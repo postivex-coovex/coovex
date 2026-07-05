@@ -1,0 +1,563 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  html {
+    @apply font-sans;
+    font-size: 17px;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Professional Light Theme ────────────────────────────────────────────────
+   Clean, modern business design — Stripe / Linear / Notion aesthetic
+   Overrides hardcoded dark Tailwind classes when html.light is active
+──────────────────────────────────────────────────────────────────────────────*/
+
+html.light {
+  color-scheme: light;
+
+  /* ── Override Tailwind color variables for light mode ──────────────────────
+     Pastel shades (300/400) are designed for dark backgrounds.
+     In light mode, we remap them to their dark-mode equivalents so
+     text-amber-300, text-amber-300/80, var(--color-amber-300), etc. all work.
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  /* Amber — warning, pending, passive */
+  --color-amber-50:  #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #92400e;
+  --color-amber-400: #b45309;
+
+  /* Emerald — success, active, growth */
+  --color-emerald-50:  #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #047857;
+  --color-emerald-400: #059669;
+
+  /* Blue — info, content */
+  --color-blue-50:  #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #1d4ed8;
+  --color-blue-400: #2563eb;
+
+  /* Blue — primary accent (CooVex brand) */
+  --color-violet-50:  #eff6ff;
+  --color-violet-100: #dbeafe;
+  --color-violet-200: #bfdbfe;
+  --color-violet-300: #1d4ed8;
+  --color-violet-400: #2563eb;
+
+  /* Red / destructive */
+  --color-red-50:  #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-300: #b91c1c;
+  --color-red-400: #dc2626;
+
+  /* Pink */
+  --color-pink-50:  #fdf2f8;
+  --color-pink-100: #fce7f3;
+  --color-pink-200: #be185d;
+  --color-pink-300: #db2777;
+  --color-pink-400: #ec4899;
+
+  /* Sky */
+  --color-sky-300: #0369a1;
+  --color-sky-400: #0284c7;
+
+  /* Teal */
+  --color-teal-300: #0f766e;
+  --color-teal-400: #0d9488;
+
+  /* Orange */
+  --color-orange-300: #c2410c;
+  --color-orange-400: #ea580c;
+
+  /* Green */
+  --color-green-300: #15803d;
+  --color-green-400: #16a34a;
+
+  /* Indigo */
+  --color-indigo-300: #4338ca;
+  --color-indigo-400: #4f46e5;
+
+  /* Cyan */
+  --color-cyan-300: #0e7490;
+  --color-cyan-400: #0891b2;
+}
+
+html.light body {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ── Page / layout backgrounds ── */
+html.light .bg-slate-950 { background-color: #e2e8f0 !important; }
+html.light .bg-black     { background-color: #f1f5f9 !important; }
+html.light .bg-slate-900 { background-color: #ffffff !important; }
+html.light .bg-slate-800 { background-color: #f8fafc !important; }
+html.light .bg-slate-700 { background-color: #f1f5f9 !important; }
+html.light .bg-slate-600 { background-color: #e2e8f0 !important; }
+
+/* ── Opacity variants ── */
+html.light .bg-slate-800\/20 { background-color: rgba(241,245,249,0.6) !important; }
+html.light .bg-slate-800\/40 { background-color: rgba(241,245,249,0.8) !important; }
+html.light .bg-slate-800\/50 { background-color: rgba(241,245,249,0.9) !important; }
+html.light .bg-slate-900\/50 { background-color: rgba(255,255,255,0.9) !important; }
+html.light .bg-slate-900\/80 { background-color: rgba(255,255,255,0.95) !important; }
+html.light .bg-slate-950\/40 { background-color: rgba(226,232,240,0.5) !important; }
+html.light .bg-slate-950\/50 { background-color: rgba(226,232,240,0.6) !important; }
+
+/* ── Borders ── */
+html.light .border-slate-800    { border-color: #e2e8f0 !important; }
+html.light .border-slate-700    { border-color: #cbd5e1 !important; }
+html.light .border-slate-800\/30 { border-color: rgba(226,232,240,0.8) !important; }
+html.light .border-slate-800\/50 { border-color: rgba(226,232,240,0.9) !important; }
+html.light .divide-slate-800\/50 > * + * { border-color: rgba(226,232,240,0.8) !important; }
+html.light .divide-slate-800    > * + * { border-color: #e2e8f0 !important; }
+
+/* ── Text ── */
+html.light .text-white     { color: #0f172a !important; }
+
+/* ── Solid colored bg (300–900) → text always white ── */
+html.light .bg-blue-300, html.light .bg-blue-400, html.light .bg-blue-500,
+html.light .bg-blue-600, html.light .bg-blue-700, html.light .bg-blue-800, html.light .bg-blue-900,
+html.light .bg-violet-300, html.light .bg-violet-400, html.light .bg-violet-500,
+html.light .bg-violet-600, html.light .bg-violet-700, html.light .bg-violet-800, html.light .bg-violet-900,
+html.light .bg-indigo-300, html.light .bg-indigo-400, html.light .bg-indigo-500,
+html.light .bg-indigo-600, html.light .bg-indigo-700, html.light .bg-indigo-800, html.light .bg-indigo-900,
+html.light .bg-rose-400, html.light .bg-rose-500, html.light .bg-rose-600,
+html.light .bg-rose-700, html.light .bg-rose-800, html.light .bg-rose-900,
+html.light .bg-red-400, html.light .bg-red-500, html.light .bg-red-600,
+html.light .bg-red-700, html.light .bg-red-800, html.light .bg-red-900,
+html.light .bg-emerald-400, html.light .bg-emerald-500, html.light .bg-emerald-600,
+html.light .bg-emerald-700, html.light .bg-emerald-800, html.light .bg-emerald-900,
+html.light .bg-green-400, html.light .bg-green-500, html.light .bg-green-600,
+html.light .bg-green-700, html.light .bg-green-800, html.light .bg-green-900,
+html.light .bg-amber-400, html.light .bg-amber-500, html.light .bg-amber-600,
+html.light .bg-amber-700, html.light .bg-amber-800, html.light .bg-amber-900,
+html.light .bg-orange-400, html.light .bg-orange-500, html.light .bg-orange-600,
+html.light .bg-orange-700, html.light .bg-orange-800, html.light .bg-orange-900,
+html.light .bg-teal-400, html.light .bg-teal-500, html.light .bg-teal-600,
+html.light .bg-teal-700, html.light .bg-teal-800, html.light .bg-teal-900,
+html.light .bg-cyan-400, html.light .bg-cyan-500, html.light .bg-cyan-600,
+html.light .bg-cyan-700, html.light .bg-cyan-800, html.light .bg-cyan-900,
+html.light .bg-pink-400, html.light .bg-pink-500, html.light .bg-pink-600,
+html.light .bg-pink-700, html.light .bg-pink-800, html.light .bg-pink-900,
+html.light .bg-purple-400, html.light .bg-purple-500, html.light .bg-purple-600,
+html.light .bg-purple-700, html.light .bg-purple-800, html.light .bg-purple-900,
+html.light .bg-sky-400, html.light .bg-sky-500, html.light .bg-sky-600,
+html.light .bg-sky-700, html.light .bg-sky-800, html.light .bg-sky-900,
+html.light .bg-slate-600, html.light .bg-slate-700,
+html.light .bg-slate-800, html.light .bg-slate-900, html.light .bg-slate-950,
+html.light .bg-black { color: #ffffff !important; }
+/* Form elements are excluded — they always need dark text on white bg */
+html.light input.bg-slate-950, html.light input.bg-slate-900, html.light input.bg-slate-800,
+html.light input.bg-slate-700, html.light input.bg-slate-600, html.light input.bg-black,
+html.light textarea.bg-slate-950, html.light textarea.bg-slate-900, html.light textarea.bg-slate-800,
+html.light textarea.bg-slate-700, html.light textarea.bg-slate-600, html.light textarea.bg-black,
+html.light select.bg-slate-950, html.light select.bg-slate-900, html.light select.bg-slate-800,
+html.light select.bg-slate-700, html.light select.bg-slate-600, html.light select.bg-black,
+html.light input.text-white, html.light textarea.text-white, html.light select.text-white {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+}
+html.light .text-slate-50  { color: #0f172a !important; }
+html.light .text-slate-100 { color: #0f172a !important; }
+html.light .text-slate-200 { color: #1e293b !important; }
+html.light .text-slate-300 { color: #334155 !important; }
+html.light .text-slate-400 { color: #475569 !important; }
+html.light .text-slate-500 { color: #64748b !important; }
+html.light .text-slate-600 { color: #64748b !important; }
+html.light .text-slate-700 { color: #475569 !important; }
+
+/* ── Secondary buttons (dark slate → clean white outline) ── */
+html.light button.bg-slate-800,
+html.light a.bg-slate-800 {
+  background-color: #ffffff !important;
+  border-color: #94a3b8 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06) !important;
+}
+html.light button.bg-slate-800:hover,
+html.light a.bg-slate-800:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #64748b !important;
+}
+html.light button.bg-slate-700,
+html.light a.bg-slate-700 {
+  background-color: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #334155 !important;
+}
+
+/* ── Sidebar ── */
+html.light aside.bg-slate-900 { background-color: #ffffff !important; box-shadow: 1px 0 0 #e2e8f0; }
+html.light .bg-slate-800.hover\:bg-slate-700:hover { background-color: #f1f5f9 !important; }
+
+/* ── Hover states ── */
+html.light .hover\:bg-slate-800:hover { background-color: #f1f5f9 !important; }
+html.light .hover\:bg-slate-700:hover { background-color: #e2e8f0 !important; }
+html.light .hover\:text-slate-200:hover { color: #1e293b !important; }
+html.light .hover\:text-white:hover { color: #0f172a !important; }
+
+/* ── Active/selected nav items ── */
+html.light .bg-violet-600\/20 { background-color: rgba(37,99,235,0.08) !important; }
+html.light .bg-violet-600\/10 { background-color: rgba(37,99,235,0.05) !important; }
+
+/* ── Cards / elevated surfaces ── */
+html.light .rounded-2xl.bg-slate-900,
+html.light .rounded-xl.bg-slate-900 {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
+}
+html.light .rounded-2xl.border.border-slate-800,
+html.light .rounded-xl.border.border-slate-800 {
+  border-color: #e8ecf0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+
+/* ── Inputs & forms ── */
+/* Use [class] attribute selector (specificity 0,2,2) to beat .bg-slate-900 (0,2,1) */
+html.light input[class],
+html.light textarea[class],
+html.light select[class],
+html.light input:not([class]),
+html.light textarea:not([class]),
+html.light select:not([class]) {
+  background-color: #ffffff !important;
+  border-color: #d1d9e0 !important;
+  color: #0f172a !important;
+}
+html.light input::placeholder,
+html.light textarea::placeholder { color: #94a3b8 !important; }
+html.light input[class]:focus,
+html.light textarea[class]:focus,
+html.light input:focus,
+html.light textarea:focus { border-color: #2563eb !important; box-shadow: 0 0 0 2px rgba(37,99,235,0.12) !important; }
+
+/* ── Blue accent colors (CooVex brand) ── */
+html.light .text-violet-400 { color: #1d4ed8 !important; }
+html.light .text-violet-300 { color: #2563eb !important; }
+html.light .text-violet-500 { color: #1e40af !important; }
+html.light .bg-violet-600   { background-color: #2563eb !important; }
+html.light .border-violet-800\/30 { border-color: rgba(29,78,216,0.25) !important; }
+html.light .bg-violet-950\/20 { background-color: rgba(37,99,235,0.06) !important; }
+html.light .bg-violet-950\/30 { background-color: rgba(37,99,235,0.08) !important; }
+html.light .bg-violet-950\/40 { background-color: rgba(37,99,235,0.10) !important; }
+
+/* ── Status colors — keep vibrant but slightly adjusted for light ── */
+html.light .bg-emerald-950\/20 { background-color: rgba(6,95,70,0.06) !important; }
+html.light .bg-emerald-950\/40 { background-color: rgba(6,95,70,0.08) !important; }
+html.light .border-emerald-800\/40 { border-color: rgba(6,78,59,0.2) !important; }
+html.light .bg-red-950\/10 { background-color: rgba(127,29,29,0.05) !important; }
+html.light .bg-amber-950\/20 { background-color: rgba(120,53,15,0.06) !important; }
+html.light .bg-amber-950\/40 { background-color: rgba(120,53,15,0.08) !important; }
+html.light .bg-blue-950\/20  { background-color: rgba(23,37,84,0.06) !important; }
+html.light .bg-blue-950\/40  { background-color: rgba(23,37,84,0.08) !important; }
+
+/* ── Command palette ── */
+html.light .bg-black\/70 { background-color: rgba(15,23,42,0.4) !important; }
+
+/* ── Landing page specific ── */
+html.light .bg-slate-950\/80 { background-color: rgba(255,255,255,0.92) !important; }
+html.light .border-white\/5  { border-color: rgba(15,23,42,0.08) !important; }
+html.light .bg-slate-900\/40 { background-color: rgba(248,250,252,0.8) !important; }
+html.light .bg-slate-900\/60 { background-color: rgba(255,255,255,0.85) !important; }
+html.light .bg-violet-950\/60 { background-color: rgba(37,99,235,0.10) !important; }
+html.light .border-violet-500\/50 { border-color: rgba(37,99,235,0.35) !important; }
+html.light .text-violet-200  { color: #1e40af !important; }
+html.light .text-red-400     { color: #dc2626 !important; }
+
+/* Gradient overrides — swap dark gradients to soft light equivalents */
+html.light .from-violet-950\/60 { --tw-gradient-from: rgba(37,99,235,0.06) var(--tw-gradient-from-position) !important; }
+html.light .from-violet-950\/50 { --tw-gradient-from: rgba(37,99,235,0.05) var(--tw-gradient-from-position) !important; }
+html.light .from-violet-950\/40 { --tw-gradient-from: rgba(37,99,235,0.04) var(--tw-gradient-from-position) !important; }
+html.light .to-slate-900        { --tw-gradient-to: #f8fafc var(--tw-gradient-to-position) !important; }
+html.light .via-slate-900       { --tw-gradient-via: #f8fafc var(--tw-gradient-via-position) !important; }
+
+/* Animated pulse dot on landing badge */
+html.light .bg-violet-400 { background-color: #2563eb !important; }
+
+/* ── Auth pages — light theme, no overrides needed ── */
+
+/* ── Onboarding — always dark regardless of theme ── */
+html.light .onboarding-shell {
+  background: linear-gradient(to bottom right, #020617, #0f172a, #020617) !important;
+}
+html.light .onboarding-shell .text-white    { color: #ffffff !important; }
+html.light .onboarding-shell .text-slate-50 { color: #f8fafc !important; }
+html.light .onboarding-shell .text-slate-100{ color: #f1f5f9 !important; }
+html.light .onboarding-shell .text-slate-200{ color: #e2e8f0 !important; }
+html.light .onboarding-shell .text-slate-300{ color: #cbd5e1 !important; }
+html.light .onboarding-shell .text-slate-400{ color: #94a3b8 !important; }
+html.light .onboarding-shell .text-slate-500{ color: #64748b !important; }
+html.light .onboarding-shell .text-slate-600{ color: #475569 !important; }
+html.light .onboarding-shell .bg-slate-900  { background-color: #0f172a !important; }
+html.light .onboarding-shell .bg-slate-800  { background-color: #1e293b !important; }
+html.light .onboarding-shell .border-slate-800 { border-color: #334155 !important; }
+html.light .onboarding-shell .border-slate-700 { border-color: #475569 !important; }
+html.light .onboarding-shell input,
+html.light .onboarding-shell textarea,
+html.light .onboarding-shell select {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+html.light .onboarding-shell input::placeholder,
+html.light .onboarding-shell textarea::placeholder { color: #475569 !important; }
+
+/* ── Scrollbar ── */
+html.light ::-webkit-scrollbar { width: 6px; height: 6px; }
+html.light ::-webkit-scrollbar-track { background: #f1f5f9; }
+html.light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+html.light ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Status & accent text — pastel colors are invisible on white, make them deep ── */
+html.light .text-emerald-300 { color: #047857 !important; }
+html.light .text-emerald-400 { color: #059669 !important; }
+html.light .text-emerald-500 { color: #10b981 !important; }
+html.light .text-amber-300   { color: #b45309 !important; }
+html.light .text-amber-400   { color: #d97706 !important; }
+html.light .text-yellow-300  { color: #a16207 !important; }
+html.light .text-yellow-400  { color: #ca8a04 !important; }
+html.light .text-blue-300    { color: #1d4ed8 !important; }
+html.light .text-blue-400    { color: #2563eb !important; }
+html.light .text-pink-300    { color: #be185d !important; }
+html.light .text-pink-400    { color: #db2777 !important; }
+html.light .text-indigo-300  { color: #4338ca !important; }
+html.light .text-indigo-400  { color: #4f46e5 !important; }
+html.light .text-orange-300  { color: #c2410c !important; }
+html.light .text-orange-400  { color: #ea580c !important; }
+html.light .text-cyan-300    { color: #0e7490 !important; }
+html.light .text-cyan-400    { color: #0891b2 !important; }
+html.light .text-teal-300    { color: #0f766e !important; }
+html.light .text-teal-400    { color: #0d9488 !important; }
+html.light .text-sky-300     { color: #0369a1 !important; }
+html.light .text-sky-400     { color: #0284c7 !important; }
+html.light .text-green-300   { color: #15803d !important; }
+html.light .text-green-400   { color: #16a34a !important; }
+
+/* ── Status badge backgrounds (900/50-variant dark tints) → soft light tints ── */
+html.light .bg-emerald-900\/40 { background-color: rgba(5,150,105,0.10) !important; }
+html.light .bg-emerald-900\/30 { background-color: rgba(5,150,105,0.08) !important; }
+html.light .bg-emerald-900\/20 { background-color: rgba(5,150,105,0.06) !important; }
+html.light .bg-emerald-500\/10 { background-color: rgba(5,150,105,0.08) !important; }
+html.light .bg-emerald-500\/20 { background-color: rgba(5,150,105,0.12) !important; }
+
+html.light .bg-amber-900\/40  { background-color: rgba(217,119,6,0.10) !important; }
+html.light .bg-amber-900\/30  { background-color: rgba(217,119,6,0.08) !important; }
+html.light .bg-amber-900\/20  { background-color: rgba(217,119,6,0.06) !important; }
+html.light .bg-amber-500\/10  { background-color: rgba(217,119,6,0.08) !important; }
+html.light .bg-amber-500\/15  { background-color: rgba(217,119,6,0.10) !important; }
+
+html.light .bg-red-900\/40    { background-color: rgba(220,38,38,0.08) !important; }
+html.light .bg-red-900\/30    { background-color: rgba(220,38,38,0.06) !important; }
+html.light .bg-red-900\/20    { background-color: rgba(220,38,38,0.05) !important; }
+html.light .bg-red-500\/10    { background-color: rgba(220,38,38,0.07) !important; }
+
+html.light .bg-blue-900\/50   { background-color: rgba(37,99,235,0.08) !important; }
+html.light .bg-blue-900\/40   { background-color: rgba(37,99,235,0.07) !important; }
+html.light .bg-blue-500\/10   { background-color: rgba(37,99,235,0.07) !important; }
+html.light .bg-blue-500\/15   { background-color: rgba(37,99,235,0.10) !important; }
+
+html.light .bg-violet-900\/50 { background-color: rgba(29,78,216,0.08) !important; }
+html.light .bg-violet-900\/40 { background-color: rgba(29,78,216,0.07) !important; }
+html.light .bg-violet-900\/30 { background-color: rgba(29,78,216,0.06) !important; }
+html.light .bg-violet-500\/10 { background-color: rgba(29,78,216,0.06) !important; }
+html.light .bg-violet-500\/15 { background-color: rgba(29,78,216,0.08) !important; }
+html.light .bg-violet-600\/15 { background-color: rgba(29,78,216,0.07) !important; }
+html.light .bg-violet-600\/25 { background-color: rgba(29,78,216,0.10) !important; }
+
+html.light .bg-pink-500\/10   { background-color: rgba(219,39,119,0.07) !important; }
+
+/* ── Status badge borders ── */
+html.light .border-emerald-800\/40 { border-color: rgba(5,150,105,0.25) !important; }
+html.light .border-emerald-500\/20 { border-color: rgba(5,150,105,0.20) !important; }
+html.light .border-emerald-500\/40 { border-color: rgba(5,150,105,0.30) !important; }
+html.light .border-amber-800\/30   { border-color: rgba(217,119,6,0.20) !important; }
+html.light .border-amber-800\/40   { border-color: rgba(217,119,6,0.25) !important; }
+html.light .border-amber-500\/20   { border-color: rgba(217,119,6,0.20) !important; }
+html.light .border-red-800\/40     { border-color: rgba(220,38,38,0.20) !important; }
+html.light .border-red-800\/30     { border-color: rgba(220,38,38,0.15) !important; }
+html.light .border-blue-800\/40    { border-color: rgba(37,99,235,0.20) !important; }
+html.light .border-violet-800\/40  { border-color: rgba(29,78,216,0.20) !important; }
+html.light .border-violet-500\/20  { border-color: rgba(29,78,216,0.20) !important; }
+html.light .border-violet-500\/25  { border-color: rgba(29,78,216,0.22) !important; }
+html.light .border-violet-500\/30  { border-color: rgba(29,78,216,0.25) !important; }
+html.light .border-violet-500\/40  { border-color: rgba(29,78,216,0.30) !important; }
+html.light .border-violet-500\/60  { border-color: rgba(29,78,216,0.40) !important; }
+
+/* ── Slate semi-transparent backgrounds ── */
+html.light .bg-slate-800\/60  { background-color: #f1f5f9 !important; }
+html.light .bg-slate-800\/30  { background-color: #f8fafc !important; }
+html.light .bg-slate-800\/40  { background-color: #f4f7fb !important; }
+html.light .bg-slate-900\/40  { background-color: rgba(255,255,255,0.80) !important; }
+html.light .bg-slate-900\/60  { background-color: rgba(255,255,255,0.90) !important; }
+
+/* ── Gradient bar colors (health bars, etc.) ── */
+html.light .from-emerald-600 { --tw-gradient-from: #059669 var(--tw-gradient-from-position) !important; }
+html.light .to-emerald-400   { --tw-gradient-to:   #34d399 var(--tw-gradient-to-position) !important; }
+html.light .from-amber-600   { --tw-gradient-from: #d97706 var(--tw-gradient-from-position) !important; }
+html.light .to-amber-400     { --tw-gradient-to:   #fbbf24 var(--tw-gradient-to-position) !important; }
+html.light .from-red-600     { --tw-gradient-from: #dc2626 var(--tw-gradient-from-position) !important; }
+html.light .to-red-500       { --tw-gradient-to:   #ef4444 var(--tw-gradient-to-position) !important; }
+
+/* ── AI Activity Card category colors (border-left accents) ── */
+html.light .border-violet-500\/20 { border-color: rgba(29,78,216,0.18) !important; }
+html.light .border-blue-500\/20   { border-color: rgba(37,99,235,0.18) !important; }
+html.light .border-emerald-500\/20{ border-color: rgba(5,150,105,0.18) !important; }
+html.light .border-amber-500\/20  { border-color: rgba(217,119,6,0.18) !important; }
+html.light .border-pink-500\/20   { border-color: rgba(219,39,119,0.18) !important; }
+
+/* ── animate-ping pulse dot ── */
+html.light .bg-emerald-500 { background-color: #059669 !important; }
+
+/* ── Progress bar fills ── */
+html.light .bg-violet-500 { background-color: #2563eb !important; }
+
+/* ── Workspace switcher gradient avatars ── */
+html.light .from-violet-600.to-violet-800 {
+  --tw-gradient-from: #2563eb !important;
+  --tw-gradient-to: #1e40af !important;
+}
+html.light .from-slate-700.to-slate-800 {
+  --tw-gradient-from: #e2e8f0 !important;
+  --tw-gradient-to: #cbd5e1 !important;
+}
+html.light .from-slate-700.to-slate-800 .text-slate-300 { color: #374151 !important; }

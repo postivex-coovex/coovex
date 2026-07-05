@@ -1,0 +1,21 @@
+﻿src/app/(app)/analytics/page.tsx(90,166): error TS2339: Property 'catch' does not exist on type 'PromiseLike<PostgrestResponseFailure | PostgrestResponseSuccess<{ cost_usd: any; tokens_in: any; tokens_out: any; feature: any; }[]>>'.
+src/app/(app)/analytics/page.tsx(97,67): error TS7006: Parameter 'm' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(112,66): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(113,66): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(125,44): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(133,47): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(134,75): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(138,38): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(139,38): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(140,39): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(140,42): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(141,40): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(141,43): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(142,40): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(142,43): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(146,45): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(147,49): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(147,52): error TS7006: Parameter 'd' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(212,36): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(212,39): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/app/(app)/analytics/page.tsx(377,28): error TS7006: Parameter 's' implicitly has an 'any' type.
