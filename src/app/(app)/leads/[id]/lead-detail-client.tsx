@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 type LeadStage = 'new' | 'contacted' | 'qualified' | 'proposal_sent' | 'won' | 'lost'
-type LeadSource = 'website_form' | 'linkedin' | 'facebook' | 'google_ads' | 'referral' | 'manual' | 'email' | 'other' | 'web_search' | 'map_search'
+type LeadSource = 'website_form' | 'linkedin' | 'facebook' | 'google_ads' | 'referral' | 'manual' | 'email' | 'other' | 'web_search' | 'map_search' | 'keyword_scraper'
 type ActivityType = 'email_sent' | 'email_opened' | 'link_clicked' | 'form_submitted' | 'call' | 'meeting' | 'note' | 'stage_change' | 'score_change' | 'ad_click'
 
 interface ResearchData {
