@@ -69,7 +69,7 @@ export async function POST() {
     const targetCustomer = (intel?.target_market as string) ?? 'Unknown'
 
     const currentStack = (stackItems ?? [])
-      .map(s => (s.software as { name: string; category: string })?.name)
+      .map(s => (s.software as unknown as { name: string; category: string })?.name)
       .filter(Boolean)
       .join(', ') || 'None yet'
 

@@ -91,7 +91,7 @@ async function checkGeoReadiness(url: string) {
 }
 
 async function refreshGeoIntelligence(
-  supabase: ReturnType<typeof createServiceClient>,
+  supabase: Awaited<ReturnType<typeof createServiceClient>>,
   business: { id: string; name: string; industry?: string | null; description?: string | null; target_customer?: string | null; website_url?: string | null; website_intel?: Record<string, unknown> | null },
   apiKey: string,
 ) {
@@ -183,7 +183,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = createServiceClient()
+  const supabase = await createServiceClient()
   const apiKey = process.env.ANTHROPIC_API_KEY
 
   const { data: businesses } = await supabase

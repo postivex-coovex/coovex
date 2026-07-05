@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const resolved: EmailSettings = { ...settings }
   for (const k of SECRET_KEYS) {
     if ((settings as Record<string, unknown>)[k] === '••••••••') {
-      (resolved as Record<string, unknown>)[k] = stored[k]
+      (resolved as unknown as Record<string, unknown>)[k] = stored[k]
     }
   }
 
