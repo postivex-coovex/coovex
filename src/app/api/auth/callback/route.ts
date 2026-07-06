@@ -1,5 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { sendWelcomeEmail } from '@/lib/email'
 
 export async function GET(request: Request) {
@@ -10,14 +11,29 @@ export async function GET(request: Request) {
   const isNewUser = searchParams.get('new') === '1'
 
   if (code) {
-    const supabase = await createClient()
+    const cookieStore = await cookies()
+
+    // Build the redirect response first so we can set cookies directly on it
+    const redirectTo = type === 'recovery' ? `${origin}/reset-password` : `${origin}${next}`
+    const response = NextResponse.redirect(redirectTo)
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return cookieStore.getAll() },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      // Password recovery — go directly to reset page (skip new user logic)
-      if (type === 'recovery') {
-        return NextResponse.redirect(`${origin}/reset-password`)
-      }
-      // Send welcome email for new signups
       if (isNewUser && data.user?.email) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -28,7 +44,6 @@ export async function GET(request: Request) {
         sendWelcomeEmail(data.user.email, name).catch(() => null)
       }
 
-      // Handle workspace invite acceptance
       const workspaceId = searchParams.get('workspace_id')
       if (workspaceId && data.user) {
         await supabase.from('workspace_members').upsert(
@@ -37,7 +52,7 @@ export async function GET(request: Request) {
         )
       }
 
-      return NextResponse.redirect(`${origin}${next}`)
+      return response
     }
   }
 
