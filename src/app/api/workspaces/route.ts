@@ -68,13 +68,22 @@ export async function POST(req: NextRequest) {
   // Use service client to bypass RLS for workspace/business creation
   const admin = await createServiceClient()
 
-  // 1. Create workspace
+  // 1. Create workspace with 30 welcome credits
   const { data: workspace, error: wsErr } = await admin
     .from('workspaces')
-    .insert({ name: business_name, owner_id: user.id })
+    .insert({ name: business_name, owner_id: user.id, ai_credits_balance: 30 })
     .select()
     .single()
   if (wsErr || !workspace) return NextResponse.json({ error: wsErr?.message ?? 'Failed to create workspace' }, { status: 500 })
+
+  // Log welcome credit transaction
+  await admin.from('credit_transactions').insert({
+    workspace_id: workspace.id,
+    amount: 30,
+    type: 'bonus',
+    description: 'Welcome bonus — 30 free credits',
+    balance_after: 30,
+  }).then(() => {})
 
   // 2. Add user as owner member
   await admin.from('workspace_members').insert({
