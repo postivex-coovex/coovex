@@ -34,14 +34,22 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      if (isNewUser && data.user?.email) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
+      if (data.user?.id && data.user?.email) {
+        // Always sync auth email → profiles table (covers email_change confirmations)
+        supabase.from('profiles')
+          .update({ email: data.user.email })
           .eq('id', data.user.id)
-          .single()
-        const name = profile?.full_name ?? data.user.email.split('@')[0]
-        sendWelcomeEmail(data.user.email, name).catch(() => null)
+          .then(() => {})
+
+        if (isNewUser) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', data.user.id)
+            .single()
+          const name = profile?.full_name ?? data.user.email.split('@')[0]
+          sendWelcomeEmail(data.user.email, name).catch(() => null)
+        }
       }
 
       const workspaceId = searchParams.get('workspace_id')
