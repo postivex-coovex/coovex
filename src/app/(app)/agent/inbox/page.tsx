@@ -26,7 +26,7 @@ export default async function AgentInboxPage() {
     .eq('workspace_id', profile?.current_workspace_id)
     .maybeSingle()
 
-  if (!business) redirect('/onboarding/welcome')
+  if (!business) return null
 
   // Sync all business data into agent_memory so AI has full context
   await syncBusinessMemory(business.id, profile?.current_workspace_id ?? '')

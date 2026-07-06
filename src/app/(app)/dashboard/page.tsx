@@ -33,8 +33,8 @@ export default async function DashboardPage() {
     .eq('workspace_id', profile?.current_workspace_id)
     .maybeSingle()
 
-  // New user with no business → redirect to onboarding
-  if (!business) redirect('/onboarding/welcome')
+  // New user with no business → AppShell shows BusinessOnboardingModal
+  if (!business) return null
 
   // Sync business data into agent_memory (non-blocking — run in background)
   syncBusinessMemory(business.id, profile?.current_workspace_id ?? '', 10 * 60 * 1000).catch(() => {})
