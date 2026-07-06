@@ -80,7 +80,7 @@ export function SignupForm() {
       if (!data.session) {
         window.location.href = '/verify-email'
       } else {
-        window.location.href = '/onboarding/welcome'
+        window.location.href = '/dashboard'
       }
     } catch (err) {
       toast.error('Something went wrong. Please try again.')
@@ -93,7 +93,7 @@ export function SignupForm() {
   async function handleGoogleSignup() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding/welcome` },
+      options: { redirectTo: `${window.location.origin}/api/auth/callback?next=/dashboard` },
     })
   }
 

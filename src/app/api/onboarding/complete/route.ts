@@ -17,12 +17,15 @@ export async function POST() {
   }
 
   const admin = await createServiceClient()
-  const { error } = await admin
-    .from('workspaces')
-    .update({ onboarding_completed: true })
-    .eq('id', profile.current_workspace_id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  await Promise.all([
+    admin.from('workspaces')
+      .update({ onboarding_completed: true })
+      .eq('id', profile.current_workspace_id),
+    admin.from('profiles')
+      .update({ onboarding_completed: true })
+      .eq('id', user.id),
+  ])
 
   return NextResponse.json({ ok: true })
 }

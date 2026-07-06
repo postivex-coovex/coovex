@@ -17,9 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('id', user.id)
     .single()
 
-  if (!profile || !profile.onboarding_completed) {
-    redirect('/onboarding/welcome')
-  }
+  if (!profile) redirect('/login')
 
   // Track last seen (non-blocking — fire and forget)
   supabase.from('profiles')
@@ -46,7 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   let ga4Id: string | null = null
   let gAdsId: string | null = null
   let currentBusinessName = 'My Business'
-  let onboardingRequired = false
+  let onboardingRequired = !profile.onboarding_completed
   try {
     if (profile?.current_workspace_id) {
       const { data: ws } = await supabase
@@ -54,7 +52,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         .select('onboarding_completed')
         .eq('id', profile.current_workspace_id)
         .single()
-      onboardingRequired = ws?.onboarding_completed === false
+      onboardingRequired = onboardingRequired || ws?.onboarding_completed === false
 
       const { data: biz } = await supabase
         .from('businesses').select('name, integrations')

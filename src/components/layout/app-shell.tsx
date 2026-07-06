@@ -69,8 +69,8 @@ export function AppShell({ user, currentBusinessName = 'My Business', onboarding
   }, [])
 
   async function handleOnboardingContinue() {
-    // Step 1 → proceed to next steps (for now just close; steps added later)
     setShowOnboarding(false)
+    router.refresh()
   }
 
   return (
