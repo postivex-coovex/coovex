@@ -58,6 +58,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         .from('businesses').select('name, integrations')
         .eq('workspace_id', profile.current_workspace_id).maybeSingle()
       if (biz?.name) currentBusinessName = biz.name
+      // Force setup modal when business is missing regardless of onboarding flags
+      if (!biz) onboardingRequired = true
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ig = (biz as any)?.integrations ?? {}
       ga4Id  = ig?.ga4?.enabled         ? (ig.ga4.measurement_id ?? null)       : null
