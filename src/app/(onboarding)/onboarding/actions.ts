@@ -1,7 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 async function getContext() {
   const supabase = await createClient()
@@ -210,21 +210,24 @@ export async function markOnboardingComplete() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('name, email, reengagement_sent_at')
+    .select('name, email, reengagement_sent_at, current_workspace_id')
     .eq('id', user.id)
     .single()
 
-  await supabase
-    .from('profiles')
-    .update({ onboarding_completed: true, last_seen_at: new Date().toISOString() })
-    .eq('id', user.id)
+  const admin = await createServiceClient()
+  await Promise.all([
+    supabase.from('profiles').update({ onboarding_completed: true, last_seen_at: new Date().toISOString() }).eq('id', user.id),
+    profile?.current_workspace_id
+      ? admin.from('workspaces').update({ onboarding_completed: true }).eq('id', profile.current_workspace_id)
+      : Promise.resolve(),
+  ])
 
   // Send welcome email (fire and forget)
   if (profile?.email) {
     const { data: biz } = await supabase
       .from('businesses')
       .select('name')
-      .eq('workspace_id', (await supabase.from('profiles').select('current_workspace_id').eq('id', user.id).single()).data?.current_workspace_id ?? '')
+      .eq('workspace_id', profile?.current_workspace_id ?? '')
       .maybeSingle()
 
     const { buildReengagementEmail } = await import('@/lib/emails/reengagement')

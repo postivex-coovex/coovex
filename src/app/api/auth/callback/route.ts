@@ -68,7 +68,7 @@ export async function GET(request: Request) {
               workspace_id: workspace.id, user_id: data.user.id, role: 'owner',
             }),
             admin.from('businesses').insert({
-              workspace_id: workspace.id, name: displayName, industry: 'Other',
+              workspace_id: workspace.id, name: 'My Business', industry: 'Other',
             }),
             admin.from('profiles').update({ current_workspace_id: workspace.id }).eq('id', data.user.id),
             admin.from('credit_transactions').insert({

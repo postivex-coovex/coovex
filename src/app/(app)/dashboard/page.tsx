@@ -33,8 +33,16 @@ export default async function DashboardPage() {
     .eq('workspace_id', profile?.current_workspace_id)
     .maybeSingle()
 
-  // New user with no business → AppShell shows BusinessOnboardingModal
-  if (!business) return null
+  // No business yet — the onboarding modal (shown by AppShell) will handle setup
+  if (!business) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-2">
+          <p className="text-slate-400 text-sm">Complete the setup wizard to get started.</p>
+        </div>
+      </div>
+    )
+  }
 
   // Sync business data into agent_memory (non-blocking — run in background)
   syncBusinessMemory(business.id, profile?.current_workspace_id ?? '', 10 * 60 * 1000).catch(() => {})
