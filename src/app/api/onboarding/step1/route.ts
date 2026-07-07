@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   if (existing) {
     ;({ error } = await admin.from('businesses').update(fields).eq('workspace_id', profile.current_workspace_id))
   } else {
-    ;({ error } = await admin.from('businesses').insert({ ...fields, workspace_id: profile.current_workspace_id, health_score: 0 }))
+    ;({ error } = await admin.from('businesses').insert({ ...fields, workspace_id: profile.current_workspace_id, health_score: 0, industry: 'Other' }))
   }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
