@@ -44,7 +44,7 @@ export async function GET() {
       plan:           ws?.plan ?? 'starter',
       role:           m.role,
       business_id:    biz?.id ?? null,
-      business_name:  biz?.name ?? ws?.name ?? 'Untitled Business',
+      business_name:  biz?.name ?? 'My Business',
       industry:       biz?.industry ?? '',
       logo_url:       biz?.logo_url ?? null,
       is_current:     m.workspace_id === profile?.current_workspace_id,
