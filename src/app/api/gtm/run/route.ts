@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     ? await supabase.from('businesses').select('*').eq('workspace_id', profile.current_workspace_id).maybeSingle()
     : { data: null }
 
-  if (!business) return NextResponse.json({ error: 'No business found' }, { status: 400 })
+  if (!business || !profile?.current_workspace_id) return NextResponse.json({ error: 'No business found' }, { status: 400 })
 
-  const { ok, balance } = await deductCredits(user.id, 'gtm_autopilot', 'GTM Autopilot run')
+  const { ok, balance } = await deductCredits(profile.current_workspace_id, 'gtm_autopilot', 'GTM Autopilot run')
   if (!ok) return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
