@@ -476,37 +476,51 @@ export default function ContentClient({ initialPosts, businessName, industry, au
       </div>
 
       {/* GEO Content Ideas */}
-      {contentGaps.length > 0 && (
-        <div className="mb-6 bg-slate-900 border border-violet-800/30 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-1">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              🧠 Content to Create
-              <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/25">
-                AI Recommended
-              </span>
-            </h3>
+      <div className="mb-6 bg-slate-900 border border-violet-800/30 rounded-2xl p-5">
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            🧠 Content to Create
+            <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/25">
+              AI Recommended
+            </span>
+          </h3>
+          {contentGaps.length > 0 && (
             <a href="/content/ideas" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
               See all {contentGaps.length} →
             </a>
-          </div>
-          <p className="text-xs text-slate-500 mb-4">
-            AI assistants frequently cite these content types. Generate to save as draft and publish to your site.
-          </p>
-          <div className="space-y-2">
-            {contentGaps.slice(0, 3).map((gap, i) => (
-              <GeoIdeaRow key={i} gap={gap} onGenerated={async () => {
-                const r = await fetch('/api/posts'); const d = await r.json()
-                if (d.posts) setPosts(d.posts)
-              }} />
-            ))}
-          </div>
-          {contentGaps.length > 3 && (
-            <a href="/content/ideas" className="mt-3 block text-center text-xs text-slate-500 hover:text-violet-400 transition-colors py-1">
-              + {contentGaps.length - 3} more ideas in GEO Content Ideas →
-            </a>
           )}
         </div>
-      )}
+        <p className="text-xs text-slate-500 mb-4">
+          AI assistants frequently cite these content types. Generate to save as draft and publish to your site.
+        </p>
+        {contentGaps.length === 0 ? (
+          <div className="flex items-center justify-between py-2">
+            <p className="text-xs text-slate-500">Run GEO Intelligence to get personalized content ideas.</p>
+            <a
+              href="/geo"
+              className="text-xs px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg font-medium transition-colors flex-shrink-0 ml-4"
+            >
+              Run GEO Intel →
+            </a>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2">
+              {contentGaps.slice(0, 3).map((gap, i) => (
+                <GeoIdeaRow key={i} gap={gap} onGenerated={async () => {
+                  const r = await fetch('/api/posts'); const d = await r.json()
+                  if (d.posts) setPosts(d.posts)
+                }} />
+              ))}
+            </div>
+            {contentGaps.length > 3 && (
+              <a href="/content/ideas" className="mt-3 block text-center text-xs text-slate-500 hover:text-violet-400 transition-colors py-1">
+                + {contentGaps.length - 3} more ideas in GEO Content Ideas →
+              </a>
+            )}
+          </>
+        )}
+      </div>
 
       {/* View toggle + filter */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
