@@ -156,6 +156,7 @@ export const CREDIT_COSTS = {
   marketing_plan:        30,  // real ~$0.12, charged $0.30
   pitch_deck:            40,
   business_plan:         50,  // real ~$0.08, charged $0.50
+  gtm_autopilot:         30,  // full GTM run: leads + content + geo + AI plan
 } as const
 
 export type FeatureKey = keyof typeof CREDIT_COSTS

@@ -29,10 +29,11 @@ const navGroups: { label: string | null; items: NavItem[] }[] = [
   {
     label: null,
     items: [
-      { label: 'Dashboard',    href: '/dashboard',    icon: LayoutDashboard, badge: null, sub: false },
-      { label: 'Agent Report', href: '/agent/report', icon: Bot,             badge: null, sub: false },
-      { label: 'Notifications',href: '/notifications',icon: Bell,            badge: null, sub: false },
-      { label: 'Agency View',  href: '/agency',       icon: Building2,       badge: null, sub: false },
+      { label: 'Dashboard',    href: '/dashboard',    icon: LayoutDashboard, badge: null,  sub: false },
+      { label: 'GTM Autopilot',href: '/gtm-agent',   icon: Zap,             badge: 'new', sub: false },
+      { label: 'Agent Report', href: '/agent/report', icon: Bot,             badge: null,  sub: false },
+      { label: 'Notifications',href: '/notifications',icon: Bell,            badge: null,  sub: false },
+      { label: 'Agency View',  href: '/agency',       icon: Building2,       badge: null,  sub: false },
     ],
   },
   {
