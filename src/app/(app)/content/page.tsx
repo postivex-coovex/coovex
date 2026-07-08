@@ -16,13 +16,16 @@ export default async function ContentPage() {
     ? await supabase.from('businesses').select('*').eq('workspace_id', profile.current_workspace_id).maybeSingle()
     : { data: null }
 
-  const [{ data: posts }, { data: audits }] = await Promise.all([
+  const [{ data: posts }, { data: audits }, { data: geoMemory }] = await Promise.all([
     business
       ? supabase.from('posts').select('*').eq('business_id', business.id).order('created_at', { ascending: false })
       : Promise.resolve({ data: [] }),
     business
       ? supabase.from('audits').select('id, score, created_at, report_json').eq('business_id', business.id).eq('type', 'website').order('created_at', { ascending: false }).limit(10)
       : Promise.resolve({ data: [] }),
+    business
+      ? supabase.from('agent_memory').select('value_text').eq('business_id', business.id).eq('key', 'geo_intelligence').maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
 
   const auditOptions = (audits ?? []).map(a => ({
@@ -39,6 +42,14 @@ export default async function ContentPage() {
   const connectedChannels = sc ? Object.keys(sc).filter(k => sc[k]?.connected) : []
   const hasWebhook = !!(biz?.webhook_url)
 
+  let contentGaps: { type: string; suggestion: string; impact: 'high' | 'medium' | 'low' }[] = []
+  if (geoMemory?.value_text) {
+    try {
+      const geo = JSON.parse(geoMemory.value_text)
+      contentGaps = geo.content_gaps ?? []
+    } catch { /* ignore */ }
+  }
+
   return (
     <Suspense>
       <ContentClient
@@ -48,6 +59,7 @@ export default async function ContentPage() {
         auditOptions={auditOptions}
         connectedChannels={connectedChannels}
         hasWebhook={hasWebhook}
+        contentGaps={contentGaps}
       />
     </Suspense>
   )

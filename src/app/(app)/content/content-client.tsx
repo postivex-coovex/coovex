@@ -35,6 +35,12 @@ interface Product {
   status: string
 }
 
+interface ContentGap {
+  type: string
+  suggestion: string
+  impact: 'high' | 'medium' | 'low'
+}
+
 interface ContentClientProps {
   initialPosts: Post[]
   businessName: string
@@ -42,6 +48,7 @@ interface ContentClientProps {
   auditOptions?: AuditOption[]
   connectedChannels?: string[]
   hasWebhook?: boolean
+  contentGaps?: ContentGap[]
 }
 
 const CHANNEL_META: Record<PostChannel, { label: string; icon: string; color: string }> = {
@@ -70,7 +77,55 @@ function formatScheduled(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-export default function ContentClient({ initialPosts, businessName, industry, auditOptions = [], connectedChannels = [], hasWebhook = false }: ContentClientProps) {
+const IMPACT_STYLE = {
+  high:   'bg-rose-500/15 text-rose-400 border-rose-500/25',
+  medium: 'bg-amber-500/15 text-amber-400 border-amber-500/25',
+  low:    'bg-slate-700/50 text-slate-400 border-slate-600/25',
+}
+
+function GeoIdeaRow({ gap, onGenerated }: { gap: ContentGap; onGenerated: () => Promise<void> }) {
+  const [loading, setLoading] = useState(false)
+  const [done, setDone] = useState(false)
+
+  const generate = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/geo/generate-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suggestion: gap.suggestion, type: gap.type }),
+      })
+      if (res.ok) { setDone(true); await onGenerated() }
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-violet-700/40 transition-colors">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <span className="text-[10px] uppercase tracking-wide font-bold text-slate-500">{gap.type}</span>
+          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${IMPACT_STYLE[gap.impact]}`}>
+            {gap.impact} impact
+          </span>
+        </div>
+        <p className="text-xs text-slate-300 leading-relaxed">{gap.suggestion}</p>
+      </div>
+      <button
+        onClick={generate}
+        disabled={loading || done}
+        className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+          done ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-700/40 cursor-default'
+               : 'bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-50'
+        }`}
+      >
+        {loading ? <span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : null}
+        {done ? '✓ Saved' : loading ? 'Generating…' : '✨ Generate · 8 credits'}
+      </button>
+    </div>
+  )
+}
+
+export default function ContentClient({ initialPosts, businessName, industry, auditOptions = [], connectedChannels = [], hasWebhook = false, contentGaps = [] }: ContentClientProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [view, setView] = useState<'list' | 'calendar'>('list')
   const [filter, setFilter] = useState<PostStatus | 'all'>('all')
@@ -419,6 +474,39 @@ export default function ContentClient({ initialPosts, businessName, industry, au
       <div className="mb-6">
         <RedditTrends />
       </div>
+
+      {/* GEO Content Ideas */}
+      {contentGaps.length > 0 && (
+        <div className="mb-6 bg-slate-900 border border-violet-800/30 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+              🧠 Content to Create
+              <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/25">
+                AI Recommended
+              </span>
+            </h3>
+            <a href="/content/ideas" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+              See all {contentGaps.length} →
+            </a>
+          </div>
+          <p className="text-xs text-slate-500 mb-4">
+            AI assistants frequently cite these content types. Generate to save as draft and publish to your site.
+          </p>
+          <div className="space-y-2">
+            {contentGaps.slice(0, 3).map((gap, i) => (
+              <GeoIdeaRow key={i} gap={gap} onGenerated={async () => {
+                const r = await fetch('/api/posts'); const d = await r.json()
+                if (d.posts) setPosts(d.posts)
+              }} />
+            ))}
+          </div>
+          {contentGaps.length > 3 && (
+            <a href="/content/ideas" className="mt-3 block text-center text-xs text-slate-500 hover:text-violet-400 transition-colors py-1">
+              + {contentGaps.length - 3} more ideas in GEO Content Ideas →
+            </a>
+          )}
+        </div>
+      )}
 
       {/* View toggle + filter */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
