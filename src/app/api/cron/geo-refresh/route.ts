@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import Anthropic from '@anthropic-ai/sdk'
 
 // VPS cron — runs daily at 3:00 AM UTC
@@ -91,7 +91,7 @@ async function checkGeoReadiness(url: string) {
 }
 
 async function refreshGeoIntelligence(
-  supabase: Awaited<ReturnType<typeof createServiceClient>>,
+  supabase: ReturnType<typeof createServiceClient>,
   business: { id: string; name: string; industry?: string | null; description?: string | null; target_customer?: string | null; website_url?: string | null; website_intel?: Record<string, unknown> | null },
   apiKey: string,
 ) {
@@ -183,7 +183,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = await createServiceClient()
+  const supabase = createServiceClient()
   const apiKey = process.env.ANTHROPIC_API_KEY
 
   const { data: businesses } = await supabase
