@@ -33,7 +33,7 @@ interface StepState {
 const STEPS = [
   { id: 'audit',  label: 'Website Audit',              icon: '🔍', defaultLabel: 'Reading website audit results' },
   { id: 'icp',    label: 'Lead Pipeline & ICP',        icon: '👥', defaultLabel: 'Analyzing leads & building ICP' },
-  { id: 'leads',  label: 'Lead Discovery',             icon: '🎯', defaultLabel: 'Searching Reddit for lead opportunities' },
+  { id: 'leads',  label: 'AI Lead Finder',              icon: '🎯', defaultLabel: 'ICP → company search → email enrichment' },
   { id: 'geo',    label: 'GEO & Gemini Visibility',    icon: '🧠', defaultLabel: 'Checking AI search visibility with Gemini' },
   { id: 'ai',     label: 'AI Action Plan',             icon: '⚡', defaultLabel: 'Generating GTM action plan' },
   { id: 'inbox',  label: 'Agent Inbox',                icon: '📥', defaultLabel: 'Saving results to Agent Inbox' },
@@ -67,10 +67,14 @@ function StepResult({ id, data }: { id: string; data?: Record<string, unknown> }
     )
   }
   if (id === 'leads') {
+    const found = data.found as number
+    const real = data.real as boolean
+    const icp = data.icp as string | undefined
+    if (!found && !icp) return <span className="text-xs text-slate-500 ml-1">no results (search service may be offline)</span>
     return (
       <span className="text-xs text-emerald-400 ml-1">
-        {data.discovered as number} opportunities found
-        {(data.keyword as string) ? ` for "${data.keyword}"` : ''}
+        {found} companies found {real ? '· real results' : '· ICP-generated'}
+        {icp ? ` · ${icp}` : ''}
       </span>
     )
   }
@@ -277,7 +281,7 @@ export function GtmClient({ initialLastRun }: { initialLastRun: LastRun | null }
             {[
               { icon: '🔍', title: 'Website Audit', desc: 'Reads your latest audit — overall score, GEO score, critical issues' },
               { icon: '👥', title: 'Lead Pipeline & ICP', desc: 'Analyzes your lead database — total, hot leads, top industries for ICP' },
-              { icon: '🎯', title: 'Lead Discovery', desc: 'Searches Reddit for conversations matching your industry keywords' },
+              { icon: '🎯', title: 'AI Lead Finder', desc: 'Builds ICP from audit → searches for real companies → enriches with emails' },
               { icon: '🧠', title: 'GEO & Gemini', desc: 'Reads AI search visibility — how often Gemini mentions your business' },
               { icon: '⚡', title: 'AI Action Plan', desc: 'Generates 3 precise, data-driven GTM actions for this week' },
               { icon: '📥', title: 'Agent Inbox', desc: 'Saves the full report to your Agent Inbox' },
@@ -319,7 +323,7 @@ export function GtmClient({ initialLastRun }: { initialLastRun: LastRun | null }
               {
                 label: 'Hot Leads',
                 value: lastRun.hot_leads,
-                sub: `${lastRun.new_leads} new · ${lastRun.discovered_leads} found`,
+                sub: `${lastRun.new_leads} new · ${lastRun.discovered_leads} by AI Finder`,
                 color: 'text-rose-400',
                 link: '/leads',
               },

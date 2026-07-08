@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import Anthropic from '@anthropic-ai/sdk'
 import { deductCredits } from '@/lib/credits'
-import { searchReddit, scoreLeadQuality } from '@/lib/reddit-client'
 
 export const maxDuration = 120
 
@@ -121,22 +121,45 @@ export async function POST() {
           data: { total: totalLeads ?? 0, new: newLeads ?? 0, hot: hotLeads ?? 0, top_industries: topIndustries },
         })
 
-        // ── Step 3: Lead Discovery via Reddit ─────────────────────────────────
-        send({ type: 'step', id: 'leads', status: 'running', label: 'Searching Reddit for lead opportunities via Leads Engine' })
+        // ── Step 3: AI Lead Finder ────────────────────────────────────────────
+        send({ type: 'step', id: 'leads', status: 'running', label: 'Running AI Lead Finder — ICP → company search → email enrichment' })
 
         let discoveredCount = 0
-        const keyword = (biz.industry || biz.name || 'b2b saas') as string
+        let hasRealResults = false
+        let icpSummary = ''
+        let leadIcp: { company_types?: string[]; company_size?: string; industries?: string[]; decision_maker_titles?: string[] } | null = null
 
         try {
-          const posts = await searchReddit(keyword, 20)
-          discoveredCount = posts.filter(p => scoreLeadQuality(p) >= 40).length
+          const cookieStore = await cookies()
+          const cookieHeader = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ')
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+          const findRes = await fetch(`${appUrl}/api/leads/find`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Cookie: cookieHeader },
+            body: JSON.stringify({ audit_id: latestAudit.id }),
+            signal: AbortSignal.timeout(55000),
+          })
+
+          if (findRes.ok) {
+            const findData = await findRes.json()
+            discoveredCount = (findData.candidates ?? []).length
+            hasRealResults = findData.has_real_results ?? false
+            leadIcp = findData.icp ?? null
+            if (leadIcp) {
+              icpSummary = [
+                leadIcp.company_size,
+                leadIcp.industries?.slice(0, 2).join(' / '),
+              ].filter(Boolean).join(' · ')
+            }
+          }
         } catch {
-          // Non-fatal — Reddit may be unreachable
+          // Non-fatal — lead finder may timeout on slow VPS
         }
 
         send({
           type: 'step', id: 'leads', status: 'done',
-          data: { discovered: discoveredCount, keyword },
+          data: { found: discoveredCount, real: hasRealResults, icp: icpSummary },
         })
 
         // ── Step 4: GEO & Gemini AI Visibility ────────────────────────────────
@@ -203,6 +226,10 @@ export async function POST() {
           ? `Gemini AI search visibility: ${geminiVisibility.visibility_rate}% (found in ${geminiVisibility.checks.filter(c => c.found).length}/${geminiVisibility.checks.length} searches)`
           : 'GEO Intelligence not yet run — user should run GEO Optimizer for Gemini visibility check'
 
+        const icpLine = leadIcp
+          ? `ICP: ${leadIcp.company_types?.slice(0, 2).join(', ')} · ${leadIcp.company_size} · Decision makers: ${leadIcp.decision_maker_titles?.slice(0, 2).join(', ')}`
+          : 'ICP: not yet determined'
+
         const aiResponse = await anthropic.messages.create({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 700,
@@ -213,8 +240,9 @@ export async function POST() {
 Business: ${biz.name || 'Unknown'} | Industry: ${biz.industry || 'N/A'} | Website: ${biz.website_url || 'N/A'}
 Website Audit: ${auditOverall}/100 overall · GEO ${auditGeo ?? 'N/A'}/100 · SEO ${auditSeo ?? 'N/A'}/100${auditIssues.length ? ' · Critical: ' + auditIssues.join(', ') : ''}
 Lead Pipeline: ${totalLeads ?? 0} total · ${newLeads ?? 0} new this week · ${hotLeads ?? 0} hot (≥70 score)
-Reddit lead opportunities found: ${discoveredCount} (keyword: "${keyword}")
-Top lead industries: ${topIndustries.length ? topIndustries.join(', ') : 'not enough data yet'}
+AI Lead Finder: ${discoveredCount} companies found (${hasRealResults ? 'real search results' : 'ICP-generated'})
+${icpLine}
+Top existing lead industries: ${topIndustries.length ? topIndustries.join(', ') : 'not enough data yet'}
 Content: ${draftCount ?? 0} drafts · ${scheduledCount ?? 0} scheduled
 Competitors tracked: ${compCount ?? 0}${latestComp ? ` (latest: ${latestComp.name})` : ''}
 GEO content gaps: ${contentGapsCount} · ${highImpactGaps} high-impact (top: ${geoGapList})
@@ -241,7 +269,7 @@ Return EXACTLY this JSON (no markdown):
 
         const inboxBody = [
           `🔍 Audit: ${auditOverall}/100 overall · GEO ${auditGeo ?? 'N/A'}/100${auditAgeDays > 7 ? ' (⚠️ audit is ' + auditAgeDays + ' days old)' : ''}`,
-          `👥 ${hotLeads ?? 0} hot leads · ${newLeads ?? 0} new this week · ${discoveredCount} Reddit opportunities found`,
+          `👥 ${hotLeads ?? 0} hot leads · ${newLeads ?? 0} new this week · ${discoveredCount} companies found by AI Lead Finder${hasRealResults ? ' (real)' : ''}`,
           geminiVisibility?.visibility_rate != null
             ? `🧠 Gemini AI visibility: ${geminiVisibility.visibility_rate}% · ${highImpactGaps} high-impact GEO gaps`
             : '🧠 GEO not analyzed yet — run GEO Optimizer to check Gemini visibility',
@@ -266,6 +294,8 @@ Return EXACTLY this JSON (no markdown):
           new_leads: newLeads ?? 0,
           hot_leads: hotLeads ?? 0,
           discovered_leads: discoveredCount,
+          discovered_real: hasRealResults,
+          icp_summary: icpSummary,
           draft_posts: draftCount ?? 0,
           scheduled_posts: scheduledCount ?? 0,
           competitors: compCount ?? 0,
