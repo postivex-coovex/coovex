@@ -127,7 +127,7 @@ function GeoIdeaRow({ gap, onGenerated }: { gap: ContentGap; onGenerated: () => 
 export default function ContentClient({ initialPosts, businessName, industry, auditOptions = [], connectedChannels = [], hasWebhook = false, contentGaps = [] }: ContentClientProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [view, setView] = useState<'list' | 'calendar'>('list')
-  const [filter, setFilter] = useState<PostStatus | 'all'>('all')
+  const [filter, setFilter] = useState<PostStatus | 'all' | 'need_to_create'>('all')
   const [showModal, setShowModal] = useState(false)
   const [editPost, setEditPost] = useState<Post | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -151,7 +151,6 @@ export default function ContentClient({ initialPosts, businessName, industry, au
   const [selectedProductId, setSelectedProductId] = useState('')
 
   const postsSectionRef = useRef<HTMLDivElement>(null)
-  const geoSectionRef = useRef<HTMLDivElement>(null)
 
   const searchParams = useSearchParams()
 
@@ -443,17 +442,13 @@ export default function ContentClient({ initialPosts, businessName, industry, au
           { label: 'Scheduled', value: scheduled, icon: '📅', color: 'text-violet-400', filterVal: 'scheduled' as PostStatus | 'geo' },
           { label: 'Drafts', value: drafts, icon: '✏️', color: 'text-amber-400', filterVal: 'draft' as PostStatus | 'geo' },
           { label: 'Published This Month', value: publishedThisMonth, icon: '✅', color: 'text-emerald-400', filterVal: 'published' as PostStatus | 'geo' },
-          { label: 'Content to Create', value: contentGaps.length, icon: '🧠', color: 'text-violet-400', filterVal: 'geo' as PostStatus | 'geo' },
+          { label: 'Content to Create', value: contentGaps.length, icon: '🧠', color: 'text-violet-400', filterVal: 'need_to_create' as PostStatus | 'need_to_create' },
         ].map(s => (
           <button
             key={s.label}
             onClick={() => {
-              if (s.filterVal === 'geo') {
-                geoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              } else {
-                setFilter(s.filterVal as PostStatus)
-                postsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }
+              setFilter(s.filterVal as PostStatus | 'need_to_create')
+              postsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
             className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-left hover:border-slate-600 transition-colors group cursor-pointer"
           >
@@ -484,53 +479,6 @@ export default function ContentClient({ initialPosts, businessName, industry, au
         </div>
       )}
 
-      {/* GEO Content Ideas */}
-      <div ref={geoSectionRef} className="mb-6 bg-slate-900 border border-violet-800/30 rounded-2xl p-5">
-        <div className="flex items-center justify-between mb-1">
-          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-            🧠 Content to Create
-            <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/25">
-              AI Recommended
-            </span>
-          </h3>
-          {contentGaps.length > 0 && (
-            <a href="/content/ideas" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
-              See all {contentGaps.length} →
-            </a>
-          )}
-        </div>
-        <p className="text-xs text-slate-500 mb-4">
-          AI assistants frequently cite these content types. Generate to save as draft and publish to your site.
-        </p>
-        {contentGaps.length === 0 ? (
-          <div className="flex items-center justify-between py-2">
-            <p className="text-xs text-slate-500">Run GEO Intelligence to get personalized content ideas.</p>
-            <a
-              href="/geo"
-              className="text-xs px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg font-medium transition-colors flex-shrink-0 ml-4"
-            >
-              Run GEO Intel →
-            </a>
-          </div>
-        ) : (
-          <>
-            <div className="space-y-2">
-              {contentGaps.slice(0, 3).map((gap, i) => (
-                <GeoIdeaRow key={i} gap={gap} onGenerated={async () => {
-                  const r = await fetch('/api/posts'); const d = await r.json()
-                  if (d.posts) setPosts(d.posts)
-                }} />
-              ))}
-            </div>
-            {contentGaps.length > 3 && (
-              <a href="/content/ideas" className="mt-3 block text-center text-xs text-slate-500 hover:text-violet-400 transition-colors py-1">
-                + {contentGaps.length - 3} more ideas in GEO Content Ideas →
-              </a>
-            )}
-          </>
-        )}
-      </div>
-
       {/* View toggle + filter */}
       <div ref={postsSectionRef} className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-lg p-1">
@@ -554,17 +502,66 @@ export default function ContentClient({ initialPosts, businessName, industry, au
               className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                 filter === f
                   ? 'border-violet-500/50 bg-violet-600/20 text-violet-300'
+                  : f === 'draft' && drafts > 0
+                  ? 'border-amber-600/50 bg-amber-950/30 text-amber-400 hover:text-amber-300'
                   : 'border-slate-800 text-slate-500 hover:text-slate-400'
               }`}
             >
-              {f === 'all' ? 'All Posts' : f === 'pending_approval' ? `Pending${pendingApproval > 0 ? ` (${pendingApproval})` : ''}` : f.charAt(0).toUpperCase() + f.slice(1)}
+              {f === 'all' ? 'All Posts'
+                : f === 'pending_approval' ? `Pending${pendingApproval > 0 ? ` (${pendingApproval})` : ''}`
+                : f === 'draft' ? `Draft${drafts > 0 ? ` (${drafts})` : ''}`
+                : f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
           ))}
+          {/* Need to Create tab */}
+          <button
+            onClick={() => setFilter('need_to_create')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+              filter === 'need_to_create'
+                ? 'border-violet-500/50 bg-violet-600/20 text-violet-300'
+                : contentGaps.length > 0
+                ? 'border-violet-700/60 bg-violet-950/40 text-violet-400 hover:text-violet-300 animate-pulse'
+                : 'border-slate-800 text-slate-500 hover:text-slate-400'
+            }`}
+          >
+            🧠 Need to Create{contentGaps.length > 0 ? ` (${contentGaps.length})` : ''}
+          </button>
         </div>
       </div>
 
+      {/* Need to Create view */}
+      {filter === 'need_to_create' && (
+        <div className="space-y-2">
+          {contentGaps.length === 0 ? (
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl py-16 text-center">
+              <div className="text-4xl mb-3">🧠</div>
+              <p className="text-white font-semibold mb-2">No content ideas yet</p>
+              <p className="text-slate-400 text-sm mb-4">Run GEO Intelligence to get AI-personalized content ideas.</p>
+              <a href="/geo" className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors">
+                Go to GEO Optimizer →
+              </a>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs text-slate-500">AI assistants frequently cite these content types. Generate to save as draft and publish automatically.</p>
+                <a href="/content/ideas" className="text-xs text-violet-400 hover:text-violet-300 transition-colors flex-shrink-0 ml-4">
+                  Full page →
+                </a>
+              </div>
+              {contentGaps.map((gap, i) => (
+                <GeoIdeaRow key={i} gap={gap} onGenerated={async () => {
+                  const r = await fetch('/api/posts'); const d = await r.json()
+                  if (d.posts) { setPosts(d.posts); setFilter('draft') }
+                }} />
+              ))}
+            </>
+          )}
+        </div>
+      )}
+
       {/* List View */}
-      {view === 'list' && (
+      {view === 'list' && filter !== 'need_to_create' && (
         <div>
           {filtered.length === 0 ? (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl py-20 text-center">
@@ -657,7 +654,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
       )}
 
       {/* Calendar View */}
-      {view === 'calendar' && (
+      {view === 'calendar' && filter !== 'need_to_create' && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <h2 className="text-white font-semibold mb-4 text-center">{monthName}</h2>
           <div className="grid grid-cols-7 gap-1 mb-2">

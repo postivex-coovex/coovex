@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { redirect } from 'next/navigation'
 import ContentClient from './content-client'
 
@@ -16,6 +17,7 @@ export default async function ContentPage() {
     ? await supabase.from('businesses').select('*').eq('workspace_id', profile.current_workspace_id).maybeSingle()
     : { data: null }
 
+  const service = createServiceClient()
   const [{ data: posts }, { data: audits }, { data: geoMemory }] = await Promise.all([
     business
       ? supabase.from('posts').select('*').eq('business_id', business.id).order('created_at', { ascending: false })
@@ -24,7 +26,7 @@ export default async function ContentPage() {
       ? supabase.from('audits').select('id, score, created_at, report_json').eq('business_id', business.id).eq('type', 'website').order('created_at', { ascending: false }).limit(10)
       : Promise.resolve({ data: [] }),
     business
-      ? supabase.from('agent_memory').select('value_text').eq('business_id', business.id).eq('key', 'geo_intelligence').maybeSingle()
+      ? service.from('agent_memory').select('value_text').eq('business_id', business.id).eq('key', 'geo_intelligence').maybeSingle()
       : Promise.resolve({ data: null }),
   ])
 
