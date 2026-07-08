@@ -7,6 +7,7 @@ import { AppSidebar } from './app-sidebar'
 import { CommandPalette } from './command-palette'
 import { CoachWidget } from './coach-widget'
 import { IntegrationServiceWidget } from './integration-service-widget'
+import { FloatingActions } from './floating-actions'
 import { BrandLogo } from './brand-logo'
 import { BusinessOnboardingModal } from './business-onboarding-modal'
 
@@ -106,10 +107,11 @@ export function AppShell({ user, currentBusinessName = 'My Business', onboarding
         {children}
       </div>
 
-      {/* Integration Service — above AI Coach */}
+      {/* Modals/panels — triggered by FloatingActions events */}
       <IntegrationServiceWidget />
-      {/* AI Coach — available on every page */}
       <CoachWidget />
+      {/* Right-side collapsible action dock */}
+      <FloatingActions />
 
       {/* Onboarding modal — shown whenever DB says onboarding_completed = false */}
       <BusinessOnboardingModal

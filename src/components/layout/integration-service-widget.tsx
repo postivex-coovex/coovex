@@ -119,17 +119,15 @@ export function IntegrationServiceWidget() {
 
   const f = (key: keyof typeof form, val: string) => setForm(p => ({ ...p, [key]: val }))
 
+  useEffect(() => {
+    const handler = () => { reset(); setOpen(true) }
+    window.addEventListener('coovex:open-integration', handler)
+    return () => window.removeEventListener('coovex:open-integration', handler)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <>
-      {/* Floating button — sits above AI Coach (bottom-20) */}
-      <button
-        onClick={() => { reset(); setOpen(true) }}
-        className="fixed bottom-20 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl shadow-2xl font-medium text-sm bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/60 transition-all duration-200"
-      >
-        <span className="text-base">🔧</span>
-        <span>Setup & Integration</span>
-      </button>
-
       {/* Backdrop */}
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)}>

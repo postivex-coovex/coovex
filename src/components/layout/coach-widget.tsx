@@ -200,20 +200,14 @@ export function CoachWidget() {
 
   const isEmpty = messages.length === 0 && !loading
 
+  useEffect(() => {
+    const handler = () => setOpen(v => !v)
+    window.addEventListener('coovex:toggle-coach', handler)
+    return () => window.removeEventListener('coovex:toggle-coach', handler)
+  }, [])
+
   return (
     <>
-      {/* Floating button */}
-      <button
-        onClick={() => setOpen(v => !v)}
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl shadow-2xl font-medium text-sm transition-all duration-200 ${
-          open ? 'bg-slate-700 text-slate-200' : 'bg-violet-600 hover:bg-violet-500 text-white shadow-violet-900/60'
-        }`}
-      >
-        <span className="text-base">🧠</span>
-        <span>AI Coach</span>
-        {!open && messages.length > 0 && <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />}
-      </button>
-
       {/* Mobile backdrop */}
       {open && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setOpen(false)} />}
 
