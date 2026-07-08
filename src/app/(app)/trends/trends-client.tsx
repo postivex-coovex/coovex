@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import RedditTrends from '@/components/content/reddit-trends'
 
 interface Trend {
   title: string
@@ -135,6 +136,11 @@ export default function TrendsClient({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Reddit Trends */}
+      <div className="mb-6">
+        <RedditTrends />
       </div>
 
       {error && (

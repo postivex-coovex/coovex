@@ -70,7 +70,6 @@ const navGroups: { label: string | null; items: NavItem[] }[] = [
       { label: 'Reviews',     href: '/reviews',             icon: Star,       badge: null, sub: false },
       { label: 'Content',     href: '/content',             icon: Calendar,   badge: null, sub: false },
       { label: 'GEO Ideas',   href: '/content/ideas',       icon: Lightbulb,  badge: null, sub: true  },
-      { label: 'Performance', href: '/content/performance', icon: BarChart3,  badge: null, sub: true  },
       { label: 'NPS Survey',  href: '/nps',                 icon: ThumbsUp,   badge: null, sub: false },
     ],
   },

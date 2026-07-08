@@ -3,7 +3,6 @@
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AIPageContext } from '@/components/ui/ai-page-context'
-import RedditTrends from '@/components/content/reddit-trends'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 
 type PostChannel = 'linkedin' | 'facebook' | 'instagram' | 'tiktok' | 'wordpress'
@@ -484,11 +483,6 @@ export default function ContentClient({ initialPosts, businessName, industry, au
           </button>
         </div>
       )}
-
-      {/* Reddit Trends */}
-      <div className="mb-6">
-        <RedditTrends />
-      </div>
 
       {/* GEO Content Ideas */}
       <div ref={geoSectionRef} className="mb-6 bg-slate-900 border border-violet-800/30 rounded-2xl p-5">
