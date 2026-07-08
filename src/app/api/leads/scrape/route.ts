@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { deductCredits, getWorkspaceId } from '@/lib/credits'
 
-export const maxDuration = 60
+export const maxDuration = 300
 
 const VPS_SCRAPER_URL = 'http://82.29.160.236:8000'
 const VPS_SCRAPER_KEY = '88a112be6c56b840c3d8eee98c55fe7a9f7423ab1e2af5e6'
