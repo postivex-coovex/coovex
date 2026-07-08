@@ -111,7 +111,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ leads: leadsWithEnrichment }, creditBalance !== undefined ? { headers: { 'X-Credits-Remaining': String(creditBalance) } } : undefined)
   } catch (error) {
-    console.error('POST /api/leads/scrape error:', error)
-    return NextResponse.json({ error: 'Failed to find leads' }, { status: 500 })
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('POST /api/leads/scrape error:', msg)
+    return NextResponse.json({ error: 'Failed to find leads', detail: msg }, { status: 500 })
   }
 }
