@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AIPageContext } from '@/components/ui/ai-page-context'
 import RedditTrends from '@/components/content/reddit-trends'
@@ -150,6 +150,9 @@ export default function ContentClient({ initialPosts, businessName, industry, au
   const [selectedAuditId, setSelectedAuditId] = useState(defaultAuditId)
   const [products, setProducts] = useState<Product[]>([])
   const [selectedProductId, setSelectedProductId] = useState('')
+
+  const postsSectionRef = useRef<HTMLDivElement>(null)
+  const geoSectionRef = useRef<HTMLDivElement>(null)
 
   const searchParams = useSearchParams()
 
@@ -436,19 +439,31 @@ export default function ContentClient({ initialPosts, businessName, industry, au
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Scheduled', value: scheduled, icon: '📅', color: 'text-violet-400' },
-          { label: 'Drafts', value: drafts, icon: '✏️', color: 'text-amber-400' },
-          { label: 'Published This Month', value: publishedThisMonth, icon: '✅', color: 'text-emerald-400' },
+          { label: 'Scheduled', value: scheduled, icon: '📅', color: 'text-violet-400', filterVal: 'scheduled' as PostStatus | 'geo' },
+          { label: 'Drafts', value: drafts, icon: '✏️', color: 'text-amber-400', filterVal: 'draft' as PostStatus | 'geo' },
+          { label: 'Published This Month', value: publishedThisMonth, icon: '✅', color: 'text-emerald-400', filterVal: 'published' as PostStatus | 'geo' },
+          { label: 'Content to Create', value: contentGaps.length, icon: '🧠', color: 'text-violet-400', filterVal: 'geo' as PostStatus | 'geo' },
         ].map(s => (
-          <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <button
+            key={s.label}
+            onClick={() => {
+              if (s.filterVal === 'geo') {
+                geoSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              } else {
+                setFilter(s.filterVal as PostStatus)
+                postsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }}
+            className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-left hover:border-slate-600 transition-colors group cursor-pointer"
+          >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-500 text-xs">{s.label}</span>
+              <span className="text-slate-500 text-xs group-hover:text-slate-400 transition-colors">{s.label}</span>
               <span>{s.icon}</span>
             </div>
             <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -476,7 +491,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
       </div>
 
       {/* GEO Content Ideas */}
-      <div className="mb-6 bg-slate-900 border border-violet-800/30 rounded-2xl p-5">
+      <div ref={geoSectionRef} className="mb-6 bg-slate-900 border border-violet-800/30 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             🧠 Content to Create
@@ -523,7 +538,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
       </div>
 
       {/* View toggle + filter */}
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <div ref={postsSectionRef} className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-lg p-1">
           {(['list', 'calendar'] as const).map(v => (
             <button
