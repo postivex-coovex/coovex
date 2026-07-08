@@ -10,9 +10,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ user }: AppHeaderProps) {
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-
+  const [greeting, setGreeting] = useState('Good morning')
   const [credits, setCredits] = useState<{ balance: number; monthly: number; business_used: number } | null>(null)
 
   const fetchBalance = () => {
@@ -23,6 +21,8 @@ export function AppHeader({ user }: AppHeaderProps) {
   }
 
   useEffect(() => {
+    const h = new Date().getHours()
+    setGreeting(h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening')
     fetchBalance()
     // Fallback poll every 60s (interceptor handles instant updates)
     const interval = setInterval(fetchBalance, 60_000)

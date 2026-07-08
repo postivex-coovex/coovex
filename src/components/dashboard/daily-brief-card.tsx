@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface DailyBriefCardProps {
   businessName: string
@@ -13,9 +13,14 @@ export function DailyBriefCard({ businessName, userName }: DailyBriefCardProps) 
   const [loading, setLoading] = useState(false)
   const [generated, setGenerated] = useState(false)
 
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-  const day = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const [greeting, setGreeting] = useState('Good morning')
+  const [day, setDay] = useState('')
+
+  useEffect(() => {
+    const h = new Date().getHours()
+    setGreeting(h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening')
+    setDay(new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }))
+  }, [])
 
   async function generate() {
     setLoading(true)
