@@ -499,18 +499,26 @@ export default function ContentClient({ initialPosts, businessName, industry, au
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                 filter === f
                   ? 'border-violet-500/50 bg-violet-600/20 text-violet-300'
-                  : f === 'draft' && drafts > 0
-                  ? 'border-amber-600/50 bg-amber-950/30 text-amber-400 hover:text-amber-300'
                   : 'border-slate-800 text-slate-500 hover:text-slate-400'
               }`}
             >
               {f === 'all' ? 'All Posts'
-                : f === 'pending_approval' ? `Pending${pendingApproval > 0 ? ` (${pendingApproval})` : ''}`
-                : f === 'draft' ? `Draft${drafts > 0 ? ` (${drafts})` : ''}`
+                : f === 'pending_approval' ? 'Pending'
+                : f === 'draft' ? 'Drafts'
                 : f.charAt(0).toUpperCase() + f.slice(1)}
+              {f === 'draft' && drafts > 0 && (
+                <span className="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center">
+                  {drafts}
+                </span>
+              )}
+              {f === 'pending_approval' && pendingApproval > 0 && (
+                <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center">
+                  {pendingApproval}
+                </span>
+              )}
             </button>
           ))}
           {/* Need to Create tab */}
