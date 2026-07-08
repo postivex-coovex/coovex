@@ -52,24 +52,30 @@ function StepResult({ id, data }: { id: string; data?: Record<string, unknown> }
   if (!data) return null
 
   if (id === 'audit') {
+    const overall = data.overall as number
+    const geo = data.geo as number | null
+    const ageDays = data.age_days as number
     return (
       <span className="text-xs text-emerald-400 ml-1">
-        {data.overall}/100 overall · GEO {data.geo ?? 'N/A'}/100
-        {(data.age_days as number) > 7 ? ` · ⚠️ ${data.age_days}d old` : ''}
+        {overall}/100 overall · GEO {geo ?? 'N/A'}/100
+        {ageDays > 7 ? ` · ⚠️ ${ageDays}d old` : ''}
       </span>
     )
   }
   if (id === 'icp') {
+    const total = data.total as number
+    const hot   = data.hot as number
+    const newL  = data.new as number
     return (
       <span className="text-xs text-emerald-400 ml-1">
-        {data.total as number} leads total · {data.hot as number} hot · {data.new as number} new this week
+        {total} leads total · {hot} hot · {newL} new this week
       </span>
     )
   }
   if (id === 'leads') {
     const found = data.found as number
-    const real = data.real as boolean
-    const icp = data.icp as string | undefined
+    const real  = data.real as boolean
+    const icp   = data.icp as string | undefined
     if (!found && !icp) return <span className="text-xs text-slate-500 ml-1">no results (search service may be offline)</span>
     return (
       <span className="text-xs text-emerald-400 ml-1">
@@ -80,10 +86,13 @@ function StepResult({ id, data }: { id: string; data?: Record<string, unknown> }
   }
   if (id === 'geo') {
     if (data.stale) return <span className="text-xs text-amber-400 ml-1">GEO not yet run — run GEO Optimizer first</span>
+    const gaps   = data.content_gaps as number
+    const high   = data.high_impact as number
+    const visRate = data.ai_visibility_rate as number | null
     return (
       <span className="text-xs text-emerald-400 ml-1">
-        {data.content_gaps as number} gaps · {data.high_impact as number} high-impact
-        {data.ai_visibility_rate != null ? ` · Gemini visibility: ${data.ai_visibility_rate}%` : ' · Gemini: no data'}
+        {gaps} gaps · {high} high-impact
+        {visRate != null ? ` · Gemini visibility: ${visRate}%` : ' · Gemini: no data'}
       </span>
     )
   }
