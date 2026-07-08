@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle2, XCircle, RefreshCw, Copy, Download, ChevronDown, ChevronUp, Globe2, Brain, Sparkles, AlertCircle } from 'lucide-react'
 import { checkCredits } from '@/lib/client-credits'
+import { LiveVisibilityCheck } from '@/components/geo/live-visibility-check'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -288,9 +289,9 @@ function CodeBlock({ content, filename }: { content: string; filename: string })
   )
 }
 
-// ─── Live AI Visibility Check ─────────────────────────────────────────────────
-
-function LiveVisibilityCheck({ visibility, geo }: { visibility: NonNullable<GeoIntelligence['actual_ai_visibility']>; geo: GeoCheck | null }) {
+// ─── Live AI Visibility Check (imported from shared component) ────────────────
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _LiveVisibilityCheck_REPLACED({ visibility, geo }: { visibility: NonNullable<GeoIntelligence['actual_ai_visibility']>; geo: GeoCheck | null }) {
   const [expanded, setExpanded] = useState<number | null>(null)
   const rate = visibility.visibility_rate
   const rateColor = rate >= 60 ? 'text-emerald-400' : rate >= 30 ? 'text-amber-400' : 'text-red-400'

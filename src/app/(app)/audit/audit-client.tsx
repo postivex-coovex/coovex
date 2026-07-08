@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { LiveVisibilityCheck } from '@/components/geo/live-visibility-check'
+import type { VisibilityResult } from '@/app/api/geo/visibility-check/route'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -193,6 +195,8 @@ export default function AuditClient({ audits: initialAudits, websiteUrl, busines
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const [aiFix, setAiFix] = useState<AiFix | null>(null)
   const [logEntries, setLogEntries] = useState<LogEntry[]>([])
+  const [visibility, setVisibility] = useState<VisibilityResult | null>(null)
+  const [visibilityLoading, setVisibilityLoading] = useState(false)
   const logRef = useRef<HTMLDivElement>(null)
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const startRef = useRef<number>(0)
@@ -201,6 +205,28 @@ export default function AuditClient({ audits: initialAudits, websiteUrl, busines
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
   }, [logEntries])
+
+  const runVisibilityCheck = useCallback(async (silent = false) => {
+    if (!silent) setVisibilityLoading(true)
+    try {
+      // First try cache
+      const cached = await fetch('/api/geo/visibility-check').then(r => r.json()) as { result: VisibilityResult | null }
+      if (cached.result) { setVisibility(cached.result); return }
+      // Run fresh check
+      const res = await fetch('/api/geo/visibility-check', { method: 'POST' })
+      const data = await res.json() as { result: VisibilityResult }
+      if (data.result) setVisibility(data.result)
+    } catch { /* silent fail */ } finally {
+      setVisibilityLoading(false)
+    }
+  }, [])
+
+  // Load visibility when geo tab is opened
+  useEffect(() => {
+    if (activeTab === 'geo' && !visibility && !visibilityLoading) {
+      runVisibilityCheck(true)
+    }
+  }, [activeTab, visibility, visibilityLoading, runVisibilityCheck])
 
   function addLog(text: string, type: LogEntry['type'], delayMs: number) {
     const id = ++logId.current
@@ -310,6 +336,9 @@ export default function AuditClient({ audits: initialAudits, websiteUrl, busines
       setAudits(prev => [newAudit, ...prev])
       setSelectedAudit(newAudit)
       setActiveTab('overview')
+      // Auto-run AI visibility check after every audit
+      setVisibility(null)
+      runVisibilityCheck(true)
     } catch (err) {
       timersRef.current.forEach(clearTimeout)
       timersRef.current = []
@@ -793,6 +822,35 @@ export default function AuditClient({ audits: initialAudits, websiteUrl, busines
                           )
                         })}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Live AI Visibility Check */}
+                  {visibility ? (
+                    <LiveVisibilityCheck visibility={visibility} geo={geo} />
+                  ) : visibilityLoading ? (
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex items-center gap-3">
+                      <span className="w-4 h-4 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-white">Running Live AI Visibility Check...</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Gemini is searching to see if your business appears in AI results</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                          ✨ Live AI Visibility Check
+                          <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/25">Gemini Search</span>
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-500 mb-4">Verify whether your business is mentioned in real AI searches today.</p>
+                      <button
+                        onClick={() => runVisibilityCheck(false)}
+                        className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors"
+                      >
+                        <span>✨</span> Run Visibility Check
+                      </button>
                     </div>
                   )}
 
