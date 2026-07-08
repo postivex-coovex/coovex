@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         city: city || '',
         limit: 20,
       }),
-      signal: AbortSignal.timeout(60_000),
+      signal: AbortSignal.timeout(240_000),
     })
 
     if (!res.ok) {
