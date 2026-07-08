@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Scraper error: ${res.status} ${errText}` }, { status: 502 })
     }
 
-    const results: ScrapeResult[] = await res.json()
+    const raw = await res.json()
+    const results: ScrapeResult[] = Array.isArray(raw) ? raw : (raw.leads ?? [])
 
     if (results.length === 0) {
       return NextResponse.json({ leads: [], message: 'No new leads found for this combination.' })
