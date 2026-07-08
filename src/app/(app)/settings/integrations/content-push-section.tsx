@@ -102,55 +102,72 @@ const WORDPRESS_PLUGIN = `<?php
 /**
  * Plugin Name: CooVex Content Push
  * Description: Auto-publishes CooVex AI content as WordPress posts
- * Version: 1.0.0
+ * Version:     1.0.0
+ * Author:      CooVex
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 // Settings page
-add_action('admin_menu', function() {
-    add_options_page('CooVex Push', 'CooVex Push', 'manage_options', 'coovex', function() {
-        if ($_POST) update_option('coovex_secret', sanitize_text_field($_POST['secret'] ?? ''));
-        $s = get_option('coovex_secret', '');
-        echo '<div class="wrap"><h1>CooVex Push Settings</h1><form method="post">
-            <table class="form-table"><tr><th>Webhook Secret</th>
-            <td><input type="text" name="secret" value="' . esc_attr($s) . '" class="regular-text"></td></tr>
-            </table><p><b>Webhook URL:</b> <code>' . rest_url('coovex/v1/receive') . '</code></p>
-            <p class="submit"><input type="submit" class="button-primary" value="Save"></p>
-        </form></div>';
-    });
-});
+add_action( 'admin_menu', function () {
+    add_options_page( 'CooVex Push', 'CooVex Push', 'manage_options', 'coovex-push', function () {
+        if ( isset( $_POST['coovex_save'] ) && check_admin_referer( 'coovex_push_save' ) ) {
+            update_option( 'coovex_webhook_secret', sanitize_text_field( $_POST['webhook_secret'] ?? '' ) );
+            update_option( 'coovex_post_status',    sanitize_text_field( $_POST['post_status']    ?? 'publish' ) );
+        }
+        $secret = get_option( 'coovex_webhook_secret', '' );
+        $status = get_option( 'coovex_post_status', 'publish' );
+        $webhook_url = rest_url( 'coovex/v1/receive' );
+        echo '<div class="wrap"><h1>⚡ CooVex Push Settings</h1>';
+        echo '<div style="background:#f0f6ff;border-left:4px solid #2271b1;padding:12px 16px;margin:16px 0">';
+        echo '<strong>Your Webhook URL</strong><br><code>' . esc_url( $webhook_url ) . '</code>';
+        echo '<p style="margin:6px 0 0;font-size:12px">Copy this URL into <strong>CooVex → Settings → Integrations → Webhook URL</strong></p></div>';
+        echo '<form method="post">';
+        wp_nonce_field( 'coovex_push_save' );
+        echo '<table class="form-table">
+            <tr><th>Webhook Secret</th><td>
+            <input type="text" name="webhook_secret" value="' . esc_attr( $secret ) . '" class="regular-text">
+            <p class="description">Paste your secret from CooVex → Settings → Integrations</p></td></tr>
+            <tr><th>Publish Status</th><td><select name="post_status">
+            <option value="publish"' . selected( $status, "publish", false ) . '>Publish immediately</option>
+            <option value="draft"'   . selected( $status, "draft",   false ) . '>Save as Draft</option>
+            </select></td></tr></table>';
+        submit_button( 'Save Settings', 'primary', 'coovex_save' );
+        echo '</form></div>';
+    } );
+} );
 
 // REST endpoint
-add_action('rest_api_init', function() {
-    register_rest_route('coovex/v1', '/receive', [
+add_action( 'rest_api_init', function () {
+    register_rest_route( 'coovex/v1', '/receive', [
         'methods'             => 'POST',
-        'callback'            => function(WP_REST_Request $req) {
-            $secret = get_option('coovex_secret');
-            if ($secret) {
-                $sig = $req->get_header('X-CooVex-Signature');
-                $exp = 'sha256=' . hash_hmac('sha256', $req->get_body(), $secret);
-                if (!hash_equals($exp, $sig ?? ''))
-                    return new WP_Error('unauthorized', 'Bad signature', ['status' => 401]);
+        'callback'            => function ( WP_REST_Request $req ) {
+            $secret = get_option( 'coovex_webhook_secret', '' );
+            if ( $secret ) {
+                $sig = $req->get_header( 'X-CooVex-Signature' ) ?? '';
+                $exp = 'sha256=' . hash_hmac( 'sha256', $req->get_body(), $secret );
+                if ( ! hash_equals( $exp, $sig ) )
+                    return new WP_Error( 'unauthorized', 'Bad signature', [ 'status' => 401 ] );
             }
-
-            $d = $req->get_json_params();
-            $id = wp_insert_post([
-                'post_title'   => sanitize_text_field($d['title'] ?? 'Post'),
-                'post_content' => wp_kses_post($d['content'] ?? ''),
-                'post_status'  => 'publish',
-            ]);
-            if (is_wp_error($id)) return $id;
-
-            $url = get_permalink($id);
-            wp_remote_post($d['confirm_url'], [
-                'body'    => json_encode(['api_key' => $d['api_key'], 'external_url' => $url, 'published_at' => current_time('c')]),
-                'headers' => ['Content-Type' => 'application/json'],
-            ]);
-
-            return ['ok' => true, 'wp_post_id' => $id, 'url' => $url];
+            $d   = $req->get_json_params();
+            $id  = wp_insert_post( [
+                'post_title'   => sanitize_text_field( $d['title']   ?? 'Post' ),
+                'post_content' => wp_kses_post( $d['content']         ?? '' ),
+                'post_status'  => get_option( 'coovex_post_status', 'publish' ),
+            ], true );
+            if ( is_wp_error( $id ) ) return $id;
+            $url = get_permalink( $id );
+            if ( ! empty( $d['confirm_url'] ) ) {
+                wp_remote_post( $d['confirm_url'], [
+                    'body'    => wp_json_encode( [ 'api_key' => $d['api_key'], 'external_url' => $url, 'published_at' => current_time( 'c' ) ] ),
+                    'headers' => [ 'Content-Type' => 'application/json' ],
+                ] );
+            }
+            return [ 'ok' => true, 'wp_post_id' => $id, 'url' => $url ];
         },
         'permission_callback' => '__return_true',
-    ]);
-});
+    ] );
+} );
 `
 
 const NODE_CODE = `// server.js — Node.js / Express
@@ -730,7 +747,20 @@ export default function ContentPushSection({ appUrl }: ContentPushSectionProps) 
                   platform === 'ajax'      ? 'bg-yellow-950/20 border-yellow-900/30 text-yellow-300' :
                                              'bg-slate-800/50 border-slate-700 text-slate-300'
                 }`}>
-                  {platform === 'wordpress' && <><strong>WordPress Plugin</strong> — Copy to <code className="bg-black/20 px-1 rounded">wp-content/plugins/coovex-push/coovex-push.php</code>, activate it. Webhook URL: <code className="bg-black/20 px-1 rounded">https://yoursite.com/wp-json/coovex/v1/receive</code></>}
+                  {platform === 'wordpress' && (
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <div className="flex-1">
+                        <strong>WordPress Plugin</strong> — Download &amp; install the plugin below. After activation, copy the Webhook URL from <em>Settings → CooVex Push</em>.
+                      </div>
+                      <a
+                        href="/downloads/coovex-push.zip"
+                        download="coovex-push.zip"
+                        className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
+                      >
+                        ⬇ Download Plugin
+                      </a>
+                    </div>
+                  )}
                   {platform === 'php'       && <><strong>Pure PHP</strong> — Save as <code className="bg-black/20 px-1 rounded">coovex-receiver.php</code> on any PHP hosting (cPanel, Hostinger, etc.). Set your Webhook URL to that file's public URL.</>}
                   {platform === 'node'      && <><strong>Node.js / Express</strong> — Run <code className="bg-black/20 px-1 rounded">npm install express</code>. Set <code className="bg-black/20 px-1 rounded">COOVEX_SECRET</code> env var. Deploy to Railway, Render, VPS, etc.</>}
                   {platform === 'nextjs'    && <><strong>Next.js API Route</strong> — Drop this into <code className="bg-black/20 px-1 rounded">app/api/coovex/receive/route.ts</code>. Set <code className="bg-black/20 px-1 rounded">COOVEX_SECRET</code> in <code className="bg-black/20 px-1 rounded">.env.local</code>.</>}
