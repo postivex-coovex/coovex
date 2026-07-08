@@ -53,6 +53,9 @@ export function DailyTasksCard({ tasks, businessId }: DailyTasksCardProps) {
   const [taskList, setTaskList] = useState<Task[]>(tasks?.tasks_json ?? [])
   const [generating, setGenerating] = useState(false)
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [label, setLabel] = useState('')
+
+  useEffect(() => { setLabel(todayLabel()) }, [])
 
   useEffect(() => {
     if (taskList.length === 0 && businessId) {
@@ -130,7 +133,7 @@ export function DailyTasksCard({ tasks, businessId }: DailyTasksCardProps) {
               <Sparkles className="w-3.5 h-3.5 text-blue-400" />
               <h3 className="text-sm font-semibold text-white">Today&apos;s Focus</h3>
             </div>
-            <p className="text-[11px] text-slate-500">{todayLabel()}</p>
+            <p className="text-[11px] text-slate-500">{label}</p>
           </div>
           <div className="flex items-center gap-2">
             {total > 0 && (
