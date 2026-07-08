@@ -2,7 +2,7 @@
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/providers/theme-provider'
-import { AppProgressBar as ProgressBar } from 'next-nprogress-bar'
+import { NavigationProgress } from '@/components/layout/navigation-progress'
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://coovex.com'
 
@@ -151,12 +151,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           {children}
           <Toaster richColors position="top-right" />
-          <ProgressBar
-            height="2px"
-            color="#7c3aed"
-            options={{ showSpinner: false }}
-            shallowRouting
-          />
+          <NavigationProgress />
         </ThemeProvider>
       </body>
     </html>
