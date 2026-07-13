@@ -26,7 +26,7 @@ interface StaticData {
   geoContentGaps: number
   geoHighImpact: number
   topGaps: string[]
-  launchMap: Record<string, string>
+  launchMap: Record<string, { status: string; url?: string | null }>
   businessId: string
 }
 
@@ -107,7 +107,7 @@ function calcProgress(sd: StaticData) {
     { label: 'Content created',          done: sd.draftPosts > 0 || sd.scheduledPosts > 0,                    link: '/content' },
     { label: 'Google Search Console',    done: !!sd.searchPresence?.gsc_verified,                             link: '/audit' },
     { label: 'Google Analytics (GA4)',   done: !!sd.searchPresence?.ga4,                                      link: '/audit' },
-    { label: 'Launched on a platform',   done: Object.values(sd.launchMap).some(s => s === 'done' || s === 'live'), link: undefined },
+    { label: 'Launched on a platform',   done: Object.values(sd.launchMap).some(s => s.status === 'done' || s.status === 'live'), link: undefined },
   ]
   const score = items.filter(i => i.done).length
   return { score, total: items.length, pct: Math.round((score / items.length) * 100), items }
@@ -178,7 +178,7 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
   const [running, setRunning] = useState(false)
   const [steps, setSteps] = useState<Record<string, StepState>>({})
   const [error, setError] = useState('')
-  const [launchMap, setLaunchMap] = useState<Record<string, string>>(staticData.launchMap)
+  const [launchMap, setLaunchMap] = useState<Record<string, { status: string; url?: string | null }>>(staticData.launchMap)
   const [togglingPlatform, setTogglingPlatform] = useState<string | null>(null)
   const [pendingTasks, setPendingTasks] = useState<PendingTask[]>(initialPendingTasks)
   const [dismissingTask, setDismissingTask] = useState<string | null>(null)
@@ -232,8 +232,8 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
     setDismissingTask(null)
   }
 
-  async function togglePlatform(platformId: string, current: string) {
-    const newStatus = current === 'done' ? 'not_started' : 'done'
+  async function togglePlatform(platformId: string, current: { status: string; url?: string | null }) {
+    const newStatus = current.status === 'done' ? 'not_started' : 'done'
     setTogglingPlatform(platformId)
     try {
       await fetch('/api/gtm/platform', {
@@ -241,7 +241,7 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ platform_id: platformId, status: newStatus }),
       })
-      setLaunchMap(prev => ({ ...prev, [platformId]: newStatus }))
+      setLaunchMap(prev => ({ ...prev, [platformId]: { ...prev[platformId], status: newStatus } }))
     } catch {}
     setTogglingPlatform(null)
   }
@@ -544,7 +544,7 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
           <span>🚀</span>
           <h2 className="text-sm font-semibold text-white">Platform Launch Tracker</h2>
           <span className="ml-auto text-xs text-slate-500">
-            {Object.values(launchMap).filter(s => s === 'done' || s === 'live').length} / {LAUNCH_PLATFORMS.length} done
+            {Object.values(launchMap).filter(s => s.status === 'done' || s.status === 'live').length} / {LAUNCH_PLATFORMS.length} done
           </span>
         </div>
         <p className="text-xs text-slate-600 mb-4">Click to mark as launched. These platforms boost discovery, backlinks, and early customers.</p>
@@ -557,13 +557,15 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
               <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wider mb-2">{cat}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 {platforms.map(p => {
-                  const status = launchMap[p.id]
-                  const done = status === 'done' || status === 'live'
+                  const entry = launchMap[p.id] ?? { status: 'not_started' }
+                  const done = entry.status === 'done' || entry.status === 'live'
+                  const isAutoDetected = entry.status === 'live'
+                  const detectedUrl = entry.url
                   const toggling = togglingPlatform === p.id
                   return (
                     <div key={p.id} className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-colors ${done ? 'bg-emerald-500/8 border-emerald-700/30' : 'bg-slate-800/50 border-slate-700/50'}`}>
                       <button
-                        onClick={() => togglePlatform(p.id, status ?? 'not_started')}
+                        onClick={() => togglePlatform(p.id, entry)}
                         disabled={toggling}
                         className={`w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center text-[10px] transition-colors ${
                           done ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-slate-600 text-slate-600 hover:border-slate-400'
@@ -572,7 +574,16 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
                         {toggling ? <span className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" /> : done ? '✓' : '○'}
                       </button>
                       <span className="text-sm flex-shrink-0">{p.icon}</span>
-                      <span className={`text-xs flex-1 ${done ? 'text-slate-300 line-through decoration-emerald-600' : 'text-slate-400'}`}>{p.label}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-xs block truncate ${done ? 'text-slate-300 line-through decoration-emerald-600' : 'text-slate-400'}`}>{p.label}</span>
+                        {isAutoDetected && (
+                          <span className="text-[9px] text-emerald-500 font-medium">AI detected</span>
+                        )}
+                      </div>
+                      {done && detectedUrl && (
+                        <a href={detectedUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-[10px] text-emerald-600 hover:text-emerald-400 flex-shrink-0 transition-colors" title="View listing">↗</a>
+                      )}
                       {!done && (
                         <a href={p.href} target="_blank" rel="noopener noreferrer" className="text-[10px] text-slate-600 hover:text-violet-400 flex-shrink-0 transition-colors">↗</a>
                       )}

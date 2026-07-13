@@ -141,7 +141,7 @@ export async function POST() {
 
         const bgPlatformDetect = (async () => {
           if (!searchUrl || !bizNameClean) return {}
-          const detected: Record<string, boolean> = {}
+          const detected: Record<string, string> = {}
           await Promise.allSettled(
             DETECT_PLATFORMS.map(async p => {
               try {
@@ -152,7 +152,8 @@ export async function POST() {
                 const res = await fetch(u.toString(), { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) })
                 if (res.ok) {
                   const data = await res.json()
-                  if ((data.results ?? []).length > 0) detected[p.id] = true
+                  const firstUrl: string | undefined = data.results?.[0]?.url
+                  if (firstUrl) detected[p.id] = firstUrl
                 }
               } catch {}
             })
@@ -388,7 +389,14 @@ Return EXACTLY this JSON (no markdown):
           await Promise.allSettled(
             detectedIds.map(platformId =>
               service.from('launch_tracker_platforms').upsert(
-                { workspace_id: profile.current_workspace_id, business_id: business.id, platform_id: platformId, status: 'live', updated_at: now.toISOString() },
+                {
+                  workspace_id: profile.current_workspace_id,
+                  business_id: business.id,
+                  platform_id: platformId,
+                  status: 'live',
+                  url: detectedPlatforms[platformId] ?? null,
+                  updated_at: now.toISOString(),
+                },
                 { onConflict: 'business_id,platform_id' },
               )
             )

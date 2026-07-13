@@ -105,8 +105,8 @@ export default async function GtmAgentPage() {
     } catch {}
   }
 
-  const launchMap: Record<string, string> = {}
-  for (const p of launchPlatforms ?? []) launchMap[p.platform_id] = p.status
+  const launchMap: Record<string, { status: string; url?: string | null }> = {}
+  for (const p of launchPlatforms ?? []) launchMap[p.platform_id] = { status: p.status, url: p.url ?? null }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pendingTasks = (pendingSignals ?? []) as any[]
