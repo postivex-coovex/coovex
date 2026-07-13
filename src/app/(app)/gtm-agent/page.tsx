@@ -58,21 +58,31 @@ export default async function GtmAgentPage() {
   const [
     { data: mem },
     { data: geoMem },
+    { data: spMem },
     { count: totalLeads },
     { count: hotLeads },
     { count: draftPosts },
     { count: scheduledPosts },
     { count: competitors },
     { data: launchPlatforms },
+    { data: pendingSignals },
   ] = await Promise.all([
     service.from('agent_memory').select('value_text').eq('business_id', business!.id).eq('key', 'gtm_last_run').maybeSingle(),
     service.from('agent_memory').select('value_text, updated_at').eq('business_id', business!.id).eq('key', 'geo_intelligence').maybeSingle(),
+    service.from('agent_memory').select('value_text').eq('business_id', business!.id).eq('key', 'search_presence').maybeSingle(),
     supabase.from('leads').select('*', { count: 'exact', head: true }).eq('business_id', business!.id),
     supabase.from('leads').select('*', { count: 'exact', head: true }).eq('business_id', business!.id).gte('score', 70),
     supabase.from('posts').select('*', { count: 'exact', head: true }).eq('business_id', business!.id).eq('status', 'draft'),
     supabase.from('posts').select('*', { count: 'exact', head: true }).eq('business_id', business!.id).eq('status', 'scheduled'),
     supabase.from('competitors').select('*', { count: 'exact', head: true }).eq('business_id', business!.id),
     supabase.from('launch_tracker_platforms').select('platform_id, status, url').eq('business_id', business!.id),
+    supabase.from('agent_signals')
+      .select('id, type, title, body, action_label, action_data_json, created_at')
+      .eq('business_id', business!.id)
+      .eq('dismissed', false)
+      .in('type', ['task', 'opportunity', 'warning'])
+      .order('created_at', { ascending: false })
+      .limit(15),
   ])
 
   let lastRun = null
@@ -80,7 +90,10 @@ export default async function GtmAgentPage() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const auditReport = latestAudit.report_json as any
-  const searchPresence = auditReport?.search_presence ?? null
+  // Prefer freshly-checked search presence (saved by GTM run) over audit snapshot
+  let searchPresence = null
+  if (spMem?.value_text) try { searchPresence = JSON.parse(spMem.value_text) } catch {}
+  if (!searchPresence) searchPresence = auditReport?.geo?.search_presence ?? null
   const geoScore = auditReport?.geo?.geo_score ?? null
 
   let geoIntel = null
@@ -95,9 +108,13 @@ export default async function GtmAgentPage() {
   const launchMap: Record<string, string> = {}
   for (const p of launchPlatforms ?? []) launchMap[p.platform_id] = p.status
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pendingTasks = (pendingSignals ?? []) as any[]
+
   return (
     <GtmClient
       initialLastRun={lastRun}
+      pendingTasks={pendingTasks}
       staticData={{
         auditScore: latestAudit.score ?? 0,
         auditGeoScore: geoScore,

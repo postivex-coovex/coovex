@@ -158,13 +158,30 @@ function StepResult({ id, data }: { id: string; data?: Record<string, unknown> }
   return null
 }
 
-export function GtmClient({ initialLastRun, staticData }: { initialLastRun: LastRun | null; staticData: StaticData }) {
+interface PendingTask {
+  id: string
+  type: string
+  title: string
+  body: string
+  action_label?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  action_data_json?: any
+  created_at: string
+}
+
+export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPendingTasks }: {
+  initialLastRun: LastRun | null
+  staticData: StaticData
+  pendingTasks: PendingTask[]
+}) {
   const [lastRun, setLastRun] = useState<LastRun | null>(initialLastRun)
   const [running, setRunning] = useState(false)
   const [steps, setSteps] = useState<Record<string, StepState>>({})
   const [error, setError] = useState('')
   const [launchMap, setLaunchMap] = useState<Record<string, string>>(staticData.launchMap)
   const [togglingPlatform, setTogglingPlatform] = useState<string | null>(null)
+  const [pendingTasks, setPendingTasks] = useState<PendingTask[]>(initialPendingTasks)
+  const [dismissingTask, setDismissingTask] = useState<string | null>(null)
 
   function setStep(id: string, update: Partial<StepState>) {
     setSteps(prev => ({ ...prev, [id]: { ...prev[id], ...update } }))
@@ -200,6 +217,19 @@ export function GtmClient({ initialLastRun, staticData }: { initialLastRun: Last
         }
       }
     } catch { setError('Network error.'); setRunning(false) }
+  }
+
+  async function dismissTask(taskId: string) {
+    setDismissingTask(taskId)
+    try {
+      await fetch('/api/gtm/dismiss-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signal_id: taskId }),
+      })
+      setPendingTasks(prev => prev.filter(t => t.id !== taskId))
+    } catch {}
+    setDismissingTask(null)
   }
 
   async function togglePlatform(platformId: string, current: string) {
@@ -465,6 +495,44 @@ export function GtmClient({ initialLastRun, staticData }: { initialLastRun: Last
                 </div>
                 <span className="text-slate-600 group-hover:text-slate-400 flex-shrink-0">→</span>
               </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Pending Tasks ───────────────────────────────────────────────────── */}
+      {pendingTasks.length > 0 && (
+        <div className="mb-5 bg-slate-900 border border-amber-800/30 rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <span>📋</span>
+            <h2 className="text-sm font-semibold text-white">Pending Tasks</h2>
+            <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/15 text-amber-400 border border-amber-500/25 rounded-full">{pendingTasks.length}</span>
+            <span className="ml-auto text-[10px] text-slate-500">from last audit scan</span>
+          </div>
+          <div className="space-y-2">
+            {pendingTasks.map(task => (
+              <div key={task.id} className="flex items-start gap-3 p-3 bg-slate-800/60 border border-slate-700/40 rounded-xl">
+                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${task.type === 'warning' ? 'bg-rose-400' : task.type === 'opportunity' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-white leading-snug">{task.title}</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{task.body}</p>
+                  {task.action_data_json?.url && (
+                    <Link href={task.action_data_json.url} className="text-[10px] text-violet-400 hover:text-violet-300 mt-1 inline-block">
+                      {task.action_label || 'Fix →'}
+                    </Link>
+                  )}
+                </div>
+                <button
+                  onClick={() => dismissTask(task.id)}
+                  disabled={dismissingTask === task.id}
+                  title="Dismiss"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-300 hover:bg-slate-700 transition-colors flex-shrink-0 mt-0.5 text-sm"
+                >
+                  {dismissingTask === task.id
+                    ? <span className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" />
+                    : '×'}
+                </button>
+              </div>
             ))}
           </div>
         </div>

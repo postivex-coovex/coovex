@@ -406,6 +406,88 @@ export async function sendCompetitorAlertEmail(to: string, ownerName: string, op
   return send(to, `👁️ ${opts.competitorName} just updated — competitor alert`, html)
 }
 
+export async function sendAuditAlertEmail(to: string, name: string, opts: {
+  businessName: string
+  websiteUrl: string
+  auditScore: number
+  geoScore: number
+  criticalIssues: string[]
+  missingSearchItems: { label: string; title: string; body: string; url: string }[]
+}) {
+  const { businessName, websiteUrl, auditScore, geoScore, criticalIssues, missingSearchItems } = opts
+  const grade = auditScore >= 90 ? 'A' : auditScore >= 80 ? 'B' : auditScore >= 70 ? 'C' : auditScore >= 60 ? 'D' : 'F'
+  const scoreColor = auditScore >= 70 ? '#059669' : auditScore >= 50 ? '#d97706' : '#dc2626'
+
+  const taskRows = missingSearchItems.map(t => `
+    <tr>
+      <td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="flex-shrink:0;width:8px;height:8px;background:#ef4444;border-radius:50%;margin-top:5px;display:inline-block;"></span>
+          <div>
+            <p style="color:#0f172a;font-size:14px;font-weight:600;margin:0 0 3px;">${t.label}</p>
+            <p style="color:#64748b;font-size:13px;margin:0;line-height:1.5;">${t.body}</p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `).join('')
+
+  const issueRows = criticalIssues.map(i => `
+    <tr>
+      <td style="padding:8px 14px;border-bottom:1px solid #fef2f2;">
+        <span style="background:#fee2e2;color:#991b1b;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;margin-right:8px;">critical</span>
+        <span style="color:#374151;font-size:13px;">${i}</span>
+      </td>
+    </tr>
+  `).join('')
+
+  const html = baseLayout(`
+    ${h1(`Website Audit Complete — ${businessName}`)}
+    ${p(`Hi ${name}, we just ran a website audit on <strong>${websiteUrl}</strong>. Here's what we found:`)}
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+      <tr>
+        <td style="padding:16px;background:#f8fafc;border-radius:10px 0 0 10px;border:1px solid #e2e8f0;text-align:center;width:50%;">
+          <p style="color:#64748b;font-size:12px;margin:0 0 6px;">Audit Score</p>
+          <p style="color:${scoreColor};font-size:28px;font-weight:800;margin:0;">${auditScore}/100</p>
+          <p style="color:#94a3b8;font-size:11px;margin:4px 0 0;">Grade ${grade}</p>
+        </td>
+        <td style="padding:16px;background:#f8fafc;border-radius:0 10px 10px 0;border:1px solid #e2e8f0;border-left:none;text-align:center;width:50%;">
+          <p style="color:#64748b;font-size:12px;margin:0 0 6px;">GEO / AI Score</p>
+          <p style="color:${geoScore >= 70 ? '#059669' : '#d97706'};font-size:28px;font-weight:800;margin:0;">${geoScore}/100</p>
+          <p style="color:#94a3b8;font-size:11px;margin:4px 0 0;">AI Discoverability</p>
+        </td>
+      </tr>
+    </table>
+
+    ${missingSearchItems.length > 0 ? `
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;overflow:hidden;margin:20px 0;">
+      <div style="padding:14px 16px;background:#fff3e0;border-bottom:1px solid #fed7aa;">
+        <p style="color:#c2410c;font-size:13px;font-weight:700;margin:0;">⚠️ ${missingSearchItems.length} Search & Discovery Setup${missingSearchItems.length > 1 ? 's' : ''} Missing</p>
+        <p style="color:#9a3412;font-size:12px;margin:4px 0 0;">Fix these to improve visibility in Google, Bing, and AI search engines.</p>
+      </div>
+      <table width="100%" cellpadding="0" cellspacing="0">${taskRows}</table>
+    </div>
+    ` : `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;margin:20px 0;">
+      <p style="color:#166534;font-size:13px;font-weight:700;margin:0;">✅ All search presence checks passed!</p>
+    </div>`}
+
+    ${criticalIssues.length > 0 ? `
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;overflow:hidden;margin:20px 0;">
+      <div style="padding:12px 16px;background:#fee2e2;border-bottom:1px solid #fecaca;">
+        <p style="color:#991b1b;font-size:13px;font-weight:700;margin:0;">🔴 ${criticalIssues.length} Critical Issue${criticalIssues.length > 1 ? 's' : ''} Found</p>
+      </div>
+      <table width="100%" cellpadding="0" cellspacing="0">${issueRows}</table>
+    </div>
+    ` : ''}
+
+    ${p('Your CooVex agent has added these as pending tasks to your dashboard. Fix them to improve your GTM score.')}
+    ${btn('View Pending Tasks → GTM Dashboard', `${APP_URL}/gtm-agent`)}
+    <p style="color:#94a3b8;font-size:12px;margin-top:16px;text-align:center;">You receive these alerts after every audit. <a href="${APP_URL}/settings/notifications" style="color:#7c3aed;">Manage preferences</a></p>
+  `)
+  return send(to, `⚠️ Audit Complete: ${missingSearchItems.length} task${missingSearchItems.length !== 1 ? 's' : ''} pending — ${businessName}`, html)
+}
+
 export async function sendProposalEmail(opts: {
   to: string
   name: string

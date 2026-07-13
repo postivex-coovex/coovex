@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
             title: `[Audit] ${t.title}`,
             body: `Your website ${geoLow ? `GEO Score is ${geoScore}/100` : `Performance is ${perfScore}/100`}. Fix this to improve AI discoverability. Go to Audit → AI/GEO → Fix with AI.`,
             action_type: 'open_url',
-            action_url: '/audit',
+            action_data_json: { url: '/audit' },
             dismissed: false,
           }))
 

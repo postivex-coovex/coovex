@@ -96,6 +96,70 @@ export async function POST() {
           data: { overall: auditOverall, geo: auditGeo, seo: auditSeo, age_days: auditAgeDays, critical_issues: auditIssues },
         })
 
+        // ── Background: search presence + platform detection (runs alongside Steps 2–5) ──
+        const searchUrl = process.env.SEARCH_SERVICE_URL
+        const bizWebsite = biz.website_url?.startsWith('http') ? biz.website_url : biz.website_url ? `https://${biz.website_url}` : ''
+        const bizNameClean = (biz.name ?? '').replace(/['"]/g, '').trim()
+
+        const bgSearchPresence = (async () => {
+          if (!bizWebsite) return null
+          try {
+            const [homeRes, robotsRes] = await Promise.all([
+              fetch(bizWebsite, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CooVex/1.0)' } }).catch(() => null),
+              fetch(`${bizWebsite}/robots.txt`, { signal: AbortSignal.timeout(5000) }).catch(() => null),
+            ])
+            if (!homeRes?.ok) return null
+            const html = await homeRes.text()
+            const robots = robotsRes?.ok ? await robotsRes.text() : ''
+            const ga4Match = html.match(/['"`]G-[A-Z0-9]{4,12}['"`]/)
+            const gscMatch = html.match(/name=["']google-site-verification["'][^>]*content=["']([^"']+)["']/i) ?? html.match(/content=["']([^"']+)["'][^>]*name=["']google-site-verification["']/i)
+            const bingMatch = html.match(/name=["']msvalidate\.01["'][^>]*content=["']([^"']+)["']/i) ?? html.match(/content=["']([^"']+)["'][^>]*name=["']msvalidate\.01["']/i)
+            return {
+              ga4: !!ga4Match,
+              ga4_id: ga4Match?.[0]?.replace(/['"`]/g, '') ?? null,
+              gtm: /GTM-[A-Z0-9]{4,8}/.test(html),
+              gsc_verified: !!gscMatch,
+              gsc_verification_id: gscMatch?.[1]?.slice(0, 10) ?? null,
+              bing_verified: !!bingMatch,
+              bing_verification_id: bingMatch?.[1]?.slice(0, 10) ?? null,
+              sitemap_in_robots: /sitemap\s*:/i.test(robots),
+              indexnow_configured: /indexnow/i.test(robots),
+            }
+          } catch { return null }
+        })()
+
+        const DETECT_PLATFORMS = [
+          { id: 'product_hunt', domain: 'producthunt.com' },
+          { id: 'indie_hackers', domain: 'indiehackers.com' },
+          { id: 'g2', domain: 'g2.com' },
+          { id: 'capterra', domain: 'capterra.com' },
+          { id: 'linkedin', domain: 'linkedin.com/company' },
+          { id: 'crunchbase', domain: 'crunchbase.com' },
+          { id: 'betalist', domain: 'betalist.com' },
+          { id: 'hacker_news', domain: 'news.ycombinator.com' },
+        ]
+
+        const bgPlatformDetect = (async () => {
+          if (!searchUrl || !bizNameClean) return {}
+          const detected: Record<string, boolean> = {}
+          await Promise.allSettled(
+            DETECT_PLATFORMS.map(async p => {
+              try {
+                const u = new URL('/search', searchUrl)
+                u.searchParams.set('q', `site:${p.domain} "${bizNameClean}"`)
+                u.searchParams.set('format', 'json')
+                u.searchParams.set('categories', 'general')
+                const res = await fetch(u.toString(), { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) })
+                if (res.ok) {
+                  const data = await res.json()
+                  if ((data.results ?? []).length > 0) detected[p.id] = true
+                }
+              } catch {}
+            })
+          )
+          return detected
+        })()
+
         // ── Step 2: Lead Pipeline & ICP ────────────────────────────────────────
         send({ type: 'step', id: 'icp', status: 'running', label: 'Analyzing lead pipeline & building ICP' })
 
@@ -303,6 +367,34 @@ Return EXACTLY this JSON (no markdown):
         // ── Step 6: Save & Inbox ───────────────────────────────────────────────
         send({ type: 'step', id: 'inbox', status: 'running', label: 'Saving results to Agent Inbox' })
 
+        // Resolve background tasks
+        const [freshSearchPresence, detectedPlatforms] = await Promise.all([bgSearchPresence, bgPlatformDetect])
+
+        // Save fresh search presence to agent_memory
+        if (freshSearchPresence) {
+          await service.from('agent_memory').upsert(
+            { business_id: business.id, key: 'search_presence', value_text: JSON.stringify({ ...freshSearchPresence, checked_at: now.toISOString() }), updated_at: now.toISOString() },
+            { onConflict: 'business_id,key' },
+          )
+        }
+
+        // Save platform presence + auto-mark detected platforms in tracker
+        const detectedIds = Object.keys(detectedPlatforms)
+        if (detectedIds.length > 0) {
+          await service.from('agent_memory').upsert(
+            { business_id: business.id, key: 'platform_presence', value_text: JSON.stringify({ detected: detectedPlatforms, checked_at: now.toISOString() }), updated_at: now.toISOString() },
+            { onConflict: 'business_id,key' },
+          )
+          await Promise.allSettled(
+            detectedIds.map(platformId =>
+              service.from('launch_tracker_platforms').upsert(
+                { workspace_id: profile.current_workspace_id, business_id: business.id, platform_id: platformId, status: 'live', updated_at: now.toISOString() },
+                { onConflict: 'business_id,platform_id' },
+              )
+            )
+          )
+        }
+
         const inboxBody = [
           `🔍 Audit: ${auditOverall}/100 overall · GEO ${auditGeo ?? 'N/A'}/100${auditAgeDays > 7 ? ' (⚠️ audit is ' + auditAgeDays + ' days old)' : ''}`,
           `👥 ${hotLeadsAfter ?? hotLeads ?? 0} hot leads · ${newLeads ?? 0} new this week · ${discoveredCount} found by AI Finder (${savedLeadsCount} added to pipeline)`,
@@ -318,7 +410,7 @@ Return EXACTLY this JSON (no markdown):
           title: '🚀 GTM Autopilot Complete',
           body: inboxBody,
           action_label: 'View GTM Dashboard',
-          action_url: '/gtm-agent',
+          action_data_json: { url: '/gtm-agent' },
         })
 
         const runRecord = {

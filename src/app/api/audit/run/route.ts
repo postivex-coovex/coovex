@@ -701,7 +701,8 @@ export async function POST(request: NextRequest) {
     const grade = scores.overall >= 90 ? 'A' : scores.overall >= 80 ? 'B' : scores.overall >= 70 ? 'C' : scores.overall >= 60 ? 'D' : 'F'
     const signalType = criticalCount > 0 ? 'warning' : scores.overall >= 70 ? 'done' : 'opportunity'
 
-    const signalsToInsert = [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const signalsToInsert: any[] = [
       {
         business_id: business.id,
         type: signalType,
@@ -798,15 +799,55 @@ export async function POST(request: NextRequest) {
       recommendations.push(blog.recommendation || 'Publish 2+ blog posts per week using Content Generator to build SEO authority and AI discoverability.')
     }
 
+    // ── Search Presence task signals ─────────────────────────────────────────
+    const sp = geo.search_presence as SearchPresence
+    const searchPresenceTasks: { label: string; title: string; body: string; url: string }[] = []
+
+    if (!sp.ga4 && !sp.gtm) {
+      const t = { label: 'Google Analytics 4', title: '📊 Install Google Analytics 4 (GA4)', body: 'No GA4 tracking detected on your website. GA4 lets you measure traffic, user behavior, and marketing ROI. Install the tracking snippet in your site header.', url: 'https://analytics.google.com' }
+      searchPresenceTasks.push(t)
+      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_label: 'Set Up GA4', action_data_json: { url: t.url }, dismissed: false })
+    }
+    if (!sp.gsc_verified) {
+      const t = { label: 'Google Search Console', title: '🔍 Verify Google Search Console', body: 'Your site is not verified in Google Search Console. GSC lets Google discover your content faster, shows indexing errors, and displays keyword rankings.', url: 'https://search.google.com/search-console' }
+      searchPresenceTasks.push(t)
+      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_label: 'Open GSC', action_data_json: { url: t.url }, dismissed: false })
+    }
+    if (!sp.bing_verified) {
+      const t = { label: 'Bing Webmaster Tools', title: '🔎 Set Up Bing Webmaster Tools', body: 'Bing/Copilot powers 15–20% of searches and all Microsoft AI products. Add BingSiteAuth.xml or the verification meta tag to get indexed.', url: 'https://www.bing.com/webmasters' }
+      searchPresenceTasks.push(t)
+      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_label: 'Open Bing Webmaster', action_data_json: { url: t.url }, dismissed: false })
+    }
+    if (!sp.indexnow_configured) {
+      const t = { label: 'IndexNow', title: '⚡ Enable IndexNow Auto-Indexing', body: 'IndexNow instantly notifies Bing, Yandex, and Seznam when you publish new content — no waiting weeks for crawlers. Add the key file and reference it in robots.txt.', url: '/audit' }
+      searchPresenceTasks.push(t)
+      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_label: 'See Instructions', action_data_json: { url: t.url }, dismissed: false })
+    }
+
     // Dismiss all previous audit signals before inserting new ones
     await supabase
       .from('agent_signals')
       .update({ dismissed: true })
       .eq('business_id', business.id)
       .eq('dismissed', false)
-      .or('title.ilike.Website Audit Complete%,title.ilike.GEO:%,title.ilike.Add %,title.ilike.Audit complete%,title.ilike.[Blog]%')
+      .or('title.ilike.Website Audit Complete%,title.ilike.GEO:%,title.ilike.Add %,title.ilike.Audit complete%,title.ilike.[Blog]%,title.ilike.📊 Install%,title.ilike.🔍 Verify%,title.ilike.🔎 Set Up Bing%,title.ilike.⚡ Enable IndexNow%')
 
     await supabase.from('agent_signals').insert(signalsToInsert)
+
+    // Send audit alert email (non-blocking)
+    if (user.email) {
+      const { data: ownerProfile } = await supabase.from('profiles').select('full_name, display_name').eq('id', user.id).maybeSingle()
+      const ownerName = (ownerProfile as { full_name?: string; display_name?: string } | null)?.display_name || (ownerProfile as { full_name?: string; display_name?: string } | null)?.full_name || 'there'
+      const { sendAuditAlertEmail } = await import('@/lib/email')
+      sendAuditAlertEmail(user.email, ownerName, {
+        businessName: (business as { name?: string }).name ?? url,
+        websiteUrl: url,
+        auditScore: scores.overall,
+        geoScore: geo.geo_score,
+        criticalIssues: (issues || []).filter((i: AuditIssue) => i.severity === 'critical').slice(0, 3).map((i: AuditIssue) => i.title),
+        missingSearchItems: searchPresenceTasks,
+      }).catch(() => {})
+    }
 
     // Emit orchestration event so engine can react (update memory, create tasks, etc.)
     const { data: prof } = await supabase.from('profiles').select('current_workspace_id').eq('id', user.id).single()

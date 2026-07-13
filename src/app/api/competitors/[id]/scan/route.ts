@@ -242,7 +242,7 @@ Based on this analysis, provide a comprehensive intelligence report. Respond ONL
       title:         `Competitor scan: ${competitor.name}`,
       body:          `Intelligence score: ${analysis.intelligence_score}/100 · Threat: ${analysis.threat_level} · Found ${allInsights.length} insights`,
       action_label:  'View Competitors',
-      action_url:    '/competitors',
+      action_data_json: { url: '/competitors' },
     })
 
     const { data: updated } = await supabase.from('competitors').select('*').eq('id', id).single()
