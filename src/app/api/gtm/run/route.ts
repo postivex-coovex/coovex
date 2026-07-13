@@ -410,6 +410,7 @@ Return EXACTLY this JSON (no markdown):
           title: '🚀 GTM Autopilot Complete',
           body: inboxBody,
           action_label: 'View GTM Dashboard',
+          action_type: 'open_url',
           action_data_json: { url: '/gtm-agent' },
         })
 

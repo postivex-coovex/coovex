@@ -806,22 +806,22 @@ export async function POST(request: NextRequest) {
     if (!sp.ga4 && !sp.gtm) {
       const t = { label: 'Google Analytics 4', title: '📊 Install Google Analytics 4 (GA4)', body: 'No GA4 tracking detected on your website. GA4 lets you measure traffic, user behavior, and marketing ROI. Install the tracking snippet in your site header.', url: 'https://analytics.google.com' }
       searchPresenceTasks.push(t)
-      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_label: 'Set Up GA4', action_data_json: { url: t.url }, dismissed: false })
+      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_type: 'open_url', action_label: 'Set Up GA4', action_data_json: { url: t.url }, dismissed: false })
     }
     if (!sp.gsc_verified) {
       const t = { label: 'Google Search Console', title: '🔍 Verify Google Search Console', body: 'Your site is not verified in Google Search Console. GSC lets Google discover your content faster, shows indexing errors, and displays keyword rankings.', url: 'https://search.google.com/search-console' }
       searchPresenceTasks.push(t)
-      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_label: 'Open GSC', action_data_json: { url: t.url }, dismissed: false })
+      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_type: 'open_url', action_label: 'Open GSC', action_data_json: { url: t.url }, dismissed: false })
     }
     if (!sp.bing_verified) {
       const t = { label: 'Bing Webmaster Tools', title: '🔎 Set Up Bing Webmaster Tools', body: 'Bing/Copilot powers 15–20% of searches and all Microsoft AI products. Add BingSiteAuth.xml or the verification meta tag to get indexed.', url: 'https://www.bing.com/webmasters' }
       searchPresenceTasks.push(t)
-      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_label: 'Open Bing Webmaster', action_data_json: { url: t.url }, dismissed: false })
+      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_type: 'open_url', action_label: 'Open Bing Webmaster', action_data_json: { url: t.url }, dismissed: false })
     }
     if (!sp.indexnow_configured) {
       const t = { label: 'IndexNow', title: '⚡ Enable IndexNow Auto-Indexing', body: 'IndexNow instantly notifies Bing, Yandex, and Seznam when you publish new content — no waiting weeks for crawlers. Add the key file and reference it in robots.txt.', url: '/audit' }
       searchPresenceTasks.push(t)
-      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_label: 'See Instructions', action_data_json: { url: t.url }, dismissed: false })
+      signalsToInsert.push({ business_id: business.id, type: 'task', title: t.title, body: t.body, action_type: 'open_url', action_label: 'See Instructions', action_data_json: { url: t.url }, dismissed: false })
     }
 
     // Dismiss all previous audit signals before inserting new ones
