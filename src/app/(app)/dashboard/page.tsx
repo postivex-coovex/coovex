@@ -6,7 +6,6 @@ import { DailyBriefCard } from '@/components/dashboard/daily-brief-card'
 import { QuickStatsBar } from '@/components/dashboard/quick-stats-bar'
 import { SetupGuide } from '@/components/dashboard/setup-guide'
 import { SmartActionsPanel } from './smart-actions-panel'
-import { QuickActions } from './quick-actions'
 import { PromotionAuditPanel } from './promotion-audit-panel'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -142,7 +141,6 @@ export default async function DashboardPage() {
       <SetupGuide steps={setupSteps} userName={profile?.name || ''} />
       <DailyBriefCard businessName={business.name} userName={profile?.name || ''} />
       <QuickStatsBar business={business} stats={liveStats} />
-      <QuickActions />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           <SmartActionsPanel />

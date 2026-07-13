@@ -43,9 +43,10 @@ export function SmartActionsPanel() {
   const [actions, setActions]       = useState<ActionItem[]>([])
   const [contextDB, setContextDB]   = useState<ContextDB | null>(null)
   const [loading, setLoading]       = useState(true)
-  const [expanded, setExpanded]     = useState<string | null>(null)
-  const [showAll, setShowAll]       = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
+  const [expanded, setExpanded]      = useState<string | null>(null)
+  const [showAll, setShowAll]        = useState(false)
+  const [refreshing, setRefreshing]  = useState(false)
+  const [actionsOpen, setActionsOpen] = useState(false)
 
   useEffect(() => {
     fetch('/api/agent/smart-actions')
@@ -85,83 +86,87 @@ export function SmartActionsPanel() {
 
   return (
     <div className="space-y-4">
-      {/* Action Cards */}
+      {/* Setup Actions — collapsed by default */}
       {pending.length > 0 && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-            <div>
-              <h2 className="text-white font-semibold text-sm flex items-center gap-2">
-                ⚡ Setup Actions
-                <span className="text-xs font-normal px-2 py-0.5 bg-amber-100 text-amber-700 border border-amber-300 rounded-full">
-                  {pending.length} pending
-                </span>
-              </h2>
-              <p className="text-slate-500 text-xs mt-0.5">Connect these to unlock accurate AI insights</p>
-            </div>
-            <button onClick={refresh} disabled={refreshing}
-              className="text-slate-600 hover:text-slate-400 text-xs transition-colors disabled:opacity-50">
-              {refreshing ? '↻ Refreshing…' : '↻ Refresh'}
-            </button>
-          </div>
+          <button
+            onClick={() => setActionsOpen(v => !v)}
+            className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-slate-800/40 transition-colors"
+          >
+            <span className="text-sm font-medium text-slate-300 flex items-center gap-2">
+              ⚡ Setup Actions
+              <span className="text-xs font-normal px-2 py-0.5 bg-slate-800 text-slate-400 rounded-full border border-slate-700">
+                {pending.length} remaining
+              </span>
+            </span>
+            <span className="text-slate-600 text-xs">{actionsOpen ? '▲' : '▼'}</span>
+          </button>
 
-          <div className="divide-y divide-slate-800/50">
-            {shown.map(action => {
-              const pm = PRIORITY_META[action.priority]
-              const isOpen = expanded === action.id
-              return (
-                <div key={action.id} className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="text-xl shrink-0 mt-0.5">{action.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <p className="text-white text-sm font-medium">{action.title}</p>
-                        <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${pm.cls}`}>
-                          {pm.label}
-                        </span>
-                      </div>
-                      <p className="text-slate-400 text-xs leading-relaxed">{action.why}</p>
-
-                      {/* Expandable details */}
-                      {isOpen && (
-                        <div className="mt-3 space-y-3">
-                          <div className="bg-slate-800/50 rounded-lg p-3">
-                            <p className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold mb-1.5">What AI can do once connected</p>
-                            <div className="grid grid-cols-2 gap-1">
-                              {action.data_unlocked.map((item, i) => (
-                                <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-300">
-                                  <span className="text-violet-400">✓</span> {item}
-                                </div>
-                              ))}
-                            </div>
+          {actionsOpen && (
+            <>
+              <div className="border-t border-slate-800 divide-y divide-slate-800/50">
+                {shown.map(action => {
+                  const pm = PRIORITY_META[action.priority]
+                  const isOpen = expanded === action.id
+                  return (
+                    <div key={action.id} className="p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-xl shrink-0 mt-0.5">{action.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <p className="text-white text-sm font-medium">{action.title}</p>
+                            <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${pm.cls}`}>
+                              {pm.label}
+                            </span>
                           </div>
-                          <p className="text-emerald-400 text-xs">{action.benefit}</p>
-                        </div>
-                      )}
+                          <p className="text-slate-400 text-xs leading-relaxed">{action.why}</p>
 
-                      <div className="flex items-center gap-3 mt-2">
-                        <button onClick={() => setExpanded(isOpen ? null : action.id)}
-                          className="text-slate-600 hover:text-slate-400 text-[11px] transition-colors">
-                          {isOpen ? '↑ Less' : '↓ Why this matters'}
-                        </button>
-                        <Link href={action.link}
-                          className="text-[11px] font-medium text-violet-400 hover:text-violet-300 transition-colors">
-                          Connect →
-                        </Link>
+                          {isOpen && (
+                            <div className="mt-3 space-y-3">
+                              <div className="bg-slate-800/50 rounded-lg p-3">
+                                <p className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold mb-1.5">What AI can do once connected</p>
+                                <div className="grid grid-cols-2 gap-1">
+                                  {action.data_unlocked.map((item, i) => (
+                                    <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-300">
+                                      <span className="text-violet-400">✓</span> {item}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              <p className="text-emerald-400 text-xs">{action.benefit}</p>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-3 mt-2">
+                            <button onClick={() => setExpanded(isOpen ? null : action.id)}
+                              className="text-slate-600 hover:text-slate-400 text-[11px] transition-colors">
+                              {isOpen ? '↑ Less' : '↓ Why this matters'}
+                            </button>
+                            <Link href={action.link}
+                              className="text-[11px] font-medium text-violet-400 hover:text-violet-300 transition-colors">
+                              Connect →
+                            </Link>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                  )
+                })}
+              </div>
 
-          {pending.length > 3 && (
-            <div className="px-5 py-3 border-t border-slate-800">
-              <button onClick={() => setShowAll(v => !v)}
-                className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
-                {showAll ? '↑ Show less' : `↓ Show ${pending.length - 3} more actions`}
-              </button>
-            </div>
+              {pending.length > 3 && (
+                <div className="px-5 py-3 border-t border-slate-800 flex items-center justify-between">
+                  <button onClick={() => setShowAll(v => !v)}
+                    className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
+                    {showAll ? '↑ Show less' : `↓ Show ${pending.length - 3} more`}
+                  </button>
+                  <button onClick={refresh} disabled={refreshing}
+                    className="text-slate-600 hover:text-slate-400 text-xs transition-colors disabled:opacity-50">
+                    {refreshing ? '↻ Refreshing…' : '↻ Refresh'}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
