@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 type ReviewPlatform = 'google' | 'trustpilot' | 'g2' | 'capterra' | 'facebook' | 'tripadvisor'
 type ReviewStatus = 'new' | 'responded' | 'flagged' | 'ignored'
@@ -286,9 +287,9 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
           <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
             + Add Manually
           </button>
-          <a href="/integrations" className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+          <Link href="/integrations" className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
             + Connect Platform
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -301,7 +302,7 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
         }`}>
           {syncMsg.text}
           {syncMsg.type === 'warn' && (
-            <a href="/integrations/google_mybusiness" className="ml-2 underline hover:no-underline">Configure →</a>
+            <Link href="/integrations/google_mybusiness" className="ml-2 underline hover:no-underline">Configure →</Link>
           )}
         </div>
       )}
@@ -316,10 +317,10 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
               <p className="text-slate-500 text-xs mt-0.5">Auto-sync Google reviews — click "Sync Google" after connecting.</p>
             </div>
           </div>
-          <a href="/integrations/google_mybusiness"
+          <Link href="/integrations/google_mybusiness"
             className="flex-shrink-0 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
             Connect →
-          </a>
+          </Link>
         </div>
       )}
 
@@ -348,9 +349,9 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
           <p className="text-slate-400 text-sm max-w-sm mx-auto mb-6">
             Connect Google Business Profile, Trustpilot, or other review platforms to see and respond to reviews here.
           </p>
-          <a href="/integrations" className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+          <Link href="/integrations" className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
             Connect Review Platform
-          </a>
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

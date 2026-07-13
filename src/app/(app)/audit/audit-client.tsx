@@ -222,7 +222,7 @@ export default function AuditClient({ audits: initialAudits, websiteUrl, busines
   const logRef = useRef<HTMLDivElement>(null)
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const startRef = useRef<number>(0)
-  let logId = useRef(0)
+  const logId = useRef(0)
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight

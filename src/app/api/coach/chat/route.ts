@@ -198,7 +198,7 @@ After using a tool, give a brief human-readable summary of what you did. Keep re
     ]
 
     let actionUrl: string | null = null
-    let toolResults: Array<{ tool: string; result: unknown }> = []
+    const toolResults: Array<{ tool: string; result: unknown }> = []
 
     // Agentic loop — handle tool calls
     const response = await client.messages.create({
