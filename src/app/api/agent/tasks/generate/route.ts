@@ -1,18 +1,19 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { readBusinessContext } from '@/lib/agent/sync-memory'
-import Anthropic from '@anthropic-ai/sdk'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export async function POST() {
   const supabase = await createClient()
+  const service  = createServiceClient()
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await supabase
     .from('profiles').select('current_workspace_id').eq('id', user.id).single()
   const { data: business } = await supabase
-    .from('businesses').select('id, name, industry, health_score, target_customer')
-    .eq('workspace_id', profile?.current_workspace_id).maybeSingle()
+    .from('businesses').select('id, name, industry, health_score')
+    .eq('workspace_id', profile?.current_workspace_id ?? '').maybeSingle()
   if (!business) return NextResponse.json({ error: 'No business' }, { status: 400 })
 
   const today = new Date().toISOString().split('T')[0]
@@ -24,115 +25,195 @@ export async function POST() {
     return NextResponse.json({ tasks: existing })
   }
 
-  // Read from agent_memory — full business context
-  const ctx = await readBusinessContext(business.id)
+  // ── Fetch real data from 3 sources in parallel ──────────────────────────────
+  const [
+    { data: latestAudit },
+    { data: pendingSignals },
+    { data: draftPosts },
+    { data: gtmMem },
+    { data: geoMem },
+  ] = await Promise.all([
+    supabase.from('audits')
+      .select('score, report_json, created_at')
+      .eq('business_id', business.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase.from('agent_signals')
+      .select('id, type, title, body, action_data_json')
+      .eq('business_id', business.id)
+      .eq('dismissed', false)
+      .in('type', ['task', 'opportunity', 'warning'])
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase.from('posts')
+      .select('id, title, type, platform')
+      .eq('business_id', business.id)
+      .in('status', ['draft', 'scheduled'])
+      .order('created_at', { ascending: false })
+      .limit(3),
+    service.from('agent_memory')
+      .select('value_text, updated_at')
+      .eq('business_id', business.id)
+      .eq('key', 'gtm_last_run')
+      .maybeSingle(),
+    service.from('agent_memory')
+      .select('value_text')
+      .eq('business_id', business.id)
+      .eq('key', 'geo_intelligence')
+      .maybeSingle(),
+  ])
 
-  // Build rich context string from memory
-  let contextString: string
-  if (ctx) {
-    const lines = [
-      `Business: ${ctx.business.name} (${ctx.business.industry}, ${ctx.business.target_customer})`,
-      `Health Score: ${ctx.business.health_score}/100`,
-      `Description: ${ctx.business.description || '—'}`,
-      '',
-      `LEADS: ${ctx.leads.total} total | ${ctx.leads.new_7d} new this week | ${ctx.leads.hot_count} hot (score 70+)`,
-      ctx.leads.hot_count > 0
-        ? `Hot leads: ${ctx.leads.hot_leads.map((l: { name: string; stage: string; score: number }) => `${l.name} (${l.stage}, score ${l.score})`).join(', ')}`
-        : '',
-      `Lead stages: ${Object.entries(ctx.leads.by_stage).map(([s, n]) => `${s}:${n}`).join(', ') || 'none'}`,
-      '',
-      `REVIEWS: ${ctx.reviews.total} total | Avg ${ctx.reviews.avg_rating ?? '—'}/5 | ${ctx.reviews.unanswered} unanswered | ${ctx.reviews.negative_unanswered} negative unanswered`,
-      '',
-      ctx.audit
-        ? `AUDIT: Score ${ctx.audit.latest_score}/100 (${ctx.audit.grade}). Critical issues: ${ctx.audit.critical_issues.join('; ') || 'none'}. Wins: ${ctx.audit.wins.join('; ') || 'none'}`
-        : 'AUDIT: Not run yet',
-      '',
-      `PIPELINE: ${ctx.pipeline.open_deals} open deals | $${ctx.pipeline.total_value.toLocaleString()} total value`,
-      '',
-      `CONTENT (30d): ${ctx.content.published_30d} published | ${ctx.content.drafts_pending} drafts pending | Channels: ${ctx.content.channels_active.join(', ') || 'none'}`,
-      '',
-      ctx.products.active.length > 0
-        ? `PRODUCTS: ${ctx.products.active.map((p: { name: string; type: string }) => `${p.name} (${p.type})`).join(', ')}`
-        : 'PRODUCTS: None added yet',
-      '',
-      `INTEGRATIONS: Connected: ${ctx.integrations.connected.join(', ') || 'none'}`,
-      ctx.integrations.disconnected.length > 0
-        ? `Disconnected (needs setup): ${ctx.integrations.disconnected.slice(0, 5).join(', ')}`
-        : '',
-      '',
-      ctx.tasks.completion_rate_7d !== null
-        ? `TASK HISTORY (7d): ${ctx.tasks.completed_7d}/${ctx.tasks.total_7d} completed (${ctx.tasks.completion_rate_7d}% rate)`
-        : '',
-      ctx.competitors.length > 0
-        ? `COMPETITORS: ${ctx.competitors.map((c: { name: string }) => c.name).join(', ')}`
-        : '',
-    ].filter(Boolean).join('\n')
-    contextString = lines
-  } else {
-    // Fallback if memory not yet synced — read minimal data
-    const [{ data: signals }, { data: leads }, { data: reviews }] = await Promise.all([
-      supabase.from('agent_signals').select('type, title').eq('business_id', business.id).eq('dismissed', false).limit(5),
-      supabase.from('leads').select('name, stage, score').eq('business_id', business.id).order('score', { ascending: false }).limit(5),
-      supabase.from('reviews').select('rating, status').eq('business_id', business.id).eq('status', 'new').limit(5),
-    ])
-    contextString = [
-      `Business: ${business.name} (${business.industry})`,
-      `Health Score: ${business.health_score}/100`,
-      signals?.length ? `Pending signals: ${signals.map(s => s.title).join(', ')}` : '',
-      leads?.length ? `Top leads: ${leads.map(l => `${l.name} (${l.stage}, score ${l.score})`).join(', ')}` : '',
-      reviews?.length ? `${reviews.length} new unanswered review(s)` : '',
-    ].filter(Boolean).join('\n')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const auditReport = latestAudit?.report_json as any
+  const criticalIssues: Array<{ title: string }> = (auditReport?.issues ?? []).filter(
+    (i: { severity: string }) => i.severity === 'critical'
+  ).slice(0, 2)
+
+  const gtmLastRunAt = gtmMem?.updated_at ? new Date(gtmMem.updated_at) : null
+  const gtmDaysAgo = gtmLastRunAt
+    ? Math.floor((Date.now() - gtmLastRunAt.getTime()) / 86400000)
+    : null
+
+  let geoGaps: string[] = []
+  if (geoMem?.value_text) {
+    try {
+      const geo = JSON.parse(geoMem.value_text)
+      geoGaps = (geo.content_gaps ?? [])
+        .filter((g: { impact: string }) => g.impact === 'high')
+        .slice(0, 3)
+        .map((g: { suggestion?: string; type: string }) => g.suggestion || g.type)
+    } catch {}
   }
 
-  const FALLBACK_TASKS = [
-    { id: '1', title: 'Follow up with your 3 hottest leads from last week', completed: false, priority: 'critical' },
-    { id: '2', title: 'Respond to any unanswered reviews on Google', completed: false, priority: 'high' },
-    { id: '3', title: 'Review and approve the AI-generated content drafts', completed: false, priority: 'high' },
-    { id: '4', title: 'Check your website audit score and fix the top critical issue', completed: false, priority: 'medium' },
-    { id: '5', title: 'Update your business description to include your latest offer', completed: false, priority: 'low' },
-  ]
+  // ── Build 3 tasks deterministically ─────────────────────────────────────────
 
-  let tasks = FALLBACK_TASKS
-
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (apiKey) {
-    try {
-      const client = new Anthropic({ apiKey })
-      const msg = await client.messages.create({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 700,
-        messages: [{
-          role: 'user',
-          content: `You are an AI business agent. Generate exactly 5 high-impact, SPECIFIC daily tasks for today based on the REAL business data below. Each task must be directly tied to a real issue or opportunity in the data — not generic advice. Completable in under 30 minutes.
-
-BUSINESS DATA (from AI agent memory):
-${contextString}
-
-Rules:
-- Reference real numbers and names from the data (e.g. "Follow up with John Smith — score 85, still in 'qualified'")
-- If there are negative unanswered reviews, one task must address that
-- If audit has critical issues, one task must address the #1 issue
-- If hot leads exist, one task must be about them specifically
-- If draft content exists, include approving it
-- Be specific — NOT generic like "improve marketing"
-- Assign priority: "critical" (revenue/reputation at risk, must do today), "high" (important, strong impact), "medium" (useful, do if time allows), "low" (nice to have)
-- At most 1 "critical", at most 2 "high", rest "medium" or "low"
-
-Return ONLY a JSON array:
-[{"id":"1","title":"...","priority":"critical"},{"id":"2","title":"...","priority":"high"},{"id":"3","title":"...","priority":"high"},{"id":"4","title":"...","priority":"medium"},{"id":"5","title":"...","priority":"low"}]`,
-        }],
-      })
-
-      const text = msg.content[0].type === 'text' ? msg.content[0].text : ''
-      const match = text.match(/\[[\s\S]*\]/)
-      if (match) {
-        const parsed: Array<{ id: string; title: string; priority?: string }> = JSON.parse(match[0])
-        tasks = parsed.slice(0, 5).map(t => ({ ...t, completed: false, priority: t.priority ?? 'medium' }))
-      }
-    } catch {
-      // use fallback tasks
+  // TASK 1 — AUDIT
+  let task1: Record<string, unknown>
+  if (!latestAudit) {
+    task1 = {
+      id: 'audit-run',
+      title: 'Run your Website Audit',
+      description: 'AI scans your site for SEO, GEO, and performance issues. Takes 30 seconds, costs 10 credits.',
+      source: 'audit',
+      priority: 'critical',
+      action_type: 'link',
+      action_data: { url: '/audit' },
+      completed: false,
+    }
+  } else if (criticalIssues.length > 0) {
+    task1 = {
+      id: 'audit-fix',
+      title: `Fix: ${criticalIssues[0].title}`,
+      description: criticalIssues.length > 1
+        ? `+${criticalIssues.length - 1} more critical issues in your audit`
+        : 'Critical issue found in your website audit',
+      source: 'audit',
+      priority: 'high',
+      action_type: 'link',
+      action_data: { url: '/audit' },
+      completed: false,
+    }
+  } else {
+    const auditAgeDays = latestAudit?.created_at
+      ? Math.floor((Date.now() - new Date(latestAudit.created_at).getTime()) / 86400000)
+      : 0
+    task1 = {
+      id: 'audit-refresh',
+      title: auditAgeDays > 14
+        ? 'Refresh your website audit (14 days old)'
+        : `Audit score: ${latestAudit.score}/100 — check recommendations`,
+      description: `Your website health score is ${latestAudit.score}/100. Review any open recommendations.`,
+      source: 'audit',
+      priority: 'medium',
+      action_type: 'link',
+      action_data: { url: '/audit' },
+      completed: false,
     }
   }
+
+  // TASK 2 — GTM / AGENT
+  let task2: Record<string, unknown>
+  const topSignal = pendingSignals?.[0]
+  if (topSignal) {
+    const signalUrl = (topSignal.action_data_json as Record<string, string> | null)?.url ?? '/agent/inbox'
+    task2 = {
+      id: `signal-${topSignal.id}`,
+      title: topSignal.title,
+      description: topSignal.body?.slice(0, 100) ?? '',
+      source: 'gtm',
+      priority: 'high',
+      action_type: 'link',
+      action_data: { url: signalUrl },
+      completed: false,
+    }
+  } else if (gtmDaysAgo === null || gtmDaysAgo > 7) {
+    task2 = {
+      id: 'gtm-run',
+      title: gtmDaysAgo === null
+        ? 'Run GTM Autopilot — find leads + check AI visibility'
+        : `Run GTM Autopilot — ${gtmDaysAgo} days since last run`,
+      description: 'One click: AI finds leads, checks Gemini visibility, and gives you 3 action items. 30 credits.',
+      source: 'gtm',
+      priority: 'high',
+      action_type: 'link',
+      action_data: { url: '/gtm-agent' },
+      completed: false,
+    }
+  } else {
+    task2 = {
+      id: 'gtm-inbox',
+      title: 'Review Agent Inbox for new opportunities',
+      description: 'Check what your AI agent discovered and take action on open signals.',
+      source: 'gtm',
+      priority: 'medium',
+      action_type: 'link',
+      action_data: { url: '/agent/inbox' },
+      completed: false,
+    }
+  }
+
+  // TASK 3 — CONTENT
+  let task3: Record<string, unknown>
+  const topDraft = draftPosts?.[0]
+  if (topDraft) {
+    const platform = topDraft.platform ?? topDraft.type ?? 'Blog'
+    const displayPlatform = String(platform).charAt(0).toUpperCase() + String(platform).slice(1)
+    task3 = {
+      id: `publish-${topDraft.id}`,
+      title: `Publish "${topDraft.title?.slice(0, 45) ?? 'your draft'}" to ${displayPlatform}`,
+      description: `You have ${draftPosts!.length} draft${draftPosts!.length > 1 ? 's' : ''} ready. Publish today to stay consistent.`,
+      source: 'content',
+      priority: 'medium',
+      action_type: 'link',
+      action_data: { url: '/content' },
+      completed: false,
+    }
+  } else if (geoGaps.length > 0) {
+    task3 = {
+      id: 'content-geo',
+      title: `Write: ${geoGaps[0]}`,
+      description: 'This topic has high GEO impact — publishing it will boost your Gemini AI visibility.',
+      source: 'content',
+      priority: 'medium',
+      action_type: 'link',
+      action_data: { url: '/content/ideas' },
+      completed: false,
+    }
+  } else {
+    task3 = {
+      id: 'content-create',
+      title: 'Create one piece of content today',
+      description: 'Consistent content builds GEO authority and keeps your audience engaged.',
+      source: 'content',
+      priority: 'low',
+      action_type: 'link',
+      action_data: { url: '/content' },
+      completed: false,
+    }
+  }
+
+  const tasks = [task1, task2, task3]
 
   const { data: row, error } = await supabase
     .from('daily_tasks')
@@ -140,7 +221,7 @@ Return ONLY a JSON array:
       business_id: business.id,
       date: today,
       tasks_json: tasks,
-      total_count: tasks.length,
+      total_count: 3,
       completed_count: 0,
     }, { onConflict: 'business_id,date' })
     .select().single()
