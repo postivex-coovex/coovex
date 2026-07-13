@@ -657,7 +657,6 @@ function ScrapeLog({ loading, keyword, country, city, found }: {
 
   useEffect(() => {
     if (!loading) return
-    setEntries([])
     const steps = [
       { delay: 0,     icon: '🔌', text: 'Starting Lead AI Engine...' },
       { delay: 1000,  icon: '🔎', text: `Searching for "${keyword}" in ${loc}...` },
@@ -669,7 +668,8 @@ function ScrapeLog({ loading, keyword, country, city, found }: {
       setTimeout(() => {
         const t = ts()
         setEntries(prev => {
-          const updated = prev.map((e, idx) => idx === prev.length - 1 ? { ...e, done: true } : e)
+          const base = i === 0 ? [] : prev
+          const updated = base.map((e: LogEntry, idx: number) => idx === base.length - 1 ? { ...e, done: true } : e)
           return [...updated, { icon, text, done: i === steps.length - 1, time: t }]
         })
       }, delay)
@@ -680,17 +680,18 @@ function ScrapeLog({ loading, keyword, country, city, found }: {
   useEffect(() => {
     if (loading || entries.length === 0) return
     const t = ts()
-    setEntries(prev => [
-      ...prev.map(e => ({ ...e, done: true })),
-      {
-        icon: found > 0 ? '✅' : '🔍',
-        text: found > 0 ? `Done! Found ${found} new leads` : 'No new leads found for this combination.',
-        done: true,
-        time: t,
-      },
-    ])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading])
+    setTimeout(() => {
+      setEntries(prev => [
+        ...prev.map(e => ({ ...e, done: true })),
+        {
+          icon: found > 0 ? '✅' : '🔍',
+          text: found > 0 ? `Done! Found ${found} new leads` : 'No new leads found for this combination.',
+          done: true,
+          time: t,
+        },
+      ])
+    }, 0)
+  }, [loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (entries.length === 0) return null
 

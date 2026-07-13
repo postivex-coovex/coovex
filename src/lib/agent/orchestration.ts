@@ -73,7 +73,6 @@ async function createSignal(
     : { type: 'create_signal', status: 'ok', detail: signal.title }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function safeStr(v: unknown, fallback = '—'): string {
   return typeof v === 'string' ? v : fallback
 }
