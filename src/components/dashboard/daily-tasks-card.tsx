@@ -12,15 +12,15 @@ interface Task {
   description?: string
   source?: 'audit' | 'gtm' | 'content'
   priority?: 'critical' | 'high' | 'medium' | 'low'
-  action_data?: { url?: string }
+  action_data?: { url?: string; tool?: string }
   completed: boolean
   auto_completed?: boolean
 }
 
 const SOURCE_META = {
-  audit:   { label: '🔍 Audit',   color: 'text-blue-400 bg-blue-950/40 border-blue-800/40' },
-  gtm:     { label: '🚀 GTM',     color: 'text-violet-400 bg-violet-950/40 border-violet-800/40' },
-  content: { label: '✍️ Content', color: 'text-amber-400 bg-amber-950/40 border-amber-800/40' },
+  audit:   { label: '🔍 Audit',   color: 'text-blue-400 bg-blue-950/40 border-blue-800/40',   defaultTool: 'Website Audit' },
+  gtm:     { label: '🚀 GTM',     color: 'text-violet-400 bg-violet-950/40 border-violet-800/40', defaultTool: 'GTM Autopilot' },
+  content: { label: '✍️ Content', color: 'text-amber-400 bg-amber-950/40 border-amber-800/40',  defaultTool: 'Content' },
 }
 
 const STREAK_LABEL = (n: number) => {
@@ -157,52 +157,55 @@ export function DailyTasksCard({ tasks, businessId, initialStreak = 0 }: DailyTa
             {taskList.map(task => {
               const src = SOURCE_META[task.source ?? 'gtm']
               const link = task.action_data?.url
+              const toolName = task.action_data?.tool ?? src.defaultTool
               return (
                 <div
                   key={task.id}
                   className={cn(
-                    'flex items-start gap-3 rounded-xl border px-3 py-2.5 transition-all',
+                    'rounded-xl border transition-all',
                     task.completed
                       ? 'border-slate-800 bg-emerald-950/10 opacity-60'
-                      : 'border-slate-800 bg-slate-800/30 hover:border-slate-700'
+                      : 'border-slate-800 bg-slate-800/30'
                   )}
                 >
-                  {/* Checkbox */}
-                  <button
-                    onClick={() => toggleTask(task)}
-                    disabled={savingId === task.id}
-                    className="flex-shrink-0 mt-0.5"
-                  >
-                    {savingId === task.id ? (
-                      <span className="w-4 h-4 block border-2 border-slate-600 border-t-blue-400 rounded-full animate-spin" />
-                    ) : task.completed ? (
-                      <span className="w-4 h-4 flex items-center justify-center rounded-full bg-emerald-500 text-white text-[10px]">✓</span>
-                    ) : (
-                      <span className="w-4 h-4 block rounded-full border-2 border-slate-600 hover:border-slate-400 transition-colors" />
-                    )}
-                  </button>
-
-                  <div className="flex-1 min-w-0">
-                    {/* Source badge */}
-                    <span className={cn('inline-block text-[9px] font-semibold px-1.5 py-0.5 rounded border mb-1', src.color)}>
-                      {src.label}
-                    </span>
-                    <p className={cn('text-xs leading-snug', task.completed ? 'text-slate-500 line-through' : 'text-slate-200')}>
-                      {task.title}
-                    </p>
-                    {task.description && !task.completed && (
-                      <p className="text-[10px] text-slate-600 mt-0.5 leading-relaxed truncate">{task.description}</p>
-                    )}
+                  {/* Top: checkbox + title */}
+                  <div className="flex items-start gap-3 px-3 pt-3 pb-1.5">
+                    <button
+                      onClick={() => toggleTask(task)}
+                      disabled={savingId === task.id}
+                      className="flex-shrink-0 mt-0.5"
+                    >
+                      {savingId === task.id ? (
+                        <span className="w-4 h-4 block border-2 border-slate-600 border-t-blue-400 rounded-full animate-spin" />
+                      ) : task.completed ? (
+                        <span className="w-4 h-4 flex items-center justify-center rounded-full bg-emerald-500 text-white text-[10px]">✓</span>
+                      ) : (
+                        <span className="w-4 h-4 block rounded-full border-2 border-slate-600 hover:border-slate-400 transition-colors" />
+                      )}
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <span className={cn('inline-block text-[9px] font-semibold px-1.5 py-0.5 rounded border mb-1', src.color)}>
+                        {src.label}
+                      </span>
+                      <p className={cn('text-xs leading-snug', task.completed ? 'text-slate-500 line-through' : 'text-slate-200')}>
+                        {task.title}
+                      </p>
+                      {task.description && !task.completed && (
+                        <p className="text-[10px] text-slate-600 mt-0.5 leading-relaxed">{task.description}</p>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Action link */}
+                  {/* CooVex action button */}
                   {!task.completed && link && (
-                    <Link
-                      href={link}
-                      className="flex-shrink-0 text-[10px] font-medium text-slate-500 hover:text-violet-400 transition-colors mt-0.5"
-                    >
-                      →
-                    </Link>
+                    <div className="px-3 pb-2.5 pl-10">
+                      <Link
+                        href={link}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-violet-600 text-slate-300 hover:text-white text-[11px] font-semibold transition-colors"
+                      >
+                        ⚡ {toolName} →
+                      </Link>
+                    </div>
                   )}
                 </div>
               )

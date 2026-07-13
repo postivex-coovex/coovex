@@ -17,6 +17,8 @@ interface AiSlot {
 interface AiTask {
   title: string
   description: string
+  tool: string       // CooVex tool name shown on the button
+  url: string        // CooVex page URL
 }
 
 async function fillWeakSlotsWithAi(
@@ -31,10 +33,29 @@ async function fillWeakSlotsWithAi(
     ? doneRecently.map(t => `  • ${t}`).join('\n')
     : '  (none yet)'
 
-  const prompt = `You are a sharp AI business agent. Generate specific, actionable daily tasks for a business owner.
+  const COOVEX_TOOLS = `
+CooVex tools available (pick the right one per task):
+- Website Audit (/audit) — run/view SEO + GEO health scan, see critical issues
+- GEO Optimizer (/geo) — check Gemini/ChatGPT AI visibility, find content gaps
+- Leads (/leads) — view pipeline, change lead stages, hot leads list
+- GTM Autopilot (/gtm-agent) — one-click: find leads + check AI visibility + action plan
+- Competitors (/competitors) — monitor rival websites, pricing, new content
+- Content (/content) — create/publish blog posts, LinkedIn posts, newsletters
+- GEO Content Ideas (/content/ideas) — AI-suggested topics to boost AI search visibility
+- Campaigns (/campaigns) — write and send outreach email campaigns
+- Reviews (/reviews) — view unanswered reviews, AI-write responses
+- Goals (/goals) — set and track business targets
+- Products (/products) — add/update your products/services
+- AI Coach (/chat) — ask anything about your business strategy
+- Agent Inbox (/agent/inbox) — view all AI signals, opportunities, warnings`
+
+  const prompt = `You are a sharp AI business agent. Generate specific, actionable daily tasks for a business owner that can be completed using CooVex tools.
 
 BUSINESS DATA:
 ${bizContext}
+
+COOVEX TOOLS:
+${COOVEX_TOOLS}
 
 ALREADY COMPLETED RECENTLY (do NOT repeat or paraphrase these):
 ${doneList}
@@ -43,15 +64,16 @@ SLOTS TO FILL (one task per slot):
 ${slotList}
 
 Rules:
-- Each task must reference REAL numbers or facts from the business data above
-- Completable in under 30 minutes
+- Each task must be completable IN CooVex — pick the exact tool + URL
+- Must reference REAL numbers or facts from the business data above
+- Completable in under 30 minutes using CooVex
 - Zero generic advice ("improve your marketing", "grow your audience", etc.)
 - Must be a NEW action the user hasn't done recently
-- Be specific: name leads, mention exact scores, reference actual content topics
+- Be specific: name leads, mention exact scores, reference actual topics
 
 Return ONLY valid JSON (no markdown):
 {
-  ${slots.map(s => `"${s.source}": { "title": "...", "description": "..." }`).join(',\n  ')}
+  ${slots.map(s => `"${s.source}": { "title": "...", "description": "...", "tool": "CooVex ToolName", "url": "/correct-path" }`).join(',\n  ')}
 }`
 
   try {
@@ -310,10 +332,11 @@ export async function POST() {
     for (const slot of weakSlots) {
       const ai = aiResults[slot.source]
       if (!ai?.title) continue
-      const base = { source: slot.source, priority: 'medium', action_type: 'link', action_data: { url: slot.url }, completed: false }
-      if (slot.source === 'audit')   task1 = { ...base, id: `ai-audit-${today}`,   ...ai }
-      if (slot.source === 'gtm')     task2 = { ...base, id: `ai-gtm-${today}`,     ...ai }
-      if (slot.source === 'content') task3 = { ...base, id: `ai-content-${today}`, ...ai }
+      const resolvedUrl = ai.url ?? slot.url
+      const base = { source: slot.source, priority: 'medium', action_type: 'link', action_data: { url: resolvedUrl, tool: ai.tool ?? 'CooVex' }, completed: false }
+      if (slot.source === 'audit')   task1 = { ...base, id: `ai-audit-${today}`,   title: ai.title, description: ai.description }
+      if (slot.source === 'gtm')     task2 = { ...base, id: `ai-gtm-${today}`,     title: ai.title, description: ai.description }
+      if (slot.source === 'content') task3 = { ...base, id: `ai-content-${today}`, title: ai.title, description: ai.description }
     }
   }
 
