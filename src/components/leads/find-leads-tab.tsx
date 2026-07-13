@@ -343,7 +343,8 @@ function KeywordInput({
   }, [query])
 
   useEffect(() => {
-    setHighlighted(0)
+    const t = setTimeout(() => setHighlighted(0), 0)
+    return () => clearTimeout(t)
   }, [query])
 
   useEffect(() => {
@@ -787,7 +788,6 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
       })
       .catch(() => { /* ignore */ })
       .finally(() => setLoadingSessions(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessId])
 
   const cities = CITIES[selectedCountry] ?? DEFAULT_CITIES
@@ -967,7 +967,11 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
   }
 
   function toggleCheck(websiteUrl: string) {
-    setChecked(prev => { const n = new Set(prev); n.has(websiteUrl) ? n.delete(websiteUrl) : n.add(websiteUrl); return n })
+    setChecked(prev => {
+      const n = new Set(prev)
+      if (n.has(websiteUrl)) { n.delete(websiteUrl) } else { n.add(websiteUrl) }
+      return n
+    })
   }
 
   function toggleAll() {
