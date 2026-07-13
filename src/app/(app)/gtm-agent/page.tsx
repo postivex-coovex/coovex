@@ -17,14 +17,13 @@ export default async function GtmAgentPage() {
   const { data: profile } = await supabase
     .from('profiles').select('current_workspace_id').eq('id', user.id).single()
   const { data: business } = profile?.current_workspace_id
-    ? await supabase.from('businesses').select('id').eq('workspace_id', profile.current_workspace_id).maybeSingle()
+    ? await supabase.from('businesses').select('id, name, website_url').eq('workspace_id', profile.current_workspace_id).maybeSingle()
     : { data: null }
 
-  // Audit prerequisite — show gate before showing GTM
   const { data: latestAudit } = business
     ? await supabase
         .from('audits')
-        .select('id, score, created_at')
+        .select('id, score, report_json, created_at')
         .eq('business_id', business.id)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -39,51 +38,83 @@ export default async function GtmAgentPage() {
           <h1 className="text-2xl font-bold text-white">GTM Autopilot</h1>
         </div>
         <p className="text-slate-400 text-sm mb-8">
-          Your AI agent that runs leads, GEO, and competitor scans — then hands you a precise action plan.
+          Your AI go-to-market agent — runs your full GTM in one click and tells you exactly what to do.
         </p>
-
         <div className="bg-slate-900 border border-amber-700/40 rounded-2xl p-8 text-center">
           <div className="text-4xl mb-4">🔍</div>
           <h2 className="text-lg font-semibold text-white mb-2">Run Website Audit First</h2>
           <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">
-            GTM Autopilot starts by reading your website audit — scores, GEO data, and critical issues.
-            Run the audit once to unlock GTM.
+            GTM Autopilot reads your website audit as step 1. Run it once to unlock.
           </p>
-          <Link
-            href="/audit"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-colors"
-          >
+          <Link href="/audit" className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-colors">
             🔍 Run Website Audit →
           </Link>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[
-            { icon: '👥', title: 'Lead Discovery', desc: 'Finds Reddit & community leads matching your industry' },
-            { icon: '🧠', title: 'Gemini Visibility', desc: 'Checks if your business appears in AI search results' },
-            { icon: '⚡', title: 'AI Action Plan', desc: 'Generates 3 precise GTM actions based on real data' },
-          ].map(s => (
-            <div key={s.title} className="p-4 bg-slate-900 border border-slate-800 rounded-xl opacity-60">
-              <span className="text-lg">{s.icon}</span>
-              <p className="text-sm font-medium text-white mt-2">{s.title}</p>
-              <p className="text-xs text-slate-500 mt-1">{s.desc}</p>
-            </div>
-          ))}
         </div>
       </div>
     )
   }
 
-  // Load last run
+  // Parallel data fetch
+  const [
+    { data: mem },
+    { data: geoMem },
+    { count: totalLeads },
+    { count: hotLeads },
+    { count: draftPosts },
+    { count: scheduledPosts },
+    { count: competitors },
+    { data: launchPlatforms },
+  ] = await Promise.all([
+    service.from('agent_memory').select('value_text').eq('business_id', business!.id).eq('key', 'gtm_last_run').maybeSingle(),
+    service.from('agent_memory').select('value_text, updated_at').eq('business_id', business!.id).eq('key', 'geo_intelligence').maybeSingle(),
+    supabase.from('leads').select('*', { count: 'exact', head: true }).eq('business_id', business!.id),
+    supabase.from('leads').select('*', { count: 'exact', head: true }).eq('business_id', business!.id).gte('score', 70),
+    supabase.from('posts').select('*', { count: 'exact', head: true }).eq('business_id', business!.id).eq('status', 'draft'),
+    supabase.from('posts').select('*', { count: 'exact', head: true }).eq('business_id', business!.id).eq('status', 'scheduled'),
+    supabase.from('competitors').select('*', { count: 'exact', head: true }).eq('business_id', business!.id),
+    supabase.from('launch_tracker_platforms').select('platform_id, status, url').eq('business_id', business!.id),
+  ])
+
   let lastRun = null
-  if (business) {
-    const { data: mem } = await service
-      .from('agent_memory').select('value_text')
-      .eq('business_id', business.id).eq('key', 'gtm_last_run').maybeSingle()
-    if (mem?.value_text) {
-      try { lastRun = JSON.parse(mem.value_text) } catch {}
-    }
+  if (mem?.value_text) try { lastRun = JSON.parse(mem.value_text) } catch {}
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const auditReport = latestAudit.report_json as any
+  const searchPresence = auditReport?.search_presence ?? null
+  const geoScore = auditReport?.geo?.geo_score ?? null
+
+  let geoIntel = null
+  let geminiRate: number | null = null
+  if (geoMem?.value_text) {
+    try {
+      geoIntel = JSON.parse(geoMem.value_text)
+      geminiRate = geoIntel?.actual_ai_visibility?.visibility_rate ?? null
+    } catch {}
   }
 
-  return <GtmClient initialLastRun={lastRun} />
+  const launchMap: Record<string, string> = {}
+  for (const p of launchPlatforms ?? []) launchMap[p.platform_id] = p.status
+
+  return (
+    <GtmClient
+      initialLastRun={lastRun}
+      staticData={{
+        auditScore: latestAudit.score ?? 0,
+        auditGeoScore: geoScore,
+        auditAgeDays: Math.floor((Date.now() - new Date(latestAudit.created_at).getTime()) / 86400000),
+        totalLeads: totalLeads ?? 0,
+        hotLeads: hotLeads ?? 0,
+        draftPosts: draftPosts ?? 0,
+        scheduledPosts: scheduledPosts ?? 0,
+        competitors: competitors ?? 0,
+        searchPresence,
+        geminiRate,
+        geoContentGaps: geoIntel?.content_gaps?.length ?? 0,
+        geoHighImpact: (geoIntel?.content_gaps ?? []).filter((g: { impact: string }) => g.impact === 'high').length,
+        topGaps: (geoIntel?.content_gaps ?? []).slice(0, 3).map((g: { suggestion?: string; type: string }) => g.suggestion || g.type),
+        launchMap,
+        businessId: business!.id,
+      }}
+    />
+  )
 }

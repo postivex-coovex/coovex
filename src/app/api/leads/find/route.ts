@@ -38,14 +38,19 @@ async function searchSelfHosted(query: string, serviceUrl: string, secret: strin
   try {
     const url = new URL('/search', serviceUrl)
     url.searchParams.set('q', query)
-    url.searchParams.set('max_results', '5')
+    url.searchParams.set('format', 'json')  // SearXNG requires this for JSON output
+    url.searchParams.set('categories', 'general')
     const res = await fetch(url.toString(), {
-      headers: secret ? { 'X-Service-Secret': secret } : {},
+      headers: {
+        'Accept': 'application/json',
+        ...(secret ? { 'X-Service-Secret': secret } : {}),
+      },
       signal: AbortSignal.timeout(20000),
     })
     if (!res.ok) return []
     const data = await res.json()
-    return (data.results as TavilyResult[]) || []
+    // SearXNG returns { results: [{ title, url, content, score }] }
+    return ((data.results ?? []) as TavilyResult[]).slice(0, 5)
   } catch {
     return []
   }

@@ -125,6 +125,7 @@ export async function POST() {
         send({ type: 'step', id: 'leads', status: 'running', label: 'Running AI Lead Finder — ICP → company search → email enrichment' })
 
         let discoveredCount = 0
+        let savedLeadsCount = 0
         let hasRealResults = false
         let icpSummary = ''
         let leadIcp: { company_types?: string[]; company_size?: string; industries?: string[]; decision_maker_titles?: string[] } | null = null
@@ -143,7 +144,9 @@ export async function POST() {
 
           if (findRes.ok) {
             const findData = await findRes.json()
-            discoveredCount = (findData.candidates ?? []).length
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const candidates: any[] = findData.candidates ?? []
+            discoveredCount = candidates.length
             hasRealResults = findData.has_real_results ?? false
             leadIcp = findData.icp ?? null
             if (leadIcp) {
@@ -152,14 +155,47 @@ export async function POST() {
                 leadIcp.industries?.slice(0, 2).join(' / '),
               ].filter(Boolean).join(' · ')
             }
+
+            // Auto-save candidates to leads table so they appear in the pipeline
+            for (const c of candidates.slice(0, 8)) {
+              if (!c.company && !c.name) continue
+              const website = c.website
+                ? (c.website.startsWith('http') ? c.website : `https://${c.website}`)
+                : null
+              // Skip if already exists
+              if (website) {
+                const { data: existing } = await service
+                  .from('leads').select('id').eq('business_id', business.id).eq('website', website).maybeSingle()
+                if (existing) continue
+              }
+              const { error: insErr } = await service.from('leads').insert({
+                business_id: business.id,
+                name: c.name || c.company || 'Unknown',
+                company: c.company || null,
+                job_title: c.title || null,
+                email: c.email || null,
+                phone: c.phone || null,
+                website,
+                source: hasRealResults ? 'gtm_autopilot' : 'gtm_autopilot_icp',
+                stage: 'new',
+                score: c.fit_score ?? 60,
+                notes: [c.fit_reason, !hasRealResults ? '(ICP-generated profile)' : null].filter(Boolean).join(' — ') || null,
+              })
+              if (!insErr) savedLeadsCount++
+            }
           }
         } catch {
           // Non-fatal — lead finder may timeout on slow VPS
         }
 
+        // Re-fetch hot leads count after auto-save
+        const { count: hotLeadsAfter } = await supabase
+          .from('leads').select('*', { count: 'exact', head: true })
+          .eq('business_id', business.id).gte('score', 70)
+
         send({
           type: 'step', id: 'leads', status: 'done',
-          data: { found: discoveredCount, real: hasRealResults, icp: icpSummary },
+          data: { found: discoveredCount, real: hasRealResults, icp: icpSummary, saved: savedLeadsCount },
         })
 
         // ── Step 4: GEO & Gemini AI Visibility ────────────────────────────────
@@ -239,7 +275,7 @@ export async function POST() {
 
 Business: ${biz.name || 'Unknown'} | Industry: ${biz.industry || 'N/A'} | Website: ${biz.website_url || 'N/A'}
 Website Audit: ${auditOverall}/100 overall · GEO ${auditGeo ?? 'N/A'}/100 · SEO ${auditSeo ?? 'N/A'}/100${auditIssues.length ? ' · Critical: ' + auditIssues.join(', ') : ''}
-Lead Pipeline: ${totalLeads ?? 0} total · ${newLeads ?? 0} new this week · ${hotLeads ?? 0} hot (≥70 score)
+Lead Pipeline: ${totalLeads ?? 0} total · ${newLeads ?? 0} new this week · ${hotLeadsAfter ?? hotLeads ?? 0} hot (≥70 score) · ${savedLeadsCount} just added by AI Finder${hasRealResults ? ' (real companies)' : ' (ICP-generated)'}
 AI Lead Finder: ${discoveredCount} companies found (${hasRealResults ? 'real search results' : 'ICP-generated'})
 ${icpLine}
 Top existing lead industries: ${topIndustries.length ? topIndustries.join(', ') : 'not enough data yet'}
@@ -269,7 +305,7 @@ Return EXACTLY this JSON (no markdown):
 
         const inboxBody = [
           `🔍 Audit: ${auditOverall}/100 overall · GEO ${auditGeo ?? 'N/A'}/100${auditAgeDays > 7 ? ' (⚠️ audit is ' + auditAgeDays + ' days old)' : ''}`,
-          `👥 ${hotLeads ?? 0} hot leads · ${newLeads ?? 0} new this week · ${discoveredCount} companies found by AI Lead Finder${hasRealResults ? ' (real)' : ''}`,
+          `👥 ${hotLeadsAfter ?? hotLeads ?? 0} hot leads · ${newLeads ?? 0} new this week · ${discoveredCount} found by AI Finder (${savedLeadsCount} added to pipeline)`,
           geminiVisibility?.visibility_rate != null
             ? `🧠 Gemini AI visibility: ${geminiVisibility.visibility_rate}% · ${highImpactGaps} high-impact GEO gaps`
             : '🧠 GEO not analyzed yet — run GEO Optimizer to check Gemini visibility',
@@ -292,9 +328,10 @@ Return EXACTLY this JSON (no markdown):
           audit_age_days: auditAgeDays,
           total_leads: totalLeads ?? 0,
           new_leads: newLeads ?? 0,
-          hot_leads: hotLeads ?? 0,
+          hot_leads: hotLeadsAfter ?? hotLeads ?? 0,
           discovered_leads: discoveredCount,
           discovered_real: hasRealResults,
+          saved_leads: savedLeadsCount,
           icp_summary: icpSummary,
           draft_posts: draftCount ?? 0,
           scheduled_posts: scheduledCount ?? 0,
