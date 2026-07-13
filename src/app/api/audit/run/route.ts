@@ -19,6 +19,18 @@ interface AuditIssue {
   description: string
 }
 
+export interface SearchPresence {
+  ga4: boolean
+  ga4_id: string | null
+  gtm: boolean
+  gsc_verified: boolean
+  gsc_verification_id: string | null
+  bing_verified: boolean
+  bing_verification_id: string | null
+  indexnow_configured: boolean
+  sitemap_in_robots: boolean
+}
+
 export interface GeoCheck {
   llms_txt: boolean
   robots_txt: boolean
@@ -36,6 +48,7 @@ export interface GeoCheck {
   robots_ai_allowed: boolean
   llms_txt_quality: 'good' | 'basic' | 'missing'
   faq_content: boolean
+  search_presence: SearchPresence
 }
 
 export interface BusinessIntel {
@@ -159,7 +172,38 @@ async function checkGeoReadiness(url: string): Promise<GeoCheck> {
 
   const ai_discoverability: 'high' | 'medium' | 'low' = geo_score >= 65 ? 'high' : geo_score >= 35 ? 'medium' : 'low'
 
-  return { llms_txt, robots_txt, sitemap_xml, structured_data, open_graph, canonical_url, meta_description, twitter_card, https, ai_discoverability, geo_score, missing_geo, ai_tasks, robots_ai_allowed, llms_txt_quality, faq_content }
+  // ── Search Presence checks ─────────────────────────────────────────────────
+  const ga4Match = homepageHtml.match(/['"`]G-[A-Z0-9]{4,12}['"`]/)
+  const ga4    = !!ga4Match
+  const ga4_id = ga4Match?.[0]?.replace(/['"`]/g, '') ?? null
+  const gtm    = /GTM-[A-Z0-9]{4,8}/.test(homepageHtml)
+
+  const gscMatch = homepageHtml.match(/name=["']google-site-verification["'][^>]*content=["']([^"']+)["']/i)
+    ?? homepageHtml.match(/content=["']([^"']+)["'][^>]*name=["']google-site-verification["']/i)
+  const gsc_verified       = !!gscMatch
+  const gsc_verification_id = gscMatch?.[1]?.slice(0, 10) ?? null
+
+  const bingMetaMatch = homepageHtml.match(/name=["']msvalidate\.01["'][^>]*content=["']([^"']+)["']/i)
+    ?? homepageHtml.match(/content=["']([^"']+)["'][^>]*name=["']msvalidate\.01["']/i)
+  let bing_verified        = !!bingMetaMatch
+  const bing_verification_id = bingMetaMatch?.[1]?.slice(0, 10) ?? null
+
+  if (!bing_verified) {
+    const bingAuth = await fetchText('/BingSiteAuth.xml')
+    if (bingAuth?.includes('<user>')) bing_verified = true
+  }
+
+  const sitemap_in_robots  = robots_txt && /sitemap\s*:/i.test(robotsContent ?? '')
+  const indexnow_configured = /indexnow/i.test(robotsContent ?? '')
+
+  const search_presence: SearchPresence = {
+    ga4, ga4_id, gtm,
+    gsc_verified, gsc_verification_id,
+    bing_verified, bing_verification_id,
+    indexnow_configured, sitemap_in_robots,
+  }
+
+  return { llms_txt, robots_txt, sitemap_xml, structured_data, open_graph, canonical_url, meta_description, twitter_card, https, ai_discoverability, geo_score, missing_geo, ai_tasks, robots_ai_allowed, llms_txt_quality, faq_content, search_presence }
 }
 
 // ─── 2. PageSpeed Audit ────────────────────────────────────────────────────────

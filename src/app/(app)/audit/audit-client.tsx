@@ -14,6 +14,12 @@ interface AuditScores {
 interface AuditIssue {
   severity: 'critical' | 'warning' | 'info'; category: string; title: string; description: string
 }
+interface SearchPresence {
+  ga4: boolean; ga4_id: string | null; gtm: boolean
+  gsc_verified: boolean; gsc_verification_id: string | null
+  bing_verified: boolean; bing_verification_id: string | null
+  indexnow_configured: boolean; sitemap_in_robots: boolean
+}
 interface GeoCheck {
   llms_txt: boolean; robots_txt: boolean; sitemap_xml: boolean
   structured_data: boolean; open_graph: boolean; canonical_url: boolean
@@ -24,6 +30,7 @@ interface GeoCheck {
   robots_ai_allowed?: boolean
   llms_txt_quality?: 'good' | 'basic' | 'missing'
   faq_content?: boolean
+  search_presence?: SearchPresence
   [key: string]: unknown
 }
 interface BusinessIntel {
@@ -73,6 +80,21 @@ const GEO_ITEMS = [
   { key: 'canonical_url',   label: 'Canonical',     icon: '📎', desc: 'Dedup prevention',    weight: 'medium' },
   { key: 'twitter_card',    label: 'X/Twitter Card',icon: '🐦', desc: 'Social card',         weight: 'low' },
 ] as const
+
+const SEARCH_PRESENCE_ITEMS: {
+  key: keyof SearchPresence
+  label: string
+  icon: string
+  desc: string
+  fix: string
+}[] = [
+  { key: 'ga4',               label: 'Google Analytics 4', icon: '📊', desc: 'GA4 tracking tag',          fix: 'Add GA4 tag (G-XXXXXXXX) to your website' },
+  { key: 'gtm',               label: 'Google Tag Manager', icon: '🏷',  desc: 'GTM container installed',   fix: 'Install GTM (GTM-XXXXXXX) for easier tag management' },
+  { key: 'gsc_verified',      label: 'Search Console',     icon: '🔍', desc: 'Google Search Console',     fix: 'Verify site in Google Search Console and submit sitemap' },
+  { key: 'bing_verified',     label: 'Bing Webmaster',     icon: '🦊', desc: 'Bing Webmaster Tools',      fix: 'Add Bing verification meta tag or BingSiteAuth.xml' },
+  { key: 'indexnow_configured', label: 'IndexNow',         icon: '⚡', desc: 'Instant indexing protocol', fix: 'Add IndexNow key file and reference it in robots.txt' },
+  { key: 'sitemap_in_robots', label: 'Sitemap in robots',  icon: '🗺', desc: 'robots.txt references sitemap', fix: 'Add "Sitemap: https://yourdomain.com/sitemap.xml" to robots.txt' },
+]
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -262,7 +284,11 @@ export default function AuditClient({ audits: initialAudits, websiteUrl, busines
     addLog(`↳ sitemap.xml — page index for AI crawlers`, 'sub', 6900)
     addLog(`↳ JSON-LD structured data (rich results)`, 'sub', 7200)
     addLog(`↳ Open Graph, HTTPS, canonical URL, Twitter card`, 'sub', 7500)
-    addLog(`GEO signals collected — computing AI discoverability score`, 'success', 8000)
+    addLog(`Checking search presence — GA4, GSC, Bing, IndexNow`, 'info', 7800)
+    addLog(`↳ Google Analytics 4 tag detection`, 'sub', 8100)
+    addLog(`↳ Google Search Console & Bing verification`, 'sub', 8400)
+    addLog(`↳ IndexNow configuration & sitemap in robots.txt`, 'sub', 8700)
+    addLog(`GEO signals collected — computing AI discoverability score`, 'success', 9200)
     addLog(`Claude AI analyzing scraped content...`, 'info', 8800)
     addLog(`↳ Identifying industry, services & target market`, 'sub', 9500)
     addLog(`↳ Extracting unique value proposition`, 'sub', 10500)
@@ -851,6 +877,53 @@ export default function AuditClient({ audits: initialAudits, websiteUrl, busines
                       >
                         <span>✨</span> Run Visibility Check
                       </button>
+                    </div>
+                  )}
+
+                  {/* Search Presence */}
+                  {geo.search_presence && (
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                      <h3 className="text-white font-semibold mb-1 flex items-center gap-2">
+                        <span>📡</span> Search Presence
+                      </h3>
+                      <p className="text-slate-500 text-xs mb-4">Analytics tracking, search console verification, and indexing setup</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {SEARCH_PRESENCE_ITEMS.map(item => {
+                          const sp = geo.search_presence!
+                          const passed = !!sp[item.key]
+                          const hint = item.key === 'ga4' && sp.ga4_id ? sp.ga4_id :
+                                       item.key === 'gsc_verified' && sp.gsc_verification_id ? `ID: ${sp.gsc_verification_id}…` :
+                                       item.key === 'bing_verified' && sp.bing_verification_id ? `ID: ${sp.bing_verification_id}…` : null
+                          return (
+                            <div key={item.key} className={`flex items-start gap-2.5 p-2.5 rounded-lg border transition-all ${
+                              passed ? 'bg-emerald-900/20 border-emerald-800/40' : 'bg-slate-800/40 border-slate-700/40'
+                            }`}>
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold mt-0.5 ${
+                                passed ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-500'
+                              }`}>
+                                {passed ? '✓' : '✗'}
+                              </div>
+                              <div className="min-w-0">
+                                <p className={`text-xs font-semibold truncate ${passed ? 'text-emerald-300' : 'text-slate-400'}`}>
+                                  {item.icon} {item.label}
+                                </p>
+                                {hint
+                                  ? <p className="text-[10px] text-slate-500 truncate font-mono">{hint}</p>
+                                  : <p className="text-[10px] text-slate-600 truncate">{passed ? item.desc : item.fix}</p>
+                                }
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      {/* Summary line */}
+                      {(() => {
+                        const sp = geo.search_presence!
+                        const passed = SEARCH_PRESENCE_ITEMS.filter(i => !!sp[i.key]).length
+                        return (
+                          <p className="text-xs text-slate-600 mt-3">{passed}/{SEARCH_PRESENCE_ITEMS.length} configured — {passed < 3 ? 'set up analytics and search console to track your indexing' : passed < 5 ? 'almost complete — add missing tools for full visibility' : 'fully tracked across all search engines'}</p>
+                        )
+                      })()}
                     </div>
                   )}
 
