@@ -23,6 +23,7 @@ export default async function SettingsPage() {
       profile={{ name: profile?.name || null, language: profile?.language || null, timezone: profile?.timezone || null }}
       business={business || null}
       workspace={workspace ? { name: workspace.name, plan: workspace.plan } : null}
+      workspaceId={profile?.current_workspace_id ?? null}
       email={user.email || ''}
     />
   )

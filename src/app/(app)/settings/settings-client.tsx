@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
@@ -30,10 +31,11 @@ interface Props {
   profile: Profile
   business: Business | null
   workspace: Workspace | null
+  workspaceId: string | null
   email: string
 }
 
-export default function SettingsClient({ profile, business, workspace, email }: Props) {
+export default function SettingsClient({ profile, business, workspace, workspaceId, email }: Props) {
   // Profile state
   const [name, setName] = useState(profile.name || '')
   const [language, setLanguage] = useState(profile.language || 'en')
@@ -85,6 +87,33 @@ export default function SettingsClient({ profile, business, workspace, email }: 
   const [savingBiz, setSavingBiz] = useState(false)
   const [bizSaved, setBizSaved] = useState(false)
   const [bizError, setBizError] = useState('')
+
+  // Delete business state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmName, setDeleteConfirmName] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const router = useRouter()
+
+  async function deleteBusiness() {
+    if (!workspaceId || !business) return
+    setDeleting(true)
+    setDeleteError('')
+    const res = await fetch('/api/workspaces/delete', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workspace_id: workspaceId, confirm_name: deleteConfirmName }),
+    })
+    const data = await res.json()
+    setDeleting(false)
+    if (!res.ok) {
+      setDeleteError(data.error || 'Failed to delete')
+      return
+    }
+    // Redirect to dashboard (will land on next workspace or onboarding)
+    router.push('/dashboard')
+    router.refresh()
+  }
 
   async function saveProfile() {
     setSavingProfile(true)
@@ -353,19 +382,100 @@ export default function SettingsClient({ profile, business, workspace, email }: 
         {/* Danger zone */}
         <div className="bg-slate-900 border border-red-900/30 rounded-2xl p-6">
           <h2 className="text-red-400 font-semibold mb-4">Danger Zone</h2>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-300 text-sm">Sign out of CooVex</p>
-              <p className="text-slate-600 text-xs">You can sign back in at any time</p>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-300 text-sm">Sign out of CooVex</p>
+                <p className="text-slate-600 text-xs">You can sign back in at any time</p>
+              </div>
+              <form action="/api/auth/signout" method="post">
+                <button type="submit" className="bg-red-950/40 hover:bg-red-900/40 border border-red-900/40 text-red-400 hover:text-red-300 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                  Sign Out
+                </button>
+              </form>
             </div>
-            <form action="/api/auth/signout" method="post">
-              <button type="submit" className="bg-red-950/40 hover:bg-red-900/40 border border-red-900/40 text-red-400 hover:text-red-300 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-                Sign Out
-              </button>
-            </form>
+
+            {business && workspaceId && (
+              <div className="flex items-center justify-between pt-4 border-t border-red-900/20">
+                <div>
+                  <p className="text-slate-300 text-sm">Delete Business</p>
+                  <p className="text-slate-600 text-xs">Permanently delete <span className="text-slate-500">{business.name}</span> and all its data. This cannot be undone.</p>
+                </div>
+                <button
+                  onClick={() => { setShowDeleteModal(true); setDeleteConfirmName(''); setDeleteError('') }}
+                  className="bg-red-950/40 hover:bg-red-900/40 border border-red-900/40 text-red-400 hover:text-red-300 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  Delete Business
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && business && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-red-900/40 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-start gap-3 mb-5">
+              <div className="w-10 h-10 rounded-full bg-red-950/60 border border-red-800/50 flex items-center justify-center flex-shrink-0 text-lg">
+                ⚠️
+              </div>
+              <div>
+                <h3 className="text-white font-semibold text-base">Delete Business?</h3>
+                <p className="text-slate-400 text-sm mt-1">
+                  This will permanently delete <span className="text-white font-medium">{business.name}</span> and all associated data — leads, campaigns, competitors, content, reviews, and AI memory. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-red-950/20 border border-red-900/30 rounded-xl p-4 mb-5">
+              <p className="text-red-400 text-xs font-semibold mb-3">What will be deleted:</p>
+              <ul className="text-slate-400 text-xs space-y-1">
+                {['All leads and pipeline data', 'Campaigns and drip sequences', 'Competitor tracking', 'Content calendar and posts', 'Reviews and responses', 'Website audit history', 'AI agent memory', 'All credits and billing history'].map(item => (
+                  <li key={item} className="flex items-center gap-2">
+                    <span className="text-red-500">✕</span> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-xs font-medium text-slate-400 mb-2">
+                Type <span className="text-white font-semibold">{business.name}</span> to confirm:
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmName}
+                onChange={e => setDeleteConfirmName(e.target.value)}
+                placeholder={business.name}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-red-500 transition-colors placeholder:text-slate-600"
+                autoFocus
+              />
+            </div>
+
+            {deleteError && (
+              <p className="text-red-400 text-sm mb-4">✗ {deleteError}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowDeleteModal(false); setDeleteConfirmName(''); setDeleteError('') }}
+                className="flex-1 py-2.5 text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteBusiness}
+                disabled={deleteConfirmName.trim().toLowerCase() !== business.name.trim().toLowerCase() || deleting}
+                className="flex-1 py-2.5 text-sm font-semibold bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+              >
+                {deleting ? 'Deleting…' : 'Delete Permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
