@@ -8,7 +8,7 @@ import {
   MessageSquare, Star, Target, TrendingUp,
   Settings, Zap, Search, ChevronRight, ClipboardCheck, FileText, Mail,
   Lightbulb, UserCircle, Presentation, BookOpen, LineChart, ThumbsUp, DollarSign,
-  PieChart, Map, Bot, Building2, FileDown, Activity, Crosshair, Banknote, Snowflake, Bell, Filter, LogOut, Package, Globe2, LayoutGrid, Inbox, Radio, GripVertical, Pin, PinOff,
+  PieChart, Map, Bot, Building2, FileDown, Activity, Crosshair, Banknote, Snowflake, Bell, Filter, LogOut, Package, Globe2, LayoutGrid, Inbox, Radio, GripVertical, Pin, PinOff, FolderGit2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BrandLogo } from './brand-logo'
@@ -104,6 +104,7 @@ const navGroups: { label: string | null; items: NavItem[] }[] = [
       { label: 'Journey Map',    href: '/tools/journey',        icon: Map,           badge: null,  sub: false },
       { label: 'AI Coach',       href: '/chat',                 icon: MessageSquare, badge: 'new', sub: false },
       { label: 'Chatbot',        href: '/chatbot',              icon: Bot,           badge: null,  sub: false },
+      { label: 'GitHub Coding',  href: '/github',               icon: FolderGit2,    badge: 'new', sub: false },
     ],
   },
   {

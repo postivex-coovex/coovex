@@ -7,6 +7,7 @@ import { DailyBriefCard } from '@/components/dashboard/daily-brief-card'
 import { QuickStatsBar } from '@/components/dashboard/quick-stats-bar'
 import { SetupGuide } from '@/components/dashboard/setup-guide'
 import { DailyTasksCard } from '@/components/dashboard/daily-tasks-card'
+import { GithubWidget } from '@/components/dashboard/github-widget'
 import { SmartActionsPanel } from './smart-actions-panel'
 import { PromotionAuditPanel } from './promotion-audit-panel'
 import { redirect } from 'next/navigation'
@@ -171,6 +172,7 @@ export default async function DashboardPage() {
         </div>
         <div className="space-y-4">
           <HealthScoreCard score={business?.health_score ?? 0} />
+          <GithubWidget />
           <ScoreBreakdownCard scores={scoreBreakdown} />
         </div>
       </div>
