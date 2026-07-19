@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { ghFetch, type GitHubConfig, type StagedFile } from '@/lib/github'
-
-async function getGithubConfig(supabase: Awaited<ReturnType<typeof createClient>>): Promise<GitHubConfig | null> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: prof } = await supabase.from('profiles').select('current_workspace_id').eq('id', user.id).single()
-  const { data: biz } = await supabase.from('businesses').select('integrations').eq('workspace_id', prof?.current_workspace_id ?? '').maybeSingle()
-  const gh = (biz?.integrations as Record<string, unknown>)?.github
-  if (!gh || !(gh as GitHubConfig).token) return null
-  return gh as GitHubConfig
-}
+import { getUserGithubConfig, ghFetch, type StagedFile } from '@/lib/github'
 
 // POST /api/github/commit — commit multiple staged files using Git Data API
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const gh = await getGithubConfig(supabase)
+  const gh = await getUserGithubConfig()
   if (!gh) return NextResponse.json({ error: 'GitHub not connected' }, { status: 401 })
 
   const { owner, repo, branch, message, files } = await req.json() as {
@@ -71,11 +59,7 @@ export async function POST(req: NextRequest) {
   const newCommitRes = await ghFetch(`${base}/git/commits`, token, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message,
-      tree: treeData.sha,
-      parents: [currentCommitSha],
-    }),
+    body: JSON.stringify({ message, tree: treeData.sha, parents: [currentCommitSha] }),
   })
   if (!newCommitRes.ok) return NextResponse.json({ error: 'Failed to create commit' }, { status: 502 })
   const newCommit = await newCommitRes.json() as { sha: string; html_url: string }

@@ -410,14 +410,13 @@ export default function FolderGit2Client({ initialConfig }: { initialConfig: Git
   async function handleSelectRepo(repo: ActiveRepo) {
     setActiveRepo(repo)
     setStagedFiles([]); setMessages([])
-    // Persist active_repo in integrations
-    const settings = { ...config, active_repo: repo }
-    await fetch('/api/integrations', {
+    // Persist active_repo in user's profile.github_config
+    await fetch('/api/github/connect/repo', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ platform: 'github', settings }),
+      body: JSON.stringify({ active_repo: repo }),
     })
-    if (config) setConfig({ ...config, active_repo: repo })
+    if (config) setConfig({ ...config, active_repo: repo } as GitHubConfig)
   }
 
   async function handleDisconnect() {

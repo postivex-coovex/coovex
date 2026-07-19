@@ -11,14 +11,13 @@ export default async function GithubPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: prof } = await supabase.from('profiles').select('current_workspace_id').eq('id', user.id).single()
-  const { data: biz } = await supabase
-    .from('businesses')
-    .select('integrations')
-    .eq('workspace_id', prof?.current_workspace_id ?? '')
-    .maybeSingle()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('github_config')
+    .eq('id', user.id)
+    .single()
 
-  const gh = (biz?.integrations as Record<string, unknown>)?.github as GitHubConfig | undefined
+  const gh = (profile as Record<string, unknown> | null)?.github_config as GitHubConfig | undefined
 
   return <GithubClient initialConfig={gh ?? null} />
 }
