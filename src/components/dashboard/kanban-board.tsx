@@ -50,28 +50,23 @@ function proofRequired(category: string) {
 
 // ── Proof Modal ───────────────────────────────────────────────────────────────
 
-function ProofModal({
-  task, onSubmit, onClose,
-}: {
+function ProofModal({ task, onSubmit, onClose }: {
   task: KanbanTask
   onSubmit: (proof: { proof_value?: string; proof_type?: string; screenshot_base64?: string; screenshot_mime?: string }) => void
   onClose: () => void
 }) {
-  const [url, setUrl]       = useState('')
-  const [note, setNote]     = useState('')
-  const [imgData, setImg]   = useState<{ base64: string; mime: string; name: string } | null>(null)
-  const [tab, setTab]       = useState<'url' | 'screenshot' | 'note'>('url')
-  const fileRef             = useRef<HTMLInputElement>(null)
-  const required            = proofRequired(task.category)
+  const [url, setUrl]     = useState('')
+  const [note, setNote]   = useState('')
+  const [imgData, setImg] = useState<{ base64: string; mime: string; name: string } | null>(null)
+  const [tab, setTab]     = useState<'url' | 'screenshot' | 'note'>('url')
+  const fileRef           = useRef<HTMLInputElement>(null)
+  const required          = proofRequired(task.category)
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = ev => {
-      const base64 = ev.target?.result as string
-      setImg({ base64, mime: file.type, name: file.name })
-    }
+    reader.onload = ev => setImg({ base64: ev.target?.result as string, mime: file.type, name: file.name })
     reader.readAsDataURL(file)
   }
 
@@ -86,7 +81,7 @@ function ProofModal({
     }
   }
 
-  const canSubmit = !required || tab === 'url' ? (url.trim() || note.trim()) : tab === 'screenshot' ? !!imgData : note.trim()
+  const canSubmit = required ? (tab === 'url' ? !!(url.trim() || note.trim()) : tab === 'screenshot' ? !!imgData : !!note.trim()) : true
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
@@ -96,16 +91,13 @@ function ProofModal({
             <h3 className="text-white font-semibold text-sm">Mark as Complete</h3>
             <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">{task.title}</p>
           </div>
-          <button onClick={onClose} className="text-slate-600 hover:text-slate-400 shrink-0 ml-3">
-            <X className="w-4 h-4" />
-          </button>
+          <button onClick={onClose} className="text-slate-600 hover:text-slate-400 shrink-0 ml-3"><X className="w-4 h-4" /></button>
         </div>
 
-        {/* Tab selector */}
         <div className="flex gap-1 bg-slate-800 rounded-lg p-1">
           {(['url', 'screenshot', 'note'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
-              className={cn('flex-1 py-1.5 text-xs font-medium rounded-md transition-colors capitalize', tab === t ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300')}>
+              className={cn('flex-1 py-1.5 text-xs font-medium rounded-md transition-colors', tab === t ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-slate-300')}>
               {t === 'url' ? '🔗 URL' : t === 'screenshot' ? '📸 Screenshot' : '📝 Note'}
             </button>
           ))}
@@ -114,10 +106,13 @@ function ProofModal({
         <p className="text-slate-500 text-xs">{PROOF_LABELS[task.category] ?? PROOF_LABELS.general}</p>
 
         {tab === 'url' && (
-          <input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..."
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500" />
+          <>
+            <input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..."
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500" />
+            <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Add a note (optional)" rows={2}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none" />
+          </>
         )}
-
         {tab === 'screenshot' && (
           <div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
@@ -125,35 +120,27 @@ function ProofModal({
               <div className="flex items-center gap-2 p-3 bg-slate-800 rounded-lg border border-slate-700">
                 <span className="text-emerald-400 text-xs">✓</span>
                 <span className="text-slate-300 text-xs flex-1 truncate">{imgData.name}</span>
-                <button onClick={() => setImg(null)} className="text-slate-600 hover:text-red-400">
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                <button onClick={() => setImg(null)} className="text-slate-600 hover:text-red-400"><X className="w-3.5 h-3.5" /></button>
               </div>
             ) : (
               <button onClick={() => fileRef.current?.click()}
                 className="w-full border-2 border-dashed border-slate-700 hover:border-violet-600 rounded-xl p-6 text-center transition-colors">
                 <Upload className="w-5 h-5 text-slate-600 mx-auto mb-2" />
                 <p className="text-slate-500 text-xs">Click to upload screenshot</p>
-                <p className="text-slate-600 text-[10px] mt-0.5">AI will extract and save the proof text</p>
+                <p className="text-slate-600 text-[10px] mt-0.5">AI extracts and saves proof text</p>
               </button>
             )}
           </div>
         )}
-
-        {(tab === 'note' || (tab === 'url' && !url.trim())) && (
-          <textarea value={note} onChange={e => setNote(e.target.value)}
-            placeholder={tab === 'note' ? 'What did you accomplish?' : 'Add a note (optional)'}
-            rows={3}
+        {tab === 'note' && (
+          <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="What did you accomplish?" rows={3}
             className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none" />
         )}
 
         <div className="flex gap-2 pt-1">
-          <button onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-800 transition-colors">
-            Cancel
-          </button>
-          <button onClick={submit}
-            disabled={required ? !canSubmit : false}
-            className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
+          <button onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-800 transition-colors">Cancel</button>
+          <button onClick={submit} disabled={required ? !canSubmit : false}
+            className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
             <Check className="w-3.5 h-3.5" /> Mark Done
           </button>
         </div>
@@ -164,10 +151,11 @@ function ProofModal({
 
 // ── Task Card ─────────────────────────────────────────────────────────────────
 
-function TaskCard({
-  task, onMove, onDelete, onUpdateNotes,
-}: {
+function TaskCard({ task, isDragging, onDragStart, onDragEnd, onMove, onDelete, onUpdateNotes }: {
   task: KanbanTask
+  isDragging: boolean
+  onDragStart: (id: string) => void
+  onDragEnd: () => void
   onMove: (id: string, status: KanbanTask['status'], proof?: Record<string, string>) => void
   onDelete: (id: string) => void
   onUpdateNotes: (id: string, notes: string) => void
@@ -179,40 +167,27 @@ function TaskCard({
   const cat = CAT[task.category as keyof typeof CAT] ?? CAT.general
 
   function saveNotes() {
-    if (notesDirty) {
-      onUpdateNotes(task.id, notes)
-      setDirty(false)
-    }
+    if (notesDirty) { onUpdateNotes(task.id, notes); setDirty(false) }
   }
 
-  function handleMoveToInProgress() {
-    onMove(task.id, 'in_progress')
-  }
-
-  function handleMoveBack() {
-    onMove(task.id, 'todo')
-  }
-
-  function handleCompleteTrigger() {
-    setShowProof(true)
-  }
-
-  function handleProofSubmit(proof: { proof_value?: string; proof_type?: string; screenshot_base64?: string; screenshot_mime?: string }) {
+  function handleProofSubmit(proof: Parameters<typeof ProofModal>[0]['onSubmit'] extends (p: infer P) => void ? P : never) {
     setShowProof(false)
     onMove(task.id, 'done', proof as Record<string, string>)
   }
 
   return (
     <>
-      {showProof && (
-        <ProofModal task={task} onSubmit={handleProofSubmit} onClose={() => setShowProof(false)} />
-      )}
-      <div className={cn(
-        'rounded-xl border transition-all duration-200 group',
-        task.status === 'done'
-          ? 'border-emerald-800/30 bg-emerald-950/10'
-          : 'border-slate-800 bg-slate-900 hover:border-slate-700',
-      )}>
+      {showProof && <ProofModal task={task} onSubmit={handleProofSubmit} onClose={() => setShowProof(false)} />}
+      <div
+        draggable
+        onDragStart={e => { e.dataTransfer.setData('taskId', task.id); e.dataTransfer.effectAllowed = 'move'; onDragStart(task.id) }}
+        onDragEnd={onDragEnd}
+        className={cn(
+          'rounded-xl border transition-all duration-200 cursor-grab active:cursor-grabbing select-none',
+          isDragging ? 'opacity-40 scale-[0.98]' : '',
+          task.status === 'done' ? 'border-emerald-800/30 bg-emerald-950/10' : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:shadow-md hover:shadow-black/20',
+        )}
+      >
         {/* Card header */}
         <div className="p-3">
           <div className="flex items-start gap-2">
@@ -227,20 +202,18 @@ function TaskCard({
                 <p className="text-[10px] text-slate-600 mt-0.5 leading-relaxed line-clamp-2">{task.description}</p>
               )}
             </div>
-            <button onClick={() => setExpanded(v => !v)} className="shrink-0 text-slate-700 hover:text-slate-400 transition-colors mt-0.5">
+            <button onClick={() => setExpanded(v => !v)} className="shrink-0 text-slate-700 hover:text-slate-400 mt-0.5 cursor-pointer" style={{ cursor: 'pointer' }}>
               {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
           </div>
 
-          {/* Proof badge for done tasks */}
           {task.status === 'done' && (task.proof_value || task.proof_summary) && (
             <div className="mt-2 p-2 bg-emerald-950/30 border border-emerald-800/30 rounded-lg">
               <p className="text-[9px] text-emerald-600 font-semibold uppercase tracking-wider mb-0.5">Proof</p>
               {task.proof_value?.startsWith('http') ? (
                 <a href={task.proof_value} target="_blank" rel="noopener noreferrer"
                   className="text-[10px] text-emerald-400 hover:underline flex items-center gap-1 truncate">
-                  <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                  {task.proof_value}
+                  <ExternalLink className="w-2.5 h-2.5 shrink-0" />{task.proof_value}
                 </a>
               ) : (
                 <p className="text-[10px] text-slate-400 leading-relaxed">{task.proof_summary || task.proof_value}</p>
@@ -249,73 +222,55 @@ function TaskCard({
           )}
         </div>
 
-        {/* Expanded section */}
         {expanded && (
           <div className="px-3 pb-3 border-t border-slate-800/60 pt-3 space-y-2.5">
-            {task.description && (
-              <p className="text-[10px] text-slate-500 leading-relaxed">{task.description}</p>
-            )}
-
-            {/* Notes */}
+            {task.description && <p className="text-[10px] text-slate-500 leading-relaxed">{task.description}</p>}
             <div>
               <p className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider mb-1">Notes</p>
-              <textarea
-                value={notes}
-                onChange={e => { setNotes(e.target.value); setDirty(true) }}
-                onBlur={saveNotes}
-                placeholder="Add a note..."
-                rows={2}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-[11px] text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none"
-              />
+              <textarea value={notes} onChange={e => { setNotes(e.target.value); setDirty(true) }} onBlur={saveNotes}
+                placeholder="Add a note..." rows={2}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-[11px] text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none" />
               {notesDirty && (
-                <button onClick={saveNotes} className="text-[10px] text-violet-400 hover:text-violet-300 mt-0.5 transition-colors">
-                  Save note →
-                </button>
+                <button onClick={saveNotes} className="text-[10px] text-violet-400 hover:text-violet-300 mt-0.5 transition-colors">Save note →</button>
               )}
             </div>
-
-            {/* Action link */}
             {task.href && task.status !== 'done' && (
               <Link href={task.href}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-violet-600 border border-slate-700 hover:border-violet-500 rounded-lg text-slate-300 hover:text-white text-[11px] font-semibold transition-colors">
                 ⚡ {task.cta ?? 'Open'} <ArrowRight className="w-2.5 h-2.5" />
               </Link>
             )}
-
-            {/* Delete */}
-            <button onClick={() => onDelete(task.id)}
-              className="flex items-center gap-1 text-[10px] text-slate-700 hover:text-red-400 transition-colors">
+            <button onClick={() => onDelete(task.id)} className="flex items-center gap-1 text-[10px] text-slate-700 hover:text-red-400 transition-colors">
               <Trash2 className="w-3 h-3" /> Remove
             </button>
           </div>
         )}
 
-        {/* Move buttons */}
         {task.status !== 'done' && (
           <div className="px-3 pb-3 flex gap-1.5">
             {task.status === 'todo' && (
-              <button onClick={handleMoveToInProgress}
-                className="flex-1 py-1.5 text-[10px] font-semibold text-slate-400 bg-slate-800 hover:bg-slate-700 hover:text-white rounded-lg border border-slate-700 transition-colors">
-                ▶ Start
-              </button>
+              <>
+                <button onClick={() => onMove(task.id, 'in_progress')}
+                  className="flex-1 py-1.5 text-[10px] font-semibold text-slate-400 bg-slate-800 hover:bg-slate-700 hover:text-white rounded-lg border border-slate-700 transition-colors">
+                  ▶ Start
+                </button>
+                {task.href && !expanded && (
+                  <Link href={task.href}
+                    className="py-1.5 px-2.5 text-[10px] font-medium text-violet-400 hover:text-violet-300 rounded-lg border border-slate-800 transition-colors flex items-center gap-1">
+                    Open <ArrowRight className="w-2.5 h-2.5" />
+                  </Link>
+                )}
+              </>
             )}
             {task.status === 'in_progress' && (
               <>
-                <button onClick={handleMoveBack}
-                  className="py-1.5 px-2 text-[10px] font-medium text-slate-600 hover:text-slate-400 rounded-lg border border-slate-800 transition-colors">
-                  ← Back
-                </button>
-                <button onClick={handleCompleteTrigger}
+                <button onClick={() => onMove(task.id, 'todo')}
+                  className="py-1.5 px-2 text-[10px] font-medium text-slate-600 hover:text-slate-400 rounded-lg border border-slate-800 transition-colors">← Back</button>
+                <button onClick={() => setShowProof(true)}
                   className="flex-1 py-1.5 text-[10px] font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center justify-center gap-1">
                   <Check className="w-3 h-3" /> Done
                 </button>
               </>
-            )}
-            {task.status === 'todo' && task.href && !expanded && (
-              <Link href={task.href}
-                className="py-1.5 px-2 text-[10px] font-medium text-violet-400 hover:text-violet-300 rounded-lg border border-slate-800 transition-colors flex items-center gap-1">
-                Open <ArrowRight className="w-2.5 h-2.5" />
-              </Link>
             )}
           </div>
         )}
@@ -327,9 +282,9 @@ function TaskCard({
 // ── Add Task Form ─────────────────────────────────────────────────────────────
 
 function AddTaskForm({ onAdd, onClose }: { onAdd: (t: Partial<KanbanTask>) => void; onClose: () => void }) {
-  const [title, setTitle]   = useState('')
-  const [cat, setCat]       = useState('general')
-  const [href, setHref]     = useState('')
+  const [title, setTitle] = useState('')
+  const [cat, setCat]     = useState('general')
+  const [href, setHref]   = useState('')
   const [saving, setSaving] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -347,9 +302,7 @@ function AddTaskForm({ onAdd, onClose }: { onAdd: (t: Partial<KanbanTask>) => vo
       const data = await res.json() as { task?: KanbanTask }
       if (data.task) onAdd(data.task)
       onClose()
-    } finally {
-      setSaving(false)
-    }
+    } finally { setSaving(false) }
   }
 
   return (
@@ -363,8 +316,7 @@ function AddTaskForm({ onAdd, onClose }: { onAdd: (t: Partial<KanbanTask>) => vo
           className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:outline-none">
           {Object.entries(CAT).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
-        <input value={href} onChange={e => setHref(e.target.value)}
-          placeholder="Link (optional)"
+        <input value={href} onChange={e => setHref(e.target.value)} placeholder="Link (optional)"
           className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-400 placeholder-slate-700 focus:outline-none" />
       </div>
       <div className="flex gap-2">
@@ -378,33 +330,44 @@ function AddTaskForm({ onAdd, onClose }: { onAdd: (t: Partial<KanbanTask>) => vo
   )
 }
 
-// ── Column ────────────────────────────────────────────────────────────────────
+// ── Drop Column ───────────────────────────────────────────────────────────────
 
-function Column({ title, icon, tasks, emptyText, onMove, onDelete, onUpdateNotes, footer }: {
-  title: string; icon: string; tasks: KanbanTask[]
-  emptyText: string
-  onMove: (id: string, status: KanbanTask['status'], proof?: Record<string, string>) => void
-  onDelete: (id: string) => void
-  onUpdateNotes: (id: string, notes: string) => void
+function DropColumn({ title, icon, colStatus, tasks, dragOverCol, onDragOver, onDragLeave, onDrop, onDragStart, onDragEnd, dragId, onMove, onDelete, onUpdateNotes, footer }: {
+  title: string; icon: string; colStatus: KanbanTask['status']
+  tasks: KanbanTask[]; dragOverCol: string | null; dragId: string | null
+  onDragOver: (col: string) => void; onDragLeave: () => void; onDrop: (col: KanbanTask['status']) => void
+  onDragStart: (id: string) => void; onDragEnd: () => void
+  onMove: (id: string, s: KanbanTask['status'], proof?: Record<string, string>) => void
+  onDelete: (id: string) => void; onUpdateNotes: (id: string, notes: string) => void
   footer?: React.ReactNode
 }) {
+  const isOver = dragOverCol === colStatus
+
   return (
-    <div className="flex flex-col min-w-[260px] flex-1">
+    <div
+      className={cn('flex flex-col min-w-[280px] flex-1 rounded-xl p-3 transition-colors', isOver ? 'bg-violet-950/20 ring-1 ring-violet-700/50' : 'bg-slate-800/20')}
+      onDragOver={e => { e.preventDefault(); onDragOver(colStatus) }}
+      onDragLeave={onDragLeave}
+      onDrop={e => { e.preventDefault(); onDrop(colStatus) }}
+    >
       <div className="flex items-center gap-2 mb-3">
         <span className="text-base">{icon}</span>
         <span className="text-xs font-semibold text-slate-300">{title}</span>
-        <span className="text-[10px] text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded-full border border-slate-700">
-          {tasks.length}
-        </span>
+        <span className="text-[10px] text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded-full border border-slate-700">{tasks.length}</span>
+        {isOver && <span className="text-[9px] text-violet-400 ml-auto">Drop here</span>}
       </div>
       <div className="flex-1 space-y-2">
-        {tasks.length === 0 && (
+        {tasks.length === 0 && !isOver && (
           <div className="border border-dashed border-slate-800 rounded-xl p-4 text-center">
-            <p className="text-slate-700 text-xs">{emptyText}</p>
+            <p className="text-slate-700 text-xs">
+              {colStatus === 'todo' ? 'No pending tasks' : colStatus === 'in_progress' ? 'Drag a card here to start' : 'Completed tasks appear here'}
+            </p>
           </div>
         )}
         {tasks.map(t => (
-          <TaskCard key={t.id} task={t} onMove={onMove} onDelete={onDelete} onUpdateNotes={onUpdateNotes} />
+          <TaskCard key={t.id} task={t} isDragging={dragId === t.id}
+            onDragStart={onDragStart} onDragEnd={onDragEnd}
+            onMove={onMove} onDelete={onDelete} onUpdateNotes={onUpdateNotes} />
         ))}
         {footer}
       </div>
@@ -415,12 +378,15 @@ function Column({ title, icon, tasks, emptyText, onMove, onDelete, onUpdateNotes
 // ── Main Board ────────────────────────────────────────────────────────────────
 
 export function KanbanBoard() {
-  const [tasks, setTasks]         = useState<KanbanTask[]>([])
-  const [loading, setLoading]     = useState(true)
-  const [refreshing, setRefresh]  = useState(false)
+  const [tasks, setTasks]           = useState<KanbanTask[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [refreshing, setRefresh]    = useState(false)
   const [generating, setGenerating] = useState(false)
-  const [addingTask, setAdding]   = useState(false)
-  const [movingId, setMovingId]   = useState<string | null>(null)
+  const [addingTask, setAdding]     = useState(false)
+  const [movingId, setMovingId]     = useState<string | null>(null)
+  const [dragId, setDragId]         = useState<string | null>(null)
+  const [dragOverCol, setDragOverCol] = useState<string | null>(null)
+  const [pendingProofDrag, setPendingProofDrag] = useState<KanbanTask | null>(null)
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
@@ -429,7 +395,6 @@ export function KanbanBoard() {
       const res = await fetch('/api/tasks')
       const data = await res.json() as { tasks?: KanbanTask[]; hasDailyTasks?: boolean }
       setTasks(data.tasks ?? [])
-      // Auto-generate daily tasks if AI hasn't produced any yet today
       if (!data.hasDailyTasks) {
         setGenerating(true)
         fetch('/api/agent/tasks/generate', { method: 'POST' })
@@ -447,24 +412,13 @@ export function KanbanBoard() {
 
   useEffect(() => { load() }, [load])
 
-  // Returns the persisted UUID for a task (creates it if it's still a virtual source_id)
   async function persistTask(task: KanbanTask): Promise<string> {
     const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     if (uuidRe.test(task.id)) return task.id
-    // Virtual id — need to create a real tasks row first
     const res = await fetch('/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: task.title,
-        description: task.description,
-        category: task.category,
-        priority: task.priority,
-        href: task.href,
-        cta: task.cta,
-        due_date: task.due_date,
-        source_id: task.source_id ?? task.id,
-      }),
+      body: JSON.stringify({ title: task.title, description: task.description, category: task.category, priority: task.priority, href: task.href, cta: task.cta, due_date: task.due_date, source_id: task.source_id ?? task.id }),
     })
     const data = await res.json() as { task?: { id: string } }
     const newId = data.task?.id ?? task.id
@@ -485,17 +439,13 @@ export function KanbanBoard() {
         body: JSON.stringify({ status, ...proof }),
       })
       if (status === 'done') await load(true)
-    } finally {
-      setMovingId(null)
-    }
+    } finally { setMovingId(null) }
   }
 
   async function handleDelete(id: string) {
     setTasks(prev => prev.filter(t => t.id !== id))
     const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    if (uuidRe.test(id)) {
-      await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
-    }
+    if (uuidRe.test(id)) await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
   }
 
   async function handleUpdateNotes(id: string, notes: string) {
@@ -503,15 +453,30 @@ export function KanbanBoard() {
     const task = tasks.find(t => t.id === id)
     if (!task) return
     const realId = await persistTask(task)
-    await fetch(`/api/tasks/${realId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notes }),
-    })
+    await fetch(`/api/tasks/${realId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notes }) })
+  }
+
+  // Drag handlers
+  function handleDragStart(id: string) { setDragId(id) }
+  function handleDragEnd() { setDragId(null); setDragOverCol(null) }
+
+  function handleDrop(targetStatus: KanbanTask['status']) {
+    if (!dragId) return
+    const task = tasks.find(t => t.id === dragId)
+    if (!task || task.status === targetStatus) { setDragId(null); setDragOverCol(null); return }
+
+    if (targetStatus === 'done') {
+      // Show proof modal before completing
+      setPendingProofDrag(task)
+    } else {
+      handleMove(dragId, targetStatus)
+    }
+    setDragId(null)
+    setDragOverCol(null)
   }
 
   function handleAdd(t: Partial<KanbanTask>) {
-    if (t && t.id) setTasks(prev => [t as KanbanTask, ...prev])
+    if (t?.id) setTasks(prev => [t as KanbanTask, ...prev])
   }
 
   const todo       = tasks.filter(t => t.status === 'todo')
@@ -536,66 +501,75 @@ export function KanbanBoard() {
   }
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-        <div>
-          <h2 className="text-sm font-bold text-white flex items-center gap-2">
-            Task Board
-            {generating && (
-              <span className="flex items-center gap-1 text-[10px] font-normal text-violet-400">
-                <span className="w-3 h-3 border border-violet-500 border-t-transparent rounded-full animate-spin inline-block" />
-                AI generating tasks…
-              </span>
-            )}
-          </h2>
-          <p className="text-[10px] text-slate-600 mt-0.5">
-            {todo.length + inProgress.length} active · {done.length} done
-            {movingId && ' · saving…'}
-          </p>
+    <>
+      {pendingProofDrag && (
+        <ProofModal
+          task={pendingProofDrag}
+          onSubmit={proof => { handleMove(pendingProofDrag.id, 'done', proof as Record<string, string>); setPendingProofDrag(null) }}
+          onClose={() => setPendingProofDrag(null)}
+        />
+      )}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+          <div>
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              Task Board
+              {generating && (
+                <span className="flex items-center gap-1 text-[10px] font-normal text-violet-400">
+                  <span className="w-3 h-3 border border-violet-500 border-t-transparent rounded-full animate-spin inline-block" />
+                  AI generating tasks…
+                </span>
+              )}
+            </h2>
+            <p className="text-[10px] text-slate-600 mt-0.5">
+              {todo.length + inProgress.length} active · {done.length} done
+              {movingId && ' · saving…'}
+              <span className="ml-2 text-slate-700">· Drag cards between columns</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => load(true)} disabled={refreshing} className="text-slate-600 hover:text-slate-400 transition-colors disabled:opacity-40">
+              <RefreshCw className={cn('w-3.5 h-3.5', refreshing && 'animate-spin')} />
+            </button>
+            <button onClick={() => setAdding(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold rounded-lg transition-colors">
+              <Plus className="w-3 h-3" /> Add Task
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => load(true)} disabled={refreshing}
-            className="text-slate-600 hover:text-slate-400 transition-colors disabled:opacity-40">
-            <RefreshCw className={cn('w-3.5 h-3.5', refreshing && 'animate-spin')} />
-          </button>
-          <button onClick={() => setAdding(true)}
-            className="flex items-center gap-1 px-2.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold rounded-lg transition-colors">
-            <Plus className="w-3 h-3" /> Add Task
-          </button>
-        </div>
-      </div>
 
-      {/* Board */}
-      <div className="overflow-x-auto">
-        <div className="flex gap-4 p-5 min-w-[700px]">
-          <Column
-            title="Todo" icon="📌" tasks={todo}
-            emptyText="No pending tasks"
-            onMove={handleMove} onDelete={handleDelete} onUpdateNotes={handleUpdateNotes}
-            footer={
-              addingTask
+        {/* Board */}
+        <div className="overflow-x-auto">
+          <div className="flex gap-3 p-4 min-w-[700px]">
+            <DropColumn title="Todo" icon="📌" colStatus="todo" tasks={todo}
+              dragOverCol={dragOverCol} dragId={dragId}
+              onDragOver={setDragOverCol} onDragLeave={() => setDragOverCol(null)} onDrop={handleDrop}
+              onDragStart={handleDragStart} onDragEnd={handleDragEnd}
+              onMove={handleMove} onDelete={handleDelete} onUpdateNotes={handleUpdateNotes}
+              footer={addingTask
                 ? <AddTaskForm onAdd={handleAdd} onClose={() => setAdding(false)} />
-                : (
-                  <button onClick={() => setAdding(true)}
+                : <button onClick={() => setAdding(true)}
                     className="w-full py-2 border border-dashed border-slate-700 hover:border-slate-600 rounded-xl text-slate-700 hover:text-slate-500 text-xs transition-colors flex items-center justify-center gap-1">
                     <Plus className="w-3 h-3" /> Add task
                   </button>
-                )
-            }
-          />
-          <Column
-            title="In Progress" icon="🔄" tasks={inProgress}
-            emptyText="Move a task here to start"
-            onMove={handleMove} onDelete={handleDelete} onUpdateNotes={handleUpdateNotes}
-          />
-          <Column
-            title="Done" icon="✅" tasks={done}
-            emptyText="Completed tasks appear here"
-            onMove={handleMove} onDelete={handleDelete} onUpdateNotes={handleUpdateNotes}
-          />
+              }
+            />
+            <DropColumn title="In Progress" icon="🔄" colStatus="in_progress" tasks={inProgress}
+              dragOverCol={dragOverCol} dragId={dragId}
+              onDragOver={setDragOverCol} onDragLeave={() => setDragOverCol(null)} onDrop={handleDrop}
+              onDragStart={handleDragStart} onDragEnd={handleDragEnd}
+              onMove={handleMove} onDelete={handleDelete} onUpdateNotes={handleUpdateNotes}
+            />
+            <DropColumn title="Done" icon="✅" colStatus="done" tasks={done}
+              dragOverCol={dragOverCol} dragId={dragId}
+              onDragOver={setDragOverCol} onDragLeave={() => setDragOverCol(null)} onDrop={handleDrop}
+              onDragStart={handleDragStart} onDragEnd={handleDragEnd}
+              onMove={handleMove} onDelete={handleDelete} onUpdateNotes={handleUpdateNotes}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
