@@ -13,6 +13,7 @@ interface KanbanTask {
   status: 'todo' | 'in_progress' | 'done'
   priority: string
   source: string
+  source_id?: string
   href?: string
   cta?: string
   notes?: string
@@ -446,16 +447,43 @@ export function KanbanBoard() {
 
   useEffect(() => { load() }, [load])
 
+  // Returns the persisted UUID for a task (creates it if it's still a virtual source_id)
+  async function persistTask(task: KanbanTask): Promise<string> {
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (uuidRe.test(task.id)) return task.id
+    // Virtual id — need to create a real tasks row first
+    const res = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: task.title,
+        description: task.description,
+        category: task.category,
+        priority: task.priority,
+        href: task.href,
+        cta: task.cta,
+        due_date: task.due_date,
+        source_id: task.source_id ?? task.id,
+      }),
+    })
+    const data = await res.json() as { task?: { id: string } }
+    const newId = data.task?.id ?? task.id
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, id: newId } : t))
+    return newId
+  }
+
   async function handleMove(id: string, status: KanbanTask['status'], proof?: Record<string, string>) {
     setMovingId(id)
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t))
     try {
-      await fetch(`/api/tasks/${id}`, {
+      const task = tasks.find(t => t.id === id)
+      if (!task) return
+      const realId = await persistTask(task)
+      await fetch(`/api/tasks/${realId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, ...proof }),
       })
-      // Reload to get server-updated proof_summary from OCR
       if (status === 'done') await load(true)
     } finally {
       setMovingId(null)
@@ -464,16 +492,22 @@ export function KanbanBoard() {
 
   async function handleDelete(id: string) {
     setTasks(prev => prev.filter(t => t.id !== id))
-    await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (uuidRe.test(id)) {
+      await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    }
   }
 
   async function handleUpdateNotes(id: string, notes: string) {
-    await fetch(`/api/tasks/${id}`, {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, notes } : t))
+    const task = tasks.find(t => t.id === id)
+    if (!task) return
+    const realId = await persistTask(task)
+    await fetch(`/api/tasks/${realId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ notes }),
     })
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, notes } : t))
   }
 
   function handleAdd(t: Partial<KanbanTask>) {
