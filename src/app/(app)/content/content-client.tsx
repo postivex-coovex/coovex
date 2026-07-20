@@ -306,6 +306,26 @@ export default function ContentClient({ initialPosts, businessName, industry, au
     })
   }
 
+  const [publishingId, setPublishingId] = useState<string | null>(null)
+  const [publishResults, setPublishResults] = useState<Record<string, Array<{ integration: string; success: boolean; url?: string; error?: string }>>>({})
+
+  const handlePublish = async (postId: string) => {
+    setPublishingId(postId)
+    setPublishResults(prev => ({ ...prev, [postId]: [] }))
+    try {
+      const res = await fetch(`/api/posts/${postId}/publish`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+      const data = await res.json() as { success: boolean; results?: Array<{ integration: string; success: boolean; url?: string; error?: string }> }
+      if (data.success) {
+        setPosts(prev => prev.map(p => p.id === postId ? { ...p, status: 'published' as PostStatus, published_at: new Date().toISOString() } : p))
+      }
+      if (data.results) setPublishResults(prev => ({ ...prev, [postId]: data.results! }))
+    } catch {
+      // silent
+    } finally {
+      setPublishingId(null)
+    }
+  }
+
   const scheduled = posts.filter(p => p.status === 'scheduled').length
   const drafts = posts.filter(p => p.status === 'draft').length
   const pendingApproval = posts.filter(p => p.status === 'pending_approval').length
@@ -611,7 +631,27 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                         )}
                       </div>
                     </div>
-                    <div className="flex-shrink-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity items-center">
+                    <div className="flex-shrink-0 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity items-end">
+                      {/* Publish results */}
+                      {publishResults[post.id]?.length > 0 && (
+                        <div className="flex flex-col gap-0.5">
+                          {publishResults[post.id].map((r, i) => (
+                            <span key={i} className={`text-[10px] px-2 py-0.5 rounded ${r.success ? 'text-emerald-400 bg-emerald-950/40' : 'text-red-400 bg-red-950/40'}`}>
+                              {r.success ? '✓' : '✗'} {r.integration}{r.url ? ` →` : ''}{r.error ? `: ${r.error.slice(0, 30)}` : ''}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-2 items-center">
+                      {post.status !== 'published' && (
+                        <button
+                          onClick={() => handlePublish(post.id)}
+                          disabled={publishingId === post.id}
+                          className="text-xs text-violet-400 hover:text-violet-300 px-2 py-1 rounded-md hover:bg-violet-950/40 transition-colors font-medium disabled:opacity-50"
+                        >
+                          {publishingId === post.id ? '⏳ Publishing…' : '🚀 Publish'}
+                        </button>
+                      )}
                       {post.status === 'draft' && (
                         <button
                           onClick={() => handleStatusChange(post.id, 'pending_approval')}
@@ -652,6 +692,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                       >
                         Delete
                       </button>
+                      </div>
                     </div>
                   </div>
                 )

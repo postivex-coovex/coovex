@@ -7,7 +7,7 @@ import { Check, ExternalLink, ArrowLeft } from 'lucide-react'
 interface FieldDef {
   key: string
   label: string
-  type: 'text' | 'password' | 'url' | 'select'
+  type: 'text' | 'password' | 'url' | 'select' | 'textarea'
   placeholder?: string
   options?: string[]
   hint?: string
@@ -856,6 +856,121 @@ const CONFIGS: Record<string, IntegrationConfig> = {
       'Copy the database ID from the page URL and paste above',
     ],
   },
+
+  // ─── Website Publishing ───────────────────────────────────────────────────
+  wordpress_publish: {
+    name: 'WordPress (Auto-Publish)', icon: '🔵', color: 'bg-blue-900/30 border-blue-800/40',
+    description: 'Publish blog posts directly to your WordPress site via the REST API. No plugin required.',
+    docsUrl: 'https://developer.wordpress.org/rest-api/using-the-rest-api/authentication/',
+    authType: 'api_key',
+    fields: [
+      { key: 'site_url',     label: 'WordPress Site URL',   type: 'url',      placeholder: 'https://yourblog.com' },
+      { key: 'username',     label: 'WordPress Username',   type: 'text',     placeholder: 'admin' },
+      { key: 'app_password', label: 'Application Password', type: 'password', placeholder: 'xxxx xxxx xxxx xxxx xxxx xxxx', hint: 'WP Admin → Users → Your Profile → Application Passwords → Add New' },
+      { key: 'default_status', label: 'Default Publish Status', type: 'select', options: ['publish', 'draft'], hint: 'publish = live immediately, draft = saved as draft' },
+    ],
+    syncOptions: [
+      { key: 'auto_publish', label: 'Auto-Publish', desc: 'Publish approved content instantly to WordPress' },
+      { key: 'as_draft',     label: 'Save as Draft', desc: 'Send to WordPress as draft for manual review' },
+    ],
+    setupSteps: [
+      'Log in to your WordPress admin panel',
+      'Go to Users → Your Profile → scroll down to "Application Passwords"',
+      'Enter a name (e.g. "CooVex") and click Add New Application Password',
+      'Copy the generated password and paste it above (spaces are OK)',
+      'Click Test Connection to verify',
+    ],
+  },
+  webhook_publish: {
+    name: 'Webhook (Custom Site)', icon: '🔗', color: 'bg-slate-800/50 border-slate-600/40',
+    description: 'Push published content to any website or CMS via a custom HTTP webhook endpoint.',
+    docsUrl: 'https://docs.coovex.com/integrations/webhook',
+    authType: 'webhook',
+    fields: [
+      { key: 'url',    label: 'Webhook Endpoint URL', type: 'url',      placeholder: 'https://yoursite.com/api/coovex-publish' },
+      { key: 'secret', label: 'Signing Secret',       type: 'password', placeholder: 'Optional — used to verify payload signature', hint: 'CooVex adds X-CooVex-Signature header (HMAC-SHA256) when a secret is provided' },
+    ],
+    syncOptions: [
+      { key: 'publish', label: 'Auto-Push on Publish', desc: 'POST to your endpoint when content is published' },
+    ],
+    setupSteps: [
+      'Set up an HTTP endpoint on your server that accepts POST requests',
+      'The payload will be JSON: { title, content (HTML), slug, meta_title, meta_description, tags, published_at }',
+      'Optionally set a secret key — CooVex will include an HMAC-SHA256 signature in X-CooVex-Signature header',
+      'Paste your endpoint URL above and click Test Connection',
+    ],
+  },
+  ghost: {
+    name: 'Ghost CMS', icon: '👻', color: 'bg-slate-800/50 border-slate-600/40',
+    description: 'Publish posts directly to your Ghost blog using the Ghost Admin API.',
+    docsUrl: 'https://ghost.org/docs/admin-api/',
+    authType: 'api_key',
+    fields: [
+      { key: 'site_url',      label: 'Ghost Site URL',    type: 'url',      placeholder: 'https://yourblog.ghost.io' },
+      { key: 'admin_api_key', label: 'Admin API Key',     type: 'password', placeholder: 'id:secret_hex', hint: 'Ghost Admin → Settings → Integrations → Add custom integration → copy Admin API Key' },
+      { key: 'default_status', label: 'Default Status',  type: 'select',   options: ['published', 'draft'] },
+    ],
+    syncOptions: [
+      { key: 'auto_publish', label: 'Auto-Publish', desc: 'Publish immediately to Ghost' },
+      { key: 'as_draft',     label: 'Save as Draft', desc: 'Send to Ghost as draft' },
+    ],
+    setupSteps: [
+      'In Ghost Admin → Settings → Integrations → click "Add custom integration"',
+      'Name it "CooVex" and click Create',
+      'Copy the "Admin API Key" (format: id:secret)',
+      'Paste your Ghost site URL and API key above',
+      'Click Test Connection',
+    ],
+  },
+  github: {
+    name: 'GitHub (Jamstack / Static Site)', icon: '🐙', color: 'bg-slate-800/50 border-slate-600/40',
+    description: 'Commit content as Markdown or HTML files to a GitHub repo. Works with Hugo, Jekyll, Next.js, Astro, and any Jamstack setup.',
+    docsUrl: 'https://docs.github.com/en/rest/repos/contents',
+    authType: 'api_key',
+    fields: [
+      { key: 'token',        label: 'GitHub Personal Access Token', type: 'password', placeholder: 'ghp_xxxxxxxxxxxxxxxxxxxx', hint: 'github.com → Settings → Developer settings → Personal access tokens → Fine-grained → repo:write' },
+      { key: 'owner',        label: 'Repo Owner',    type: 'text', placeholder: 'yourusername or org-name' },
+      { key: 'repo',         label: 'Repository',   type: 'text', placeholder: 'my-blog-site' },
+      { key: 'branch',       label: 'Branch',        type: 'text', placeholder: 'main', hint: 'Branch to commit to (default: main)' },
+      { key: 'content_path', label: 'Content Path',  type: 'text', placeholder: 'content/blog', hint: 'Folder path inside the repo where posts will be saved' },
+      { key: 'file_format',  label: 'File Format',   type: 'select', options: ['markdown', 'html'], hint: 'markdown includes frontmatter (title, date, tags, etc.)' },
+    ],
+    syncOptions: [
+      { key: 'auto_commit', label: 'Auto-Commit on Publish', desc: 'Commit new post file when content is published' },
+    ],
+    setupSteps: [
+      'Go to github.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens',
+      'Create a token with Repository access → Contents: Read and write',
+      'Copy the token and paste above',
+      'Enter your repo owner (username or org), repo name, branch (usually main), and the folder where posts should go',
+      'Click Test Connection to verify access',
+    ],
+  },
+  sftp: {
+    name: 'SFTP (Server Upload)', icon: '🖥️', color: 'bg-slate-800/50 border-slate-600/40',
+    description: 'Upload HTML or Markdown files directly to your web server via SFTP/SSH.',
+    docsUrl: 'https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol',
+    authType: 'api_key',
+    fields: [
+      { key: 'host',        label: 'SFTP Host',       type: 'text',     placeholder: 'server.yoursite.com or 123.456.789.0' },
+      { key: 'port',        label: 'Port',            type: 'text',     placeholder: '22', hint: 'Default SFTP port is 22' },
+      { key: 'username',    label: 'SSH Username',    type: 'text',     placeholder: 'ubuntu or root' },
+      { key: 'password',    label: 'SSH Password',    type: 'password', placeholder: 'Leave empty if using private key' },
+      { key: 'private_key', label: 'SSH Private Key (PEM)', type: 'textarea', placeholder: '-----BEGIN RSA PRIVATE KEY-----\n...', hint: 'Paste your private key or leave empty to use password auth' },
+      { key: 'upload_path', label: 'Upload Path',     type: 'text',     placeholder: '/var/www/html/blog', hint: 'Absolute path on the server where files will be uploaded' },
+      { key: 'file_format', label: 'File Format',     type: 'select',   options: ['html', 'markdown'] },
+    ],
+    syncOptions: [
+      { key: 'auto_upload', label: 'Auto-Upload on Publish', desc: 'Upload file to server when content is published' },
+    ],
+    setupSteps: [
+      'Get your server\'s hostname/IP, SSH username, and either a password or private key',
+      'Make sure the upload path exists on your server (e.g. /var/www/html/blog)',
+      'The SSH user needs write permission to that directory',
+      'For private key auth: copy your .pem file contents into the Private Key field above',
+      'Click Test Connection — CooVex will verify connectivity and confirm the upload path exists',
+    ],
+  },
 }
 
 export default function IntegrationConfigPage({ params }: { params: Promise<{ type: string }> }) {
@@ -898,13 +1013,19 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
   async function testConnection() {
     setTesting(true)
     setTestResult(null)
-    await new Promise(r => setTimeout(r, 1200))
-    const hasFields = cfg.fields.every(f => !!fields[f.key])
-    setTestResult(hasFields
-      ? { ok: true, msg: 'Connection verified successfully.' }
-      : { ok: false, msg: 'Fill in all required fields before testing.' }
-    )
-    setTesting(false)
+    try {
+      const res = await fetch('/api/integrations/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: type, settings: fields }),
+      })
+      const data = await res.json() as { ok: boolean; msg: string }
+      setTestResult(data)
+    } catch {
+      setTestResult({ ok: false, msg: 'Test request failed — check your network.' })
+    } finally {
+      setTesting(false)
+    }
   }
 
   if (!cfg) {
@@ -1018,6 +1139,14 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
                   <option value="">Select…</option>
                   {f.options?.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
+              ) : f.type === 'textarea' ? (
+                <textarea
+                  value={fields[f.key] || ''}
+                  onChange={e => setFields(flds => ({ ...flds, [f.key]: e.target.value }))}
+                  placeholder={f.placeholder}
+                  rows={5}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors font-mono resize-y"
+                />
               ) : (
                 <input
                   type={f.type}

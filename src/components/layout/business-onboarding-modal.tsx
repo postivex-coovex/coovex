@@ -133,7 +133,6 @@ function SwitchBusinessButton({
   onSwitch: () => void
   switching: boolean
 }) {
-  const router = useRouter()
   const [workspaces, setWorkspaces] = useState<{ workspace_id: string; business_name: string; is_current: boolean }[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -153,8 +152,7 @@ function SwitchBusinessButton({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ workspace_id: wsId }),
     })
-    router.refresh()
-    router.push('/dashboard')
+    window.location.href = '/dashboard'
   }
 
   if (previousWorkspaceId) {

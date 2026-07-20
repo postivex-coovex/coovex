@@ -8,6 +8,16 @@ export const dynamic = 'force-dynamic'
 
 const INTEGRATION_GROUPS = [
   {
+    label: 'Website Publishing',
+    integrations: [
+      { type: 'wordpress_publish', name: 'WordPress (Auto-Publish)', icon: '🔵', desc: 'Publish blog posts via WP REST API — no plugin required' },
+      { type: 'webhook_publish',   name: 'Webhook (Custom Site)',    icon: '🔗', desc: 'Push content to any CMS or server via HTTP webhook' },
+      { type: 'ghost',             name: 'Ghost CMS',                icon: '👻', desc: 'Publish posts to Ghost via Admin API' },
+      { type: 'github',            name: 'GitHub (Jamstack)',         icon: '🐙', desc: 'Commit Markdown/HTML to your repo (Hugo, Jekyll, Astro…)' },
+      { type: 'sftp',              name: 'SFTP (Server Upload)',      icon: '🖥️', desc: 'Upload files directly to your web server via SSH' },
+    ],
+  },
+  {
     label: 'Social Media',
     integrations: [
       { type: 'linkedin',  name: 'LinkedIn',        icon: '💼', desc: 'Posts, company page analytics, profile monitoring',  href: '/settings/integrations#social', sourceKey: 'social' },

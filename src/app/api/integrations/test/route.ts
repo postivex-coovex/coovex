@@ -1,5 +1,6 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { testWebsiteIntegration, isWebsitePublisher } from '@/lib/publishing'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -9,6 +10,12 @@ export async function POST(request: NextRequest) {
   const { platform, settings } = await request.json()
 
   try {
+    // Website publishing integrations (WordPress, Ghost, GitHub, Webhook, SFTP)
+    if (isWebsitePublisher(platform)) {
+      const result = await testWebsiteIntegration(platform, settings)
+      return NextResponse.json(result)
+    }
+
     switch (platform) {
       case 'hubspot': {
         const res = await fetch('https://api.hubapi.com/crm/v3/objects/contacts?limit=1', {
