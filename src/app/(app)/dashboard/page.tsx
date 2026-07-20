@@ -88,14 +88,13 @@ export default async function DashboardPage() {
   const isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')
 
   return (
-    <div className="p-6 space-y-5 max-w-5xl mx-auto">
+    <div className="p-6 space-y-5 max-w-6xl mx-auto">
       <DailyBriefCard businessName={business.name} userName={profile?.name || ''} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left — main content */}
+        {/* Left — setup guide */}
         <div className="lg:col-span-2 space-y-5">
           <SetupGuide steps={setupSteps} userName={profile?.name || ''} />
-          <KanbanBoard />
         </div>
 
         {/* Right — sidebar */}
@@ -104,6 +103,9 @@ export default async function DashboardPage() {
           <GithubWidget />
         </div>
       </div>
+
+      {/* Task Board — full width */}
+      <KanbanBoard />
 
       {isAdmin && (
         <div className="border-t border-slate-800/60 pt-6">

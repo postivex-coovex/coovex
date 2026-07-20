@@ -18,18 +18,25 @@ export async function GET() {
   if (!business) return NextResponse.json({ tasks: [] })
 
   const today = new Date().toISOString().split('T')[0]
+  const sevenAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
 
-  const [{ data: tasks }, { data: dailyRow }] = await Promise.all([
+  const [{ data: tasks }, { data: dailyRow }, { data: signals }] = await Promise.all([
     supabase.from('tasks').select('*')
       .eq('business_id', business.id)
-      .gte('due_date', new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0])
+      .gte('due_date', sevenAgo)
       .order('created_at', { ascending: false }),
-    supabase.from('daily_tasks').select('*').eq('business_id', business.id).eq('date', today).maybeSingle(),
+    supabase.from('daily_tasks').select('*')
+      .eq('business_id', business.id).eq('date', today).maybeSingle(),
+    supabase.from('agent_signals').select('id, type, title, body, action_data_json')
+      .eq('business_id', business.id).eq('dismissed', false)
+      .in('type', ['task', 'opportunity', 'warning'])
+      .order('created_at', { ascending: false }).limit(8),
   ])
 
   const existingSourceIds = new Set((tasks ?? []).map((t: { source_id?: string }) => t.source_id).filter(Boolean))
   const toInsert: Record<string, unknown>[] = []
 
+  // Import today's AI daily tasks
   if (dailyRow?.tasks_json) {
     for (const t of dailyRow.tasks_json as Array<{
       id: string; title: string; description?: string; source?: string;
@@ -55,16 +62,39 @@ export async function GET() {
     }
   }
 
+  // Import undismissed agent signals
+  for (const sig of signals ?? []) {
+    const sourceId = `signal_${sig.id}`
+    if (!existingSourceIds.has(sourceId)) {
+      const actionUrl = (sig.action_data_json as Record<string, string> | null)?.url ?? null
+      const cat = sig.type === 'warning' ? 'audit' : 'gtm'
+      toInsert.push({
+        business_id: business.id,
+        workspace_id: profile.current_workspace_id,
+        title: sig.title,
+        description: (sig.body as string | null)?.slice(0, 200) ?? '',
+        category: cat,
+        status: 'todo',
+        priority: sig.type === 'warning' ? 'high' : 'medium',
+        source: 'ai',
+        source_id: sourceId,
+        href: actionUrl,
+        due_date: today,
+      })
+    }
+  }
+
   if (toInsert.length > 0) {
     await service.from('tasks').insert(toInsert)
   }
 
   const { data: merged } = await supabase.from('tasks').select('*')
     .eq('business_id', business.id)
-    .gte('due_date', new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0])
+    .gte('due_date', sevenAgo)
     .order('created_at', { ascending: false })
 
-  return NextResponse.json({ tasks: merged ?? [] })
+  const hasDailyTasks = !!dailyRow?.tasks_json
+  return NextResponse.json({ tasks: merged ?? [], hasDailyTasks })
 }
 
 export async function POST(req: Request) {

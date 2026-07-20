@@ -414,19 +414,30 @@ function Column({ title, icon, tasks, emptyText, onMove, onDelete, onUpdateNotes
 // ── Main Board ────────────────────────────────────────────────────────────────
 
 export function KanbanBoard() {
-  const [tasks, setTasks]       = useState<KanbanTask[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [refreshing, setRefresh] = useState(false)
-  const [addingTask, setAdding]  = useState(false)
-  const [movingId, setMovingId]  = useState<string | null>(null)
+  const [tasks, setTasks]         = useState<KanbanTask[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [refreshing, setRefresh]  = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [addingTask, setAdding]   = useState(false)
+  const [movingId, setMovingId]   = useState<string | null>(null)
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     else setRefresh(true)
     try {
       const res = await fetch('/api/tasks')
-      const data = await res.json() as { tasks?: KanbanTask[] }
+      const data = await res.json() as { tasks?: KanbanTask[]; hasDailyTasks?: boolean }
       setTasks(data.tasks ?? [])
+      // Auto-generate daily tasks if AI hasn't produced any yet today
+      if (!data.hasDailyTasks) {
+        setGenerating(true)
+        fetch('/api/agent/tasks/generate', { method: 'POST' })
+          .then(() => fetch('/api/tasks'))
+          .then(r => r.json())
+          .then((d: { tasks?: KanbanTask[] }) => { setTasks(d.tasks ?? []) })
+          .catch(() => {})
+          .finally(() => setGenerating(false))
+      }
     } finally {
       setLoading(false)
       setRefresh(false)
@@ -495,7 +506,15 @@ export function KanbanBoard() {
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
         <div>
-          <h2 className="text-sm font-bold text-white">Task Board</h2>
+          <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            Task Board
+            {generating && (
+              <span className="flex items-center gap-1 text-[10px] font-normal text-violet-400">
+                <span className="w-3 h-3 border border-violet-500 border-t-transparent rounded-full animate-spin inline-block" />
+                AI generating tasks…
+              </span>
+            )}
+          </h2>
           <p className="text-[10px] text-slate-600 mt-0.5">
             {todo.length + inProgress.length} active · {done.length} done
             {movingId && ' · saving…'}
