@@ -353,7 +353,22 @@ export async function GET() {
       .eq('key', 'geo_intelligence')
       .maybeSingle()
 
-    const intelligence = data?.value_text ? JSON.parse(data.value_text) : null
+    let intelligence: GeoIntelligence | null = null
+    if (data?.value_text) {
+      try {
+        const parsed = JSON.parse(data.value_text) as GeoIntelligence
+        // Validate required fields — corrupted cache returns null so client shows empty state
+        if (
+          Array.isArray(parsed?.prompt_examples) &&
+          Array.isArray(parsed?.topic_clusters) &&
+          Array.isArray(parsed?.content_gaps) &&
+          typeof parsed?.entity_score === 'number' &&
+          typeof parsed?.ai_voice_summary === 'string'
+        ) {
+          intelligence = parsed
+        }
+      } catch { /* corrupted JSON — return null */ }
+    }
     return NextResponse.json({ intelligence })
   } catch {
     return NextResponse.json({ intelligence: null })

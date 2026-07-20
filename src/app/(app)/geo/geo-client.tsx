@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Component, type ReactNode } from 'react'
 import { CheckCircle2, XCircle, RefreshCw, Copy, Download, ChevronDown, ChevronUp, Globe2, Brain, Sparkles, AlertCircle } from 'lucide-react'
 import { checkCredits } from '@/lib/client-credits'
 import { LiveVisibilityCheck } from '@/components/geo/live-visibility-check'
@@ -287,6 +287,29 @@ function CodeBlock({ content, filename }: { content: string; filename: string })
       <pre className="p-4 text-xs text-slate-300 font-mono overflow-x-auto bg-slate-950 max-h-80 overflow-y-auto whitespace-pre-wrap">{content}</pre>
     </div>
   )
+}
+
+// ─── Error Boundary for Intelligence Tab ─────────────────────────────────────
+
+class IntelligenceBoundary extends Component<{ children: ReactNode; onReset: () => void }, { crashed: boolean }> {
+  state = { crashed: false }
+  static getDerivedStateFromError() { return { crashed: true } }
+  render() {
+    if (this.state.crashed) return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="text-4xl mb-4">⚠️</div>
+        <p className="text-white font-semibold mb-1">Analysis data could not be displayed</p>
+        <p className="text-slate-400 text-sm mb-6">The cached data may be corrupted. Regenerate to fix this.</p>
+        <button
+          onClick={() => { this.setState({ crashed: false }); this.props.onReset() }}
+          className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm rounded-lg transition-colors"
+        >
+          Regenerate Analysis
+        </button>
+      </div>
+    )
+    return this.props.children
+  }
 }
 
 // ─── AI Intelligence Tab ──────────────────────────────────────────────────────
@@ -1216,20 +1239,22 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
 
         {/* ── AI Intelligence ── */}
         {activeTab === 'intelligence' && (
-          <IntelligenceTab
-            intelligence={intelligence}
-            onGenerate={handleGenerateIntelligence}
-            generating={intelLoading}
-            error={intelError}
-            logs={intelLogs}
-            generatedGaps={generatedGaps}
-            currentGeo={currentGeo}
-            websiteUrl={websiteUrl}
-            onContentGenerated={() => {
-              window.dispatchEvent(new CustomEvent('coovex:content-draft-added'))
-              window.dispatchEvent(new CustomEvent('coovex:credits-changed'))
-            }}
-          />
+          <IntelligenceBoundary onReset={handleGenerateIntelligence}>
+            <IntelligenceTab
+              intelligence={intelligence}
+              onGenerate={handleGenerateIntelligence}
+              generating={intelLoading}
+              error={intelError}
+              logs={intelLogs}
+              generatedGaps={generatedGaps}
+              currentGeo={currentGeo}
+              websiteUrl={websiteUrl}
+              onContentGenerated={() => {
+                window.dispatchEvent(new CustomEvent('coovex:content-draft-added'))
+                window.dispatchEvent(new CustomEvent('coovex:credits-changed'))
+              }}
+            />
+          </IntelligenceBoundary>
         )}
 
         {/* ── Generators ── */}
