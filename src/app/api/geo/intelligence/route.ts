@@ -4,6 +4,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import Anthropic from '@anthropic-ai/sdk'
 import { GoogleGenerativeAI, DynamicRetrievalMode } from '@google/generative-ai'
 import { deductCredits } from '@/lib/credits'
+import { logActivity } from '@/lib/activity-log'
 
 export const maxDuration = 60
 
@@ -312,6 +313,7 @@ Rules:
         }
 
         log(`✅ Analysis complete — ${intelligence.prompt_examples.length} prompts · ${intelligence.topic_clusters.length} topics · ${intelligence.content_gaps.length} content gaps`)
+        logActivity({ action: 'geo_intelligence', description: 'AI Intelligence Report generated', credits_used: 5, business_id: business.id }).catch(() => {})
         done(intelligence)
       } catch (e) {
         error(e instanceof Error ? e.message : 'Analysis failed')

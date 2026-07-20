@@ -123,6 +123,88 @@ function Toggle({ checked, onChange, label, sub }: { checked: boolean; onChange:
   )
 }
 
+/* ── Switch Business Button ─────────────────────────────────────────── */
+function SwitchBusinessButton({
+  previousWorkspaceId,
+  onSwitch,
+  switching,
+}: {
+  previousWorkspaceId: string | null
+  onSwitch: () => void
+  switching: boolean
+}) {
+  const router = useRouter()
+  const [workspaces, setWorkspaces] = useState<{ workspace_id: string; business_name: string; is_current: boolean }[]>([])
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  async function fetchWorkspaces() {
+    setLoading(true)
+    const res = await fetch('/api/workspaces')
+    const data = await res.json() as { workspaces?: typeof workspaces }
+    setWorkspaces((data.workspaces ?? []).filter(w => !w.is_current))
+    setLoading(false)
+    setOpen(true)
+  }
+
+  async function switchTo(wsId: string) {
+    await fetch('/api/workspaces/switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workspace_id: wsId }),
+    })
+    router.refresh()
+    router.push('/dashboard')
+  }
+
+  if (previousWorkspaceId) {
+    return (
+      <button onClick={onSwitch} disabled={switching}
+        className="w-full flex items-center justify-center gap-1.5 text-xs text-slate-400 hover:text-slate-500 mt-3 py-1.5 transition-colors disabled:opacity-50">
+        <ArrowLeft className="w-3 h-3" />
+        {switching ? 'Switching back…' : 'Cancel — go back to previous business'}
+      </button>
+    )
+  }
+
+  return (
+    <div className="mt-3">
+      {!open ? (
+        <button
+          onClick={fetchWorkspaces}
+          className="w-full text-xs text-slate-400 hover:text-slate-600 py-1.5 transition-colors"
+        >
+          {loading ? 'Loading…' : '↩ Switch to another business'}
+        </button>
+      ) : (
+        <div className="border border-slate-200 rounded-xl overflow-hidden">
+          <p className="px-3 py-2 text-[10px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-200">
+            Switch to existing business
+          </p>
+          {workspaces.length === 0 ? (
+            <p className="px-3 py-3 text-xs text-slate-400 text-center">No other businesses found.</p>
+          ) : (
+            workspaces.map(ws => (
+              <button
+                key={ws.workspace_id}
+                onClick={() => switchTo(ws.workspace_id)}
+                className="w-full flex items-center gap-2 px-3 py-2.5 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
+              >
+                <span className="text-base">🏢</span>
+                <span className="text-sm text-slate-700 font-medium">{ws.business_name}</span>
+                <span className="ml-auto text-xs text-violet-600">Switch →</span>
+              </button>
+            ))
+          )}
+          <button onClick={() => setOpen(false)} className="w-full text-xs text-slate-400 py-2 hover:text-slate-600 transition-colors">
+            Cancel
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ── Main modal ─────────────────────────────────────────────────────── */
 export function BusinessOnboardingModal({ open, businessName, previousWorkspaceId, onContinue }: Props) {
   const router = useRouter()
@@ -471,12 +553,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               Start &amp; Continue <ChevronRight className="w-4 h-4" />
             </button>
 
-            {previousWorkspaceId && (
-              <button onClick={handleDismiss} disabled={switching} className="w-full flex items-center justify-center gap-1.5 text-xs text-slate-400 hover:text-slate-500 mt-3 py-1.5 transition-colors disabled:opacity-50">
-                <ArrowLeft className="w-3 h-3" />
-                {switching ? 'Switching back…' : 'Cancel — go back to previous business'}
-              </button>
-            )}
+            <SwitchBusinessButton previousWorkspaceId={previousWorkspaceId} onSwitch={handleDismiss} switching={switching} />
           </div>
         )}
 

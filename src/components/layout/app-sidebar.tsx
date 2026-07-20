@@ -8,7 +8,7 @@ import {
   MessageSquare, Star, Target, TrendingUp,
   Settings, Zap, Search, ChevronRight, ClipboardCheck, FileText, Mail,
   Lightbulb, UserCircle, Presentation, BookOpen, LineChart, ThumbsUp, DollarSign,
-  PieChart, Map, Bot, Building2, FileDown, Activity, Crosshair, Banknote, Snowflake, Bell, Filter, LogOut, Package, Globe2, LayoutGrid, Inbox, Radio, GripVertical, Pin, PinOff, FolderGit2,
+  PieChart, Map, Bot, Building2, FileDown, Activity, Crosshair, Banknote, Snowflake, Bell, Filter, LogOut, Package, Globe2, LayoutGrid, Inbox, Radio, GripVertical, Pin, PinOff, FolderGit2, UserSquare2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BrandLogo } from './brand-logo'
@@ -110,9 +110,10 @@ const navGroups: { label: string | null; items: NavItem[] }[] = [
   {
     label: 'Settings',
     items: [
-      { label: 'Settings',     href: '/settings',       icon: Settings, badge: null, sub: false },
-      { label: 'Integrations', href: '/integrations',   icon: Zap,      badge: null, sub: true  },
-      { label: 'Email',        href: '/settings/email', icon: Mail,     badge: null, sub: true  },
+      { label: 'Settings',     href: '/settings',       icon: Settings,      badge: null, sub: false },
+      { label: 'Team',         href: '/settings/team',  icon: UserSquare2,   badge: null, sub: true  },
+      { label: 'Integrations', href: '/integrations',   icon: Zap,           badge: null, sub: true  },
+      { label: 'Email',        href: '/settings/email', icon: Mail,          badge: null, sub: true  },
     ],
   },
 ]

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logActivity } from '@/lib/activity-log'
 
 // ─── GEO check (copied from audit/run/route.ts) ───────────────────────────────
 
@@ -158,6 +159,7 @@ export async function POST() {
       return NextResponse.json({ geo, url, saved: false, saveError: insertError.message })
     }
 
+    logActivity({ action: 'geo_scan', description: `GEO Scan — ${url}`, business_id: business.id }).catch(() => {})
     return NextResponse.json({ geo, url, saved: true })
   } catch (error) {
     console.error('POST /api/geo/scan error:', error)
