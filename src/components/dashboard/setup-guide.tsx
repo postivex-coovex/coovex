@@ -3,186 +3,257 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-interface SetupGuideProps {
-  steps: {
-    hasAudit:       boolean
-    hasProducts:    boolean
-    hasSocial:      boolean
-    hasCompetitors: boolean
-    knowsIcp:       boolean
-    hasCampaign:    boolean
-    hasLeads:       boolean
-    hasEmail:       boolean
-    hasProposal:    boolean
-    hasCrm:        boolean
-  }
-  userName?: string
+export interface OnboardingSteps {
+  hasProfile:      boolean
+  hasProducts:     boolean
+  hasGeoScan:      boolean
+  hasCompetitors:  boolean
+  hasIntelligence: boolean
+  hasGenerators:   boolean
+  hasGtm:          boolean
+  hasLeads:        boolean
+  hasProposal:     boolean
 }
 
-const DISMISS_KEY = 'coovex_setup_dismissed'
-
-const TASK_LIST = [
+const PHASES = [
   {
-    id: 'audit',
-    icon: '🔍',
-    title: 'Run Website Audit',
-    desc: 'AI learns your brand, SEO gaps, and GEO visibility in ~30 seconds.',
-    href: '/audit',
-    doneKey: 'hasAudit' as const,
+    id: 'setup',
+    label: 'Setup',
+    emoji: '⚙️',
+    steps: [
+      {
+        key: 'hasProfile' as const,
+        icon: '🏢',
+        title: 'Business Profile',
+        desc: 'Add your business name, website, industry and target customer.',
+        href: '/settings',
+        cta: 'Complete Profile',
+      },
+      {
+        key: 'hasProducts' as const,
+        icon: '📦',
+        title: 'Products & Services',
+        desc: 'Tell AI what you sell — this makes every analysis far more accurate.',
+        href: '/products',
+        cta: 'Add Products',
+      },
+    ],
   },
   {
-    id: 'products',
-    icon: '📦',
-    title: 'Add Products & Services',
-    desc: 'Help AI know what you sell — enables better lead targeting and proposals.',
-    href: '/products',
-    doneKey: 'hasProducts' as const,
+    id: 'understand',
+    label: 'Understand',
+    emoji: '🔍',
+    steps: [
+      {
+        key: 'hasGeoScan' as const,
+        icon: '🌐',
+        title: 'Run GEO Scan',
+        desc: 'See your current AI visibility score and what's missing on your website.',
+        href: '/geo',
+        cta: 'Run Scan',
+      },
+      {
+        key: 'hasCompetitors' as const,
+        icon: '🕵️',
+        title: 'Add Competitors',
+        desc: 'AI tracks competitor pricing, content and features — gives you context.',
+        href: '/competitors',
+        cta: 'Add Competitors',
+      },
+      {
+        key: 'hasIntelligence' as const,
+        icon: '🧠',
+        title: 'AI Intelligence Report',
+        desc: 'See exactly how AI assistants like ChatGPT and Gemini describe your business.',
+        href: '/geo?tab=intelligence',
+        cta: 'Generate Report',
+      },
+    ],
   },
   {
-    id: 'social',
-    icon: '🔗',
-    title: 'Connect Social Profiles',
-    desc: 'AI monitors and auto-generates social content daily.',
-    href: '/integrations',
-    doneKey: 'hasSocial' as const,
-  },
-  {
-    id: 'competitors',
-    icon: '🕵️',
-    title: 'Add Competitors',
-    desc: 'AI tracks rival pricing, content, and feature changes in real-time.',
-    href: '/competitors',
-    doneKey: 'hasCompetitors' as const,
-  },
-  {
-    id: 'leads',
-    icon: '👥',
-    title: 'Find Your First Leads',
-    desc: 'AI discovers 10–20 qualified leads matching your ideal customer profile.',
-    href: '/leads',
-    doneKey: 'hasLeads' as const,
-  },
-  {
-    id: 'email',
-    icon: '📧',
-    title: 'Connect Email SMTP',
-    desc: 'Set up your email so AI runs outreach campaigns from your own domain.',
-    href: '/settings',
-    doneKey: 'hasEmail' as const,
-  },
-  {
-    id: 'campaign',
-    icon: '📋',
-    title: 'Create a Campaign',
-    desc: 'AI writes personalised outreach emails for your lead pipeline.',
-    href: '/campaigns',
-    doneKey: 'hasCampaign' as const,
-  },
-  {
-    id: 'proposal',
-    icon: '📄',
-    title: 'Send a Proposal',
-    desc: 'AI generates a polished tracked proposal — impress your first client.',
-    href: '/proposals',
-    doneKey: 'hasProposal' as const,
-  },
-  {
-    id: 'crm',
-    icon: '🔄',
-    title: 'Integrate Your CRM',
-    desc: 'AI learns from every deal and improves its daily advice.',
-    href: '/integrations',
-    doneKey: 'hasCrm' as const,
+    id: 'grow',
+    label: 'Grow',
+    emoji: '🚀',
+    steps: [
+      {
+        key: 'hasGenerators' as const,
+        icon: '🛠️',
+        title: 'Fix AI Visibility',
+        desc: 'Generate llms.txt and JSON-LD structured data — gets you into AI search results.',
+        href: '/geo?tab=generators',
+        cta: 'Fix Now',
+      },
+      {
+        key: 'hasGtm' as const,
+        icon: '🎯',
+        title: 'GTM Strategy',
+        desc: 'AI builds your go-to-market plan — which channels, what to post, and when.',
+        href: '/tools/marketing-plan',
+        cta: 'Build Strategy',
+      },
+      {
+        key: 'hasLeads' as const,
+        icon: '👥',
+        title: 'Find Your First Leads',
+        desc: 'AI discovers qualified prospects matching your ideal customer profile.',
+        href: '/leads',
+        cta: 'Find Leads',
+      },
+      {
+        key: 'hasProposal' as const,
+        icon: '📄',
+        title: 'Send a Proposal',
+        desc: 'AI writes a polished tracked proposal — close your first deal.',
+        href: '/proposals',
+        cta: 'Create Proposal',
+      },
+    ],
   },
 ]
 
-export function SetupGuide({ steps, userName }: SetupGuideProps) {
+const DISMISS_KEY = 'coovex_onboarding_v2_dismissed'
+
+export function SetupGuide({ steps, userName }: { steps: OnboardingSteps; userName?: string }) {
   const [dismissed, setDismissed] = useState(false)
   const [mounted, setMounted]     = useState(false)
-  const [showAll, setShowAll]     = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    if (typeof window !== 'undefined') {
-      setDismissed(localStorage.getItem(DISMISS_KEY) === '1')
-    }
+    setDismissed(localStorage.getItem(DISMISS_KEY) === '1')
   }, [])
 
-  const tasks     = TASK_LIST.map(t => ({ ...t, done: steps[t.doneKey] }))
-  const doneCount = tasks.filter(t => t.done).length
-  const total     = tasks.length
-  const pct       = Math.round((doneCount / total) * 100)
-  const allDone   = doneCount === total
-  const nextTask  = tasks.find(t => !t.done)
+  const allStepKeys = PHASES.flatMap(p => p.steps.map(s => s.key))
+  const doneCount   = allStepKeys.filter(k => steps[k]).length
+  const total       = allStepKeys.length
+  const allDone     = doneCount === total
 
-  if (!mounted || dismissed || allDone || !nextTask) return null
+  if (!mounted || dismissed || allDone) return null
+
+  // Find current active phase (first phase with incomplete steps)
+  const activePhaseIdx = PHASES.findIndex(p => p.steps.some(s => !steps[s.key]))
 
   const firstName = userName?.split(' ')[0] || ''
 
   return (
-    <div className="bg-slate-900 border border-violet-800/30 rounded-2xl overflow-hidden">
-      {/* Next step banner */}
-      <div className="px-5 py-4">
-        <div className="flex items-start justify-between gap-3 mb-1">
-          <p className="text-[10px] font-semibold text-violet-400 uppercase tracking-wider">
-            {firstName ? `${firstName}'s next step` : 'Your next step'} · {doneCount}/{total} done
-          </p>
-          <button
-            onClick={() => { localStorage.setItem(DISMISS_KEY, '1'); setDismissed(true) }}
-            className="text-slate-600 hover:text-slate-400 text-xs transition-colors flex-shrink-0 -mt-0.5"
-            title="Dismiss"
-          >
-            ✕
-          </button>
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-slate-800">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-semibold text-white">
+            {firstName ? `${firstName}'s ` : ''}Getting Started
+          </span>
+          <span className="text-xs text-slate-500">{doneCount}/{total} done</span>
         </div>
+        <button
+          onClick={() => { localStorage.setItem(DISMISS_KEY, '1'); setDismissed(true) }}
+          className="text-slate-600 hover:text-slate-400 text-xs transition-colors"
+          title="Hide"
+        >
+          ✕
+        </button>
+      </div>
 
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-full bg-slate-800 rounded-full h-1.5">
-            <div
-              className="h-1.5 rounded-full bg-violet-500 transition-all duration-500"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <span className="text-xs text-slate-500 flex-shrink-0">{pct}%</span>
-        </div>
-
-        <div className="flex items-start gap-4">
-          <span className="text-2xl flex-shrink-0 mt-0.5">{nextTask.icon}</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm mb-0.5">{nextTask.title}</p>
-            <p className="text-slate-400 text-xs leading-relaxed mb-3">{nextTask.desc}</p>
-            <div className="flex items-center gap-3">
-              <Link
-                href={nextTask.href}
-                className="px-4 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-colors"
-              >
-                Start Now →
-              </Link>
-              <button
-                onClick={() => setShowAll(v => !v)}
-                className="text-slate-500 hover:text-slate-300 text-xs transition-colors"
-              >
-                {showAll ? '↑ Hide checklist' : `↓ See all ${total - doneCount} remaining`}
-              </button>
-            </div>
-          </div>
+      {/* Progress bar */}
+      <div className="px-5 pt-3 pb-1">
+        <div className="w-full bg-slate-800 rounded-full h-1">
+          <div
+            className="h-1 rounded-full bg-violet-500 transition-all duration-500"
+            style={{ width: `${Math.round((doneCount / total) * 100)}%` }}
+          />
         </div>
       </div>
 
-      {/* Expandable checklist */}
-      {showAll && (
-        <div className="border-t border-slate-800 divide-y divide-slate-800/50">
-          {tasks.filter(t => !t.done).map(task => (
-            <Link
-              key={task.id}
-              href={task.href}
-              className="flex items-center gap-3 px-5 py-3 hover:bg-slate-800/40 transition-colors group"
+      {/* Phase tabs */}
+      <div className="flex px-5 pt-3 pb-3 gap-2">
+        {PHASES.map((phase, idx) => {
+          const phaseDone  = phase.steps.filter(s => steps[s.key]).length
+          const phaseTotal = phase.steps.length
+          const isActive   = idx === activePhaseIdx
+          const isComplete = phaseDone === phaseTotal
+          const isLocked   = idx > activePhaseIdx
+
+          return (
+            <div
+              key={phase.id}
+              className={`flex-1 rounded-xl px-3 py-2.5 border transition-colors ${
+                isActive
+                  ? 'bg-violet-950/40 border-violet-700/50'
+                  : isComplete
+                  ? 'bg-emerald-950/20 border-emerald-800/30'
+                  : 'bg-slate-800/30 border-slate-800'
+              }`}
             >
-              <span className="text-base flex-shrink-0">{task.icon}</span>
-              <p className="text-xs text-slate-300 group-hover:text-white flex-1">{task.title}</p>
-              <span className="text-slate-600 group-hover:text-slate-400 text-xs">→</span>
-            </Link>
-          ))}
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-sm">{phase.emoji}</span>
+                <span className={`text-[11px] font-semibold ${
+                  isActive ? 'text-violet-300' : isComplete ? 'text-emerald-400' : 'text-slate-600'
+                }`}>
+                  {phase.label}
+                </span>
+                {isLocked && <span className="text-[10px] text-slate-700">🔒</span>}
+              </div>
+              <div className="flex gap-1">
+                {phase.steps.map(s => (
+                  <div
+                    key={s.key}
+                    className={`h-1 flex-1 rounded-full ${
+                      steps[s.key]
+                        ? isActive ? 'bg-violet-500' : 'bg-emerald-500'
+                        : 'bg-slate-700'
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className={`text-[10px] mt-1 ${isActive ? 'text-violet-400' : isComplete ? 'text-emerald-500' : 'text-slate-700'}`}>
+                {isComplete ? 'Complete ✓' : `${phaseDone}/${phaseTotal} done`}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Active phase steps */}
+      {PHASES[activePhaseIdx] && (
+        <div className="border-t border-slate-800">
+          {PHASES[activePhaseIdx].steps.map((step, i) => {
+            const done = steps[step.key]
+            const isNext = !done && PHASES[activePhaseIdx].steps.slice(0, i).every(s => steps[s.key])
+
+            return (
+              <div
+                key={step.key}
+                className={`flex items-center gap-4 px-5 py-3.5 border-b border-slate-800/60 last:border-0 ${
+                  done ? 'opacity-50' : ''
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-base ${
+                  done ? 'bg-emerald-900/60' : isNext ? 'bg-violet-900/60' : 'bg-slate-800'
+                }`}>
+                  {done ? '✅' : step.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${done ? 'text-slate-400 line-through' : 'text-white'}`}>
+                    {step.title}
+                  </p>
+                  {!done && (
+                    <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{step.desc}</p>
+                  )}
+                </div>
+                {!done && (
+                  <Link
+                    href={step.href}
+                    className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                      isNext
+                        ? 'bg-violet-600 hover:bg-violet-500 text-white'
+                        : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
+                    }`}
+                  >
+                    {step.cta} →
+                  </Link>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
