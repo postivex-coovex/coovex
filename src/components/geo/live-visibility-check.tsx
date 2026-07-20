@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { GeoIntelligence } from '@/app/api/geo/intelligence/route'
+import type { GeoIntelligence } from '@/types/geo'
 
 type GeoFlags = { structured_data?: boolean; llms_txt?: boolean } | null
 
