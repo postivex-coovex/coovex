@@ -48,7 +48,7 @@ const PHASES = [
         key: 'hasGeoScan' as const,
         icon: '🌐',
         title: 'Run GEO Scan',
-        desc: 'See your current AI visibility score and what's missing on your website.',
+        desc: "See your current AI visibility score and what's missing on your website.",
         href: '/geo',
         cta: 'Run Scan',
       },
