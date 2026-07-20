@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import type { ExecutionPlan, PlanMilestone } from '@/app/api/tools/business-plan/route'
+import type { ExecutionPlan, PlanMilestone } from '@/types/business-plan'
 
 const PRIORITY_COLOR: Record<string, string> = {
   high:   'bg-red-500/20 text-red-300 border-red-500/30',

@@ -5,18 +5,8 @@ import { GoogleGenerativeAI, DynamicRetrievalMode } from '@google/generative-ai'
 
 export const maxDuration = 60
 
-export type VisibilityResult = {
-  checks: {
-    query: string
-    ai: string
-    found: boolean
-    response_snippet: string
-    sources: string[]
-    search_queries?: string[]
-  }[]
-  visibility_rate: number
-  checked_at: string
-}
+export type { VisibilityResult } from '@/types/geo'
+import type { VisibilityResult } from '@/types/geo'
 
 // GET — return cached result
 export async function GET() {

@@ -2,15 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import Anthropic from '@anthropic-ai/sdk'
 
-export interface Community {
-  name: string
-  platform: 'reddit' | 'facebook' | 'linkedin' | 'slack' | 'discord' | 'other'
-  url: string
-  members: string
-  why: string
-  post_tip: string
-  post_type: 'story' | 'question' | 'value' | 'showcase'
-}
+export type { Community } from '@/types/marketing-plan'
+import type { Community } from '@/types/marketing-plan'
 
 const FALLBACK_COMMUNITIES: Community[] = [
   { name: 'r/SaaS', platform: 'reddit', url: 'https://reddit.com/r/SaaS', members: '230K', why: 'SaaS founders and buyers actively discuss tools — ideal for product showcases', post_tip: 'Share a transparent revenue milestone or "what I learned building X" — avoid direct promotion', post_type: 'story' },

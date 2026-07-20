@@ -3,31 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { deductCredits } from '@/lib/credits'
 
-export interface MarketingAction {
-  title: string
-  description: string
-  impact: 'high' | 'medium' | 'low'
-  effort: 'high' | 'medium' | 'low'
-  timeline: string
-  action_type: string   // maps to CooVex feature or external
-  ai_help_type: string | null  // 'linkedin_post' | 'email_sequence' | 'ad_copy' | null
-  external_tools: string[]
-}
-
-export interface MarketingPhase {
-  name: string
-  weeks: string
-  focus: string
-  actions: MarketingAction[]
-}
-
-export interface MarketingPlan {
-  goal: string
-  strategy_summary: string
-  key_channels: string[]
-  phases: MarketingPhase[]
-  expected_results: { label: string; value: string }[]
-}
+export type { MarketingAction, MarketingPhase, MarketingPlan } from '@/types/marketing-plan'
+import type { MarketingAction, MarketingPhase, MarketingPlan } from '@/types/marketing-plan'
 
 const FALLBACK: MarketingPlan = {
   goal: 'Generate 100 qualified leads in 30 days',

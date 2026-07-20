@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import type { MarketingPlan, MarketingAction } from '@/app/api/tools/marketing-plan/route'
-import type { Community } from '@/app/api/tools/marketing-plan/communities/route'
+import type { MarketingPlan, MarketingAction, Community } from '@/types/marketing-plan'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface LaunchPlatform {

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { LiveVisibilityCheck } from '@/components/geo/live-visibility-check'
-import type { VisibilityResult } from '@/app/api/geo/visibility-check/route'
+import type { VisibilityResult } from '@/types/geo'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

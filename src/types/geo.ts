@@ -1,3 +1,16 @@
+export type VisibilityResult = {
+  checks: {
+    query: string
+    ai: string
+    found: boolean
+    response_snippet: string
+    sources: string[]
+    search_queries?: string[]
+  }[]
+  visibility_rate: number
+  checked_at: string
+}
+
 export interface GeoIntelligence {
   prompt_examples: {
     prompt: string
