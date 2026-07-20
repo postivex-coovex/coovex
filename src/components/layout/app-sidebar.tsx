@@ -248,21 +248,19 @@ export function AppSidebar({ user, currentBusinessName = 'My Business', onNavCli
             item.sub ? 'px-3 py-1.5 ml-4 pr-7' : 'px-3 py-2 pr-7',
             active
               ? isDashboard
-                ? 'bg-violet-600/25 text-violet-300 ring-1 ring-violet-600/40'
+                ? 'bg-gradient-to-r from-violet-600/30 to-blue-600/20 text-white ring-1 ring-violet-500/50 shadow-sm shadow-violet-900/30'
                 : 'bg-blue-600/20 text-blue-400'
               : isDashboard
-                ? 'bg-slate-800 text-slate-200 hover:bg-violet-900/30 hover:text-violet-200 ring-1 ring-slate-700/60'
+                ? 'bg-gradient-to-r from-violet-900/50 to-slate-800 text-slate-100 hover:from-violet-800/50 hover:to-slate-700 ring-1 ring-violet-700/40 shadow-sm shadow-violet-900/20'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
           )}
         >
           <item.icon className={cn(
             'flex-shrink-0',
             item.sub ? 'w-3.5 h-3.5' : 'w-4 h-4',
-            active
-              ? isDashboard ? 'text-violet-400' : 'text-blue-400'
-              : isDashboard ? 'text-violet-400' : 'text-slate-500 group-hover:text-slate-400'
+            isDashboard ? 'text-violet-400' : active ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-400'
           )} />
-          <span className={cn('flex-1 truncate', item.sub && 'text-[13px]')}>{item.label}</span>
+          <span className={cn('flex-1 truncate', item.sub && 'text-[13px]', isDashboard && 'font-semibold')}>{item.label}</span>
           {item.badge && (
             <Badge className="text-xs px-1.5 py-0 bg-blue-600 text-white border-0 flex-shrink-0">
               {item.badge}
