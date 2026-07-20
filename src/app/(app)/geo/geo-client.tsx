@@ -410,7 +410,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
             {!generating && (
               <>
                 <p className="text-slate-400 text-sm mb-4 max-w-md mx-auto">
-                  Claude + Gemini analyze your business to tell you exactly where you stand in AI search results — and what to do to get mentioned more.
+                  AI analyzes your business to tell you exactly where you stand in AI search results — and what to do to get mentioned more.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6 text-left max-w-lg mx-auto">
                   {[
