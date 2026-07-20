@@ -4,14 +4,11 @@ import { syncBusinessMemory } from '@/lib/agent/sync-memory'
 import { HealthScoreCard } from '@/components/dashboard/health-score-card'
 import { DailyBriefCard } from '@/components/dashboard/daily-brief-card'
 import { SetupGuide } from '@/components/dashboard/setup-guide'
-import { DailyTasksCard } from '@/components/dashboard/daily-tasks-card'
+import { KanbanBoard } from '@/components/dashboard/kanban-board'
 import { GithubWidget } from '@/components/dashboard/github-widget'
-import { SmartActionsPanel } from './smart-actions-panel'
 import { PromotionAuditPanel } from './promotion-audit-panel'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import type { DailyTask } from '@/types'
-
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAIL || '')
   .split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
 
@@ -48,8 +45,6 @@ export default async function DashboardPage() {
 
   syncBusinessMemory(business.id, profile?.current_workspace_id ?? '', 10 * 60 * 1000).catch(() => {})
 
-  const today = new Date().toISOString().split('T')[0]
-
   const [
     { count: productCount },
     { count: proposalCount },
@@ -57,8 +52,6 @@ export default async function DashboardPage() {
     { count: leadsTotal },
     { data: geoData },
     { data: memKeys },
-    { data: dailyTasks },
-    { data: streakMem },
   ] = await Promise.all([
     supabase.from('products').select('*', { count: 'exact', head: true })
       .eq('business_id', business.id),
@@ -73,10 +66,6 @@ export default async function DashboardPage() {
     service.from('agent_memory').select('key')
       .eq('business_id', business.id)
       .in('key', ['geo_intelligence', 'marketing_plan']),
-    supabase.from('daily_tasks').select('*')
-      .eq('business_id', business.id).eq('date', today).maybeSingle(),
-    service.from('agent_memory').select('value_text')
-      .eq('business_id', business.id).eq('key', 'daily_task_streak').maybeSingle(),
   ])
 
   const foundMemKeys = (memKeys ?? []).map((r: { key: string }) => r.key)
@@ -96,17 +85,6 @@ export default async function DashboardPage() {
     hasProposal:     (proposalCount   ?? 0) > 0,
   }
 
-  let streak = 0
-  if (streakMem?.value_text) {
-    try {
-      const s = JSON.parse(streakMem.value_text) as { streak: number; last_completed_date: string }
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-      if (s.last_completed_date === today || s.last_completed_date === yesterday) {
-        streak = s.streak ?? 0
-      }
-    } catch {}
-  }
-
   const isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')
 
   return (
@@ -117,12 +95,7 @@ export default async function DashboardPage() {
         {/* Left — main content */}
         <div className="lg:col-span-2 space-y-5">
           <SetupGuide steps={setupSteps} userName={profile?.name || ''} />
-          <DailyTasksCard
-            tasks={dailyTasks as DailyTask | null}
-            businessId={business.id}
-            initialStreak={streak}
-          />
-          <SmartActionsPanel />
+          <KanbanBoard />
         </div>
 
         {/* Right — sidebar */}
