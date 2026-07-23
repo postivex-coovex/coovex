@@ -257,7 +257,7 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
 
   if (view === 'platform-launch') {
     return (
-      <div className="p-4 sm:p-6 max-w-3xl mx-auto">
+      <div className="p-4 sm:p-6 max-w-5xl mx-auto">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-white mb-1">Platform Launch Tracker</h1>
           <p className="text-slate-400 text-xs">Track where you&apos;ve launched your business. These platforms boost discovery, backlinks, and early customers.</p>
@@ -590,63 +590,19 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
         </div>
       )}
 
-      {/* ── Launch Platform Tracker ─────────────────────────────────────────── */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-        <div className="flex items-center gap-2 mb-1">
-          <span>🚀</span>
-          <h2 className="text-sm font-semibold text-white">Platform Launch Tracker</h2>
-          <span className="ml-auto text-xs text-slate-500">
-            {Object.values(launchMap).filter(s => s.status === 'done' || s.status === 'live').length} / {LAUNCH_PLATFORMS.length} done
-          </span>
+      {/* ── Platform Launch Tracker link ─────────────────────────────────────── */}
+      <a href="/gtm-agent/platform-launch" className="flex items-center justify-between bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 transition-colors group">
+        <div className="flex items-center gap-3">
+          <span className="text-xl">🚀</span>
+          <div>
+            <p className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">Platform Launch Tracker</p>
+            <p className="text-xs text-slate-500">
+              {Object.values(launchMap).filter(s => s.status === 'done' || s.status === 'live').length} / {LAUNCH_PLATFORMS.length} platforms launched
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-slate-600 mb-4">Click to mark as launched. These platforms boost discovery, backlinks, and early customers.</p>
-
-        {/* Group by category */}
-        {(['Launch', 'Social', 'Search', 'Directory'] as const).map(cat => {
-          const platforms = LAUNCH_PLATFORMS.filter(p => p.category === cat)
-          return (
-            <div key={cat} className="mb-3 last:mb-0">
-              <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wider mb-2">{cat}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                {platforms.map(p => {
-                  const entry = launchMap[p.id] ?? { status: 'not_started' }
-                  const done = entry.status === 'done' || entry.status === 'live'
-                  const isAutoDetected = entry.status === 'live'
-                  const detectedUrl = entry.url
-                  const toggling = togglingPlatform === p.id
-                  return (
-                    <div key={p.id} className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-colors ${done ? 'bg-blue-600/8 border-slate-700/30' : 'bg-slate-800/50 border-slate-700/50'}`}>
-                      <button
-                        onClick={() => togglePlatform(p.id, entry)}
-                        disabled={toggling}
-                        className={`w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center text-[10px] transition-colors ${
-                          done ? 'bg-blue-600 border-blue-400 text-white' : 'border-slate-600 text-slate-600 hover:border-slate-400'
-                        }`}
-                      >
-                        {toggling ? <span className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" /> : done ? '✓' : '○'}
-                      </button>
-                      <span className="text-sm flex-shrink-0">{p.icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <span className={`text-xs block truncate ${done ? 'text-slate-300 line-through decoration-emerald-600' : 'text-slate-400'}`}>{p.label}</span>
-                        {isAutoDetected && (
-                          <span className="text-[9px] text-blue-500 font-medium">AI detected</span>
-                        )}
-                      </div>
-                      {done && detectedUrl && (
-                        <a href={detectedUrl} target="_blank" rel="noopener noreferrer"
-                          className="text-[10px] text-blue-600 hover:text-blue-400 flex-shrink-0 transition-colors" title="View listing">↗</a>
-                      )}
-                      {!done && (
-                        <a href={p.href} target="_blank" rel="noopener noreferrer" className="text-[10px] text-slate-600 hover:text-blue-400 flex-shrink-0 transition-colors">↗</a>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })}
-      </div>
+        <span className="text-slate-500 text-sm group-hover:text-blue-400 transition-colors">→</span>
+      </a>
 
       {/* Pre-run prompt if no last run */}
       {!lastRun && !running && (
