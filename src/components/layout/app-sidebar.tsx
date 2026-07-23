@@ -99,7 +99,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Overview',              href: '/leads' },
       { label: 'ICP Builder',           href: '/leads/icp' },
-      { label: 'AI Leads Finder',       href: '/leads/find' },
+      { label: 'AI Leads Finder',       href: '/leads/finder' },
       { label: 'Integrations & Import', href: '/leads/integrations' },
     ],
   },

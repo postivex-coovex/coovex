@@ -11,6 +11,7 @@ import { FindLeadsTab } from '@/components/leads/find-leads-tab'
 interface LeadsClientProps {
   leads: Lead[]
   businessId: string
+  initialTab?: 'leads' | 'reddit'
 }
 
 function LeadAvatar({ name, email, website, size = 7 }: { name: string; email?: string | null; website?: string | null; size?: number }) {
@@ -74,9 +75,9 @@ const SOURCE_LABELS: Record<string, string> = {
 type ViewType = 'list' | 'pipeline'
 type TabType  = 'leads' | 'reddit'
 
-export function LeadsClient({ leads, businessId }: LeadsClientProps) {
+export function LeadsClient({ leads, businessId, initialTab = 'leads' }: LeadsClientProps) {
   const router = useRouter()
-  const [activeTab, setActiveTab]     = useState<TabType>('leads')
+  const [activeTab, setActiveTab]     = useState<TabType>(initialTab)
   const [view, setView]               = useState<ViewType>('list')
   const [search, setSearch]           = useState('')
   const [stageFilter, setStageFilter] = useState<string>('all')
