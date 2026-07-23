@@ -1135,17 +1135,17 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                     )}
 
                     {/* Content to Create — top 3 high-impact */}
-                    {contentGaps.length > 0 && (
+                    {(intelligence?.content_gaps?.length ?? 0) > 0 && (
                       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm font-semibold text-white">✍️ Content to Create</p>
                           <button onClick={() => setActiveTab('intelligence')}
                             className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-                            See all {contentGaps.length} →
+                            See all {intelligence?.content_gaps?.length ?? 0} →
                           </button>
                         </div>
                         <div className="space-y-2">
-                          {[...contentGaps]
+                          {[...(intelligence?.content_gaps ?? [])]
                             .sort((a, b) => ({ high: 0, medium: 1, low: 2 }[a.impact] - { high: 0, medium: 1, low: 2 }[b.impact]))
                             .slice(0, 3)
                             .map((gap, i) => (
