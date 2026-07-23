@@ -17,10 +17,10 @@ interface Message {
   content: string
 }
 
-const COLORS = ['#2563eb', '#2563eb', '#1d4ed8', '#475569', '#dc2626', '#0891b2', '#2563eb']
+const COLORS = ['#2563eb', '#1d4ed8', '#3b82f6', '#475569', '#dc2626', '#0891b2', '#1e3a8a']
 const COLOR_NAMES: Record<string, string> = {
-  '#2563eb': 'Violet', '#2563eb': 'Blue', '#1d4ed8': 'Emerald',
-  '#475569': 'Amber', '#dc2626': 'Red', '#0891b2': 'Cyan',
+  '#2563eb': 'Blue', '#1d4ed8': 'Dark Blue', '#3b82f6': 'Light Blue',
+  '#475569': 'Slate', '#dc2626': 'Red', '#0891b2': 'Cyan', '#1e3a8a': 'Navy',
 }
 
 function ChatPreview({ config, chatbotId }: { config: ChatConfig; chatbotId: string | undefined }) {

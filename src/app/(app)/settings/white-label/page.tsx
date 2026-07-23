@@ -23,7 +23,7 @@ const DEFAULT: WLConfig = {
   hide_powered_by: false,
 }
 
-const COLORS = ['#2563eb', '#2563eb', '#1d4ed8', '#475569', '#dc2626', '#0891b2', '#94a3b8']
+const COLORS = ['#2563eb', '#1d4ed8', '#3b82f6', '#475569', '#dc2626', '#0891b2', '#94a3b8']
 
 export default function WhiteLabelPage() {
   const [config, setConfig] = useState<WLConfig>(DEFAULT)
