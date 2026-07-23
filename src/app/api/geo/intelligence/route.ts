@@ -312,7 +312,15 @@ Rules:
           business.name, business.industry ?? null, parsed.prompt_examples, log
         )
 
-        const intelligence: GeoIntelligence = { ...parsed, generated_at: new Date().toISOString(), actual_ai_visibility }
+        const intelligence: GeoIntelligence = {
+          ...parsed,
+          generated_at: new Date().toISOString(),
+          actual_ai_visibility,
+          // Normalize: AI sometimes returns null instead of [] for array fields
+          prompt_examples: Array.isArray(parsed.prompt_examples) ? parsed.prompt_examples : [],
+          content_gaps:    Array.isArray(parsed.content_gaps)    ? parsed.content_gaps    : [],
+          topic_clusters:  Array.isArray(parsed.topic_clusters)  ? parsed.topic_clusters  : [],
+        }
 
         log('💾 Saving to agent memory (cached for 7 days)...')
         const nowStr = new Date().toISOString()
