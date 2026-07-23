@@ -5,6 +5,13 @@ import Link from 'next/link'
 import { Plus, X, ExternalLink, ChevronDown, ChevronUp, Upload, Check, ArrowRight, Trash2, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+function safeHref(href?: string | null): string | null {
+  if (!href) return null
+  // Only accept simple internal paths (starts with / and no dot-slash patterns indicating malformed AI URLs)
+  if (!href.startsWith('/') || /\.\//g.test(href)) return null
+  return href
+}
+
 interface KanbanTask {
   id: string
   title: string
@@ -234,8 +241,8 @@ function TaskCard({ task, isDragging, onDragStart, onDragEnd, onMove, onDelete, 
                 <button onClick={saveNotes} className="text-[10px] text-blue-400 hover:text-blue-300 mt-0.5 transition-colors">Save note →</button>
               )}
             </div>
-            {task.href && task.status !== 'done' && (
-              <Link href={task.href}
+            {safeHref(task.href) && task.status !== 'done' && (
+              <Link href={safeHref(task.href)!}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-500 rounded-lg text-slate-300 hover:text-white text-[11px] font-semibold transition-colors">
                 ⚡ {task.cta ?? 'Open'} <ArrowRight className="w-2.5 h-2.5" />
               </Link>
@@ -254,8 +261,8 @@ function TaskCard({ task, isDragging, onDragStart, onDragEnd, onMove, onDelete, 
                   className="flex-1 py-1.5 text-[10px] font-semibold text-slate-400 bg-slate-800 hover:bg-slate-700 hover:text-white rounded-lg border border-slate-700 transition-colors">
                   ▶ Start
                 </button>
-                {task.href && !expanded && (
-                  <Link href={task.href}
+                {safeHref(task.href) && !expanded && (
+                  <Link href={safeHref(task.href)!}
                     className="py-1.5 px-2.5 text-[10px] font-medium text-blue-400 hover:text-blue-300 rounded-lg border border-slate-800 transition-colors flex items-center gap-1">
                     Open <ArrowRight className="w-2.5 h-2.5" />
                   </Link>

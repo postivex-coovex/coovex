@@ -69,6 +69,7 @@ interface GeoClientProps {
   cachedIntelligence: GeoIntelligence | null
   generatedGaps?: string[]
   initialTab?: 'overview' | 'intelligence' | 'generators' | 'tasks'
+  intelligenceSection?: 'visibility' | 'topics' | 'content'
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -319,7 +320,7 @@ class IntelligenceBoundary extends Component<{ children: ReactNode; onReset: () 
 
 // ─── AI Intelligence Tab ──────────────────────────────────────────────────────
 
-function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, onContentGenerated, generatedGaps, currentGeo, websiteUrl }: {
+function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, onContentGenerated, generatedGaps, currentGeo, websiteUrl, section }: {
   intelligence: GeoIntelligence | null
   onGenerate: () => void
   generating: boolean
@@ -329,6 +330,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
   generatedGaps: string[]
   currentGeo: GeoCheck | null
   websiteUrl: string
+  section?: 'visibility' | 'topics' | 'content'
 }) {
   const [promptFilter, setPromptFilter] = useState<string>('all')
   const [gapGenerating, setGapGenerating] = useState<Record<number, boolean>>({})
@@ -536,57 +538,61 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
       </div>
 
       {/* Entity Score + AI Voice */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center">
-          <p className="text-sm text-slate-400 mb-3 font-medium">Entity Score</p>
-          <ScoreRing score={intelligence.entity_score} size={120} />
-          <p className="text-[11px] text-slate-500 mt-2 text-center">AI recognition clarity</p>
-        </div>
-        <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <p className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
-              <span>🗣️</span> How AI Would Describe You
-            </p>
-            <p className="text-xs text-slate-500 mb-3">When a user asks a relevant question, AI assistants (once optimized) would say:</p>
-            <blockquote className="text-slate-200 text-sm leading-relaxed border-l-2 border-blue-500 pl-4 italic">
-              &ldquo;{intelligence.ai_voice_summary}&rdquo;
-            </blockquote>
+      {!section && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center">
+            <p className="text-sm text-slate-400 mb-3 font-medium">Entity Score</p>
+            <ScoreRing score={intelligence.entity_score} size={120} />
+            <p className="text-[11px] text-slate-500 mt-2 text-center">AI recognition clarity</p>
           </div>
-          <div className="mt-4 pt-4 border-t border-slate-800">
-            <p className="text-xs text-slate-500 font-medium mb-1">Entity Notes</p>
-            <p className="text-xs text-slate-400 leading-relaxed">{intelligence.entity_notes}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Live AI Visibility Check */}
-      {intelligence.actual_ai_visibility ? (
-        <LiveVisibilityCheck visibility={intelligence.actual_ai_visibility} geo={currentGeo} />
-      ) : (
-        <div className="bg-slate-950/15 border border-slate-700/30 rounded-2xl p-5 flex items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl flex-shrink-0">✨</span>
+          <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
             <div>
-              <p className="text-sm font-semibold text-white mb-0.5">Live AI Visibility Check — New Feature</p>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Gemini will search in real-time to verify if your business actually appears in AI results today.
-                Click <strong className="text-slate-300">Regenerate</strong> to add this check to your existing analysis (no extra credits).
+              <p className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+                <span>🗣️</span> How AI Would Describe You
               </p>
+              <p className="text-xs text-slate-500 mb-3">When a user asks a relevant question, AI assistants (once optimized) would say:</p>
+              <blockquote className="text-slate-200 text-sm leading-relaxed border-l-2 border-blue-500 pl-4 italic">
+                &ldquo;{intelligence.ai_voice_summary}&rdquo;
+              </blockquote>
+            </div>
+            <div className="mt-4 pt-4 border-t border-slate-800">
+              <p className="text-xs text-slate-500 font-medium mb-1">Entity Notes</p>
+              <p className="text-xs text-slate-400 leading-relaxed">{intelligence.entity_notes}</p>
             </div>
           </div>
-          <button
-            onClick={onGenerate}
-            disabled={generating}
-            className="flex-shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-          >
-            <Sparkles className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} />
-            {generating ? 'Checking…' : 'Run Check'}
-          </button>
         </div>
       )}
 
+      {/* Live AI Visibility Check */}
+      {(!section || section === 'visibility') && (
+        intelligence.actual_ai_visibility ? (
+          <LiveVisibilityCheck visibility={intelligence.actual_ai_visibility} geo={currentGeo} />
+        ) : (
+          <div className="bg-slate-950/15 border border-slate-700/30 rounded-2xl p-5 flex items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl flex-shrink-0">✨</span>
+              <div>
+                <p className="text-sm font-semibold text-white mb-0.5">Live AI Visibility Check — New Feature</p>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Gemini will search in real-time to verify if your business actually appears in AI results today.
+                  Click <strong className="text-slate-300">Regenerate</strong> to add this check to your existing analysis (no extra credits).
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onGenerate}
+              disabled={generating}
+              className="flex-shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+            >
+              <Sparkles className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} />
+              {generating ? 'Checking…' : 'Run Check'}
+            </button>
+          </div>
+        )
+      )}
+
       {/* Test Prompts */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      {(!section || section === 'visibility') && <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-white">🎯 Test Prompts</h3>
           <span className="text-xs text-slate-500">{promptExamples.length} prompts</span>
@@ -629,10 +635,10 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Topic Clusters */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      {(!section || section === 'topics') && <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-white mb-1">📊 Topic Coverage</h3>
         <p className="text-xs text-slate-500 mb-4">
           Topics where AI needs to know about your business. <span className="text-blue-400">Not covered</span> or <span className="text-slate-500">Weak</span> = create a page on your website for that topic — CooVex can write it for you.
@@ -705,10 +711,10 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
             )
           })}
         </div>
-      </div>
+      </div>}
 
       {/* Content Gap Analysis */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      {(!section || section === 'content') && <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-white">✍️ Content to Create</h3>
           <span className="text-[10px] text-slate-500">AI generates &amp; saves to Content as draft</span>
@@ -769,10 +775,10 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
             )
           })}
         </div>
-      </div>
+      </div>}
 
       {/* Regenerate after creating content */}
-      <div className="bg-gradient-to-r from-slate-950/40 to-slate-900 border border-slate-700/40 rounded-2xl p-5 flex items-center justify-between gap-4">
+      {!section && <div className="bg-gradient-to-r from-slate-950/40 to-slate-900 border border-slate-700/40 rounded-2xl p-5 flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-semibold text-white mb-1">✅ Published the content above?</p>
           <p className="text-xs text-slate-400 leading-relaxed">
@@ -790,7 +796,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
           </button>
           <p className="text-[10px] text-blue-400/70">5 AI credits</p>
         </div>
-      </div>
+      </div>}
 
       {error && (
         <div className="bg-red-950/30 border border-red-800/30 rounded-xl px-4 py-3 text-red-400 text-sm flex items-center gap-2">
@@ -803,8 +809,8 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function GeoClient({ geo, intel, websiteUrl, businessName, lastScanned, cachedIntelligence, generatedGaps = [], initialTab = 'overview' }: GeoClientProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'generators' | 'tasks'>(initialTab)
+export default function GeoClient({ geo, intel, websiteUrl, businessName, lastScanned, cachedIntelligence, generatedGaps = [], initialTab = 'overview', intelligenceSection }: GeoClientProps) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'generators' | 'tasks'>(intelligenceSection ? 'intelligence' : initialTab)
   const [currentGeo, setCurrentGeo] = useState<GeoCheck | null>(geo)
   const [scanning, setScanning] = useState(false)
   const [scanError, setScanError] = useState('')
@@ -960,22 +966,38 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
 
       {/* Tabs */}
       <div className="max-w-5xl mx-auto px-6 pt-6">
-        <div className="flex gap-1 bg-slate-900 rounded-xl p-1 border border-slate-800 w-fit mb-6 flex-wrap">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === tab.id ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {tab.label}
-              {'badge' in tab && tab.badge && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-400" />
-              )}
-            </button>
-          ))}
-        </div>
+        {!intelligenceSection && (
+          <div className="flex gap-1 bg-slate-900 rounded-xl p-1 border border-slate-800 w-fit mb-6 flex-wrap">
+            {TABS.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === tab.id ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {tab.label}
+                {'badge' in tab && tab.badge && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-400" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+        {intelligenceSection && (
+          <div className="mb-6">
+            <h1 className="text-xl font-bold text-white">
+              {intelligenceSection === 'visibility' ? 'AI Visibility Check' :
+               intelligenceSection === 'topics'     ? 'Topic Coverage' :
+                                                      'Content to Create'}
+            </h1>
+            <p className="text-sm text-slate-400 mt-1">
+              {intelligenceSection === 'visibility' ? 'See if AI assistants mention your business and test real prompts users type in ChatGPT, Perplexity & Gemini' :
+               intelligenceSection === 'topics'     ? 'Topics where AI needs to know about your business — weak or missing = create a page for that topic' :
+                                                      'Specific content AI assistants frequently cite — generate it directly from here'}
+            </p>
+          </div>
+        )}
 
         {/* ── Overview ── */}
         {activeTab === 'overview' && (
@@ -1100,6 +1122,29 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                   </div>
                 ) : (
                   <div className="space-y-4">
+
+                    {/* Entity Score + AI Voice — compact overview */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col items-center justify-center">
+                        <p className="text-xs text-slate-400 mb-2 font-medium">Entity Score</p>
+                        <ScoreRing score={intelligence.entity_score} size={80} />
+                        <p className="text-[11px] text-slate-500 mt-1.5 text-center">AI recognition clarity</p>
+                      </div>
+                      <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                        <div>
+                          <p className="text-xs font-semibold text-white mb-1 flex items-center gap-2">
+                            <span>🗣️</span> How AI Would Describe You
+                          </p>
+                          <blockquote className="text-slate-300 text-xs leading-relaxed border-l-2 border-blue-500 pl-3 italic">
+                            &ldquo;{intelligence.ai_voice_summary}&rdquo;
+                          </blockquote>
+                        </div>
+                        <button onClick={() => setActiveTab('intelligence')}
+                          className="mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors self-start">
+                          See full AI Intelligence →
+                        </button>
+                      </div>
+                    </div>
 
                     {/* Live AI Visibility Check — compact */}
                     {intelligence.actual_ai_visibility && (
@@ -1266,6 +1311,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
               generatedGaps={generatedGaps}
               currentGeo={currentGeo}
               websiteUrl={websiteUrl}
+              section={intelligenceSection}
               onContentGenerated={() => {
                 window.dispatchEvent(new CustomEvent('coovex:content-draft-added'))
                 window.dispatchEvent(new CustomEvent('coovex:credits-changed'))

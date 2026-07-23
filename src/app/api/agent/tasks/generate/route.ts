@@ -329,11 +329,22 @@ export async function POST() {
 
     const aiResults = await fillWeakSlotsWithAi(weakSlots, bizContext, doneRecently)
 
+    const VALID_PATHS = new Set([
+      '/audit', '/geo', '/leads', '/gtm-agent', '/competitors', '/content',
+      '/content/ideas', '/content/generator', '/content/needs', '/content/calendar',
+      '/campaigns', '/reviews', '/goals', '/products', '/chat', '/agent/inbox',
+      '/proposals', '/tools/marketing-plan', '/integrations', '/settings',
+      '/geo/ai-visibility', '/geo/topics', '/geo/content', '/geo/dev',
+      '/leads/finder', '/execution-roadmap',
+    ])
+
     for (const slot of weakSlots) {
       const ai = aiResults[slot.source]
       if (!ai?.title) continue
-      const resolvedUrl = ai.url ?? slot.url
-      const base = { source: slot.source, priority: 'medium', action_type: 'link', action_data: { url: resolvedUrl, tool: ai.tool ?? 'CooVex' }, completed: false }
+      // Sanitize: only use ai.url if it's a known single valid path, else fall back to slot.url
+      const aiUrl = typeof ai.url === 'string' && VALID_PATHS.has(ai.url) ? ai.url : slot.url
+      const resolvedUrl = aiUrl
+      const base = { source: slot.source, priority: 'medium', action_type: 'link', action_data: { url: resolvedUrl, tool: typeof ai.tool === 'string' ? ai.tool : 'CooVex' }, completed: false }
       if (slot.source === 'audit')   task1 = { ...base, id: `ai-audit-${today}`,   title: ai.title, description: ai.description }
       if (slot.source === 'gtm')     task2 = { ...base, id: `ai-gtm-${today}`,     title: ai.title, description: ai.description }
       if (slot.source === 'content') task3 = { ...base, id: `ai-content-${today}`, title: ai.title, description: ai.description }

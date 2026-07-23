@@ -47,7 +47,7 @@ export default async function GeoTopicsPage() {
       lastScanned={latestAudit?.created_at ?? null}
       cachedIntelligence={cachedIntelligence}
       generatedGaps={generatedGaps}
-      initialTab="intelligence"
+      intelligenceSection="topics"
     />
   )
 }
