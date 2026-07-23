@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, Lightbulb, Package, Inbox,
   ClipboardCheck, Zap, Globe2, Users,
-  Target, TrendingUp, Calendar,
+  Target, TrendingUp, Calendar, Share2,
   Settings, ChevronDown, Search, LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -78,6 +78,20 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Topic Coverage',    href: '/geo/topics' },
       { label: 'Content to Create', href: '/geo/content' },
       { label: 'Dev Assistant',     href: '/geo/dev' },
+    ],
+  },
+  {
+    id: 'social',
+    label: 'Social Autopilot',
+    icon: Share2,
+    badge: 'new',
+    items: [
+      { label: 'Overview',    href: '/social' },
+      { label: 'LinkedIn',    href: '/social/linkedin' },
+      { label: 'Facebook',    href: '/social/facebook' },
+      { label: 'Reddit',      href: '/social/reddit' },
+      { label: 'X (Twitter)', href: '/social/x' },
+      { label: 'YouTube',     href: '/social/youtube' },
     ],
   },
   {
