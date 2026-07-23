@@ -862,13 +862,21 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
             const evt = JSON.parse(line.slice(6)) as { type: string; msg?: string; intelligence?: GeoIntelligence }
             if (evt.type === 'log' && evt.msg) {
               setIntelLogs(prev => [...prev, evt.msg!])
-            } else if (evt.type === 'done' && evt.intelligence) {
-              setIntelligence(evt.intelligence)
-              window.dispatchEvent(new CustomEvent('coovex:credits-changed'))
+            } else if (evt.type === 'done') {
+              if (evt.intelligence && Array.isArray(evt.intelligence.prompt_examples)) {
+                setIntelligence(evt.intelligence)
+                window.dispatchEvent(new CustomEvent('coovex:credits-changed'))
+              } else {
+                // API returned done but with missing/null arrays — treat as failed
+                setIntelError('Analysis returned incomplete data. Please try again.')
+              }
             } else if (evt.type === 'error' && evt.msg) {
               setIntelError(evt.msg)
             }
-          } catch { /* malformed event */ }
+          } catch (parseErr) {
+            // SSE line failed to parse — log to console for debugging
+            console.error('[geo-intelligence] SSE parse error:', parseErr, 'line length:', line.length)
+          }
         }
       }
     } catch (e: unknown) {

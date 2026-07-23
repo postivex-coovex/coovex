@@ -137,46 +137,60 @@ export async function POST() {
     const isValid = ageMs < 7 * 24 * 60 * 60 * 1000
     try {
       const parsedCache = JSON.parse(cached.value_text) as GeoIntelligence
-      const hasVisibility = 'actual_ai_visibility' in parsedCache
 
-      if (isValid && hasVisibility) {
-        // Return cached result — no credits charged, no credit header needed
-        return new Response(new ReadableStream({
-          start(c) {
-            c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'log', msg: '✅ Returning cached analysis (less than 7 days old)' })}\n\n`))
-            c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', intelligence: parsedCache })}\n\n`))
-            c.close()
-          },
-        }), { headers: sseHeaders })
-      }
+      // Validate required array fields — null arrays = corrupted; delete and regenerate
+      const isCorrupted = typeof parsedCache !== 'object' || parsedCache === null
+        || !Array.isArray(parsedCache.prompt_examples)
+        || !Array.isArray(parsedCache.content_gaps)
+        || !Array.isArray(parsedCache.topic_clusters)
 
-      // Cache valid but missing visibility check — run Gemini only, no credit deduction
-      if (isValid && !hasVisibility && process.env.GEMINI_API_KEY) {
-        return new Response(new ReadableStream({
-          async start(c) {
-            const log = (msg: string) => c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'log', msg })}\n\n`))
-            try {
-              log('✨ Adding live visibility check to existing analysis (no credits charged)...')
-              const actual_ai_visibility = await runGeminiVisibilityCheck(
-                business.name, business.industry ?? null, parsedCache.prompt_examples, log
-              )
-              const updated: GeoIntelligence = { ...parsedCache, actual_ai_visibility }
-              const nowStr = new Date().toISOString()
-              await service.from('agent_memory')
-                .update({ value_text: JSON.stringify(updated), updated_at: nowStr })
-                .eq('business_id', business.id).eq('key', 'geo_intelligence')
-              log('💾 Visibility data cached')
-              c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', intelligence: updated })}\n\n`))
-            } catch (e) {
-              c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', msg: e instanceof Error ? e.message : 'Visibility check failed' })}\n\n`))
-            } finally {
+      if (isCorrupted) {
+        await service.from('agent_memory').delete()
+          .eq('business_id', business.id).eq('key', 'geo_intelligence')
+        // fall through to fresh generation below
+      } else {
+        const hasVisibility = 'actual_ai_visibility' in parsedCache
+
+        if (isValid && hasVisibility) {
+          return new Response(new ReadableStream({
+            start(c) {
+              c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'log', msg: '✅ Returning cached analysis (less than 7 days old)' })}\n\n`))
+              c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', intelligence: parsedCache })}\n\n`))
               c.close()
-            }
-          },
-        }), { headers: sseHeaders })
+            },
+          }), { headers: sseHeaders })
+        }
+
+        // Cache valid but missing visibility check — run Gemini only, no credit deduction
+        if (isValid && !hasVisibility && process.env.GEMINI_API_KEY) {
+          return new Response(new ReadableStream({
+            async start(c) {
+              const log = (msg: string) => c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'log', msg })}\n\n`))
+              try {
+                log('✨ Adding live visibility check to existing analysis (no credits charged)...')
+                const actual_ai_visibility = await runGeminiVisibilityCheck(
+                  business.name, business.industry ?? null, parsedCache.prompt_examples, log
+                )
+                const updated: GeoIntelligence = { ...parsedCache, actual_ai_visibility }
+                const nowStr = new Date().toISOString()
+                await service.from('agent_memory')
+                  .update({ value_text: JSON.stringify(updated), updated_at: nowStr })
+                  .eq('business_id', business.id).eq('key', 'geo_intelligence')
+                log('💾 Visibility data cached')
+                c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', intelligence: updated })}\n\n`))
+              } catch (e) {
+                c.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', msg: e instanceof Error ? e.message : 'Visibility check failed' })}\n\n`))
+              } finally {
+                c.close()
+              }
+            },
+          }), { headers: sseHeaders })
+        }
       }
     } catch {
-      // Cache corrupted — fall through to regeneration
+      // Cache JSON is malformed — delete and fall through to regeneration
+      await service.from('agent_memory').delete()
+        .eq('business_id', business.id).eq('key', 'geo_intelligence')
     }
   }
 
