@@ -701,18 +701,24 @@ export default function SocialClient({ platform, posts, businessName, industry, 
   }
 
   if (platform === 'summary') {
-    return <SummaryView posts={posts} businessName={businessName} settings={settings} />
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <SummaryView posts={posts} businessName={businessName} settings={settings} />
+      </div>
+    )
   }
 
   const ch      = platform as SocialChannel
   const enabled = settings[ch]?.social_enabled ?? false
 
   return (
-    <PlatformView
-      platform={ch} posts={posts}
-      businessName={businessName} industry={industry}
-      enabled={enabled}
-      onToggleEnabled={val => onToggleEnabled(ch, val)}
-    />
+    <div className="p-6 max-w-7xl mx-auto">
+      <PlatformView
+        platform={ch} posts={posts}
+        businessName={businessName} industry={industry}
+        enabled={enabled}
+        onToggleEnabled={val => onToggleEnabled(ch, val)}
+      />
+    </div>
   )
 }
