@@ -169,10 +169,11 @@ interface PendingTask {
   created_at: string
 }
 
-export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPendingTasks }: {
+export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPendingTasks, view = 'analyser' }: {
   initialLastRun: LastRun | null
   staticData: StaticData
   pendingTasks: PendingTask[]
+  view?: 'analyser' | 'platform-launch'
 }) {
   const [lastRun, setLastRun] = useState<LastRun | null>(initialLastRun)
   const [running, setRunning] = useState(false)
@@ -253,6 +254,57 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
   const displayHotLeads = lastRun?.hot_leads ?? staticData.hotLeads
   const displayDrafts   = lastRun?.draft_posts ?? staticData.draftPosts
   const displayAIVis    = lastRun?.ai_visibility_rate ?? staticData.geminiRate
+
+  if (view === 'platform-launch') {
+    return (
+      <div className="p-4 sm:p-6 max-w-3xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-white mb-1">Platform Launch Tracker</h1>
+          <p className="text-slate-400 text-xs">Track where you&apos;ve launched your business. These platforms boost discovery, backlinks, and early customers.</p>
+        </div>
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <span>🚀</span>
+            <h2 className="text-sm font-semibold text-white">Launch Progress</h2>
+            <span className="ml-auto text-xs text-slate-500">
+              {Object.values(launchMap).filter(s => s.status === 'done' || s.status === 'live').length} / {LAUNCH_PLATFORMS.length} done
+            </span>
+          </div>
+          <p className="text-xs text-slate-600 mb-4">Click to mark as launched.</p>
+          {(['Launch', 'Social', 'Search', 'Directory'] as const).map(cat => {
+            const platforms = LAUNCH_PLATFORMS.filter(p => p.category === cat)
+            return (
+              <div key={cat} className="mb-3 last:mb-0">
+                <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wider mb-2">{cat}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {platforms.map(p => {
+                    const entry = launchMap[p.id] ?? { status: 'not_started' }
+                    const done = entry.status === 'done' || entry.status === 'live'
+                    const toggling = togglingPlatform === p.id
+                    return (
+                      <div key={p.id} className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-colors ${done ? 'bg-blue-600/8 border-slate-700/30' : 'bg-slate-800/50 border-slate-700/50'}`}>
+                        <button onClick={() => togglePlatform(p.id, entry)} disabled={toggling}
+                          className={`w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center text-[10px] transition-colors ${done ? 'bg-blue-600 border-blue-400 text-white' : 'border-slate-600 text-slate-600 hover:border-slate-400'}`}>
+                          {toggling ? <span className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" /> : done ? '✓' : '○'}
+                        </button>
+                        <span className="text-sm flex-shrink-0">{p.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <span className={`text-xs block truncate ${done ? 'text-slate-300 line-through' : 'text-slate-400'}`}>{p.label}</span>
+                          {entry.status === 'live' && <span className="text-[9px] text-blue-500 font-medium">AI detected</span>}
+                        </div>
+                        {done && entry.url && <a href={entry.url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-600 hover:text-blue-400 flex-shrink-0">↗</a>}
+                        {!done && <a href={p.href} target="_blank" rel="noopener noreferrer" className="text-[10px] text-slate-600 hover:text-blue-400 flex-shrink-0">↗</a>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">

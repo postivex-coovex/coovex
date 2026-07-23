@@ -54,6 +54,7 @@ interface Audit {
 }
 interface AuditClientProps {
   audits: Audit[]; websiteUrl: string; businessName: string; currentHealthScore: number
+  initialTab?: TabId
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -206,7 +207,7 @@ function elapsed(start: number) {
   return `${s}s`
 }
 
-export default function AuditClient({ audits: initialAudits, websiteUrl, businessName, currentHealthScore }: AuditClientProps) {
+export default function AuditClient({ audits: initialAudits, websiteUrl, businessName, currentHealthScore, initialTab = 'overview' }: AuditClientProps) {
   const [audits, setAudits] = useState<Audit[]>(initialAudits)
   const [running, setRunning] = useState(false)
   const [error, setError] = useState('')
@@ -214,7 +215,7 @@ export default function AuditClient({ audits: initialAudits, websiteUrl, busines
   const [selectedAudit, setSelectedAudit] = useState<Audit | null>(audits[0] || null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [updatingPurposeId, setUpdatingPurposeId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<TabId>('overview')
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab)
   const [aiFix, setAiFix] = useState<AiFix | null>(null)
   const [logEntries, setLogEntries] = useState<LogEntry[]>([])
   const [visibility, setVisibility] = useState<VisibilityResult | null>(null)

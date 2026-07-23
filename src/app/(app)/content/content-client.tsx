@@ -48,6 +48,8 @@ interface ContentClientProps {
   connectedChannels?: string[]
   hasWebhook?: boolean
   contentGaps?: ContentGap[]
+  initialView?: 'list' | 'calendar'
+  initialFilter?: PostStatus | 'all' | 'need_to_create'
 }
 
 const CHANNEL_META: Record<PostChannel, { label: string; icon: string; color: string }> = {
@@ -124,10 +126,10 @@ function GeoIdeaRow({ gap, onGenerated }: { gap: ContentGap; onGenerated: () => 
   )
 }
 
-export default function ContentClient({ initialPosts, businessName, industry, auditOptions = [], connectedChannels = [], hasWebhook = false, contentGaps = [] }: ContentClientProps) {
+export default function ContentClient({ initialPosts, businessName, industry, auditOptions = [], connectedChannels = [], hasWebhook = false, contentGaps = [], initialView = 'list', initialFilter = 'all' }: ContentClientProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
-  const [view, setView] = useState<'list' | 'calendar'>('list')
-  const [filter, setFilter] = useState<PostStatus | 'all' | 'need_to_create'>('all')
+  const [view, setView] = useState<'list' | 'calendar'>(initialView)
+  const [filter, setFilter] = useState<PostStatus | 'all' | 'need_to_create'>(initialFilter)
   const [showModal, setShowModal] = useState(false)
   const [editPost, setEditPost] = useState<Post | null>(null)
   const [isPending, startTransition] = useTransition()

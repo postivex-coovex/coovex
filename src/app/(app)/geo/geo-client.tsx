@@ -68,6 +68,7 @@ interface GeoClientProps {
   lastScanned: string | null
   cachedIntelligence: GeoIntelligence | null
   generatedGaps?: string[]
+  initialTab?: 'overview' | 'intelligence' | 'generators' | 'tasks'
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -802,8 +803,8 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function GeoClient({ geo, intel, websiteUrl, businessName, lastScanned, cachedIntelligence, generatedGaps = [] }: GeoClientProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'generators' | 'tasks'>('overview')
+export default function GeoClient({ geo, intel, websiteUrl, businessName, lastScanned, cachedIntelligence, generatedGaps = [], initialTab = 'overview' }: GeoClientProps) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'intelligence' | 'generators' | 'tasks'>(initialTab)
   const [currentGeo, setCurrentGeo] = useState<GeoCheck | null>(geo)
   const [scanning, setScanning] = useState(false)
   const [scanError, setScanError] = useState('')
