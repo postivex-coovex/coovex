@@ -58,9 +58,29 @@ export default async function GeoPage() {
   ])
 
   const latestAudit = auditResult.data
-  const generatedGaps: string[] = gapsResult.data?.value_text
-    ? JSON.parse(gapsResult.data.value_text)
-    : []
+
+  // Safe JSON parse — clear corrupted records rather than crashing
+  let cachedIntelligence = null
+  if (intelResult.data?.value_text) {
+    try {
+      cachedIntelligence = JSON.parse(intelResult.data.value_text)
+    } catch {
+      // Corrupted JSON — delete the bad row so it regenerates cleanly
+      if (business?.id) {
+        await service.from('agent_memory')
+          .delete()
+          .eq('business_id', business.id)
+          .eq('key', 'geo_intelligence')
+      }
+    }
+  }
+
+  let generatedGaps: string[] = []
+  if (gapsResult.data?.value_text) {
+    try {
+      generatedGaps = JSON.parse(gapsResult.data.value_text)
+    } catch { /* ignore */ }
+  }
 
   return (
     <GeoClient
@@ -69,7 +89,7 @@ export default async function GeoPage() {
       websiteUrl={latestAudit?.report_json?.url ?? business?.website_url ?? ''}
       businessName={business?.name ?? ''}
       lastScanned={latestAudit?.created_at ?? null}
-      cachedIntelligence={intelResult.data?.value_text ? JSON.parse(intelResult.data.value_text) : null}
+      cachedIntelligence={cachedIntelligence}
       generatedGaps={generatedGaps}
     />
   )

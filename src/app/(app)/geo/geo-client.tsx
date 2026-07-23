@@ -294,12 +294,16 @@ function CodeBlock({ content, filename }: { content: string; filename: string })
 class IntelligenceBoundary extends Component<{ children: ReactNode; onReset: () => void }, { crashed: boolean }> {
   state = { crashed: false }
   static getDerivedStateFromError() { return { crashed: true } }
+  componentDidCatch() {
+    // Silently clear corrupted intelligence from DB — next page load will start fresh
+    fetch('/api/geo/clear-intelligence', { method: 'DELETE' }).catch(() => {})
+  }
   render() {
     if (this.state.crashed) return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="text-4xl mb-4">⚠️</div>
+        <AlertCircle className="w-10 h-10 text-slate-500 mx-auto mb-4" />
         <p className="text-white font-semibold mb-1">Analysis data could not be displayed</p>
-        <p className="text-slate-400 text-sm mb-6">The cached data may be corrupted. Regenerate to fix this.</p>
+        <p className="text-slate-400 text-sm mb-6">The cached data was corrupted and has been cleared. Click below to regenerate.</p>
         <button
           onClick={() => { this.setState({ crashed: false }); this.props.onReset() }}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg transition-colors"
