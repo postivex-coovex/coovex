@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -11,7 +11,7 @@ interface ContentGap {
 
 const IMPACT_STYLE = {
   high:   { badge: 'bg-rose-500/15 text-rose-400 border-rose-500/25',   dot: 'bg-rose-400' },
-  medium: { badge: 'bg-amber-500/15 text-amber-400 border-amber-500/25', dot: 'bg-amber-400' },
+  medium: { badge: 'bg-slate-600/15 text-slate-500 border-slate-500/25', dot: 'bg-slate-500' },
   low:    { badge: 'bg-slate-700/50 text-slate-400 border-slate-600/25', dot: 'bg-slate-500' },
 }
 
@@ -44,7 +44,7 @@ function IdeaCard({ gap, onGenerated }: { gap: ContentGap; onGenerated: () => vo
 
   return (
     <div className={`bg-slate-900 border rounded-2xl p-5 transition-colors ${
-      done ? 'border-emerald-700/40' : 'border-slate-800 hover:border-violet-700/30'
+      done ? 'border-slate-700/40' : 'border-slate-800 hover:border-slate-700/30'
     }`}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
@@ -55,7 +55,7 @@ function IdeaCard({ gap, onGenerated }: { gap: ContentGap; onGenerated: () => vo
           </span>
         </div>
         {done && (
-          <span className="flex-shrink-0 text-[11px] font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-700/40 px-2 py-0.5 rounded-full">
+          <span className="flex-shrink-0 text-[11px] font-semibold text-blue-400 bg-slate-950/40 border border-slate-700/40 px-2 py-0.5 rounded-full">
             ✓ Saved to drafts
           </span>
         )}
@@ -71,15 +71,15 @@ function IdeaCard({ gap, onGenerated }: { gap: ContentGap; onGenerated: () => vo
           disabled={loading || done}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
             done
-              ? 'bg-emerald-900/30 text-emerald-400 cursor-default'
-              : 'bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-50'
+              ? 'bg-slate-900/30 text-blue-400 cursor-default'
+              : 'bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50'
           }`}
         >
           {loading && <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
           {done ? '✓ Generated' : loading ? 'Generating…' : '✨ Generate · 8 credits'}
         </button>
         {done && (
-          <Link href="/content" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+          <Link href="/content" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
             View in Content Calendar →
           </Link>
         )}
@@ -134,7 +134,7 @@ export function GeoIdeasClient({
           </p>
           <Link
             href="/geo"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             Go to GEO Optimizer →
           </Link>
@@ -145,14 +145,14 @@ export function GeoIdeasClient({
           <div className="grid grid-cols-3 gap-3 mb-5">
             {[
               { label: 'High Impact', count: high,   color: 'text-rose-400',   f: 'high' as const },
-              { label: 'Medium',      count: medium, color: 'text-amber-400',  f: 'medium' as const },
+              { label: 'Medium',      count: medium, color: 'text-slate-500',  f: 'medium' as const },
               { label: 'Low',         count: low,    color: 'text-slate-400',  f: 'low' as const },
             ].map(s => (
               <button
                 key={s.f}
                 onClick={() => setFilter(filter === s.f ? 'all' : s.f)}
                 className={`bg-slate-900 border rounded-xl p-3 text-left transition-colors ${
-                  filter === s.f ? 'border-violet-600' : 'border-slate-800 hover:border-slate-700'
+                  filter === s.f ? 'border-blue-600' : 'border-slate-800 hover:border-slate-700'
                 }`}
               >
                 <p className="text-slate-500 text-xs mb-1">{s.label}</p>
@@ -162,9 +162,9 @@ export function GeoIdeasClient({
           </div>
 
           {generatedCount > 0 && (
-            <div className="mb-4 bg-emerald-950/20 border border-emerald-700/30 rounded-xl px-4 py-2.5 flex items-center gap-2">
-              <span className="text-emerald-400 text-sm font-semibold">✓ {generatedCount} draft{generatedCount > 1 ? 's' : ''} saved to Content Calendar</span>
-              <Link href="/content" className="text-xs text-emerald-400/70 hover:text-emerald-300 ml-auto">View →</Link>
+            <div className="mb-4 bg-slate-950/20 border border-slate-700/30 rounded-xl px-4 py-2.5 flex items-center gap-2">
+              <span className="text-blue-400 text-sm font-semibold">✓ {generatedCount} draft{generatedCount > 1 ? 's' : ''} saved to Content Calendar</span>
+              <Link href="/content" className="text-xs text-blue-400/70 hover:text-blue-300 ml-auto">View →</Link>
             </div>
           )}
 

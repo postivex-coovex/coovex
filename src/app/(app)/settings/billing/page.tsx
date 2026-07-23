@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -116,8 +116,8 @@ const FEATURE_COSTS = [
 
 const TIER_COLOR = {
   light:  'bg-blue-500/10 text-blue-400',
-  medium: 'bg-amber-500/10 text-amber-400',
-  tool:   'bg-violet-500/10 text-violet-400',
+  medium: 'bg-slate-600/10 text-slate-500',
+  tool:   'bg-blue-500/10 text-blue-400',
 }
 
 interface CreditData {
@@ -139,9 +139,9 @@ interface ApiCost {
 
 const colorMap = {
   blue:   { card: 'border-blue-800/40 bg-blue-950/20',   badge: 'bg-blue-500/20 text-blue-300',   btn: 'bg-blue-600 hover:bg-blue-500' },
-  violet: { card: 'border-violet-700/40 bg-violet-950/30', badge: 'bg-violet-500/20 text-violet-300', btn: 'bg-violet-600 hover:bg-violet-500' },
-  amber:  { card: 'border-amber-800/40 bg-amber-950/20', badge: 'bg-amber-500/20 text-amber-300', btn: 'bg-amber-600 hover:bg-amber-500' },
-  emerald:{ card: 'border-emerald-800/40 bg-emerald-950/20', badge: 'bg-emerald-500/20 text-emerald-300', btn: 'bg-emerald-600 hover:bg-emerald-500' },
+  violet: { card: 'border-slate-700/40 bg-slate-950/30', badge: 'bg-blue-500/20 text-blue-300', btn: 'bg-blue-600 hover:bg-blue-500' },
+  amber:  { card: 'border-slate-700/40 bg-slate-950/20', badge: 'bg-slate-600/20 text-slate-400', btn: 'bg-slate-600 hover:bg-slate-600' },
+  emerald:{ card: 'border-slate-700/40 bg-slate-950/20', badge: 'bg-blue-600/20 text-blue-300', btn: 'bg-blue-600 hover:bg-blue-600' },
 }
 
 export default function BillingPage() {
@@ -187,7 +187,7 @@ export default function BillingPage() {
         {/* Progress bar */}
         <div className="w-full bg-slate-800 rounded-full h-2 mb-2">
           <div
-            className={`h-2 rounded-full transition-all ${pct > 75 ? 'bg-emerald-500' : pct > 30 ? 'bg-amber-500' : 'bg-red-500'}`}
+            className={`h-2 rounded-full transition-all ${pct > 75 ? 'bg-blue-600' : pct > 30 ? 'bg-slate-600' : 'bg-red-500'}`}
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -201,7 +201,7 @@ export default function BillingPage() {
               {credits.recent.slice(0, 6).map((tx, i) => (
                 <div key={i} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${tx.amount < 0 ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${tx.amount < 0 ? 'bg-red-500/10 text-red-400' : 'bg-blue-600/10 text-blue-400'}`}>
                       {tx.amount < 0 ? tx.amount : `+${tx.amount}`}
                     </span>
                     <span className="text-slate-300">{tx.description ?? tx.feature ?? tx.type}</span>
@@ -235,7 +235,7 @@ export default function BillingPage() {
                   </div>
                 )}
                 {isCurrent && (
-                  <div className="absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400">
+                  <div className="absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-bold bg-blue-600/20 text-blue-400">
                     Current
                   </div>
                 )}
@@ -256,7 +256,7 @@ export default function BillingPage() {
                 <ul className="space-y-1.5 flex-1 mb-5">
                   {plan.features.map(f => (
                     <li key={f} className="flex items-start gap-2 text-xs text-slate-400">
-                      <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-blue-400 mt-0.5 flex-shrink-0" />
                       {f}
                     </li>
                   ))}
@@ -282,22 +282,22 @@ export default function BillingPage() {
             <button
               key={pack.price}
               disabled
-              className="flex flex-col items-center p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-violet-700 transition-colors cursor-not-allowed opacity-70 text-center group"
+              className="flex flex-col items-center p-4 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-700 transition-colors cursor-not-allowed opacity-70 text-center group"
             >
               <div className="flex items-center gap-1 mb-1">
-                <ShoppingCart className="w-3.5 h-3.5 text-violet-400" />
+                <ShoppingCart className="w-3.5 h-3.5 text-blue-400" />
                 <span className="text-white font-bold">{pack.credits.toLocaleString()}</span>
               </div>
               <span className="text-slate-500 text-xs mb-2">credits</span>
-              {pack.bonus && <span className="text-emerald-400 text-xs mb-2">{pack.bonus}</span>}
-              <span className="text-violet-400 font-bold text-sm">${pack.price}</span>
+              {pack.bonus && <span className="text-blue-400 text-xs mb-2">{pack.bonus}</span>}
+              <span className="text-blue-400 font-bold text-sm">${pack.price}</span>
               <span className="text-slate-600 text-xs mt-1">${(pack.price / pack.credits).toFixed(4)}/cr</span>
             </button>
           ))}
         </div>
         <p className="text-slate-600 text-xs mt-3">
           <Clock className="w-3 h-3 inline mr-1" />
-          Stripe integration coming soon — email <a href="mailto:billing@coovex.com" className="text-violet-400">billing@coovex.com</a> to purchase manually.
+          Stripe integration coming soon — email <a href="mailto:billing@coovex.com" className="text-blue-400">billing@coovex.com</a> to purchase manually.
         </p>
       </div>
 
@@ -335,7 +335,7 @@ export default function BillingPage() {
       })()}
 
       <div className="text-center text-slate-600 text-xs pb-4">
-        Questions? <a href="mailto:billing@coovex.com" className="text-violet-400 hover:text-violet-300">billing@coovex.com</a>
+        Questions? <a href="mailto:billing@coovex.com" className="text-blue-400 hover:text-blue-300">billing@coovex.com</a>
         {' · '}
         <Link href="/settings" className="text-slate-500 hover:text-slate-300">← Back to Settings</Link>
       </div>

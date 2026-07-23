@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 
@@ -12,20 +12,20 @@ interface AIPageContextProps {
 
 const ACCENT = {
   violet: {
-    border: 'border-violet-500/20',
-    bg:     'bg-violet-500/5',
-    icon:   'bg-violet-500/15 border-violet-500/25',
-    badge:  'bg-violet-500/15 text-violet-300 border-violet-500/25',
-    dot:    'bg-violet-500',
-    title:  'text-violet-300',
+    border: 'border-blue-500/20',
+    bg:     'bg-blue-500/5',
+    icon:   'bg-blue-500/15 border-blue-500/25',
+    badge:  'bg-blue-500/15 text-blue-300 border-blue-500/25',
+    dot:    'bg-blue-500',
+    title:  'text-blue-300',
   },
   emerald: {
-    border: 'border-emerald-500/20',
-    bg:     'bg-emerald-500/5',
-    icon:   'bg-emerald-500/15 border-emerald-500/25',
-    badge:  'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
-    dot:    'bg-emerald-500',
-    title:  'text-emerald-300',
+    border: 'border-blue-500/20',
+    bg:     'bg-blue-600/5',
+    icon:   'bg-blue-600/15 border-blue-500/25',
+    badge:  'bg-blue-600/15 text-blue-300 border-blue-500/25',
+    dot:    'bg-blue-600',
+    title:  'text-blue-300',
   },
   blue: {
     border: 'border-blue-500/20',
@@ -36,12 +36,12 @@ const ACCENT = {
     title:  'text-blue-300',
   },
   amber: {
-    border: 'border-amber-500/20',
-    bg:     'bg-amber-500/5',
-    icon:   'bg-amber-500/15 border-amber-500/25',
-    badge:  'bg-amber-500/15 text-amber-300 border-amber-500/25',
-    dot:    'bg-amber-500',
-    title:  'text-amber-300',
+    border: 'border-slate-500/20',
+    bg:     'bg-slate-600/5',
+    icon:   'bg-slate-600/15 border-slate-500/25',
+    badge:  'bg-slate-600/15 text-slate-400 border-slate-500/25',
+    dot:    'bg-slate-600',
+    title:  'text-slate-400',
   },
 }
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
@@ -77,9 +77,9 @@ interface LeadDetailClientProps {
 const STAGE_META: Record<LeadStage, { label: string; color: string }> = {
   new: { label: 'New', color: 'bg-slate-700 text-slate-300' },
   contacted: { label: 'Contacted', color: 'bg-blue-950/60 text-blue-400' },
-  qualified: { label: 'Qualified', color: 'bg-violet-950/60 text-violet-400' },
-  proposal_sent: { label: 'Proposal Sent', color: 'bg-amber-950/60 text-amber-400' },
-  won: { label: 'Won', color: 'bg-emerald-950/60 text-emerald-400' },
+  qualified: { label: 'Qualified', color: 'bg-slate-950/60 text-blue-400' },
+  proposal_sent: { label: 'Proposal Sent', color: 'bg-slate-950/60 text-slate-500' },
+  won: { label: 'Won', color: 'bg-slate-950/60 text-blue-400' },
   lost: { label: 'Lost', color: 'bg-red-950/60 text-red-400' },
 }
 
@@ -99,15 +99,15 @@ const SOURCE_META: Record<LeadSource, { label: string; icon: string }> = {
 
 const ACTIVITY_META: Record<ActivityType, { label: string; icon: string; color: string }> = {
   email_sent: { label: 'Email Sent', icon: '📧', color: 'text-blue-400' },
-  email_opened: { label: 'Email Opened', icon: '📨', color: 'text-cyan-400' },
-  link_clicked: { label: 'Link Clicked', icon: '🔗', color: 'text-violet-400' },
-  form_submitted: { label: 'Form Submitted', icon: '📝', color: 'text-green-400' },
-  call: { label: 'Call', icon: '📞', color: 'text-emerald-400' },
-  meeting: { label: 'Meeting', icon: '🤝', color: 'text-amber-400' },
+  email_opened: { label: 'Email Opened', icon: '📨', color: 'text-blue-400' },
+  link_clicked: { label: 'Link Clicked', icon: '🔗', color: 'text-blue-400' },
+  form_submitted: { label: 'Form Submitted', icon: '📝', color: 'text-blue-400' },
+  call: { label: 'Call', icon: '📞', color: 'text-blue-400' },
+  meeting: { label: 'Meeting', icon: '🤝', color: 'text-slate-500' },
   note: { label: 'Note', icon: '📌', color: 'text-slate-400' },
-  stage_change: { label: 'Stage Changed', icon: '🔄', color: 'text-violet-400' },
-  score_change: { label: 'Score Updated', icon: '⭐', color: 'text-yellow-400' },
-  ad_click: { label: 'Ad Click', icon: '🎯', color: 'text-orange-400' },
+  stage_change: { label: 'Stage Changed', icon: '🔄', color: 'text-blue-400' },
+  score_change: { label: 'Score Updated', icon: '⭐', color: 'text-slate-500' },
+  ad_click: { label: 'Ad Click', icon: '🎯', color: 'text-slate-500' },
 }
 
 function timeAgo(iso: string) {
@@ -128,7 +128,7 @@ function LeadAvatar({ domain, initials, iconUrl }: { domain: string | null; init
 
   if (step === 'initials') {
     return (
-      <div className="w-16 h-16 rounded-full bg-violet-600 flex items-center justify-center text-white text-xl font-bold">
+      <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
         {initials}
       </div>
     )
@@ -157,7 +157,7 @@ function LeadAvatar({ domain, initials, iconUrl }: { domain: string | null; init
 }
 
 function ScoreBar({ score }: { score: number }) {
-  const color = score >= 70 ? 'bg-emerald-500' : score >= 40 ? 'bg-amber-500' : 'bg-red-500'
+  const color = score >= 70 ? 'bg-blue-600' : score >= 40 ? 'bg-slate-600' : 'bg-red-500'
   return (
     <div className="flex items-center gap-3">
       <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
@@ -218,7 +218,7 @@ function DealCard({ leadId }: { leadId: string }) {
   }
 
   const fmtVal = (v: number, c: string) => `${c} ${v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-  const statusColor = (s: string) => s === 'won' ? 'text-emerald-400' : s === 'lost' ? 'text-red-400' : 'text-violet-400'
+  const statusColor = (s: string) => s === 'won' ? 'text-blue-400' : s === 'lost' ? 'text-red-400' : 'text-blue-400'
 
   if (loading) return null
 
@@ -226,13 +226,13 @@ function DealCard({ leadId }: { leadId: string }) {
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-slate-400 text-xs font-medium uppercase tracking-wider">Deal Value</h2>
-        <button onClick={openAdd} className="text-xs text-violet-400 hover:text-violet-300 transition-colors">+ Add Deal</button>
+        <button onClick={openAdd} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">+ Add Deal</button>
       </div>
 
       {deals.length === 0 && !showForm && (
         <div className="py-3 text-center">
           <p className="text-slate-600 text-xs">No deals yet.</p>
-          <button onClick={openAdd} className="mt-2 text-xs text-violet-500 hover:text-violet-400 border border-violet-800/40 px-3 py-1.5 rounded-lg transition-colors">
+          <button onClick={openAdd} className="mt-2 text-xs text-blue-500 hover:text-blue-400 border border-slate-700/40 px-3 py-1.5 rounded-lg transition-colors">
             + Add Deal Value
           </button>
         </div>
@@ -262,13 +262,13 @@ function DealCard({ leadId }: { leadId: string }) {
                 type="number" min="0" step="0.01"
                 value={form.value} onChange={e => setForm(p => ({ ...p, value: e.target.value }))}
                 placeholder="e.g. 2500"
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-violet-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-blue-500"
               />
             </div>
             <div className="w-20">
               <label className="text-[10px] text-slate-500 mb-1 block">Currency</label>
               <select value={form.currency} onChange={e => setForm(p => ({ ...p, currency: e.target.value }))}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-white text-xs focus:outline-none focus:border-violet-500">
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-white text-xs focus:outline-none focus:border-blue-500">
                 {CURRENCIES.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
@@ -277,14 +277,14 @@ function DealCard({ leadId }: { leadId: string }) {
             <div className="flex-1">
               <label className="text-[10px] text-slate-500 mb-1 block">Close Date</label>
               <input type="date" value={form.close_date} onChange={e => setForm(p => ({ ...p, close_date: e.target.value }))}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:border-violet-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:border-blue-500"
               />
             </div>
             <div className="w-20">
               <label className="text-[10px] text-slate-500 mb-1 block">Prob %</label>
               <input type="number" min="0" max="100"
                 value={form.probability} onChange={e => setForm(p => ({ ...p, probability: e.target.value }))}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:border-violet-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
@@ -295,9 +295,9 @@ function DealCard({ leadId }: { leadId: string }) {
                 <button key={s} onClick={() => setForm(p => ({ ...p, status: s }))}
                   className={`flex-1 text-xs py-1.5 rounded-lg border transition-colors capitalize ${
                     form.status === s
-                      ? s === 'won' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40'
+                      ? s === 'won' ? 'bg-slate-950/40 text-blue-400 border-slate-700/40'
                         : s === 'lost' ? 'bg-red-950/40 text-red-400 border-red-800/40'
-                        : 'bg-violet-950/40 text-violet-400 border-violet-800/40'
+                        : 'bg-slate-950/40 text-blue-400 border-slate-700/40'
                       : 'text-slate-500 border-slate-800 hover:border-slate-700'
                   }`}>{s}</button>
               ))}
@@ -305,7 +305,7 @@ function DealCard({ leadId }: { leadId: string }) {
           </div>
           <div className="flex gap-2 pt-1">
             <button onClick={save} disabled={saving || !form.value}
-              className="flex-1 bg-violet-700 hover:bg-violet-600 disabled:opacity-40 text-white text-xs py-2 rounded-lg transition-colors font-medium">
+              className="flex-1 bg-blue-700 hover:bg-blue-600 disabled:opacity-40 text-white text-xs py-2 rounded-lg transition-colors font-medium">
               {saving ? 'Saving…' : editId ? 'Update Deal' : 'Save Deal'}
             </button>
             <button onClick={() => setShowForm(false)} className="text-xs text-slate-500 hover:text-slate-300 px-3">Cancel</button>
@@ -601,7 +601,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
               {lead.email && (
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-slate-500">📧</span>
-                  <a href={`mailto:${lead.email}`} className="text-violet-400 hover:text-violet-300 truncate">{lead.email}</a>
+                  <a href={`mailto:${lead.email}`} className="text-blue-400 hover:text-blue-300 truncate">{lead.email}</a>
                 </div>
               )}
               {lead.phone && (
@@ -650,7 +650,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                   }
                 }}
                 disabled={isScoringAI}
-                className="text-xs text-violet-400 hover:text-violet-300 disabled:opacity-50 transition-colors"
+                className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors"
               >
                 {isScoringAI ? '…' : '✨ AI Score'}
               </button>
@@ -701,7 +701,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                     key={m.id}
                     onClick={() => handleAssign(m.id)}
                     className={`w-full text-left text-xs px-3 py-2 rounded-lg transition-colors ${
-                      assignedTo === m.id ? 'bg-violet-900/50 text-violet-300' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+                      assignedTo === m.id ? 'bg-slate-900/50 text-blue-300' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
                     }`}
                   >
                     {assignedTo === m.id ? '● ' : '○ '}{m.name}
@@ -722,7 +722,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
               {(['professional', 'friendly', 'urgent'] as const).map(t => (
                 <button key={t} onClick={() => setEmailTone(t)}
                   className={`flex-1 text-[10px] py-1.5 rounded-lg capitalize transition-colors ${
-                    emailTone === t ? 'bg-violet-600 text-white' : 'bg-slate-800 text-slate-500 hover:text-slate-300'
+                    emailTone === t ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-500 hover:text-slate-300'
                   }`}>
                   {t}
                 </button>
@@ -731,13 +731,13 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
             <button
               onClick={draftEmail}
               disabled={isDraftingEmail}
-              className="w-full text-xs text-violet-400 hover:text-violet-300 bg-violet-950/30 border border-violet-800/30 py-2 rounded-lg transition-colors disabled:opacity-50"
+              className="w-full text-xs text-blue-400 hover:text-blue-300 bg-slate-950/30 border border-slate-700/30 py-2 rounded-lg transition-colors disabled:opacity-50"
             >
               {isDraftingEmail ? '✨ Drafting…' : '✨ Draft Email'}
             </button>
             {showEmailDraft && emailDraft && (
               <div className="mt-3 bg-slate-800 rounded-lg p-3">
-                <p className="text-violet-300 text-[10px] font-medium mb-1">Subject: {emailDraft.subject}</p>
+                <p className="text-blue-300 text-[10px] font-medium mb-1">Subject: {emailDraft.subject}</p>
                 <p className="text-slate-300 text-[10px] leading-relaxed whitespace-pre-wrap">{emailDraft.email}</p>
                 <button
                   onClick={copyEmail}
@@ -751,11 +751,11 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
 
           {/* Review Request — shown when lead is won */}
           {lead.stage === 'won' && (
-            <div className="bg-emerald-950/20 border border-emerald-800/40 rounded-2xl p-5">
-              <h2 className="text-emerald-400 text-xs font-medium uppercase tracking-wider mb-1">Request a Review</h2>
+            <div className="bg-slate-950/20 border border-slate-700/40 rounded-2xl p-5">
+              <h2 className="text-blue-400 text-xs font-medium uppercase tracking-wider mb-1">Request a Review</h2>
               <p className="text-slate-500 text-xs mb-3">This lead is won — ask them to leave you a review.</p>
               {reviewRequested ? (
-                <div className="flex items-center gap-2 text-emerald-400 text-xs">
+                <div className="flex items-center gap-2 text-blue-400 text-xs">
                   <span>✓</span>
                   <span>Review request logged! Check your Agent Inbox.</span>
                 </div>
@@ -763,7 +763,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                 <button
                   onClick={requestReview}
                   disabled={isRequestingReview}
-                  className="w-full text-xs text-emerald-400 hover:text-emerald-300 bg-emerald-950/40 border border-emerald-800/40 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  className="w-full text-xs text-blue-400 hover:text-blue-300 bg-slate-950/40 border border-slate-700/40 py-2 rounded-lg transition-colors disabled:opacity-50"
                 >
                   {isRequestingReview ? '…' : '⭐ Send Review Request'}
                 </button>
@@ -790,13 +790,13 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-white font-semibold">Lead Details</h2>
               {!editing ? (
-                <button onClick={() => setEditing(true)} className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                <button onClick={() => setEditing(true)} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
                   Edit
                 </button>
               ) : (
                 <div className="flex gap-2">
                   <button onClick={() => setEditing(false)} className="text-xs text-slate-400 hover:text-white transition-colors">Cancel</button>
-                  <button onClick={handleSave} disabled={isSaving} className="text-xs bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-3 py-1 rounded-md transition-colors">
+                  <button onClick={handleSave} disabled={isSaving} className="text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-3 py-1 rounded-md transition-colors">
                     {isSaving ? 'Saving…' : 'Save'}
                   </button>
                 </div>
@@ -818,7 +818,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                       <input
                         value={form[f.key]}
                         onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                       />
                     </div>
                   ))}
@@ -828,7 +828,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                       type="number" min="0" max="100"
                       value={form.score}
                       onChange={e => setForm(prev => ({ ...prev, score: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
                 </div>
@@ -838,7 +838,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                     value={form.notes}
                     onChange={e => setForm(prev => ({ ...prev, notes: e.target.value }))}
                     rows={4}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors resize-none"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -879,15 +879,15 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
               <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5">
                 {([
                   { key: 'research', label: '🔍 Research',    color: 'bg-blue-600' },
-                  { key: 'email',    label: '📧 Email',       color: 'bg-violet-600' },
-                  { key: 'call',     label: '📞 Call Script', color: 'bg-emerald-600' },
+                  { key: 'email',    label: '📧 Email',       color: 'bg-blue-600' },
+                  { key: 'call',     label: '📞 Call Script', color: 'bg-blue-600' },
                 ] as const).map(t => (
                   <button key={t.key} onClick={() => setAiTab(t.key)}
                     className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
                       aiTab === t.key ? `${t.color} text-white` : 'text-slate-400 hover:text-slate-200'
                     }`}>
                     {t.label}
-                    {t.key === 'research' && research && <span className="ml-1 w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />}
+                    {t.key === 'research' && research && <span className="ml-1 w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />}
                   </button>
                 ))}
               </div>
@@ -898,11 +898,11 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
               {aiTab === 'email' && (
                 <div className="space-y-4">
                   {research
-                    ? <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/20 border border-emerald-800/30 px-3 py-2 rounded-lg">
+                    ? <div className="flex items-center gap-2 text-xs text-blue-400 bg-slate-950/20 border border-slate-700/30 px-3 py-2 rounded-lg">
                         <span>✓</span> Using research intelligence — email will be highly personalized
                       </div>
-                    : <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-950/20 border border-amber-700/30 px-3 py-2 rounded-lg">
-                        <span>💡</span> Run <button onClick={() => setAiTab('research')} className="underline hover:text-amber-300">Research</button> first for a more personalized email
+                    : <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-950/20 border border-slate-600/30 px-3 py-2 rounded-lg">
+                        <span>💡</span> Run <button onClick={() => setAiTab('research')} className="underline hover:text-slate-400">Research</button> first for a more personalized email
                       </div>
                   }
                   {products.length > 0 && (
@@ -925,7 +925,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                             onClick={() => setSelectedProductId(p.id === selectedProductId ? null : p.id)}
                             className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
                               selectedProductId === p.id
-                                ? 'bg-violet-600/20 border-violet-600/50 text-violet-300'
+                                ? 'bg-blue-600/20 border-blue-600/50 text-blue-300'
                                 : 'border-slate-700 text-slate-400 hover:text-slate-200'
                             }`}
                           >
@@ -942,14 +942,14 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                       {(['professional', 'friendly', 'urgent'] as const).map(t => (
                         <button key={t} onClick={() => setEmailTone(t)}
                           className={`text-xs px-3 py-1 rounded-full capitalize transition-colors ${
-                            emailTone === t ? 'bg-violet-600 text-white' : 'border border-slate-700 text-slate-400 hover:text-slate-200'
+                            emailTone === t ? 'bg-blue-600 text-white' : 'border border-slate-700 text-slate-400 hover:text-slate-200'
                           }`}>
                           {t}
                         </button>
                       ))}
                     </div>
                     <button onClick={draftEmail} disabled={isDraftingEmail}
-                      className="ml-auto flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+                      className="ml-auto flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
                       {isDraftingEmail
                         ? <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Drafting…</>
                         : '✨ Draft Email'}
@@ -959,17 +959,17 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                   {emailDraft && (
                     <div className="bg-slate-800/60 border border-slate-700 rounded-xl overflow-hidden">
                       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700/50 bg-slate-800/80">
-                        <p className="text-violet-300 text-xs font-medium">Subject: {emailDraft.subject}</p>
+                        <p className="text-blue-300 text-xs font-medium">Subject: {emailDraft.subject}</p>
                         <div className="flex items-center gap-2">
                           <button onClick={copyEmail}
                             className={`text-xs px-3 py-1 rounded-lg border transition-colors ${
-                              emailCopied ? 'bg-emerald-600/30 border-emerald-600/40 text-emerald-300' : 'border-slate-600 text-slate-300 hover:bg-slate-700'
+                              emailCopied ? 'bg-blue-600/30 border-blue-600/40 text-blue-300' : 'border-slate-600 text-slate-300 hover:bg-slate-700'
                             }`}>
                             {emailCopied ? '✓ Copied!' : '📋 Copy'}
                           </button>
                           {lead.email && (
                             <a href={`mailto:${lead.email}?subject=${encodeURIComponent(emailDraft.subject)}&body=${encodeURIComponent(emailDraft.email)}`}
-                              className="text-xs bg-violet-600 hover:bg-violet-500 text-white px-3 py-1 rounded-lg transition-colors">
+                              className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg transition-colors">
                               Open Mail →
                             </a>
                           )}
@@ -998,11 +998,11 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
               {aiTab === 'call' && (
                 <div className="space-y-4">
                   {research
-                    ? <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/20 border border-emerald-800/30 px-3 py-2 rounded-lg">
+                    ? <div className="flex items-center gap-2 text-xs text-blue-400 bg-slate-950/20 border border-slate-700/30 px-3 py-2 rounded-lg">
                         <span>✓</span> Using research intelligence — script will be specific to {lead.company || lead.name}
                       </div>
-                    : <div className="flex items-center gap-2 text-xs text-amber-400 bg-amber-950/20 border border-amber-700/30 px-3 py-2 rounded-lg">
-                        <span>💡</span> Run <button onClick={() => setAiTab('research')} className="underline hover:text-amber-300">Research</button> first for a more targeted script
+                    : <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-950/20 border border-slate-600/30 px-3 py-2 rounded-lg">
+                        <span>💡</span> Run <button onClick={() => setAiTab('research')} className="underline hover:text-slate-400">Research</button> first for a more targeted script
                       </div>
                   }
                   <div className="flex items-center justify-between">
@@ -1011,13 +1011,13 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                       {callScript && (
                         <button onClick={copyCallScript}
                           className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
-                            scriptCopied ? 'bg-emerald-600/30 border-emerald-600/40 text-emerald-300' : 'border-slate-600 text-slate-300 hover:bg-slate-700'
+                            scriptCopied ? 'bg-blue-600/30 border-blue-600/40 text-blue-300' : 'border-slate-600 text-slate-300 hover:bg-slate-700'
                           }`}>
                           {scriptCopied ? '✓ Copied!' : '📋 Copy Script'}
                         </button>
                       )}
                       <button onClick={generateCallScript} disabled={isGeneratingScript}
-                        className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
                         {isGeneratingScript
                           ? <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating…</>
                           : '✨ Generate Script'}
@@ -1072,7 +1072,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                   <div className="flex items-center justify-between">
                     <p className="text-slate-400 text-sm">
                       Web research on <strong className="text-slate-200">{lead.company || lead.name}</strong>
-                      {research && <span className="ml-2 text-emerald-400 text-xs">✓ Saved · used by Email & Call Script</span>}
+                      {research && <span className="ml-2 text-blue-400 text-xs">✓ Saved · used by Email & Call Script</span>}
                     </p>
                     <button onClick={researchLead} disabled={isResearching}
                       className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors">
@@ -1084,10 +1084,10 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
 
                   {/* Contact suggestion banner */}
                   {contactSuggestion && (
-                    <div className="bg-amber-950/30 border border-amber-700/40 rounded-xl p-4 flex items-start gap-3">
-                      <span className="text-amber-400 text-lg shrink-0">💡</span>
+                    <div className="bg-slate-950/30 border border-slate-600/40 rounded-xl p-4 flex items-start gap-3">
+                      <span className="text-slate-500 text-lg shrink-0">💡</span>
                       <div className="flex-1">
-                        <p className="text-amber-300 text-xs font-semibold mb-1">Research found new contact info!</p>
+                        <p className="text-slate-400 text-xs font-semibold mb-1">Research found new contact info!</p>
                         <div className="space-y-0.5">
                           {contactSuggestion.email   && <p className="text-slate-300 text-xs">📧 {contactSuggestion.email}</p>}
                           {contactSuggestion.phone   && <p className="text-slate-300 text-xs">📞 {contactSuggestion.phone}</p>}
@@ -1095,7 +1095,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                         </div>
                       </div>
                       <button onClick={applyContactSuggestion} disabled={updatingContact}
-                        className="shrink-0 text-xs bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors">
+                        className="shrink-0 text-xs bg-slate-600 hover:bg-slate-600 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors">
                         {updatingContact ? 'Saving…' : 'Update Lead →'}
                       </button>
                     </div>
@@ -1146,12 +1146,12 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
 
                       {/* Talking Points */}
                       {research.talking_points?.length > 0 && (
-                        <div className="bg-emerald-950/20 border border-emerald-800/30 rounded-xl p-4">
-                          <p className="text-xs font-semibold text-emerald-400 mb-2.5">🎯 Talking Points</p>
+                        <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-4">
+                          <p className="text-xs font-semibold text-blue-400 mb-2.5">🎯 Talking Points</p>
                           <ul className="space-y-1.5">
                             {research.talking_points.map((tp, i) => (
                               <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                                <span className="text-emerald-400 shrink-0 mt-px">→</span>{tp}
+                                <span className="text-blue-400 shrink-0 mt-px">→</span>{tp}
                               </li>
                             ))}
                           </ul>
@@ -1217,7 +1217,7 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                         onClick={() => setActivityType(t)}
                         className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
                           activityType === t
-                            ? 'border-violet-500/50 bg-violet-600/20 text-violet-300'
+                            ? 'border-blue-500/50 bg-blue-600/20 text-blue-300'
                             : 'border-slate-700 text-slate-400 hover:border-slate-600'
                         }`}
                       >
@@ -1231,14 +1231,14 @@ export default function LeadDetailClient({ lead: initialLead, activities: initia
                   onChange={e => setActivityNote(e.target.value)}
                   placeholder="Add a note about this activity…"
                   rows={3}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
                 />
                 <div className="flex gap-2 justify-end">
                   <button onClick={() => setShowActivityForm(false)} className="text-xs text-slate-400 hover:text-white transition-colors">Cancel</button>
                   <button
                     onClick={handleLogActivity}
                     disabled={isLoggingActivity}
-                    className="text-xs bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg transition-colors"
+                    className="text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg transition-colors"
                   >
                     {isLoggingActivity ? 'Saving…' : 'Log Activity'}
                   </button>

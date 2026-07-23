@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -19,8 +19,8 @@ export function TrialBanner({ daysLeft }: TrialBannerProps) {
       isExpired
         ? 'bg-red-950/80 border-b border-red-800/50 text-red-300'
         : isUrgent
-        ? 'bg-amber-950/80 border-b border-amber-800/50 text-amber-300'
-        : 'bg-violet-950/60 border-b border-violet-800/40 text-violet-300'
+        ? 'bg-slate-950/80 border-b border-slate-700/50 text-slate-400'
+        : 'bg-slate-950/60 border-b border-slate-700/40 text-blue-300'
     }`}>
       <span>
         {isExpired
@@ -31,7 +31,7 @@ export function TrialBanner({ daysLeft }: TrialBannerProps) {
       <div className="flex items-center gap-3 ml-4 flex-shrink-0">
         <Link
           href="/settings/billing"
-          className={`font-semibold hover:underline ${isExpired ? 'text-red-200' : isUrgent ? 'text-amber-200' : 'text-violet-200'}`}
+          className={`font-semibold hover:underline ${isExpired ? 'text-red-200' : isUrgent ? 'text-slate-300' : 'text-blue-200'}`}
         >
           {isExpired ? 'Upgrade now →' : 'View plans →'}
         </Link>

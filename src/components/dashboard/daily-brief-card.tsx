@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 
@@ -34,7 +34,7 @@ export function DailyBriefCard({ businessName, userName }: DailyBriefCardProps) 
   }
 
   return (
-    <div className="bg-gradient-to-r from-violet-950/50 to-slate-900 border border-violet-800/30 rounded-2xl p-5">
+    <div className="bg-gradient-to-r from-slate-950/50 to-slate-900 border border-slate-700/30 rounded-2xl p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <p className="text-slate-400 text-xs mb-0.5">{day}</p>
@@ -56,12 +56,12 @@ export function DailyBriefCard({ businessName, userName }: DailyBriefCardProps) 
                 </span>
               )}
               {stats.newLeads > 0 && (
-                <span className="text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/30 px-2 py-0.5 rounded-full">
+                <span className="text-xs text-blue-400 bg-slate-950/40 border border-slate-700/30 px-2 py-0.5 rounded-full">
                   +{stats.newLeads} new leads
                 </span>
               )}
               {stats.newReviews > 0 && (
-                <span className="text-xs text-amber-400 bg-amber-950/40 border border-amber-800/30 px-2 py-0.5 rounded-full">
+                <span className="text-xs text-slate-500 bg-slate-950/40 border border-slate-700/30 px-2 py-0.5 rounded-full">
                   {stats.newReviews} reviews waiting
                 </span>
               )}
@@ -72,7 +72,7 @@ export function DailyBriefCard({ businessName, userName }: DailyBriefCardProps) 
         <button
           onClick={generate}
           disabled={loading}
-          className="flex-shrink-0 flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+          className="flex-shrink-0 flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-xs font-medium px-3 py-2 rounded-lg transition-colors"
         >
           {loading ? (
             <><div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" /> Thinking…</>

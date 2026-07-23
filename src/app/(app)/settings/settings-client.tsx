@@ -164,7 +164,7 @@ export default function SettingsClient({ profile, business, workspace, workspace
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
               <div>
@@ -190,7 +190,7 @@ export default function SettingsClient({ profile, business, workspace, workspace
                         value={newEmail}
                         onChange={e => setNewEmail(e.target.value)}
                         placeholder="new@email.com"
-                        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder:text-slate-600"
+                        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
                       />
                     </div>
                     <div>
@@ -200,11 +200,11 @@ export default function SettingsClient({ profile, business, workspace, workspace
                         value={emailPassword}
                         onChange={e => setEmailPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder:text-slate-600"
+                        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
                       />
                     </div>
                     {emailMsg && (
-                      <p className={`text-xs leading-relaxed ${emailMsg.ok ? 'text-emerald-400' : 'text-red-400'}`}>
+                      <p className={`text-xs leading-relaxed ${emailMsg.ok ? 'text-blue-400' : 'text-red-400'}`}>
                         {emailMsg.ok ? '✓ ' : '✗ '}{emailMsg.text}
                       </p>
                     )}
@@ -212,7 +212,7 @@ export default function SettingsClient({ profile, business, workspace, workspace
                       <button
                         onClick={changeEmail}
                         disabled={savingEmail || !newEmail || !emailPassword}
-                        className="flex-1 py-2 text-xs font-semibold bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-lg transition-colors"
+                        className="flex-1 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg transition-colors"
                       >
                         {savingEmail ? 'Sending…' : 'Send confirmation'}
                       </button>
@@ -231,7 +231,7 @@ export default function SettingsClient({ profile, business, workspace, workspace
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">Language</label>
                 <select value={language} onChange={e => setLanguage(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none">
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none">
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
                   <option value="fr">French</option>
@@ -243,7 +243,7 @@ export default function SettingsClient({ profile, business, workspace, workspace
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">Timezone</label>
                 <select value={timezone} onChange={e => setTimezone(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none">
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none">
                   <option value="UTC">UTC</option>
                   <option value="America/New_York">Eastern Time</option>
                   <option value="America/Chicago">Central Time</option>
@@ -262,11 +262,11 @@ export default function SettingsClient({ profile, business, workspace, workspace
               <button
                 onClick={saveProfile}
                 disabled={savingProfile}
-                className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
               >
                 {savingProfile ? 'Saving…' : 'Save Profile'}
               </button>
-              {profileSaved && <span className="text-emerald-400 text-sm">✓ Saved</span>}
+              {profileSaved && <span className="text-blue-400 text-sm">✓ Saved</span>}
             </div>
           </div>
         </div>
@@ -280,24 +280,24 @@ export default function SettingsClient({ profile, business, workspace, workspace
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">Business Name</label>
                   <input type="text" value={bizName} onChange={e => setBizName(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors" />
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">Industry</label>
                   <input type="text" value={industry} onChange={e => setIndustry(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors" />
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">Country</label>
                   <input type="text" value={country} onChange={e => setCountry(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors" />
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">Team Size</label>
                   <select value={size} onChange={e => setSize(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none">
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none">
                     <option value="1">Just me</option>
                     <option value="2-10">2–10</option>
                     <option value="11-50">11–50</option>
@@ -311,12 +311,12 @@ export default function SettingsClient({ profile, business, workspace, workspace
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">Website URL</label>
                 <input type="url" value={website} onChange={e => setWebsite(e.target.value)}
                   placeholder="https://yourbusiness.com"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">Description</label>
                 <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors resize-none" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-2">Who are your customers?</label>
@@ -324,7 +324,7 @@ export default function SettingsClient({ profile, business, workspace, workspace
                   {(['b2b', 'b2c', 'both'] as const).map(t => (
                     <button key={t} type="button" onClick={() => setTarget(t)}
                       className={`px-4 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
-                        target === t ? 'bg-violet-950/50 border-violet-500 text-violet-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
+                        target === t ? 'bg-slate-950/50 border-blue-500 text-blue-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
                       }`}>
                       {t === 'b2b' ? 'Businesses (B2B)' : t === 'b2c' ? 'Consumers (B2C)' : 'Both'}
                     </button>
@@ -336,11 +336,11 @@ export default function SettingsClient({ profile, business, workspace, workspace
                 <button
                   onClick={saveBusiness}
                   disabled={savingBiz}
-                  className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
                 >
                   {savingBiz ? 'Saving…' : 'Save Business'}
                 </button>
-                {bizSaved && <span className="text-emerald-400 text-sm">✓ Saved</span>}
+                {bizSaved && <span className="text-blue-400 text-sm">✓ Saved</span>}
               </div>
             </div>
           </div>
@@ -355,7 +355,7 @@ export default function SettingsClient({ profile, business, workspace, workspace
                 <p className="text-white text-sm">{workspace?.name}</p>
                 <p className="text-slate-500 text-xs">Plan: {workspace?.plan || 'Starter'}</p>
               </div>
-              <Link href="/pricing" className="text-violet-400 hover:text-violet-300 text-xs transition-colors">
+              <Link href="/pricing" className="text-blue-400 hover:text-blue-300 text-xs transition-colors">
                 Upgrade →
               </Link>
             </div>

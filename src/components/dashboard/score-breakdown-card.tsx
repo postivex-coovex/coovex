@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -27,8 +27,8 @@ const ITEMS = [
 
 function scoreColor(s: number | null) {
   if (s === null) return { bar: 'bg-slate-700', text: 'text-slate-600' }
-  if (s >= 75)   return { bar: 'bg-emerald-500', text: 'text-emerald-400' }
-  if (s >= 50)   return { bar: 'bg-amber-500',   text: 'text-amber-400' }
+  if (s >= 75)   return { bar: 'bg-blue-600', text: 'text-blue-400' }
+  if (s >= 50)   return { bar: 'bg-slate-600',   text: 'text-slate-500' }
   return           { bar: 'bg-red-500',           text: 'text-red-400' }
 }
 
@@ -50,7 +50,7 @@ function ScoreRow({ label, icon, href, score }: { label: string; icon: string; h
       ) : (
         <Link
           href={href}
-          className="text-[10px] text-violet-400 hover:text-violet-300 font-medium w-8 text-right shrink-0 whitespace-nowrap"
+          className="text-[10px] text-blue-400 hover:text-blue-300 font-medium w-8 text-right shrink-0 whitespace-nowrap"
         >
           Scan →
         </Link>

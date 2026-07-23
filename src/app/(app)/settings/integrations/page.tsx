@@ -82,7 +82,7 @@ export default async function IntegrationsPage() {
           <h2 className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-3">Lead Capture</h2>
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
             <div className="flex items-start gap-4 mb-5">
-              <div className="w-12 h-12 bg-violet-950/50 border border-violet-900/50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">💬</div>
+              <div className="w-12 h-12 bg-slate-950/50 border border-slate-800/50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">💬</div>
               <div>
                 <h3 className="text-white font-semibold">Website Lead Capture Widget</h3>
                 <p className="text-slate-500 text-sm mt-0.5">Add a floating chat widget to your website to capture leads directly into CooVex CRM.</p>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -81,36 +81,36 @@ export default function ValuationPage() {
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">Annual Recurring Revenue</label>
                 <input value={form.arr} onChange={set('arr')} placeholder="e.g. 150000"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">Monthly MRR</label>
                 <input value={form.mrr} onChange={set('mrr')} placeholder="e.g. 12500"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">YoY Growth Rate (%)</label>
                 <input value={form.growth_rate} onChange={set('growth_rate')} placeholder="e.g. 85"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">Gross Margin (%)</label>
                 <input value={form.gross_margin} onChange={set('gross_margin')} placeholder="e.g. 78"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">Paying Customers</label>
                 <input value={form.customer_count} onChange={set('customer_count')} placeholder="e.g. 45"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">Monthly Churn (%)</label>
                 <input value={form.churn_rate} onChange={set('churn_rate')} placeholder="e.g. 3.2"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
             </div>
             <button type="submit" disabled={generating}
-              className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
               {generating
                 ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Calculating…</>
                 : '✨ Estimate Valuation'}
@@ -130,7 +130,7 @@ export default function ValuationPage() {
                     <p className="text-slate-400 text-xl font-bold">{fmt(result.low)}</p>
                   </div>
                   <div className="flex-1 text-center pb-1">
-                    <p className="text-violet-300 text-xs mb-1">Most Likely</p>
+                    <p className="text-blue-300 text-xs mb-1">Most Likely</p>
                     <p className="text-white text-4xl font-black">{fmt(result.mid)}</p>
                   </div>
                   <div className="text-center">
@@ -139,9 +139,9 @@ export default function ValuationPage() {
                   </div>
                 </div>
                 <div className="relative h-3 bg-slate-800 rounded-full">
-                  <div className="absolute h-3 bg-gradient-to-r from-slate-600 via-violet-500 to-emerald-500 rounded-full inset-0" />
+                  <div className="absolute h-3 bg-gradient-to-r from-slate-600 via-blue-500 to-blue-600 rounded-full inset-0" />
                   <div
-                    className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-violet-500 shadow-lg"
+                    className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full border-2 border-blue-500 shadow-lg"
                     style={{ left: `${Math.round(((result.mid - result.low) / Math.max(result.high - result.low, 1)) * 80 + 10)}%` }}
                   />
                 </div>
@@ -159,7 +159,7 @@ export default function ValuationPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-slate-300 text-xs font-medium">{m.name}</span>
-                          <span className="text-violet-400 text-xs">{m.multiple}</span>
+                          <span className="text-blue-400 text-xs">{m.multiple}</span>
                         </div>
                         <p className="text-slate-600 text-xs mt-0.5">{m.basis}</p>
                       </div>
@@ -182,11 +182,11 @@ export default function ValuationPage() {
       {result && (
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <h3 className="text-xs font-semibold text-emerald-400 mb-3">✓ Value Drivers</h3>
+            <h3 className="text-xs font-semibold text-blue-400 mb-3">✓ Value Drivers</h3>
             <ul className="space-y-1.5">
               {result.key_factors.map((f, i) => (
                 <li key={i} className="text-xs text-slate-300 flex gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 mt-1.5" />{f}
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 flex-shrink-0 mt-1.5" />{f}
                 </li>
               ))}
             </ul>
@@ -201,8 +201,8 @@ export default function ValuationPage() {
               ))}
             </ul>
           </div>
-          <div className="sm:col-span-2 bg-violet-950/20 border border-violet-800/30 rounded-xl p-5">
-            <p className="text-violet-300 text-xs font-semibold mb-2">🎯 Strategic Summary</p>
+          <div className="sm:col-span-2 bg-slate-950/20 border border-slate-700/30 rounded-xl p-5">
+            <p className="text-blue-300 text-xs font-semibold mb-2">🎯 Strategic Summary</p>
             <p className="text-slate-200 text-sm leading-relaxed">{result.summary}</p>
           </div>
         </div>

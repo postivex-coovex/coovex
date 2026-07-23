@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -196,15 +196,15 @@ export default async function GettingStartedPage() {
         <div className="w-full bg-slate-800 rounded-full h-2">
           <div
             className="h-2 rounded-full transition-all duration-500"
-            style={{ width: `${pct}%`, background: pct >= 75 ? '#10b981' : pct >= 40 ? '#8b5cf6' : '#f59e0b' }}
+            style={{ width: `${pct}%`, background: pct >= 75 ? '#2563eb' : pct >= 40 ? '#3b82f6' : '#64748b' }}
           />
         </div>
       </div>
 
       {/* Next Step Banner */}
       {nextStep && (
-        <div className="bg-violet-950/30 border border-violet-700/40 rounded-2xl p-5">
-          <p className="text-[10px] text-violet-400 font-semibold uppercase tracking-wider mb-2">Your next step</p>
+        <div className="bg-slate-950/30 border border-slate-700/40 rounded-2xl p-5">
+          <p className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider mb-2">Your next step</p>
           <div className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0">{nextStep.icon}</span>
             <div className="flex-1 min-w-0">
@@ -212,7 +212,7 @@ export default async function GettingStartedPage() {
               <p className="text-xs text-slate-400 leading-relaxed mb-3">{nextStep.detail}</p>
               <Link
                 href={nextStep.link}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors"
               >
                 {nextStep.linkLabel} →
               </Link>
@@ -232,7 +232,7 @@ export default async function GettingStartedPage() {
             return (
               <div key={step.id} className={`flex items-start gap-4 px-5 py-4 ${step.done ? 'opacity-70' : ''}`}>
                 {/* Step number / check */}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold ${step.done ? 'bg-emerald-500 text-white' : locked ? 'bg-slate-800 text-slate-600' : 'bg-violet-600/20 text-violet-400 border border-violet-600/30'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold ${step.done ? 'bg-blue-600 text-white' : locked ? 'bg-slate-800 text-slate-600' : 'bg-blue-600/20 text-blue-400 border border-blue-600/30'}`}>
                   {step.done ? '✓' : locked ? '🔒' : i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -251,7 +251,7 @@ export default async function GettingStartedPage() {
                   </Link>
                 )}
                 {step.done && (
-                  <span className="flex-shrink-0 text-xs text-emerald-400 font-medium">Done ✓</span>
+                  <span className="flex-shrink-0 text-xs text-blue-400 font-medium">Done ✓</span>
                 )}
               </div>
             )

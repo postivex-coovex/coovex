@@ -13,17 +13,17 @@ interface NpsResponse {
 }
 
 const CATEGORY_META = {
-  promoter:  { label: 'Promoter',  color: 'bg-emerald-900/50 text-emerald-300 border-emerald-800/40', dot: 'bg-emerald-400' },
-  passive:   { label: 'Passive',   color: 'bg-amber-900/50 text-amber-300 border-amber-800/40',       dot: 'bg-amber-400' },
+  promoter:  { label: 'Promoter',  color: 'bg-slate-900/50 text-blue-300 border-slate-700/40', dot: 'bg-blue-500' },
+  passive:   { label: 'Passive',   color: 'bg-slate-900/50 text-slate-400 border-slate-700/40',       dot: 'bg-slate-500' },
   detractor: { label: 'Detractor', color: 'bg-red-900/50 text-red-300 border-red-800/40',             dot: 'bg-red-400' },
 }
 
 function ScoreButton({ value, selected, onClick }: { value: number; selected: boolean; onClick: () => void }) {
-  const color = value >= 9 ? 'border-emerald-600 hover:bg-emerald-900/30 text-emerald-300'
-    : value >= 7 ? 'border-amber-600 hover:bg-amber-900/30 text-amber-300'
+  const color = value >= 9 ? 'border-blue-600 hover:bg-slate-900/30 text-blue-300'
+    : value >= 7 ? 'border-slate-600 hover:bg-slate-900/30 text-slate-400'
     : 'border-red-700 hover:bg-red-900/20 text-red-300'
-  const selectedColor = value >= 9 ? 'bg-emerald-600 border-emerald-500 text-white'
-    : value >= 7 ? 'bg-amber-600 border-amber-500 text-white'
+  const selectedColor = value >= 9 ? 'bg-blue-600 border-blue-500 text-white'
+    : value >= 7 ? 'bg-slate-600 border-slate-500 text-white'
     : 'bg-red-700 border-red-600 text-white'
   return (
     <button
@@ -70,14 +70,14 @@ function NpsCollector({ onSubmitted }: { onSubmitted: (r: NpsResponse) => void }
         <h3 className="text-white font-semibold mb-2">Thank you for your feedback!</h3>
         <p className="text-slate-400 text-sm">Your response has been recorded.</p>
         {showReview && (
-          <div className="mt-6 p-4 bg-emerald-950/30 border border-emerald-800/40 rounded-xl">
-            <p className="text-emerald-300 text-sm font-medium mb-3">
+          <div className="mt-6 p-4 bg-slate-950/30 border border-slate-700/40 rounded-xl">
+            <p className="text-blue-300 text-sm font-medium mb-3">
               You gave us a {score}/10 — we&apos;re thrilled! 🙌
             </p>
             <p className="text-slate-400 text-xs mb-3">
               Would you mind sharing your experience on Google? It helps us reach more customers like you.
             </p>
-            <button className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            <button className="bg-blue-600 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
               Leave a Google Review →
             </button>
           </div>
@@ -114,7 +114,7 @@ function NpsCollector({ onSubmitted }: { onSubmitted: (r: NpsResponse) => void }
               onChange={e => setComment(e.target.value)}
               placeholder="Share your thoughts…"
               rows={3}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
             />
           </div>
           <div>
@@ -123,13 +123,13 @@ function NpsCollector({ onSubmitted }: { onSubmitted: (r: NpsResponse) => void }
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Jane Smith"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <button
             onClick={submit}
             disabled={submitting}
-            className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl transition-colors"
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl transition-colors"
           >
             {submitting ? 'Submitting…' : 'Submit Response'}
           </button>
@@ -199,8 +199,8 @@ export default function NpsPage() {
             <div className="sm:col-span-1 bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center">
               <div className={`text-5xl font-black ${
                 score === null ? 'text-slate-600'
-                : score >= 50 ? 'text-emerald-400'
-                : score >= 0 ? 'text-amber-400'
+                : score >= 50 ? 'text-blue-400'
+                : score >= 0 ? 'text-slate-500'
                 : 'text-red-400'
               }`}>
                 {score !== null ? (score > 0 ? `+${score}` : score) : '—'}
@@ -208,8 +208,8 @@ export default function NpsPage() {
               <p className="text-slate-500 text-xs mt-1">NPS Score</p>
               {score !== null && (
                 <span className={`text-xs mt-2 px-2 py-0.5 rounded-full ${
-                  score >= 50 ? 'bg-emerald-900/50 text-emerald-300'
-                  : score >= 0 ? 'bg-amber-900/50 text-amber-300'
+                  score >= 50 ? 'bg-slate-900/50 text-blue-300'
+                  : score >= 0 ? 'bg-slate-900/50 text-slate-400'
                   : 'bg-red-900/50 text-red-300'
                 }`}>
                   {score >= 70 ? 'Excellent' : score >= 50 ? 'Great' : score >= 0 ? 'Good' : 'Needs Work'}
@@ -219,8 +219,8 @@ export default function NpsPage() {
 
             <div className="sm:col-span-3 grid grid-cols-3 gap-4">
               {[
-                { label: 'Promoters',  count: promoters,  pct: total > 0 ? Math.round(promoters / total * 100) : 0,  color: 'text-emerald-400', bar: 'bg-emerald-500' },
-                { label: 'Passives',   count: passives,   pct: total > 0 ? Math.round(passives / total * 100) : 0,   color: 'text-amber-400',   bar: 'bg-amber-500' },
+                { label: 'Promoters',  count: promoters,  pct: total > 0 ? Math.round(promoters / total * 100) : 0,  color: 'text-blue-400', bar: 'bg-blue-600' },
+                { label: 'Passives',   count: passives,   pct: total > 0 ? Math.round(passives / total * 100) : 0,   color: 'text-slate-500',   bar: 'bg-slate-600' },
                 { label: 'Detractors', count: detractors, pct: total > 0 ? Math.round(detractors / total * 100) : 0, color: 'text-red-400',     bar: 'bg-red-500' },
               ].map(s => (
                 <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
@@ -248,7 +248,7 @@ export default function NpsPage() {
                 Start collecting NPS scores from your customers. Promoters (9-10) will be prompted to leave a Google review.
               </p>
               <button onClick={() => setTab('collect')}
-                className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+                className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
                 Collect First Response
               </button>
             </div>
@@ -259,8 +259,8 @@ export default function NpsPage() {
                 return (
                   <div key={r.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex gap-4">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black flex-shrink-0 ${
-                      r.score >= 9 ? 'bg-emerald-900/50 text-emerald-300'
-                      : r.score >= 7 ? 'bg-amber-900/50 text-amber-300'
+                      r.score >= 9 ? 'bg-slate-900/50 text-blue-300'
+                      : r.score >= 7 ? 'bg-slate-900/50 text-slate-400'
                       : 'bg-red-900/30 text-red-300'
                     }`}>
                       {r.score}
@@ -279,7 +279,7 @@ export default function NpsPage() {
                     </div>
                     {r.category === 'promoter' && (
                       <div className="flex-shrink-0">
-                        <span className="text-xs text-emerald-600">Review requested →</span>
+                        <span className="text-xs text-blue-600">Review requested →</span>
                       </div>
                     )}
                   </div>

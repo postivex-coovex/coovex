@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -157,7 +157,7 @@ export function SetupGuide({ steps, userName }: { steps: OnboardingSteps; userNa
       <div className="px-5 pt-3 pb-1">
         <div className="w-full bg-slate-800 rounded-full h-1">
           <div
-            className="h-1 rounded-full bg-violet-500 transition-all duration-500"
+            className="h-1 rounded-full bg-blue-500 transition-all duration-500"
             style={{ width: `${Math.round((doneCount / total) * 100)}%` }}
           />
         </div>
@@ -177,16 +177,16 @@ export function SetupGuide({ steps, userName }: { steps: OnboardingSteps; userNa
               key={phase.id}
               className={`flex-1 rounded-xl px-3 py-2.5 border transition-colors ${
                 isActive
-                  ? 'bg-violet-950/40 border-violet-700/50'
+                  ? 'bg-slate-950/40 border-slate-700/50'
                   : isComplete
-                  ? 'bg-emerald-950/20 border-emerald-800/30'
+                  ? 'bg-slate-950/20 border-slate-700/30'
                   : 'bg-slate-800/30 border-slate-800'
               }`}
             >
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="text-sm">{phase.emoji}</span>
                 <span className={`text-[11px] font-semibold ${
-                  isActive ? 'text-violet-300' : isComplete ? 'text-emerald-400' : 'text-slate-600'
+                  isActive ? 'text-blue-300' : isComplete ? 'text-blue-400' : 'text-slate-600'
                 }`}>
                   {phase.label}
                 </span>
@@ -198,13 +198,13 @@ export function SetupGuide({ steps, userName }: { steps: OnboardingSteps; userNa
                     key={s.key}
                     className={`h-1 flex-1 rounded-full ${
                       steps[s.key]
-                        ? isActive ? 'bg-violet-500' : 'bg-emerald-500'
+                        ? isActive ? 'bg-blue-500' : 'bg-blue-600'
                         : 'bg-slate-700'
                     }`}
                   />
                 ))}
               </div>
-              <p className={`text-[10px] mt-1 ${isActive ? 'text-violet-400' : isComplete ? 'text-emerald-500' : 'text-slate-700'}`}>
+              <p className={`text-[10px] mt-1 ${isActive ? 'text-blue-400' : isComplete ? 'text-blue-500' : 'text-slate-700'}`}>
                 {isComplete ? 'Complete ✓' : `${phaseDone}/${phaseTotal} done`}
               </p>
             </div>
@@ -227,7 +227,7 @@ export function SetupGuide({ steps, userName }: { steps: OnboardingSteps; userNa
                 }`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-base ${
-                  done ? 'bg-emerald-900/60' : isNext ? 'bg-violet-900/60' : 'bg-slate-800'
+                  done ? 'bg-slate-900/60' : isNext ? 'bg-slate-900/60' : 'bg-slate-800'
                 }`}>
                   {done ? '✅' : step.icon}
                 </div>
@@ -244,7 +244,7 @@ export function SetupGuide({ steps, userName }: { steps: OnboardingSteps; userNa
                     href={step.href}
                     className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
                       isNext
-                        ? 'bg-violet-600 hover:bg-violet-500 text-white'
+                        ? 'bg-blue-600 hover:bg-blue-500 text-white'
                         : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
                     }`}
                   >

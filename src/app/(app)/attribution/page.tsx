@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
@@ -47,17 +47,17 @@ function fmt(n: number) {
 }
 
 const SOURCE_COLORS: Record<string, { bar: string; dot: string; card: string }> = {
-  referral:      { bar: 'bg-emerald-500', dot: 'bg-emerald-400', card: 'bg-emerald-950/20 border-emerald-800/30' },
+  referral:      { bar: 'bg-blue-600', dot: 'bg-blue-500', card: 'bg-slate-950/20 border-slate-700/30' },
   linkedin:      { bar: 'bg-blue-500',    dot: 'bg-blue-400',    card: 'bg-blue-950/20 border-blue-800/30' },
-  website_form:  { bar: 'bg-violet-500',  dot: 'bg-violet-400',  card: 'bg-violet-950/20 border-violet-800/30' },
-  website:       { bar: 'bg-violet-500',  dot: 'bg-violet-400',  card: 'bg-violet-950/20 border-violet-800/30' },
-  cold_outreach: { bar: 'bg-amber-500',   dot: 'bg-amber-400',   card: 'bg-amber-950/20 border-amber-800/30' },
-  event:         { bar: 'bg-pink-500',    dot: 'bg-pink-400',    card: 'bg-pink-950/20 border-pink-800/30' },
-  facebook:      { bar: 'bg-indigo-500',  dot: 'bg-indigo-400',  card: 'bg-indigo-950/20 border-indigo-800/30' },
+  website_form:  { bar: 'bg-blue-500',  dot: 'bg-blue-400',  card: 'bg-slate-950/20 border-slate-700/30' },
+  website:       { bar: 'bg-blue-500',  dot: 'bg-blue-400',  card: 'bg-slate-950/20 border-slate-700/30' },
+  cold_outreach: { bar: 'bg-slate-600',   dot: 'bg-slate-500',   card: 'bg-slate-950/20 border-slate-700/30' },
+  event:         { bar: 'bg-blue-500',    dot: 'bg-blue-400',    card: 'bg-slate-950/20 border-slate-700/30' },
+  facebook:      { bar: 'bg-blue-500',  dot: 'bg-blue-400',  card: 'bg-slate-950/20 border-slate-700/30' },
   instagram:     { bar: 'bg-rose-500',    dot: 'bg-rose-400',    card: 'bg-rose-950/20 border-rose-800/30' },
-  google_ads:    { bar: 'bg-yellow-500',  dot: 'bg-yellow-400',  card: 'bg-yellow-950/20 border-yellow-800/30' },
-  email:         { bar: 'bg-cyan-500',    dot: 'bg-cyan-400',    card: 'bg-cyan-950/20 border-cyan-800/30' },
-  crm_import:    { bar: 'bg-teal-500',    dot: 'bg-teal-400',    card: 'bg-teal-950/20 border-teal-800/30' },
+  google_ads:    { bar: 'bg-slate-600',  dot: 'bg-slate-500',  card: 'bg-slate-950/20 border-slate-700/30' },
+  email:         { bar: 'bg-blue-500',    dot: 'bg-blue-400',    card: 'bg-slate-950/20 border-slate-700/30' },
+  crm_import:    { bar: 'bg-blue-500',    dot: 'bg-blue-400',    card: 'bg-slate-950/20 border-slate-700/30' },
 }
 const DEFAULT_COLOR = { bar: 'bg-slate-500', dot: 'bg-slate-400', card: 'bg-slate-800 border-slate-700' }
 
@@ -146,7 +146,7 @@ export default function AttributionPage() {
           <div className="text-5xl mb-4">📊</div>
           <p className="text-white font-semibold">No leads yet</p>
           <p className="text-slate-400 text-sm mt-2 mb-5">Add leads to your pipeline to track which channels perform best.</p>
-          <Link href="/leads" className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+          <Link href="/leads" className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
             Go to Leads
           </Link>
         </div>
@@ -157,9 +157,9 @@ export default function AttributionPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
           {loading ? [1,2,3,4].map(i => <div key={i} className="h-24 bg-slate-900 rounded-xl animate-pulse" />) : data && ([
             { label: 'Total Leads',     val: data.total_leads.toString(),       sub: `${period === 'all' ? 'all time' : `last ${period}`}`,       color: 'text-white' },
-            { label: 'Won Revenue',     val: fmt(data.total_won_revenue),       sub: `${data.total_won} deals closed`,                            color: 'text-emerald-400' },
-            { label: 'Open Pipeline',   val: fmt(data.total_pipeline),          sub: `${fmt(data.total_weighted)} weighted`,                       color: 'text-violet-400' },
-            { label: 'Best Channel',    val: topSrc?.label ?? '—',              sub: `${topSrc?.win_rate ?? 0}% win rate`,                         color: 'text-amber-400' },
+            { label: 'Won Revenue',     val: fmt(data.total_won_revenue),       sub: `${data.total_won} deals closed`,                            color: 'text-blue-400' },
+            { label: 'Open Pipeline',   val: fmt(data.total_pipeline),          sub: `${fmt(data.total_weighted)} weighted`,                       color: 'text-blue-400' },
+            { label: 'Best Channel',    val: topSrc?.label ?? '—',              sub: `${topSrc?.win_rate ?? 0}% win rate`,                         color: 'text-slate-500' },
           ].map(k => (
             <div key={k.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
               <p className="text-slate-500 text-xs mb-1">{k.label}</p>
@@ -174,7 +174,7 @@ export default function AttributionPage() {
         <>
           {/* Data quality notice */}
           {!data.has_real_data && (
-            <div className="bg-amber-950/20 border border-amber-800/30 rounded-xl p-3 mb-5 text-xs text-amber-300 flex items-center gap-2">
+            <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-3 mb-5 text-xs text-slate-400 flex items-center gap-2">
               <span>⚠️</span>
               Pipeline values are estimated from lead scores. <Link href="/leads" className="underline ml-1">Add deal values to leads</Link> for accurate revenue attribution.
             </div>
@@ -201,7 +201,7 @@ export default function AttributionPage() {
                             <div className={`w-2 h-2 rounded-full ${(SOURCE_COLORS[s.source] ?? DEFAULT_COLOR).dot}`} />
                             <span className="text-slate-300 text-sm">{s.label}</span>
                             {s.source === data.top_source && (
-                              <span className="text-[10px] px-1.5 py-0.5 bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 rounded-full">Top</span>
+                              <span className="text-[10px] px-1.5 py-0.5 bg-slate-950/40 text-blue-400 border border-slate-700/40 rounded-full">Top</span>
                             )}
                           </div>
                           <span className="text-white text-sm font-medium">{fmtVal(s)}</span>
@@ -236,7 +236,7 @@ export default function AttributionPage() {
                           <span className="text-white text-sm font-medium">{s.label}</span>
                         </div>
                         {s.source === data.top_source && (
-                          <span className="text-[10px] px-1.5 py-0.5 bg-emerald-900/60 text-emerald-300 rounded-full border border-emerald-800/40">Best</span>
+                          <span className="text-[10px] px-1.5 py-0.5 bg-slate-900/60 text-blue-300 rounded-full border border-slate-700/40">Best</span>
                         )}
                       </div>
                       <div className="grid grid-cols-4 gap-1 text-center">
@@ -245,17 +245,17 @@ export default function AttributionPage() {
                           <p className="text-slate-600 text-[10px]">leads</p>
                         </div>
                         <div>
-                          <p className="text-emerald-400 text-sm font-bold">{s.won}</p>
+                          <p className="text-blue-400 text-sm font-bold">{s.won}</p>
                           <p className="text-slate-600 text-[10px]">won</p>
                         </div>
                         <div>
-                          <p className={`text-sm font-bold ${s.win_rate >= 30 ? 'text-emerald-400' : s.win_rate >= 15 ? 'text-amber-400' : 'text-slate-400'}`}>
+                          <p className={`text-sm font-bold ${s.win_rate >= 30 ? 'text-blue-400' : s.win_rate >= 15 ? 'text-slate-500' : 'text-slate-400'}`}>
                             {closed > 0 ? `${s.win_rate}%` : '—'}
                           </p>
                           <p className="text-slate-600 text-[10px]">win rate</p>
                         </div>
                         <div>
-                          <p className="text-violet-400 text-sm font-bold">{s.won_revenue > 0 ? fmt(s.won_revenue) : s.pipeline > 0 ? fmt(s.pipeline) : '—'}</p>
+                          <p className="text-blue-400 text-sm font-bold">{s.won_revenue > 0 ? fmt(s.won_revenue) : s.pipeline > 0 ? fmt(s.pipeline) : '—'}</p>
                           <p className="text-slate-600 text-[10px]">{s.won_revenue > 0 ? 'revenue' : 'pipeline'}</p>
                         </div>
                       </div>
@@ -277,7 +277,7 @@ export default function AttributionPage() {
                 const pct      = Math.round((step.count / maxFunnel) * 100)
                 const prev     = i > 0 ? data.funnel[i - 1].count : step.count
                 const convPct  = prev > 0 && i > 0 ? Math.round((step.count / prev) * 100) : null
-                const colors   = ['bg-slate-700', 'bg-blue-900/60', 'bg-violet-900/60', 'bg-violet-700/70', 'bg-violet-600/80', 'bg-emerald-700']
+                const colors   = ['bg-slate-700', 'bg-blue-900/60', 'bg-slate-900/60', 'bg-blue-700/70', 'bg-blue-600/80', 'bg-blue-700']
                 return (
                   <div key={step.stage} className="flex-1 min-w-[60px] text-center">
                     {convPct !== null && (

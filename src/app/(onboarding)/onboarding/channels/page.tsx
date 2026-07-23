@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { saveChannels } from '../actions'
@@ -38,13 +38,13 @@ export default function ChannelsPage() {
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-10">
         {[1, 2, 3, 4, 5, 6].map((s) => (
-          <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors ${s <= 3 ? 'bg-violet-500' : 'bg-slate-200'}`} />
+          <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors ${s <= 3 ? 'bg-blue-500' : 'bg-slate-200'}`} />
         ))}
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-6">
         <div>
-          <p className="text-violet-600 text-sm font-semibold mb-1">Step 3 of 6</p>
+          <p className="text-blue-600 text-sm font-semibold mb-1">Step 3 of 6</p>
           <h1 className="text-2xl font-bold text-slate-900">Connect your channels</h1>
           <p className="text-slate-500 mt-1 text-base">
             Your agent will monitor these for engagement, reviews, and competitor activity. You can add more in Settings anytime.
@@ -53,7 +53,7 @@ export default function ChannelsPage() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           {CHANNELS.map(ch => (
-            <div key={ch.key} className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 hover:border-violet-200 transition-colors">
+            <div key={ch.key} className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 hover:border-blue-200 transition-colors">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl">{ch.icon}</span>
                 <div>
@@ -66,7 +66,7 @@ export default function ChannelsPage() {
                 value={form[ch.key]}
                 onChange={e => setForm(f => ({ ...f, [ch.key]: e.target.value }))}
                 placeholder={ch.placeholder}
-                className="w-full bg-white border-2 border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                className="w-full bg-white border-2 border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
           ))}
@@ -91,7 +91,7 @@ export default function ChannelsPage() {
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 active:scale-[0.99] disabled:opacity-50 text-white font-bold px-8 py-3 rounded-xl transition-all text-base"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 text-white font-bold px-8 py-3 rounded-xl transition-all text-base"
               >
                 {isPending ? 'Saving...' : hasAny ? 'Save & Continue' : 'Continue'}
                 {!isPending && (

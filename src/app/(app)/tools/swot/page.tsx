@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef } from 'react'
 
@@ -11,8 +11,8 @@ interface SwotResult {
 }
 
 const QUADRANTS = [
-  { key: 'strengths',     label: 'Strengths',      icon: '💪', color: 'border-emerald-800/50 bg-emerald-950/20', textColor: 'text-emerald-400', dotColor: 'bg-emerald-500' },
-  { key: 'weaknesses',    label: 'Weaknesses',      icon: '⚠️', color: 'border-amber-800/50 bg-amber-950/20',   textColor: 'text-amber-400',   dotColor: 'bg-amber-500' },
+  { key: 'strengths',     label: 'Strengths',      icon: '💪', color: 'border-slate-700/50 bg-slate-950/20', textColor: 'text-blue-400', dotColor: 'bg-blue-600' },
+  { key: 'weaknesses',    label: 'Weaknesses',      icon: '⚠️', color: 'border-slate-700/50 bg-slate-950/20',   textColor: 'text-slate-500',   dotColor: 'bg-slate-600' },
   { key: 'opportunities', label: 'Opportunities',   icon: '🚀', color: 'border-blue-800/50 bg-blue-950/20',     textColor: 'text-blue-400',    dotColor: 'bg-blue-500' },
   { key: 'threats',       label: 'Threats',         icon: '🛡️', color: 'border-red-800/50 bg-red-950/20',       textColor: 'text-red-400',     dotColor: 'bg-red-500' },
 ] as const
@@ -113,7 +113,7 @@ export default function SwotPage() {
           <button
             onClick={generate}
             disabled={generating}
-            className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             {generating
               ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Analyzing your business…</>
@@ -129,7 +129,7 @@ export default function SwotPage() {
                 <button onClick={copyText} className="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition-colors">
                   {copied ? '✓ Copied' : '📋 Copy'}
                 </button>
-                <button onClick={openExport} className="text-xs bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-lg transition-colors">
+                <button onClick={openExport} className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition-colors">
                   📄 Export PDF
                 </button>
               </div>
@@ -158,7 +158,7 @@ export default function SwotPage() {
             </div>
 
             <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
-              <p className="text-violet-300 text-xs font-medium mb-2">🎯 Strategic Summary</p>
+              <p className="text-blue-300 text-xs font-medium mb-2">🎯 Strategic Summary</p>
               <p className="text-slate-200 text-sm leading-relaxed">{result.summary}</p>
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function SwotPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => iframeRef.current?.contentWindow?.print()}
-                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors"
               >
                 🖨️ Print / Save PDF
               </button>

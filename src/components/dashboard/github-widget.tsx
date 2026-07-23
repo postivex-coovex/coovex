@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ export function GithubWidget() {
           <p className="text-xs text-slate-400">AI-powered code editor</p>
         </div>
         {gh && (
-          <span className="ml-auto flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-900/20 border border-emerald-700/30 rounded-full px-2 py-0.5">
+          <span className="ml-auto flex items-center gap-1 text-[11px] text-blue-400 bg-slate-900/20 border border-slate-700/30 rounded-full px-2 py-0.5">
             <Check className="w-3 h-3" /> Connected
           </span>
         )}
@@ -49,7 +49,7 @@ export function GithubWidget() {
           </div>
           <Link
             href="/github"
-            className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg py-2 text-sm font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg py-2 text-sm font-medium transition-colors"
           >
             Open AI Coding
             <ArrowRight className="w-3.5 h-3.5" />

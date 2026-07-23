@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -83,7 +83,7 @@ export default function LoginPage() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-violet-500 focus:outline-none text-slate-900 text-base placeholder:text-slate-400 transition-colors bg-slate-50 focus:bg-white"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-slate-900 text-base placeholder:text-slate-400 transition-colors bg-slate-50 focus:bg-white"
             />
           </div>
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
               <label htmlFor="password" className="text-sm font-semibold text-slate-700">
                 Password
               </label>
-              <Link href="/forgot-password" className="text-sm text-violet-600 hover:text-violet-700 font-medium">
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
                 Forgot password?
               </Link>
             </div>
@@ -103,14 +103,14 @@ export default function LoginPage() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-violet-500 focus:outline-none text-slate-900 text-base placeholder:text-slate-400 transition-colors bg-slate-50 focus:bg-white"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-slate-900 text-base placeholder:text-slate-400 transition-colors bg-slate-50 focus:bg-white"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-violet-600 hover:bg-violet-700 active:scale-[0.99] text-white font-bold text-base transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+            className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold text-base transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-2"
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
@@ -119,7 +119,7 @@ export default function LoginPage() {
         {/* Footer */}
         <p className="text-center text-sm text-slate-500 mt-6">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-violet-600 hover:text-violet-700 font-semibold">
+          <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
             Start free trial
           </Link>
         </p>

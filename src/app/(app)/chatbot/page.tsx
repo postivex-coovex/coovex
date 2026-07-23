@@ -17,10 +17,10 @@ interface Message {
   content: string
 }
 
-const COLORS = ['#7c3aed', '#2563eb', '#059669', '#d97706', '#dc2626', '#0891b2', '#7c3aed']
+const COLORS = ['#2563eb', '#2563eb', '#1d4ed8', '#475569', '#dc2626', '#0891b2', '#2563eb']
 const COLOR_NAMES: Record<string, string> = {
-  '#7c3aed': 'Violet', '#2563eb': 'Blue', '#059669': 'Emerald',
-  '#d97706': 'Amber', '#dc2626': 'Red', '#0891b2': 'Cyan',
+  '#2563eb': 'Violet', '#2563eb': 'Blue', '#1d4ed8': 'Emerald',
+  '#475569': 'Amber', '#dc2626': 'Red', '#0891b2': 'Cyan',
 }
 
 function ChatPreview({ config, chatbotId }: { config: ChatConfig; chatbotId: string | undefined }) {
@@ -120,7 +120,7 @@ function ChatPreview({ config, chatbotId }: { config: ChatConfig; chatbotId: str
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && send()}
                   placeholder="Type a message…"
-                  className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+                  className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 />
                 <button
                   onClick={send}
@@ -153,7 +153,7 @@ function ChatPreview({ config, chatbotId }: { config: ChatConfig; chatbotId: str
 export default function ChatbotPage() {
   const [config, setConfig] = useState<ChatConfig>({
     name: 'Support Bot',
-    color: '#7c3aed',
+    color: '#2563eb',
     greeting: 'Hi there! 👋 How can I help you today?',
     system_prompt: 'You are a friendly business assistant. Help visitors with questions and try to capture their name and email for follow-up. Keep replies under 80 words.',
     is_active: true,
@@ -223,7 +223,7 @@ export default function ChatbotPage() {
         <button
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors"
         >
           {saved ? <><Check className="w-4 h-4" /> Saved!</> : saving ? 'Saving…' : 'Save Config'}
         </button>
@@ -246,7 +246,7 @@ export default function ChatbotPage() {
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">Bot Name</label>
                 <input value={config.name} onChange={set('name')} placeholder="Support Bot"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
 
               <div>
@@ -268,14 +268,14 @@ export default function ChatbotPage() {
                 <label className="block text-xs text-slate-400 mb-1.5">Greeting Message</label>
                 <textarea value={config.greeting} onChange={set('greeting')} rows={2}
                   placeholder="Hi there! 👋 How can I help you today?"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors resize-none" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none" />
               </div>
 
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">AI Personality / System Prompt</label>
                 <textarea value={config.system_prompt} onChange={set('system_prompt')} rows={5}
                   placeholder="You are a helpful assistant for [business name]. Help visitors with questions about our services..."
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors resize-none" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none" />
                 <p className="text-slate-600 text-xs mt-1">Tip: Include your business context, FAQs, and instructions to collect visitor name + email.</p>
               </div>
 
@@ -286,7 +286,7 @@ export default function ChatbotPage() {
                 </div>
                 <button
                   onClick={() => setConfig(c => ({ ...c, is_active: !c.is_active }))}
-                  className={`w-11 h-6 rounded-full transition-colors relative ${config.is_active ? 'bg-violet-600' : 'bg-slate-700'}`}
+                  className={`w-11 h-6 rounded-full transition-colors relative ${config.is_active ? 'bg-blue-600' : 'bg-slate-700'}`}
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-all ${config.is_active ? 'left-5' : 'left-0.5'}`} />
                 </button>
@@ -296,7 +296,7 @@ export default function ChatbotPage() {
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
               <div>
                 <p className="text-white font-medium text-sm mb-1">Embed on your website</p>
-                <p className="text-slate-400 text-xs">Paste this script just before the <code className="text-violet-400">&lt;/body&gt;</code> tag of your site.</p>
+                <p className="text-slate-400 text-xs">Paste this script just before the <code className="text-blue-400">&lt;/body&gt;</code> tag of your site.</p>
               </div>
 
               <div className="relative">
@@ -307,7 +307,7 @@ export default function ChatbotPage() {
                   onClick={copyEmbed}
                   className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-lg border border-slate-700 transition-colors"
                 >
-                  {copied ? <><Check className="w-3 h-3 text-emerald-400" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy</>}
+                  {copied ? <><Check className="w-3 h-3 text-blue-400" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy</>}
                 </button>
               </div>
 
@@ -316,7 +316,7 @@ export default function ChatbotPage() {
                   href={`/embed/chat/${chatbotId}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 text-violet-400 hover:text-violet-300 text-sm transition-colors"
+                  className="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm transition-colors"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Preview standalone embed page
@@ -326,7 +326,7 @@ export default function ChatbotPage() {
               <div className="p-4 bg-slate-950/50 border border-slate-800/60 rounded-xl">
                 <p className="text-slate-400 text-xs leading-relaxed">
                   <strong className="text-slate-300">WordPress:</strong> Use the &quot;Custom HTML&quot; widget in Appearance → Widgets, or paste in your theme&apos;s footer.php.<br />
-                  <strong className="text-slate-300">Shopify:</strong> Theme → Edit code → theme.liquid, paste before <code className="text-violet-400">&lt;/body&gt;</code>.<br />
+                  <strong className="text-slate-300">Shopify:</strong> Theme → Edit code → theme.liquid, paste before <code className="text-blue-400">&lt;/body&gt;</code>.<br />
                   <strong className="text-slate-300">Webflow:</strong> Project Settings → Custom Code → Footer Code.
                 </p>
               </div>

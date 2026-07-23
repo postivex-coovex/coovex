@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import type { Plan } from '@/lib/feature-flags'
 import { hasFeature } from '@/lib/feature-flags'
 
@@ -21,7 +21,7 @@ export function FeatureGate({ feature, plan, children, fallback }: FeatureGatePr
       <p className="text-slate-600 text-xs mb-3">This feature requires a higher plan.</p>
       <Link
         href="/settings/billing"
-        className="inline-block text-xs bg-violet-600 hover:bg-violet-500 text-white px-4 py-1.5 rounded-lg transition-colors"
+        className="inline-block text-xs bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg transition-colors"
       >
         Upgrade Plan →
       </Link>

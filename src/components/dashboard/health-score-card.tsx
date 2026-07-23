@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { getScoreGrade, getScoreColor, cn } from '@/lib/utils'
 
@@ -13,10 +13,10 @@ export function HealthScoreCard({ score }: HealthScoreCardProps) {
   const strokeDash = (score / 100) * circumference
 
   const gradeColors: Record<string, string> = {
-    A: 'text-green-400', B: 'text-emerald-400', C: 'text-yellow-400', D: 'text-orange-400', F: 'text-red-400'
+    A: 'text-blue-400', B: 'text-blue-400', C: 'text-slate-500', D: 'text-slate-500', F: 'text-red-400'
   }
   const ringColors: Record<string, string> = {
-    A: '#22c55e', B: '#10b981', C: '#eab308', D: '#f97316', F: '#ef4444'
+    A: '#2563eb', B: '#2563eb', C: '#eab308', D: '#64748b', F: '#ef4444'
   }
 
   return (

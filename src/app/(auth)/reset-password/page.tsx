@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -78,7 +78,7 @@ export default function ResetPasswordPage() {
           <p className="text-red-400 text-sm">{error}</p>
           <Button
             onClick={() => window.location.href = '/forgot-password'}
-            className="bg-violet-600 hover:bg-violet-500 text-white"
+            className="bg-blue-600 hover:bg-blue-500 text-white"
           >
             Request new reset link
           </Button>
@@ -91,7 +91,7 @@ export default function ResetPasswordPage() {
     return (
       <Card className="w-full max-w-md bg-slate-900 border-slate-800">
         <CardContent className="py-12 text-center">
-          <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-400 text-sm">Verifying reset link…</p>
         </CardContent>
       </Card>
@@ -133,8 +133,8 @@ export default function ResetPasswordPage() {
                 { label: 'Number',           ok: /\d/.test(password) },
               ].map(r => (
                 <div key={r.label} className="flex items-center gap-2 text-xs">
-                  <span className={r.ok ? 'text-emerald-400' : 'text-slate-600'}>{r.ok ? '✓' : '○'}</span>
-                  <span className={r.ok ? 'text-emerald-400' : 'text-slate-500'}>{r.label}</span>
+                  <span className={r.ok ? 'text-blue-400' : 'text-slate-600'}>{r.ok ? '✓' : '○'}</span>
+                  <span className={r.ok ? 'text-blue-400' : 'text-slate-500'}>{r.label}</span>
                 </div>
               ))}
             </div>
@@ -142,7 +142,7 @@ export default function ResetPasswordPage() {
 
           <Button
             type="submit" disabled={loading}
-            className="w-full bg-violet-600 hover:bg-violet-500 text-white"
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white"
           >
             {loading ? 'Updating…' : 'Update password'}
           </Button>

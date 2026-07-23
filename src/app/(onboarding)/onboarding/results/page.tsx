@@ -1,12 +1,12 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { markOnboardingComplete } from '../actions'
 
 const SIGNAL_COLORS: Record<string, string> = {
   urgent:      'border-red-200 bg-red-50',
-  warning:     'border-amber-200 bg-amber-50',
-  opportunity: 'border-violet-200 bg-violet-50',
-  done:        'border-emerald-200 bg-emerald-50',
+  warning:     'border-slate-300 bg-slate-100',
+  opportunity: 'border-blue-200 bg-blue-50',
+  done:        'border-blue-200 bg-blue-50',
   insight:     'border-blue-200 bg-blue-50',
 }
 
@@ -15,8 +15,8 @@ const SIGNAL_ICONS: Record<string, string> = {
 }
 
 const SIGNAL_TEXT: Record<string, string> = {
-  urgent: 'text-red-700', warning: 'text-amber-700', opportunity: 'text-violet-700',
-  done: 'text-emerald-700', insight: 'text-blue-700',
+  urgent: 'text-red-700', warning: 'text-slate-700', opportunity: 'text-blue-700',
+  done: 'text-blue-700', insight: 'text-blue-700',
 }
 
 export default async function ResultsPage() {
@@ -61,14 +61,14 @@ export default async function ResultsPage() {
   const dashOffset     = circumference - (healthScore / 100) * circumference
   const scoreColor     = healthScore >= 80 ? '#059669' : healthScore >= 60 ? '#3b82f6' : healthScore >= 40 ? '#d97706' : '#dc2626'
   const scoreLabel     = healthScore >= 80 ? 'Great' : healthScore >= 60 ? 'Good' : healthScore >= 40 ? 'Fair' : 'Needs Work'
-  const scoreLabelColor = healthScore >= 80 ? 'text-emerald-600' : healthScore >= 60 ? 'text-blue-600' : healthScore >= 40 ? 'text-amber-600' : 'text-red-500'
+  const scoreLabelColor = healthScore >= 80 ? 'text-blue-600' : healthScore >= 60 ? 'text-blue-600' : healthScore >= 40 ? 'text-slate-600' : 'text-red-500'
 
   return (
     <div className="w-full max-w-2xl pt-6">
       {/* Step indicator — all filled */}
       <div className="flex items-center gap-2 mb-8">
         {[1, 2, 3, 4, 5, 6].map((s) => (
-          <div key={s} className="h-1.5 rounded-full flex-1 bg-violet-500" />
+          <div key={s} className="h-1.5 rounded-full flex-1 bg-blue-500" />
         ))}
       </div>
 
@@ -76,8 +76,8 @@ export default async function ResultsPage() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-            <p className="text-emerald-600 text-sm font-semibold">Agent Active</p>
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+            <p className="text-blue-600 text-sm font-semibold">Agent Active</p>
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Here&apos;s your first look</h1>
           <p className="text-slate-500 text-sm mt-0.5">
@@ -157,7 +157,7 @@ export default async function ResultsPage() {
         <form action={markOnboardingComplete}>
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 active:scale-[0.99] text-white font-bold px-8 py-4 rounded-xl transition-all text-lg shadow-lg shadow-violet-200"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold px-8 py-4 rounded-xl transition-all text-lg shadow-lg shadow-violet-200"
           >
             Go to Dashboard
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

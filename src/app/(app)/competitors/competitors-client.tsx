@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { Bot, Plus, RefreshCw, Target, TrendingUp, AlertTriangle, Zap, Globe, ChevronDown, ChevronUp, MapPin, Globe2, Settings2, X } from 'lucide-react'
@@ -84,10 +84,10 @@ const MARKET_OPTIONS = [
     title: 'Local Competitors',
     desc: 'Businesses competing in your city or district',
     example: 'Nearby shops, local agencies, same-street rivals',
-    active: 'border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/20',
-    check: 'border-emerald-400 bg-emerald-400',
-    icon: <MapPin className="w-5 h-5 text-emerald-400" />,
-    iconBg: 'bg-emerald-500/20',
+    active: 'border-blue-500 bg-blue-600/10 ring-1 ring-blue-500/20',
+    check: 'border-blue-400 bg-blue-500',
+    icon: <MapPin className="w-5 h-5 text-blue-400" />,
+    iconBg: 'bg-blue-600/20',
   },
   {
     key: 'regional',
@@ -106,10 +106,10 @@ const MARKET_OPTIONS = [
     title: 'International Competitors',
     desc: 'Global industry leaders and international platforms',
     example: 'Worldwide brands, global SaaS, industry giants',
-    active: 'border-violet-500 bg-violet-500/10 ring-1 ring-violet-500/20',
-    check: 'border-violet-400 bg-violet-400',
-    icon: <Globe className="w-5 h-5 text-violet-400" />,
-    iconBg: 'bg-violet-500/20',
+    active: 'border-blue-500 bg-blue-500/10 ring-1 ring-blue-500/20',
+    check: 'border-blue-400 bg-blue-400',
+    icon: <Globe className="w-5 h-5 text-blue-400" />,
+    iconBg: 'bg-blue-500/20',
   },
 ] as const
 
@@ -171,25 +171,25 @@ function SetupScreen({
         <div className="col-span-3">
           {/* Section header */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center flex-shrink-0">
-              <Target className="w-5 h-5 text-violet-400" />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+              <Target className="w-5 h-5 text-blue-400" />
             </div>
             <div>
               <h2 className="text-white font-bold text-lg">Select Markets to Monitor</h2>
               <p className="text-slate-400 text-xs">
                 AI will find real competitors in each selected market.
-                {business?.location && <span className="text-violet-400"> ({business.location})</span>}
+                {business?.location && <span className="text-blue-400"> ({business.location})</span>}
               </p>
             </div>
           </div>
 
-          <p className="text-amber-500/80 text-xs mb-5 flex items-center gap-1.5">
+          <p className="text-slate-600/80 text-xs mb-5 flex items-center gap-1.5">
             <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
             Competitor data is AI-estimated — not real-time scraped. You can verify and correct it.
           </p>
 
           {existingCount > 0 && (
-            <div className="mb-5 p-4 bg-amber-950/30 border border-amber-800/40 rounded-xl flex items-start gap-2.5 text-xs text-amber-300">
+            <div className="mb-5 p-4 bg-slate-950/30 border border-slate-700/40 rounded-xl flex items-start gap-2.5 text-xs text-slate-400">
               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>This will delete {existingCount} existing competitor{existingCount !== 1 ? 's' : ''} and run a fresh AI analysis based on your new selection.</span>
             </div>
@@ -225,16 +225,16 @@ function SetupScreen({
 
           {/* Location input */}
           {needsLocation && (
-            <div className="mt-4 p-4 bg-emerald-950/20 border border-emerald-800/40 rounded-2xl">
-              <label className="block text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2">
-                📍 Your City / Area <span className="text-emerald-600 font-normal">(required for Local market)</span>
+            <div className="mt-4 p-4 bg-slate-950/20 border border-slate-700/40 rounded-2xl">
+              <label className="block text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">
+                📍 Your City / Area <span className="text-blue-600 font-normal">(required for Local market)</span>
               </label>
               <input
                 type="text"
                 value={localLocation}
                 onChange={e => setLocalLocation(e.target.value)}
                 placeholder="e.g. Dhaka, Bangladesh  or  New York, USA"
-                className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 text-white text-sm px-4 py-3 rounded-xl outline-none transition-colors placeholder-slate-600"
+                className="w-full bg-slate-900 border border-slate-700 focus:border-blue-500 text-white text-sm px-4 py-3 rounded-xl outline-none transition-colors placeholder-slate-600"
               />
               <p className="text-slate-500 text-xs mt-1.5">AI uses this to find competitors actually operating in your area</p>
             </div>
@@ -252,7 +252,7 @@ function SetupScreen({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-slate-400 text-xs font-medium">🛍️ Product / Service</label>
-                <a href="/products" className="text-violet-400 hover:text-violet-300 text-[11px] font-medium transition-colors">
+                <a href="/products" className="text-blue-400 hover:text-blue-300 text-[11px] font-medium transition-colors">
                   + Add
                 </a>
               </div>
@@ -260,7 +260,7 @@ function SetupScreen({
                 <select
                   value={productService}
                   onChange={e => setProductService(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 focus:border-violet-500 text-white text-sm px-4 py-2.5 rounded-xl outline-none transition-colors appearance-none cursor-pointer"
+                  className="w-full bg-slate-800 border border-slate-700 focus:border-blue-500 text-white text-sm px-4 py-2.5 rounded-xl outline-none transition-colors appearance-none cursor-pointer"
                 >
                   <option value="">— Select a product —</option>
                   {products.map(p => (
@@ -272,7 +272,7 @@ function SetupScreen({
               ) : (
                 <div className="flex items-center gap-3 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5">
                   <p className="text-slate-500 text-sm flex-1">No products added yet</p>
-                  <a href="/products" className="text-violet-400 hover:text-violet-300 text-xs font-medium transition-colors whitespace-nowrap">
+                  <a href="/products" className="text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors whitespace-nowrap">
                     Add now →
                   </a>
                 </div>
@@ -287,18 +287,18 @@ function SetupScreen({
                 value={businessWebsite}
                 onChange={e => setBusinessWebsite(e.target.value)}
                 placeholder="https://yourwebsite.com"
-                className="w-full bg-slate-800 border border-slate-700 focus:border-violet-500 text-white text-sm px-4 py-2.5 rounded-xl outline-none transition-colors placeholder-slate-600"
+                className="w-full bg-slate-800 border border-slate-700 focus:border-blue-500 text-white text-sm px-4 py-2.5 rounded-xl outline-none transition-colors placeholder-slate-600"
               />
               <p className="text-slate-600 text-xs mt-1.5">Used for direct positioning comparison</p>
             </div>
           </div>
 
           {/* Summary + CTA */}
-          <div className="p-5 bg-violet-950/20 border border-violet-800/30 rounded-2xl">
+          <div className="p-5 bg-slate-950/20 border border-slate-700/30 rounded-2xl">
             <div className="mb-4 space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-400">Markets selected</span>
-                <span className={`font-semibold ${selected.length > 0 ? 'text-violet-400' : 'text-slate-600'}`}>
+                <span className={`font-semibold ${selected.length > 0 ? 'text-blue-400' : 'text-slate-600'}`}>
                   {selected.length} / 3
                 </span>
               </div>
@@ -313,7 +313,7 @@ function SetupScreen({
             <button
               disabled={selected.length === 0 || (needsLocation && !localLocation.trim())}
               onClick={() => onStart(selected, localLocation.trim(), productService.trim(), businessWebsite.trim())}
-              className="w-full flex items-center justify-center gap-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-colors">
+              className="w-full flex items-center justify-center gap-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-3.5 rounded-xl text-sm transition-colors">
               <Bot className="w-4 h-4" />
               Start AI Analysis
             </button>
@@ -322,7 +322,7 @@ function SetupScreen({
               <p className="text-slate-600 text-xs mt-3 text-center">Select at least one market to continue</p>
             )}
             {needsLocation && !localLocation.trim() && selected.length > 0 && (
-              <p className="text-amber-600 text-xs mt-3 text-center">Enter your city to enable local market analysis</p>
+              <p className="text-slate-600 text-xs mt-3 text-center">Enter your city to enable local market analysis</p>
             )}
           </div>
         </div>
@@ -332,24 +332,24 @@ function SetupScreen({
 }
 
 const CHART_COLORS = [
-  '#ef4444','#f59e0b','#3b82f6','#8b5cf6',
-  '#10b981','#f97316','#ec4899','#14b8a6',
+  '#ef4444','#64748b','#3b82f6','#3b82f6',
+  '#2563eb','#64748b','#94a3b8','#60a5fa',
 ]
 
 /* ─── Helpers ────────────────────────────────────────────────────────────────── */
 
 const THREAT_STYLE: Record<string, string> = {
   high:    'bg-red-900/40   text-red-300   border-red-800/40',
-  medium:  'bg-amber-900/40 text-amber-300 border-amber-800/40',
-  low:     'bg-emerald-900/40 text-emerald-300 border-emerald-800/40',
+  medium:  'bg-slate-900/40 text-slate-400 border-slate-700/40',
+  low:     'bg-slate-900/40 text-blue-300 border-slate-700/40',
   unknown: 'bg-slate-800 text-slate-400 border-slate-700',
 }
 
 const INSIGHT_STYLE: Record<string, { color: string; icon: string; bg: string }> = {
-  gap:         { icon: '⚠️', color: 'text-amber-400',   bg: 'bg-amber-500/10 border-amber-800/30' },
-  opportunity: { icon: '💡', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-800/30' },
+  gap:         { icon: '⚠️', color: 'text-slate-500',   bg: 'bg-slate-600/10 border-slate-700/30' },
+  opportunity: { icon: '💡', color: 'text-blue-400', bg: 'bg-blue-600/10 border-slate-700/30' },
   threat:      { icon: '❗', color: 'text-red-400',     bg: 'bg-red-500/10 border-red-800/30' },
-  action:      { icon: '🚀', color: 'text-violet-400',  bg: 'bg-violet-500/10 border-violet-800/30' },
+  action:      { icon: '🚀', color: 'text-blue-400',  bg: 'bg-blue-500/10 border-slate-700/30' },
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -393,19 +393,19 @@ function DiscoverProgress({ industry, productService }: { industry?: string | nu
   }, [])
 
   return (
-    <div className="bg-slate-900 border border-violet-800/40 rounded-2xl p-10 text-center">
+    <div className="bg-slate-900 border border-slate-700/40 rounded-2xl p-10 text-center">
       {/* Icon */}
       <div className="relative w-20 h-20 mx-auto mb-6">
-        <div className="absolute inset-0 rounded-full bg-violet-500/10 border border-violet-500/20 animate-ping opacity-30" />
-        <div className="relative w-20 h-20 rounded-full bg-violet-500/10 border border-violet-500/30 flex items-center justify-center">
-          <Bot className="w-9 h-9 text-violet-400" />
+        <div className="absolute inset-0 rounded-full bg-blue-500/10 border border-blue-500/20 animate-ping opacity-30" />
+        <div className="relative w-20 h-20 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+          <Bot className="w-9 h-9 text-blue-400" />
         </div>
       </div>
 
       <h2 className="text-white font-bold text-xl mb-1">AI is scanning your market…</h2>
       <p className="text-slate-400 text-sm mb-8">
         {productService
-          ? <>Analysing competitors for <span className="text-violet-300 font-medium">{productService}</span></>
+          ? <>Analysing competitors for <span className="text-blue-300 font-medium">{productService}</span></>
           : industry
             ? `Analysing ${industry} competitors`
             : 'Identifying real competitors from your industry'
@@ -416,11 +416,11 @@ function DiscoverProgress({ industry, productService }: { industry?: string | nu
       <div className="max-w-sm mx-auto mb-5">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-slate-500">Progress</span>
-          <span className="text-xs text-violet-400 font-semibold tabular-nums">{Math.round(progress)}%</span>
+          <span className="text-xs text-blue-400 font-semibold tabular-nums">{Math.round(progress)}%</span>
         </div>
         <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-violet-600 to-violet-400 rounded-full transition-all duration-300 ease-out"
+            className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -433,23 +433,23 @@ function DiscoverProgress({ industry, productService }: { industry?: string | nu
           const current = i === step
           return (
             <div key={s.label} className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300 ${
-              current ? 'bg-violet-500/10 border border-violet-500/20' :
+              current ? 'bg-blue-500/10 border border-blue-500/20' :
               done    ? 'opacity-40' : 'opacity-20'
             }`}>
               <div className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] transition-all ${
-                done    ? 'bg-emerald-500 text-white' :
-                current ? 'bg-violet-500 text-white animate-pulse' :
+                done    ? 'bg-blue-600 text-white' :
+                current ? 'bg-blue-500 text-white animate-pulse' :
                           'bg-slate-700 text-slate-500'
               }`}>
                 {done ? '✓' : i + 1}
               </div>
-              <span className={`text-xs ${current ? 'text-violet-300 font-medium' : done ? 'text-slate-500' : 'text-slate-600'}`}>
+              <span className={`text-xs ${current ? 'text-blue-300 font-medium' : done ? 'text-slate-500' : 'text-slate-600'}`}>
                 {s.label}
               </span>
               {current && (
                 <span className="ml-auto flex gap-0.5">
                   {[0,1,2].map(d => (
-                    <span key={d} className="w-1 h-1 rounded-full bg-violet-400 animate-bounce"
+                    <span key={d} className="w-1 h-1 rounded-full bg-blue-400 animate-bounce"
                       style={{ animationDelay: `${d * 0.15}s` }} />
                   ))}
                 </span>
@@ -523,7 +523,7 @@ function TrendChart({
     type BarItem = { id: string; name: string; score: number; color: string; isYou: boolean; threat?: string | null; marketType?: string | null }
     const items: BarItem[] = []
     if (bizScore > 0) {
-      items.push({ id: 'biz', name: business?.name ?? 'Your Business', score: bizScore, color: '#8b5cf6', isYou: true })
+      items.push({ id: 'biz', name: business?.name ?? 'Your Business', score: bizScore, color: '#3b82f6', isYou: true })
     }
     competitorIds.forEach((cid, ci) => {
       const pts   = seriesMap.get(cid) ?? []
@@ -564,12 +564,12 @@ function TrendChart({
         <div className="space-y-2">
           {visible.map((item, idx) => {
             const pct = (item.score / maxScore) * 100
-            const threatColor = item.threat === 'high' ? 'text-red-400' : item.threat === 'medium' ? 'text-amber-400' : 'text-emerald-400'
+            const threatColor = item.threat === 'high' ? 'text-red-400' : item.threat === 'medium' ? 'text-slate-500' : 'text-blue-400'
             return (
               <div key={item.id}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
                   item.isYou
-                    ? 'bg-violet-500/10 border border-violet-500/25 ring-1 ring-violet-500/10'
+                    ? 'bg-blue-500/10 border border-blue-500/25 ring-1 ring-blue-500/10'
                     : hoveredId === item.id
                       ? 'bg-slate-800'
                       : 'hover:bg-slate-800/60'
@@ -584,17 +584,17 @@ function TrendChart({
                 {/* Bar + name */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className={`text-xs font-medium truncate max-w-[180px] ${item.isYou ? 'text-violet-300' : 'text-slate-200'}`}>
-                      {item.name}{item.isYou && <span className="ml-1.5 text-violet-400 text-[10px] font-normal">(You)</span>}
+                    <span className={`text-xs font-medium truncate max-w-[180px] ${item.isYou ? 'text-blue-300' : 'text-slate-200'}`}>
+                      {item.name}{item.isYou && <span className="ml-1.5 text-blue-400 text-[10px] font-normal">(You)</span>}
                     </span>
                     <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
                       {!item.isYou && item.marketType && (
                         <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold uppercase tracking-wider ${
                           item.marketType === 'local'
-                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                            ? 'bg-blue-600/10 border-blue-500/30 text-blue-400'
                             : item.marketType === 'regional'
                               ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-                              : 'bg-violet-500/10 border-violet-500/30 text-violet-400'
+                              : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
                         }`}>
                           {item.marketType === 'local' ? '📍' : item.marketType === 'regional' ? '🗺️' : '🌐'} {item.marketType}
                         </span>
@@ -602,14 +602,14 @@ function TrendChart({
                       {!item.isYou && item.threat && (
                         <span className={`text-[9px] uppercase tracking-wider ${threatColor}`}>{item.threat}</span>
                       )}
-                      <span className="text-xs font-bold tabular-nums" style={{ color: item.isYou ? '#a78bfa' : item.color }}>
+                      <span className="text-xs font-bold tabular-nums" style={{ color: item.isYou ? '#60a5fa' : item.color }}>
                         {item.score}
                       </span>
                     </div>
                   </div>
                   <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${pct}%`, backgroundColor: item.isYou ? '#8b5cf6' : item.color }} />
+                      style={{ width: `${pct}%`, backgroundColor: item.isYou ? '#3b82f6' : item.color }} />
                   </div>
                 </div>
               </div>
@@ -619,15 +619,15 @@ function TrendChart({
 
         {items.length > SHOW && (
           <button onClick={() => setShowAllBars(s => !s)}
-            className="mt-3 w-full text-xs text-slate-500 hover:text-violet-400 py-2.5 border border-slate-800 hover:border-violet-500/30 rounded-xl transition-colors">
+            className="mt-3 w-full text-xs text-slate-500 hover:text-blue-400 py-2.5 border border-slate-800 hover:border-blue-500/30 rounded-xl transition-colors">
             {showAllBars ? '↑ Show less' : `↓ Show ${items.length - SHOW} more competitors`}
           </button>
         )}
 
         {myScore > 0 && (
           <div className="mt-4 pt-3 border-t border-slate-800 grid grid-cols-2 gap-3 text-center">
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl py-2.5">
-              <p className="text-emerald-400 font-bold text-lg">{aheadOf}</p>
+            <div className="bg-blue-600/10 border border-blue-500/20 rounded-xl py-2.5">
+              <p className="text-blue-400 font-bold text-lg">{aheadOf}</p>
               <p className="text-slate-400 text-[10px]">competitors ahead of</p>
             </div>
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl py-2.5">
@@ -812,7 +812,7 @@ function TrendChart({
         </div>
         {hiddenCount > 0 && (
           <button onClick={() => setShowAllLegend(s => !s)}
-            className="mt-2 text-[10px] text-slate-600 hover:text-violet-400 transition-colors">
+            className="mt-2 text-[10px] text-slate-600 hover:text-blue-400 transition-colors">
             {showAllLegend ? '↑ Show fewer' : `↓ +${hiddenCount} more`}
           </button>
         )}
@@ -826,7 +826,7 @@ function TrendChart({
         return (
           <div className="mt-3 p-3 bg-slate-800/50 rounded-xl grid grid-cols-2 gap-3 text-center text-xs">
             <div>
-              <span className="text-emerald-400 font-bold text-base">{ahead}</span>
+              <span className="text-blue-400 font-bold text-base">{ahead}</span>
               <span className="text-slate-500 ml-1">competitors ahead of you</span>
             </div>
             <div>
@@ -843,35 +843,35 @@ function TrendChart({
 function BulkScanProgress({ done, total, currentName }: { done: number; total: number; currentName: string }) {
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
   return (
-    <div className="bg-slate-900 border border-emerald-800/30 rounded-2xl p-5">
+    <div className="bg-slate-900 border border-slate-700/30 rounded-2xl p-5">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
-          <Bot className="w-4 h-4 text-emerald-400 animate-pulse" />
+        <div className="w-8 h-8 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+          <Bot className="w-4 h-4 text-blue-400 animate-pulse" />
         </div>
         <div className="flex-1">
           <p className="text-white text-sm font-semibold">Running deep AI scan on all competitors…</p>
           <p className="text-slate-400 text-xs mt-0.5">
-            Currently scanning: <span className="text-emerald-400 font-medium">{currentName}</span>
+            Currently scanning: <span className="text-blue-400 font-medium">{currentName}</span>
           </p>
         </div>
-        <span className="text-emerald-400 font-bold text-sm tabular-nums">{done}/{total}</span>
+        <span className="text-blue-400 font-bold text-sm tabular-nums">{done}/{total}</span>
       </div>
       <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-700 ease-out"
+          className="h-full bg-gradient-to-r from-blue-600 to-blue-500 rounded-full transition-all duration-700 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
       <div className="flex justify-between mt-1.5">
         <span className="text-slate-600 text-[10px]">Gap Analysis + Growth Plan will auto-populate when done</span>
-        <span className="text-emerald-500 text-[10px] font-medium">{pct}%</span>
+        <span className="text-blue-500 text-[10px] font-medium">{pct}%</span>
       </div>
     </div>
   )
 }
 
 function ScoreRing({ score }: { score: number }) {
-  const color = score >= 75 ? '#ef4444' : score >= 50 ? '#f59e0b' : '#10b981'
+  const color = score >= 75 ? '#ef4444' : score >= 50 ? '#64748b' : '#2563eb'
   return (
     <div className="relative w-14 h-14 flex-shrink-0">
       <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
@@ -938,14 +938,14 @@ function AddModal({ onClose, onAdded }: { onClose: () => void; onAdded: (c: Comp
               <input type={f.type} placeholder={f.placeholder}
                 value={form[f.key as keyof typeof form]}
                 onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
             </div>
           ))}
           {error && <p className="text-red-400 text-xs">{error}</p>}
           <p className="text-slate-500 text-xs">After adding, click "AI Scan" to get full intelligence analysis.</p>
           <div className="flex gap-2">
             <button type="button" onClick={onClose} className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium py-2.5 rounded-xl transition-colors">Cancel</button>
-            <button type="submit" disabled={saving} className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+            <button type="submit" disabled={saving} className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
               {saving ? 'Adding…' : 'Add Competitor'}
             </button>
           </div>
@@ -1000,15 +1000,15 @@ function CompetitorCard({
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="text-white font-bold text-base">{comp.name}</h3>
                   {comp.auto_discovered && (
-                    <span className="text-[9px] text-violet-400 bg-violet-500/10 border border-violet-500/20 px-1.5 py-0.5 rounded-full font-medium">AI FOUND</span>
+                    <span className="text-[9px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full font-medium">AI FOUND</span>
                   )}
                   {comp.market_type && (
                     <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-semibold uppercase tracking-wider ${
                       comp.market_type === 'local'
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                        ? 'bg-blue-600/10 border-blue-500/30 text-blue-400'
                         : comp.market_type === 'regional'
                           ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-                          : 'bg-violet-500/10 border-violet-500/30 text-violet-400'
+                          : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
                     }`}>
                       {comp.market_type === 'local' ? '📍 Local' : comp.market_type === 'regional' ? '🗺️ Regional' : '🌐 Intl'}
                     </span>
@@ -1019,7 +1019,7 @@ function CompetitorCard({
                 </div>
                 {url && (
                   <a href={url} target="_blank" rel="noopener noreferrer"
-                    className="text-slate-500 hover:text-violet-400 text-xs transition-colors flex items-center gap-1 mt-0.5">
+                    className="text-slate-500 hover:text-blue-400 text-xs transition-colors flex items-center gap-1 mt-0.5">
                     <Globe className="w-3 h-3" />
                     {url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
                   </a>
@@ -1029,7 +1029,7 @@ function CompetitorCard({
                 <button
                   onClick={() => onScan(comp.id)}
                   disabled={scanning || comp.crawl_status === 'scanning'}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-violet-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
+                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-blue-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-40"
                 >
                   <RefreshCw className={`w-3 h-3 ${(scanning || comp.crawl_status === 'scanning') ? 'animate-spin' : ''}`} />
                   {comp.crawl_status === 'scanning' ? 'Scanning…' : 'AI Scan'}
@@ -1043,17 +1043,17 @@ function CompetitorCard({
             <div className="flex flex-wrap gap-3 mt-3">
               {comp.google_rating && (
                 <div className="flex items-center gap-1">
-                  <span className="text-amber-400 text-xs">★</span>
+                  <span className="text-slate-500 text-xs">★</span>
                   <span className="text-white text-xs font-semibold">{comp.google_rating}</span>
                   {comp.google_review_count > 0 && <span className="text-slate-500 text-xs">({comp.google_review_count})</span>}
-                  <span className="text-amber-600 text-[9px] ml-0.5">AI est.</span>
+                  <span className="text-slate-600 text-[9px] ml-0.5">AI est.</span>
                 </div>
               )}
               {comp.pricing_tier && (
                 <span className={`text-xs px-2 py-0.5 rounded-full capitalize font-medium ${
-                  comp.pricing_tier === 'premium' ? 'text-violet-300 bg-violet-500/10' :
+                  comp.pricing_tier === 'premium' ? 'text-blue-300 bg-blue-500/10' :
                   comp.pricing_tier === 'mid'     ? 'text-blue-300 bg-blue-500/10' :
-                                                    'text-emerald-300 bg-emerald-500/10'
+                                                    'text-blue-300 bg-blue-600/10'
                 }`}>
                   {comp.pricing_tier}
                 </span>
@@ -1092,12 +1092,12 @@ function CompetitorCard({
                     if (!them && !you) return null
                     const theyWin = them > you
                     return (
-                      <tr className={theyWin ? 'bg-red-950/15' : 'bg-emerald-950/10'}>
+                      <tr className={theyWin ? 'bg-red-950/15' : 'bg-slate-950/10'}>
                         <td className="px-3 py-2 text-slate-400">Strength Score</td>
                         <td className={`px-3 py-2 text-center font-bold ${theyWin ? 'text-red-400' : 'text-slate-400'}`}>{them || '—'}</td>
-                        <td className={`px-3 py-2 text-center font-bold ${!theyWin && you > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>{you || '—'}</td>
+                        <td className={`px-3 py-2 text-center font-bold ${!theyWin && you > 0 ? 'text-blue-400' : 'text-slate-400'}`}>{you || '—'}</td>
                         <td className="px-3 py-2 text-center text-[10px]">
-                          {theyWin ? <span className="text-red-400">↑ Them</span> : <span className="text-emerald-400">↑ You</span>}
+                          {theyWin ? <span className="text-red-400">↑ Them</span> : <span className="text-blue-400">↑ You</span>}
                         </td>
                       </tr>
                     )
@@ -1108,14 +1108,14 @@ function CompetitorCard({
                     const you  = business?.google_rating ?? 0
                     const theyWin = them > you
                     return (
-                      <tr className={theyWin ? 'bg-red-950/15' : you > 0 ? 'bg-emerald-950/10' : ''}>
+                      <tr className={theyWin ? 'bg-red-950/15' : you > 0 ? 'bg-slate-950/10' : ''}>
                         <td className="px-3 py-2 text-slate-400">Google Rating</td>
                         <td className={`px-3 py-2 text-center font-bold ${theyWin ? 'text-red-400' : 'text-slate-400'}`}>★{them}</td>
-                        <td className={`px-3 py-2 text-center font-bold ${!theyWin && you > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>{you > 0 ? `★${you}` : '—'}</td>
+                        <td className={`px-3 py-2 text-center font-bold ${!theyWin && you > 0 ? 'text-blue-400' : 'text-slate-400'}`}>{you > 0 ? `★${you}` : '—'}</td>
                         <td className="px-3 py-2 text-center text-[10px]">
                           {you === 0 ? <span className="text-slate-600">No data</span>
                             : theyWin ? <span className="text-red-400">↑ Them</span>
-                            : <span className="text-emerald-400">↑ You</span>}
+                            : <span className="text-blue-400">↑ You</span>}
                         </td>
                       </tr>
                     )
@@ -1126,14 +1126,14 @@ function CompetitorCard({
                     const you  = business?.review_count ?? 0
                     const theyWin = them > you
                     return (
-                      <tr className={theyWin ? 'bg-red-950/15' : you > 0 ? 'bg-emerald-950/10' : ''}>
+                      <tr className={theyWin ? 'bg-red-950/15' : you > 0 ? 'bg-slate-950/10' : ''}>
                         <td className="px-3 py-2 text-slate-400">Reviews</td>
                         <td className={`px-3 py-2 text-center font-bold ${theyWin ? 'text-red-400' : 'text-slate-400'}`}>{them.toLocaleString()}</td>
-                        <td className={`px-3 py-2 text-center font-bold ${!theyWin && you > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>{you > 0 ? you.toLocaleString() : '—'}</td>
+                        <td className={`px-3 py-2 text-center font-bold ${!theyWin && you > 0 ? 'text-blue-400' : 'text-slate-400'}`}>{you > 0 ? you.toLocaleString() : '—'}</td>
                         <td className="px-3 py-2 text-center text-[10px]">
                           {you === 0 ? <span className="text-slate-600">No data</span>
                             : theyWin ? <span className="text-red-400">↑ Them</span>
-                            : <span className="text-emerald-400">↑ You</span>}
+                            : <span className="text-blue-400">↑ You</span>}
                         </td>
                       </tr>
                     )
@@ -1158,7 +1158,7 @@ function CompetitorCard({
                     <tr>
                       <td className="px-3 py-2 text-slate-400">Threat Level</td>
                       <td className={`px-3 py-2 text-center font-semibold capitalize text-[11px] ${
-                        comp.threat_level === 'high' ? 'text-red-400' : comp.threat_level === 'medium' ? 'text-amber-400' : 'text-emerald-400'
+                        comp.threat_level === 'high' ? 'text-red-400' : comp.threat_level === 'medium' ? 'text-slate-500' : 'text-blue-400'
                       }`}>{comp.threat_level}</td>
                       <td className="px-3 py-2 text-center text-slate-500">—</td>
                       <td className="px-3 py-2 text-center text-[10px] text-slate-500">Risk</td>
@@ -1181,8 +1181,8 @@ function CompetitorCard({
               <div className="mt-2.5 space-y-1">
                 {gaps.map(g => (
                   <div key={g.id} className="flex items-start gap-2 px-1">
-                    <span className="text-amber-500 text-xs flex-shrink-0 mt-0.5">▲</span>
-                    <p className="text-amber-300 text-xs font-medium leading-snug">{g.title}</p>
+                    <span className="text-slate-600 text-xs flex-shrink-0 mt-0.5">▲</span>
+                    <p className="text-slate-400 text-xs font-medium leading-snug">{g.title}</p>
                   </div>
                 ))}
               </div>
@@ -1213,7 +1213,7 @@ function CompetitorCard({
             ))}
             {actions.map(a => (
               <div key={a.id} className="flex items-start gap-2 text-xs">
-                <span className="text-violet-400 flex-shrink-0">🚀</span>
+                <span className="text-blue-400 flex-shrink-0">🚀</span>
                 <span className="text-slate-400">{a.title}</span>
               </div>
             ))}
@@ -1227,9 +1227,9 @@ function CompetitorCard({
           </div>
         )}
         {comp.crawl_status === 'scanning' && (
-          <div className="mt-3 bg-violet-950/20 border border-violet-800/30 rounded-xl p-3 flex items-center gap-2">
-            <RefreshCw className="w-3.5 h-3.5 text-violet-400 animate-spin flex-shrink-0" />
-            <p className="text-violet-300 text-xs font-medium">AI scanning in progress…</p>
+          <div className="mt-3 bg-slate-950/20 border border-slate-700/30 rounded-xl p-3 flex items-center gap-2">
+            <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin flex-shrink-0" />
+            <p className="text-blue-300 text-xs font-medium">AI scanning in progress…</p>
           </div>
         )}
 
@@ -1265,7 +1265,7 @@ function CompetitorCard({
                 <div className="space-y-1">
                   {comp.weaknesses.map(w => (
                     <div key={w} className="flex items-start gap-1.5 text-xs text-slate-400">
-                      <span className="text-emerald-400 flex-shrink-0 mt-0.5">↓</span>{w}
+                      <span className="text-blue-400 flex-shrink-0 mt-0.5">↓</span>{w}
                     </div>
                   ))}
                 </div>
@@ -1358,7 +1358,7 @@ function GapAnalysisTab({ insights, competitors, onRegenerate }: { insights: Ins
             <button
               onClick={handleRegenerate}
               disabled={regenerating}
-              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
             >
               {regenerating
                 ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating…</>
@@ -1377,11 +1377,11 @@ function GapAnalysisTab({ insights, competitors, onRegenerate }: { insights: Ins
     <div className="space-y-5">
       {/* Strategic summary */}
       {(summary || loading) && (
-        <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5">
+        <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5">
           <div className="flex items-start gap-3">
-            <Bot className="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5" />
+            <Bot className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-violet-300 font-semibold text-sm mb-1.5">AI Strategic Summary</p>
+              <p className="text-blue-300 font-semibold text-sm mb-1.5">AI Strategic Summary</p>
               {loading ? <div className="h-4 bg-slate-700 rounded animate-pulse w-3/4" /> :
                 <p className="text-slate-400 text-sm leading-relaxed">{summary}</p>}
             </div>
@@ -1426,7 +1426,7 @@ function GapAnalysisTab({ insights, competitors, onRegenerate }: { insights: Ins
                       )}
                     </td>
                     <td className="px-3 py-3 text-center">
-                      <span className={`font-bold ${c.intelligence_score >= 75 ? 'text-red-400' : c.intelligence_score >= 50 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                      <span className={`font-bold ${c.intelligence_score >= 75 ? 'text-red-400' : c.intelligence_score >= 50 ? 'text-slate-500' : 'text-blue-400'}`}>
                         {c.intelligence_score}
                       </span>
                     </td>
@@ -1435,7 +1435,7 @@ function GapAnalysisTab({ insights, competitors, onRegenerate }: { insights: Ins
                         {c.threat_level}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-center text-amber-400">{c.google_rating ? `★${c.google_rating}` : '—'}</td>
+                    <td className="px-3 py-3 text-center text-slate-500">{c.google_rating ? `★${c.google_rating}` : '—'}</td>
                     <td className="px-3 py-3 text-center text-slate-400">{c.google_review_count > 0 ? c.google_review_count.toLocaleString() : '—'}</td>
                     <td className="px-3 py-3 text-center text-slate-400 capitalize">{c.pricing_tier || '—'}</td>
                   </tr>
@@ -1506,7 +1506,7 @@ function GrowthPlanTab({ insights, onRegenerate }: { insights: Insight[]; onRege
         <button
           onClick={handleRegenerate}
           disabled={regenerating}
-          className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors"
         >
           {regenerating
             ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating…</>
@@ -1526,10 +1526,10 @@ function GrowthPlanTab({ insights, onRegenerate }: { insights: Insight[]; onRege
 
   return (
     <div className="space-y-5">
-      <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5 flex items-start gap-3">
-        <TrendingUp className="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5" />
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5 flex items-start gap-3">
+        <TrendingUp className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-violet-300 font-semibold text-sm mb-1">AI-Generated Growth Roadmap</p>
+          <p className="text-blue-300 font-semibold text-sm mb-1">AI-Generated Growth Roadmap</p>
           <p className="text-slate-400 text-xs leading-relaxed">
             Based on competitive analysis of {[...new Set(actions.map(a => a.competitor_id))].length} competitor{[...new Set(actions.map(a => a.competitor_id))].length !== 1 ? 's' : ''}.
             Actions are sorted by strategic priority — tackle high-priority items first.
@@ -1540,7 +1540,7 @@ function GrowthPlanTab({ insights, onRegenerate }: { insights: Insight[]; onRege
       {Object.entries(byCategory).map(([cat, catActions]) => (
         <div key={cat} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-800 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-violet-400" />
+            <Zap className="w-4 h-4 text-blue-400" />
             <p className="text-white font-semibold text-sm">{CATEGORY_LABEL[cat] ?? cat.charAt(0).toUpperCase() + cat.slice(1)}</p>
             <span className="ml-auto text-xs text-slate-500">{catActions.length} action{catActions.length !== 1 ? 's' : ''}</span>
           </div>
@@ -1548,13 +1548,13 @@ function GrowthPlanTab({ insights, onRegenerate }: { insights: Insight[]; onRege
             {catActions.map((a, i) => (
               <div key={a.id} className="p-5 flex items-start gap-4">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold ${
-                  i === 0 ? 'bg-violet-600 text-white' : 'bg-slate-800 text-slate-400'
+                  i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'
                 }`}>{i + 1}</div>
                 <div>
                   <p className="text-white font-semibold text-sm mb-1">🚀 {a.title}</p>
                   {a.body && <p className="text-slate-400 text-sm leading-relaxed">{a.body}</p>}
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px] text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
                       Priority {a.priority}/10
                     </span>
                   </div>
@@ -1809,7 +1809,7 @@ export default function CompetitorsClient({
         <div className="flex items-center gap-2.5 mb-6">
           <Target className="w-5 h-5 text-red-400" />
           <h1 className="text-2xl font-bold text-white">Competitor Intelligence</h1>
-          <span className="text-[10px] text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full font-semibold">AI-Powered</span>
+          <span className="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full font-semibold">AI-Powered</span>
         </div>
         <SetupScreen
           business={business}
@@ -1830,7 +1830,7 @@ export default function CompetitorsClient({
           <div className="flex items-center gap-2.5 mb-1">
             <Target className="w-5 h-5 text-red-400" />
             <h1 className="text-2xl font-bold text-white">Competitor Intelligence</h1>
-            <span className="text-[10px] text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full font-semibold">AI-Powered</span>
+            <span className="text-[10px] text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full font-semibold">AI-Powered</span>
           </div>
           <p className="text-slate-400 text-sm">
             AI monitors your competitors daily — their rankings, social presence, services, and moves
@@ -1838,12 +1838,12 @@ export default function CompetitorsClient({
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button onClick={() => scanMarket(marketFilter)} disabled={discovering}
-            className="flex items-center gap-2 text-sm text-white bg-violet-600 hover:bg-violet-500 disabled:opacity-50 px-3 py-2 rounded-xl transition-colors font-medium">
+            className="flex items-center gap-2 text-sm text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-3 py-2 rounded-xl transition-colors font-medium">
             <Bot className={`w-4 h-4 ${discovering ? 'animate-pulse' : ''}`} />
             {discovering ? 'Scanning…' : `Scan ${marketFilter.charAt(0).toUpperCase() + marketFilter.slice(1)}`}
           </button>
           <button onClick={() => setShowSetup(true)}
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-violet-400 bg-slate-800 border border-slate-700 hover:border-violet-500/50 px-3 py-2 rounded-xl transition-colors">
+            className="flex items-center gap-2 text-sm text-slate-400 hover:text-blue-400 bg-slate-800 border border-slate-700 hover:border-blue-500/50 px-3 py-2 rounded-xl transition-colors">
             <Settings2 className="w-4 h-4" /> Change Market
           </button>
           <button onClick={() => setShowModal(true)}
@@ -1859,9 +1859,9 @@ export default function CompetitorsClient({
           <span className="text-slate-500 text-xs">Monitoring:</span>
           {activeMarkets.map(m => (
             <span key={m} className={`text-xs px-2.5 py-1 rounded-full border font-medium ${
-              m === 'local'         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+              m === 'local'         ? 'bg-blue-600/10 border-blue-500/30 text-blue-400' :
               m === 'regional'      ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
-                                      'bg-violet-500/10 border-violet-500/30 text-violet-400'
+                                      'bg-blue-500/10 border-blue-500/30 text-blue-400'
             }`}>
               {m === 'local' ? '📍' : m === 'regional' ? '🗺️' : '🌐'} {m.charAt(0).toUpperCase() + m.slice(1)}
             </span>
@@ -1870,7 +1870,7 @@ export default function CompetitorsClient({
       )}
 
       {discoverMsg && (
-        <div className={`text-sm px-4 py-3 rounded-xl border ${discoverMsg.startsWith('✓') ? 'text-emerald-300 bg-emerald-950/20 border-emerald-800/30' : 'text-red-300 bg-red-950/20 border-red-800/30'}`}>
+        <div className={`text-sm px-4 py-3 rounded-xl border ${discoverMsg.startsWith('✓') ? 'text-blue-300 bg-slate-950/20 border-slate-700/30' : 'text-red-300 bg-red-950/20 border-red-800/30'}`}>
           {discoverMsg}
         </div>
       )}
@@ -1892,7 +1892,7 @@ export default function CompetitorsClient({
           </p>
           <div className="flex justify-center gap-3">
             <button onClick={() => setShowSetup(true)}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors">
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-colors">
               <Settings2 className="w-4 h-4" /> Change Market
             </button>
             <button onClick={() => setShowModal(true)}
@@ -1914,9 +1914,9 @@ export default function CompetitorsClient({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: 'Tracked',         value: competitors.length,  color: 'text-white',       bg: 'bg-slate-900' },
-              { label: 'Scanned by AI',   value: scanned,             color: 'text-violet-400',  bg: 'bg-violet-500/10' },
+              { label: 'Scanned by AI',   value: scanned,             color: 'text-blue-400',  bg: 'bg-blue-500/10' },
               { label: 'High Threats',    value: highThreats,         color: highThreats > 0 ? 'text-red-400' : 'text-slate-500', bg: highThreats > 0 ? 'bg-red-500/10' : 'bg-slate-900' },
-              { label: 'Avg Intel Score', value: avgScore || '—',     color: 'text-amber-400',   bg: 'bg-amber-500/10' },
+              { label: 'Avg Intel Score', value: avgScore || '—',     color: 'text-slate-500',   bg: 'bg-slate-600/10' },
             ].map(s => (
               <div key={s.label} className={`${s.bg} border border-slate-800 rounded-2xl p-4 text-center`}>
                 <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
@@ -1954,9 +1954,9 @@ export default function CompetitorsClient({
           {(tab === 'competitors' || tab === 'trend') && (
             <div className="grid grid-cols-3 gap-2">
               {([
-                { key: 'local',         emoji: '📍', label: 'Local',         activeBorder: 'border-emerald-500', activeBg: 'bg-emerald-500/10', activeText: 'text-emerald-300', activeBadge: 'bg-emerald-500/20 text-emerald-300' },
+                { key: 'local',         emoji: '📍', label: 'Local',         activeBorder: 'border-blue-500', activeBg: 'bg-blue-600/10', activeText: 'text-blue-300', activeBadge: 'bg-blue-600/20 text-blue-300' },
                 { key: 'regional',      emoji: '🗺️', label: 'Regional',      activeBorder: 'border-blue-500',    activeBg: 'bg-blue-500/10',    activeText: 'text-blue-300',    activeBadge: 'bg-blue-500/20 text-blue-300' },
-                { key: 'international', emoji: '🌐', label: 'International',  activeBorder: 'border-violet-500',  activeBg: 'bg-violet-500/10',  activeText: 'text-violet-300',  activeBadge: 'bg-violet-500/20 text-violet-300' },
+                { key: 'international', emoji: '🌐', label: 'International',  activeBorder: 'border-blue-500',  activeBg: 'bg-blue-500/10',  activeText: 'text-blue-300',  activeBadge: 'bg-blue-500/20 text-blue-300' },
               ] as const).map(m => {
                 const count  = competitors.filter(c => c.market_type === m.key).length
                 const active = marketFilter === m.key
@@ -2033,7 +2033,7 @@ export default function CompetitorsClient({
       {/* AI running notice */}
       {competitors.length > 0 && (
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse flex-shrink-0" />
           <p className="text-slate-400 text-sm">
             AI competitor scans run <strong className="text-white">daily at midnight</strong> automatically. You&apos;ll get agent signals when a competitor makes a significant move.
           </p>
@@ -2066,7 +2066,7 @@ export default function CompetitorsClient({
                 rows={5}
                 autoFocus
                 placeholder={`e.g. We are a SaaS company providing biometric attendance software for schools and factories in Bangladesh. The competitors found are not in our space — we need competitors offering HR & attendance management software, not general EdTech companies.`}
-                className="w-full bg-slate-800 border border-slate-700 focus:border-amber-500 text-white text-sm px-4 py-3 rounded-xl outline-none transition-colors placeholder-slate-600 resize-none leading-relaxed"
+                className="w-full bg-slate-800 border border-slate-700 focus:border-slate-500 text-white text-sm px-4 py-3 rounded-xl outline-none transition-colors placeholder-slate-600 resize-none leading-relaxed"
               />
               <p className="text-slate-600 text-xs mt-1.5">
                 This note will be saved and used in all future AI analyses for this business.
@@ -2074,9 +2074,9 @@ export default function CompetitorsClient({
             </div>
 
             {fixNote.trim() && (
-              <div className="mb-4 p-3 bg-amber-950/20 border border-amber-800/30 rounded-xl">
-                <p className="text-amber-400 text-xs font-semibold mb-1">AI will be instructed to:</p>
-                <ul className="text-amber-300/80 text-xs space-y-0.5 list-disc list-inside">
+              <div className="mb-4 p-3 bg-slate-950/20 border border-slate-700/30 rounded-xl">
+                <p className="text-slate-500 text-xs font-semibold mb-1">AI will be instructed to:</p>
+                <ul className="text-slate-400/80 text-xs space-y-0.5 list-disc list-inside">
                   <li>Re-run competitor discovery with your correction</li>
                   <li>Focus on the exact service/market you described</li>
                   <li>Ignore previously found irrelevant competitors</li>
@@ -2094,7 +2094,7 @@ export default function CompetitorsClient({
               <button
                 onClick={submitFix}
                 disabled={!fixNote.trim() || fixing}
-                className="flex-1 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 bg-slate-600 hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
               >
                 {fixing
                   ? <><div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Fixing…</>

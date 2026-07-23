@@ -30,14 +30,14 @@ const INDUSTRIES = [
 
 function healthColor(score: number) {
   if (score >= 80) return {
-    text: 'text-emerald-400', bg: 'bg-emerald-500',
-    badge: 'bg-emerald-900/40 text-emerald-300 border-emerald-800/40', label: 'Excellent',
-    bar: 'from-emerald-600 to-emerald-400',
+    text: 'text-blue-400', bg: 'bg-blue-600',
+    badge: 'bg-slate-900/40 text-blue-300 border-slate-700/40', label: 'Excellent',
+    bar: 'from-blue-600 to-blue-500',
   }
   if (score >= 65) return {
-    text: 'text-amber-400', bg: 'bg-amber-500',
-    badge: 'bg-amber-900/40 text-amber-300 border-amber-800/40', label: 'Good',
-    bar: 'from-amber-600 to-amber-400',
+    text: 'text-slate-500', bg: 'bg-slate-600',
+    badge: 'bg-slate-900/40 text-slate-400 border-slate-700/40', label: 'Good',
+    bar: 'from-slate-600 to-slate-500',
   }
   return {
     text: 'text-red-400', bg: 'bg-red-500',
@@ -76,8 +76,8 @@ function AddClientModal({ onClose, onCreated }: { onClose: () => void; onCreated
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md p-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
-            <Building2 className="w-4 h-4 text-violet-400" />
+          <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+            <Building2 className="w-4 h-4 text-blue-400" />
           </div>
           <div>
             <h2 className="text-white font-semibold">Add Client / Business</h2>
@@ -93,7 +93,7 @@ function AddClientModal({ onClose, onCreated }: { onClose: () => void; onCreated
               value={form.business_name}
               onChange={e => setForm(f => ({ ...f, business_name: e.target.value }))}
               placeholder="e.g. Acme Marketing Co."
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
@@ -101,7 +101,7 @@ function AddClientModal({ onClose, onCreated }: { onClose: () => void; onCreated
             <select
               value={form.industry}
               onChange={e => setForm(f => ({ ...f, industry: e.target.value }))}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none"
             >
               <option value="">Select industry…</option>
               {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
@@ -113,14 +113,14 @@ function AddClientModal({ onClose, onCreated }: { onClose: () => void; onCreated
               value={form.website_url}
               onChange={e => setForm(f => ({ ...f, website_url: e.target.value }))}
               placeholder="https://example.com"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
 
           <label className="flex items-center gap-2.5 cursor-pointer mt-1">
             <div
               onClick={() => setAndSwitch(s => !s)}
-              className={`w-8 h-4.5 rounded-full border transition-colors relative flex items-center px-0.5 ${andSwitch ? 'bg-violet-600 border-violet-500' : 'bg-slate-700 border-slate-600'}`}
+              className={`w-8 h-4.5 rounded-full border transition-colors relative flex items-center px-0.5 ${andSwitch ? 'bg-blue-600 border-blue-500' : 'bg-slate-700 border-slate-600'}`}
             >
               <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${andSwitch ? 'translate-x-3.5' : 'translate-x-0'}`} />
             </div>
@@ -140,7 +140,7 @@ function AddClientModal({ onClose, onCreated }: { onClose: () => void; onCreated
           <button
             onClick={submit}
             disabled={saving}
-            className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+            className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
           >
             {saving ? 'Creating…' : 'Add Client'}
           </button>
@@ -232,7 +232,7 @@ export default function AgencyPage() {
           </button>
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" /> Add Client
           </button>
@@ -243,9 +243,9 @@ export default function AgencyPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Total Clients',    value: clients.length, icon: Users,          sub: 'managed workspaces', color: 'text-white' },
-          { label: 'Avg Health Score', value: avgHealth,       icon: TrendingUp,     sub: 'across all clients', color: avgHealth >= 75 ? 'text-emerald-400' : avgHealth >= 60 ? 'text-amber-400' : 'text-red-400' },
+          { label: 'Avg Health Score', value: avgHealth,       icon: TrendingUp,     sub: 'across all clients', color: avgHealth >= 75 ? 'text-blue-400' : avgHealth >= 60 ? 'text-slate-500' : 'text-red-400' },
           { label: 'Clients At Risk',  value: atRiskCount,     icon: AlertTriangle,  sub: 'health below 65',    color: atRiskCount > 0 ? 'text-red-400' : 'text-slate-400' },
-          { label: 'Urgent Signals',   value: urgentTotal,     icon: Zap,            sub: 'need your attention', color: urgentTotal > 0 ? 'text-amber-400' : 'text-slate-400' },
+          { label: 'Urgent Signals',   value: urgentTotal,     icon: Zap,            sub: 'need your attention', color: urgentTotal > 0 ? 'text-slate-500' : 'text-slate-400' },
         ].map(k => (
           <div key={k.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
             <k.icon className="w-4 h-4 text-slate-600 mb-2" />
@@ -262,7 +262,7 @@ export default function AgencyPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search clients…"
-          className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors w-48"
+          className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors w-48"
         />
         <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-lg p-1">
           {([
@@ -298,7 +298,7 @@ export default function AgencyPage() {
           </p>
           <button
             onClick={() => setShowAdd(true)}
-            className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+            className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
           >
             + Add First Client
           </button>
@@ -321,7 +321,7 @@ export default function AgencyPage() {
                 key={client.workspace_id}
                 className={`relative bg-slate-900 border rounded-2xl p-5 transition-all ${
                   client.is_current
-                    ? 'border-violet-500/40 ring-1 ring-violet-500/20'
+                    ? 'border-blue-500/40 ring-1 ring-blue-500/20'
                     : 'border-slate-800 hover:border-slate-700'
                 }`}
               >
@@ -333,7 +333,7 @@ export default function AgencyPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
                       {client.is_current && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400 flex-shrink-0" title="Currently active" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0" title="Currently active" />
                       )}
                       <h3 className="text-white font-semibold text-sm leading-tight truncate">{client.name}</h3>
                     </div>
@@ -366,8 +366,8 @@ export default function AgencyPage() {
                     <p className="text-white text-base font-bold leading-tight">{client.metrics.win_rate}%</p>
                     <p className="text-slate-600 text-[10px] mt-0.5">win rate</p>
                   </div>
-                  <div className={`rounded-lg py-2 ${client.metrics.urgent > 0 ? 'bg-amber-900/20' : 'bg-slate-800/60'}`}>
-                    <p className={`text-base font-bold leading-tight ${client.metrics.urgent > 0 ? 'text-amber-400' : 'text-white'}`}>
+                  <div className={`rounded-lg py-2 ${client.metrics.urgent > 0 ? 'bg-slate-900/20' : 'bg-slate-800/60'}`}>
+                    <p className={`text-base font-bold leading-tight ${client.metrics.urgent > 0 ? 'text-slate-500' : 'text-white'}`}>
                       {client.metrics.signals}
                     </p>
                     <p className="text-slate-600 text-[10px] mt-0.5">signals</p>
@@ -376,9 +376,9 @@ export default function AgencyPage() {
 
                 {/* Urgent alert */}
                 {client.metrics.urgent > 0 && (
-                  <div className="flex items-center gap-2 bg-amber-900/20 border border-amber-800/30 rounded-lg px-3 py-2 mb-3">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
-                    <p className="text-amber-300 text-xs font-medium">
+                  <div className="flex items-center gap-2 bg-slate-900/20 border border-slate-700/30 rounded-lg px-3 py-2 mb-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-pulse flex-shrink-0" />
+                    <p className="text-slate-400 text-xs font-medium">
                       {client.metrics.urgent} urgent signal{client.metrics.urgent !== 1 ? 's' : ''} need attention
                     </p>
                   </div>
@@ -389,7 +389,7 @@ export default function AgencyPage() {
                   {client.is_current ? (
                     <a
                       href="/dashboard"
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-violet-600/15 hover:bg-violet-600/25 text-violet-300 text-xs font-medium rounded-lg transition-colors border border-violet-500/30"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-600/15 hover:bg-blue-600/25 text-blue-300 text-xs font-medium rounded-lg transition-colors border border-blue-500/30"
                     >
                       View Dashboard →
                     </a>
@@ -419,7 +419,7 @@ export default function AgencyPage() {
       {/* No results */}
       {!loading && clients.length > 0 && filtered.length === 0 && (
         <div className="text-center py-12 text-slate-500 text-sm">
-          No clients match your filter. <button onClick={() => { setFilter('all'); setSearch('') }} className="text-violet-400 hover:text-violet-300">Clear filters →</button>
+          No clients match your filter. <button onClick={() => { setFilter('all'); setSearch('') }} className="text-blue-400 hover:text-blue-300">Clear filters →</button>
         </div>
       )}
 

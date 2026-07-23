@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { AgentInbox } from '@/components/dashboard/agent-inbox'
 import { DailyTasksCard } from '@/components/dashboard/daily-tasks-card'
 import { AIActivityCard } from '@/components/dashboard/ai-activity-card'
@@ -64,7 +64,7 @@ export default async function AgentInboxPage() {
           </p>
         </div>
         {pendingCount > 0 && (
-          <span className="ml-auto bg-violet-600 text-white text-sm font-bold px-3 py-1 rounded-full">
+          <span className="ml-auto bg-blue-600 text-white text-sm font-bold px-3 py-1 rounded-full">
             {pendingCount}
           </span>
         )}

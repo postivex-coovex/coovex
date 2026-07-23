@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { DollarSign, Zap, Clock, CheckCircle2, Shield, ChevronDown, ChevronUp } from 'lucide-react'
@@ -68,7 +68,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
   return (
     <button
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-violet-600' : 'bg-slate-700'}`}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${checked ? 'bg-blue-600' : 'bg-slate-700'}`}
     >
       <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
     </button>
@@ -120,8 +120,8 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
           onClick={save}
           disabled={saving}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            saved ? 'bg-emerald-600 text-white' :
-            'bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white'
+            saved ? 'bg-blue-600 text-white' :
+            'bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white'
           }`}
         >
           {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Changes'}
@@ -141,7 +141,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
             {/* Spending threshold */}
             <div className="py-5">
               <div className="flex items-center gap-2 mb-1">
-                <DollarSign className="w-4 h-4 text-emerald-400" />
+                <DollarSign className="w-4 h-4 text-blue-400" />
                 <p className="text-white text-sm font-medium">Marketing spend limit (without approval)</p>
               </div>
               <p className="text-slate-500 text-xs mb-4">
@@ -158,14 +158,14 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                 />
                 <div className={`min-w-[72px] text-center px-3 py-1.5 rounded-lg border text-sm font-bold ${
                   spendEnabled
-                    ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-400'
+                    ? 'bg-slate-950/40 border-slate-700/50 text-blue-400'
                     : 'bg-slate-800 border-slate-700 text-slate-400'
                 }`}>
                   {spendEnabled ? `$${config.auto_exec_spend_limit}` : 'Off'}
                 </div>
               </div>
               {spendEnabled && (
-                <p className="text-emerald-400 text-xs mt-2">
+                <p className="text-blue-400 text-xs mt-2">
                   ✓ AI can spend up to ${config.auto_exec_spend_limit} per action without approval
                 </p>
               )}
@@ -174,7 +174,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
             {/* Confidence threshold */}
             <div className="py-5">
               <div className="flex items-center gap-2 mb-1">
-                <Zap className="w-4 h-4 text-amber-400" />
+                <Zap className="w-4 h-4 text-slate-500" />
                 <p className="text-white text-sm font-medium">Auto-execute confidence threshold</p>
               </div>
               <p className="text-slate-500 text-xs mb-4">
@@ -189,7 +189,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                   onChange={e => set('auto_publish_confidence', Number(e.target.value))}
                   className="flex-1 accent-amber-500"
                 />
-                <div className="min-w-[56px] text-center px-3 py-1.5 rounded-lg bg-amber-950/40 border border-amber-800/50 text-amber-400 text-sm font-bold">
+                <div className="min-w-[56px] text-center px-3 py-1.5 rounded-lg bg-slate-950/40 border border-slate-700/50 text-slate-500 text-sm font-bold">
                   {config.auto_publish_confidence}%
                 </div>
               </div>
@@ -205,7 +205,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                     title={p.desc}
                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                       config.auto_publish_confidence === p.value
-                        ? 'bg-amber-600 text-white'
+                        ? 'bg-slate-600 text-white'
                         : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
                     }`}
                   >
@@ -248,7 +248,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                       <div className="flex items-center gap-2">
                         <p className="text-white text-sm">{item.label}</p>
                         {config[item.key] && (
-                          <span className="text-[10px] px-1.5 py-0.5 bg-amber-950/50 text-amber-400 border border-amber-900/50 rounded-full">Live</span>
+                          <span className="text-[10px] px-1.5 py-0.5 bg-slate-950/50 text-slate-500 border border-slate-800/50 rounded-full">Live</span>
                         )}
                       </div>
                       <p className="text-slate-500 text-xs mt-0.5">{item.desc}</p>
@@ -258,8 +258,8 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                 ))}
               </div>
               {anyAutoPublish && (
-                <div className="mt-4 p-3 bg-amber-950/20 border border-amber-800/30 rounded-xl">
-                  <p className="text-amber-400 text-xs font-medium">
+                <div className="mt-4 p-3 bg-slate-950/20 border border-slate-700/30 rounded-xl">
+                  <p className="text-slate-500 text-xs font-medium">
                     Auto-publish is active — all executions are logged in your Agent Activity feed.
                     You can review and undo any action within 24 hours.
                   </p>
@@ -335,7 +335,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                 <p className="text-slate-500 text-xs mt-3">
                   Follow-ups are generated by AI using your saved tone and sent via your connected email account.
                   {!config.auto_publish_emails && (
-                    <span className="text-amber-400 ml-1">Enable "Lead follow-up emails" auto-publish above to send without approval.</span>
+                    <span className="text-slate-500 ml-1">Enable "Lead follow-up emails" auto-publish above to send without approval.</span>
                   )}
                 </p>
               </div>
@@ -382,7 +382,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                   <div className="flex items-center gap-2">
                     <p className="text-white text-sm font-medium">{item.label}</p>
                     {config[item.key] && (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
                     )}
                   </div>
                   <p className="text-slate-500 text-xs mt-0.5">{item.desc}</p>
@@ -408,7 +408,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                     onClick={() => set('signal_threshold', level)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
                       config.signal_threshold === level
-                        ? 'bg-violet-600 text-white'
+                        ? 'bg-blue-600 text-white'
                         : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
                     }`}
                   >
@@ -428,7 +428,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                     onClick={() => set('response_tone', tone)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
                       config.response_tone === tone
-                        ? 'bg-violet-600 text-white'
+                        ? 'bg-blue-600 text-white'
                         : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
                     }`}
                   >
@@ -477,7 +477,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
             {/* Brand voice */}
             <div className="py-5">
               <div className="flex items-center gap-2 mb-1">
-                <Shield className="w-4 h-4 text-violet-400" />
+                <Shield className="w-4 h-4 text-blue-400" />
                 <p className="text-white text-sm font-medium">Brand voice description</p>
               </div>
               <p className="text-slate-500 text-xs mb-3">
@@ -488,10 +488,10 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                 value={config.brand_voice}
                 onChange={e => set('brand_voice', e.target.value)}
                 placeholder="e.g. Professional but approachable. We never use jargon. We are direct, empathetic, and avoid hyperbole. We always acknowledge the customer's concern first."
-                className="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-violet-500 placeholder-slate-600"
+                className="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-blue-500 placeholder-slate-600"
               />
               {config.brand_voice && (
-                <p className="text-emerald-400 text-xs mt-1.5">
+                <p className="text-blue-400 text-xs mt-1.5">
                   ✓ AI will match this voice before publishing
                 </p>
               )}
@@ -508,7 +508,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                 value={config.blocked_words}
                 onChange={e => set('blocked_words', e.target.value)}
                 placeholder="e.g. amazing, incredible, guaranteed, [CompetitorName]"
-                className="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-violet-500 placeholder-slate-600"
+                className="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 placeholder-slate-600"
               />
               {config.blocked_words && (
                 <p className="text-slate-500 text-xs mt-1.5">
@@ -552,7 +552,7 @@ export default function AgentSettingsClient({ savedConfig }: { savedConfig: Agen
                   value={config.signature_text}
                   onChange={e => set('signature_text', e.target.value)}
                   placeholder="e.g. Best regards,&#10;[Your Name] | [Company] | [Phone]"
-                  className="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-violet-500 placeholder-slate-600"
+                  className="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-xl px-4 py-3 resize-none focus:outline-none focus:border-blue-500 placeholder-slate-600"
                 />
               )}
             </div>
@@ -637,11 +637,11 @@ function CrossModuleAutomation({ config, set }: { config: AgentConfig; set: SetF
       <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-violet-400" />
+            <Zap className="w-4 h-4 text-blue-400" />
             <h2 className="text-white font-semibold">Cross-Module Automation</h2>
             <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${
               enabledCount > 0
-                ? 'text-emerald-400 bg-emerald-950/40 border-emerald-800/50'
+                ? 'text-blue-400 bg-slate-950/40 border-slate-700/50'
                 : 'text-slate-500 bg-slate-800 border-slate-700'
             }`}>
               {enabledCount}/{ORCH_RULES.length} active
@@ -654,19 +654,19 @@ function CrossModuleAutomation({ config, set }: { config: AgentConfig; set: SetF
         <button
           onClick={runNow}
           disabled={running}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600/30 border border-violet-700/50 text-violet-400 text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 border border-slate-700/50 text-blue-400 text-xs font-medium rounded-lg transition-colors disabled:opacity-50"
         >
           {running
-            ? <><span className="w-3 h-3 border border-violet-400/40 border-t-violet-400 rounded-full animate-spin" />Running…</>
+            ? <><span className="w-3 h-3 border border-blue-400/40 border-t-violet-400 rounded-full animate-spin" />Running…</>
             : <><Zap className="w-3 h-3" />Run now</>
           }
         </button>
       </div>
 
       {runResult && (
-        <div className="px-5 py-3 bg-emerald-950/20 border-b border-emerald-800/30 flex items-center gap-2">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-          <p className="text-emerald-400 text-xs">
+        <div className="px-5 py-3 bg-slate-950/20 border-b border-slate-700/30 flex items-center gap-2">
+          <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+          <p className="text-blue-400 text-xs">
             {runResult.total_chains === 0
               ? 'No new triggers found — all clear.'
               : `Fired ${runResult.total_chains} chain${runResult.total_chains !== 1 ? 's' : ''}, created ${runResult.total_signals} signal${runResult.total_signals !== 1 ? 's' : ''} in Agent Inbox.`
@@ -686,7 +686,7 @@ function CrossModuleAutomation({ config, set }: { config: AgentConfig; set: SetF
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <p className="text-white text-sm font-medium">{rule.name}</p>
                     {isOn && (
-                      <span className="text-[9px] px-1.5 py-0.5 bg-violet-950/50 text-violet-400 border border-violet-900/50 rounded-full">Active</span>
+                      <span className="text-[9px] px-1.5 py-0.5 bg-slate-950/50 text-blue-400 border border-slate-800/50 rounded-full">Active</span>
                     )}
                   </div>
                   <p className="text-slate-500 text-xs">
@@ -699,7 +699,7 @@ function CrossModuleAutomation({ config, set }: { config: AgentConfig; set: SetF
                         <p className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold mb-2">Action chain</p>
                         {rule.chain.map((step, i) => (
                           <div key={i} className="flex items-start gap-2 mb-1.5">
-                            <span className="text-violet-400 text-[10px] font-bold w-4 flex-shrink-0">{i + 1}.</span>
+                            <span className="text-blue-400 text-[10px] font-bold w-4 flex-shrink-0">{i + 1}.</span>
                             <p className="text-slate-300 text-xs leading-relaxed">{step}</p>
                           </div>
                         ))}
@@ -732,7 +732,7 @@ function CrossModuleAutomation({ config, set }: { config: AgentConfig; set: SetF
       <div className="px-5 py-3 border-t border-slate-800 bg-slate-800/30">
         <p className="text-slate-600 text-[11px]">
           Engine checks for triggers automatically on dashboard load. Use "Run now" for an immediate sweep.
-          All executions are logged in <a href="/agent/report" className="text-violet-400 hover:underline">Agent Report → Execution History</a>.
+          All executions are logged in <a href="/agent/report" className="text-blue-400 hover:underline">Agent Report → Execution History</a>.
         </p>
       </div>
     </div>
@@ -757,7 +757,7 @@ function ConfidenceModelCard() {
     },
     {
       label: 'Social Post',
-      color: 'text-violet-400',
+      color: 'text-blue-400',
       factors: [
         { name: 'Topic relevance to your industry', weight: 40 },
         { name: 'Brand voice match score', weight: 30 },
@@ -766,7 +766,7 @@ function ConfidenceModelCard() {
     },
     {
       label: 'Lead Follow-up Email',
-      color: 'text-emerald-400',
+      color: 'text-blue-400',
       factors: [
         { name: 'Lead score (from CRM)', weight: 40 },
         { name: 'Days since last contact vs threshold', weight: 30 },
@@ -783,7 +783,7 @@ function ConfidenceModelCard() {
       >
         <div>
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-amber-400" />
+            <Zap className="w-4 h-4 text-slate-500" />
             <h2 className="text-white font-semibold">How Confidence Scores Are Calculated</h2>
           </div>
           <p className="text-slate-500 text-xs mt-0.5">Understand what drives auto-execute decisions</p>
@@ -808,7 +808,7 @@ function ConfidenceModelCard() {
                     <div key={f.name} className="flex items-center gap-3">
                       <div className="flex-1 bg-slate-700/50 rounded-full h-1.5">
                         <div
-                          className="h-1.5 rounded-full bg-gradient-to-r from-violet-600 to-blue-500"
+                          className="h-1.5 rounded-full bg-gradient-to-r from-blue-600 to-blue-500"
                           style={{ width: `${f.weight}%` }}
                         />
                       </div>
@@ -821,8 +821,8 @@ function ConfidenceModelCard() {
             ))}
           </div>
 
-          <div className="p-3 bg-amber-950/20 border border-amber-800/30 rounded-xl">
-            <p className="text-amber-400 text-xs font-medium mb-1">Why not just ask Claude "how confident are you?"</p>
+          <div className="p-3 bg-slate-950/20 border border-slate-700/30 rounded-xl">
+            <p className="text-slate-500 text-xs font-medium mb-1">Why not just ask Claude "how confident are you?"</p>
             <p className="text-slate-500 text-xs">
               LLMs consistently over-report confidence — they say 90% even when wrong. Rule-based scoring tied to
               your specific guardrails (brand voice, blocked words, length) gives you a score you can trust and verify.

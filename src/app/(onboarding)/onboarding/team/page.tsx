@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -47,13 +47,13 @@ export default function TeamPage() {
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-10">
         {[1, 2, 3, 4, 5, 6].map((s) => (
-          <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors ${s <= 4 ? 'bg-violet-500' : 'bg-slate-200'}`} />
+          <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors ${s <= 4 ? 'bg-blue-500' : 'bg-slate-200'}`} />
         ))}
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-6">
         <div>
-          <p className="text-violet-600 text-sm font-semibold mb-1">Step 4 of 6</p>
+          <p className="text-blue-600 text-sm font-semibold mb-1">Step 4 of 6</p>
           <h1 className="text-2xl font-bold text-slate-900">Invite your team</h1>
           <p className="text-slate-500 mt-1 text-base">
             Add team members who will work with you. They&apos;ll receive an invitation email.
@@ -69,7 +69,7 @@ export default function TeamPage() {
               onChange={e => { setInput(e.target.value); setInputError('') }}
               onKeyDown={handleKeyDown}
               placeholder="teammate@company.com"
-              className="flex-1 bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-violet-500 transition-colors text-base"
+              className="flex-1 bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors text-base"
             />
             <button
               type="button"
@@ -88,8 +88,8 @@ export default function TeamPage() {
               {emails.map(email => (
                 <div key={email} className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-violet-100 border border-violet-200 flex items-center justify-center">
-                      <span className="text-violet-600 text-xs font-bold">{email[0].toUpperCase()}</span>
+                    <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center">
+                      <span className="text-blue-600 text-xs font-bold">{email[0].toUpperCase()}</span>
                     </div>
                     <span className="text-slate-700 text-sm font-medium">{email}</span>
                   </div>
@@ -130,7 +130,7 @@ export default function TeamPage() {
             <button
               onClick={handleInvite}
               disabled={loading}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 active:scale-[0.99] disabled:opacity-60 text-white font-bold px-8 py-3 rounded-xl transition-all text-base"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-60 text-white font-bold px-8 py-3 rounded-xl transition-all text-base"
             >
               {loading ? 'Sending...' : emails.length > 0 ? `Invite ${emails.length} & Continue` : 'Continue'}
               {!loading && (

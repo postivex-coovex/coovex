@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -374,8 +374,8 @@ function KeywordInput({
   if (selected) {
     return (
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 bg-violet-600/15 border border-violet-600/40 rounded-xl px-4 py-2.5 flex-1">
-          <span className="text-violet-300 font-semibold text-sm">{selected}</span>
+        <div className="flex items-center gap-2 bg-blue-600/15 border border-blue-600/40 rounded-xl px-4 py-2.5 flex-1">
+          <span className="text-blue-300 font-semibold text-sm">{selected}</span>
         </div>
         <button
           onClick={() => { onClear(); setTimeout(() => inputRef.current?.focus(), 50) }}
@@ -400,7 +400,7 @@ function KeywordInput({
           onKeyDown={handleKey}
           placeholder="Type a keyword — e.g. Marketing Agency, Hospital, Restaurant..."
           autoComplete="off"
-          className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 focus:border-violet-500 text-slate-200 text-sm rounded-xl focus:outline-none placeholder-slate-500 transition-colors"
+          className="w-full pl-10 pr-4 py-3 bg-slate-800/60 border border-slate-700 focus:border-blue-500 text-slate-200 text-sm rounded-xl focus:outline-none placeholder-slate-500 transition-colors"
         />
       </div>
 
@@ -417,7 +417,7 @@ function KeywordInput({
               onMouseDown={() => pick(keyword)}
               onMouseEnter={() => setHighlighted(i)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                highlighted === i ? 'bg-violet-600/20' : 'hover:bg-slate-800'
+                highlighted === i ? 'bg-blue-600/20' : 'hover:bg-slate-800'
               }`}>
               <span className="text-base shrink-0">{catEmoji(category)}</span>
               <div className="flex-1 min-w-0">
@@ -466,7 +466,7 @@ function SelectDropdown({
       <button
         type="button"
         onClick={() => { setOpen(o => !o); setTimeout(() => inputRef.current?.focus(), 50) }}
-        className="w-full flex items-center justify-between gap-2 bg-slate-800/60 border border-slate-700 hover:border-slate-600 focus:border-violet-500 text-slate-200 text-sm px-3.5 py-2.5 rounded-xl transition-colors text-left">
+        className="w-full flex items-center justify-between gap-2 bg-slate-800/60 border border-slate-700 hover:border-slate-600 focus:border-blue-500 text-slate-200 text-sm px-3.5 py-2.5 rounded-xl transition-colors text-left">
         <span className={value ? 'text-slate-200' : 'text-slate-500'}>{value || placeholder}</span>
         <svg className={`w-3.5 h-3.5 text-slate-500 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6"/></svg>
       </button>
@@ -481,7 +481,7 @@ function SelectDropdown({
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 focus:border-violet-500 text-slate-200 text-xs rounded-lg focus:outline-none placeholder-slate-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-slate-800 border border-slate-700 focus:border-blue-500 text-slate-200 text-xs rounded-lg focus:outline-none placeholder-slate-500"
               />
             </div>
           </div>
@@ -495,7 +495,7 @@ function SelectDropdown({
                 onMouseDown={() => pick(opt)}
                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                   value === opt
-                    ? 'bg-violet-600/20 text-violet-300 font-medium'
+                    ? 'bg-blue-600/20 text-blue-300 font-medium'
                     : 'text-slate-300 hover:bg-slate-800'
                 }`}>
                 {opt}
@@ -551,11 +551,11 @@ function LeadRow({
   ].filter(Boolean).join(', ')
 
   return (
-    <div className={`border-b border-slate-800 last:border-0 transition-colors ${checked ? 'bg-violet-950/15' : 'hover:bg-slate-800/20'}`}>
+    <div className={`border-b border-slate-800 last:border-0 transition-colors ${checked ? 'bg-slate-950/15' : 'hover:bg-slate-800/20'}`}>
       <div className="flex items-start gap-3 px-5 py-3.5">
         <button onClick={onToggle} className="shrink-0 mt-0.5">
           <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
-            checked ? 'bg-violet-600 border-violet-600' : 'border-slate-600 bg-transparent'
+            checked ? 'bg-blue-600 border-blue-600' : 'border-slate-600 bg-transparent'
           }`}>
             {checked && <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 12l5 5L20 7"/></svg>}
           </div>
@@ -563,13 +563,13 @@ function LeadRow({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="text-violet-400 text-xs font-medium bg-violet-950/40 border border-violet-800/30 px-2 py-0.5 rounded-full">
+            <span className="text-blue-400 text-xs font-medium bg-slate-950/40 border border-slate-700/30 px-2 py-0.5 rounded-full">
               🌐 {lead.domain}
             </span>
             {locationStr && <span className="text-slate-500 text-xs">📍 {locationStr}</span>}
             {lead.scrapping_date && <span className="text-slate-600 text-xs">{lead.scrapping_date}</span>}
             {hasContact && (
-              <span className="text-emerald-400 text-xs bg-emerald-950/30 border border-emerald-800/30 px-2 py-0.5 rounded-full">
+              <span className="text-blue-400 text-xs bg-slate-950/30 border border-slate-700/30 px-2 py-0.5 rounded-full">
                 ✓ Contact
               </span>
             )}
@@ -583,7 +583,7 @@ function LeadRow({
                 <div className="flex flex-wrap gap-1.5">
                   {e.emails.slice(0, 3).map(email => (
                     <button key={email} onClick={async () => { await navigator.clipboard.writeText(email); toast.success('Copied!') }}
-                      className="flex items-center gap-1 text-xs text-emerald-300 bg-emerald-950/30 border border-emerald-800/30 px-2 py-0.5 rounded-lg hover:bg-emerald-900/30 transition-colors">
+                      className="flex items-center gap-1 text-xs text-blue-300 bg-slate-950/30 border border-slate-700/30 px-2 py-0.5 rounded-lg hover:bg-slate-900/30 transition-colors">
                       ✉ {email}
                     </button>
                   ))}
@@ -635,7 +635,7 @@ function LeadRow({
             </button>
           ) : (
             <button onClick={() => setExpanded(v => !v)}
-              className="text-xs text-emerald-400 bg-emerald-950/20 border border-emerald-800/30 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+              className="text-xs text-blue-400 bg-slate-950/20 border border-slate-700/30 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap">
               ✓ Contact Found {expanded ? '↑' : '↓'}
             </button>
           )}
@@ -701,13 +701,13 @@ function ScrapeLog({ loading, keyword, country, city, found }: {
       <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-800 bg-slate-900">
         <div className="flex gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+          <div className="w-2.5 h-2.5 rounded-full bg-slate-600/70" />
+          <div className="w-2.5 h-2.5 rounded-full bg-blue-600/70" />
         </div>
         <span className="text-slate-500 text-xs font-mono ml-1">coovex — lead-scraper</span>
         {loading && (
-          <span className="ml-auto flex items-center gap-1.5 text-violet-400 text-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />running
+          <span className="ml-auto flex items-center gap-1.5 text-blue-400 text-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />running
           </span>
         )}
       </div>
@@ -717,8 +717,8 @@ function ScrapeLog({ loading, keyword, country, city, found }: {
             <span className="text-slate-600 text-xs shrink-0 tabular-nums mt-px">{entry.time}</span>
             <span className="shrink-0 mt-px w-4 text-center">
               {entry.done
-                ? <span className="text-emerald-400 text-xs">✓</span>
-                : <span className="inline-block w-3 h-3 border border-violet-500/40 border-t-violet-400 rounded-full animate-spin" />
+                ? <span className="text-blue-400 text-xs">✓</span>
+                : <span className="inline-block w-3 h-3 border border-blue-500/40 border-t-violet-400 rounded-full animate-spin" />
               }
             </span>
             <span className={`text-xs leading-relaxed ${entry.done ? 'text-slate-400' : 'text-slate-100'}`}>
@@ -1077,7 +1077,7 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
           <button
             onClick={handleSearch}
             disabled={loading || !selectedKeyword}
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
             {loading
               ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Searching…</>
               : '🔎 Find Leads'}
@@ -1094,25 +1094,25 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
               onClick={() => switchToSession(key)}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
                 activeKey === key
-                  ? 'bg-violet-600/20 border-violet-600/50 text-violet-300'
+                  ? 'bg-blue-600/20 border-blue-600/50 text-blue-300'
                   : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
               }`}
             >
               <span className="max-w-[130px] truncate">{session.keyword}</span>
               {session.country !== 'All Countries' && (
-                <span className={`text-[10px] ${activeKey === key ? 'text-violet-400/70' : 'text-slate-600'}`}>
+                <span className={`text-[10px] ${activeKey === key ? 'text-blue-400/70' : 'text-slate-600'}`}>
                   {session.city !== 'All Cities' ? session.city : session.country}
                 </span>
               )}
               <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                activeKey === key ? 'bg-violet-600/30 text-violet-300' : 'bg-slate-800 text-slate-500'
+                activeKey === key ? 'bg-blue-600/30 text-blue-300' : 'bg-slate-800 text-slate-500'
               }`}>
                 {session.leads.length}
               </span>
               <span
                 role="button"
                 onClick={e => { e.stopPropagation(); removeSession(key) }}
-                className={`ml-0.5 leading-none hover:text-red-400 transition-colors cursor-pointer ${activeKey === key ? 'text-violet-400/50' : 'text-slate-600'}`}
+                className={`ml-0.5 leading-none hover:text-red-400 transition-colors cursor-pointer ${activeKey === key ? 'text-blue-400/50' : 'text-slate-600'}`}
               >
                 ×
               </span>
@@ -1156,12 +1156,12 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
                   {leads.filter(l => l.enrichment).length} enriched · {leads.filter(l => (l.enrichment?.emails?.length ?? 0) > 0).length} with email
                 </p>
               )}
-              {message && <p className="text-amber-400 text-xs mt-0.5">⚠ {message}</p>}
+              {message && <p className="text-slate-500 text-xs mt-0.5">⚠ {message}</p>}
             </div>
             <button
               onClick={handleFindMore}
               disabled={findingMore}
-              className="flex items-center gap-1.5 text-xs font-medium text-violet-400 hover:text-violet-300 disabled:opacity-40 border border-violet-800/50 hover:border-violet-700/70 px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 disabled:opacity-40 border border-slate-700/50 hover:border-slate-700/70 px-3 py-1.5 rounded-lg transition-colors"
             >
               {findingMore ? (
                 <>
@@ -1187,7 +1187,7 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
                 <button onClick={toggleAll}
                   className="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200 transition-colors">
                   <div className={`w-3.5 h-3.5 rounded border-2 flex items-center justify-center ${
-                    checked.size === leads.length ? 'bg-violet-600 border-violet-600' : 'border-slate-500'
+                    checked.size === leads.length ? 'bg-blue-600 border-blue-600' : 'border-slate-500'
                   }`}>
                     {checked.size === leads.length && (
                       <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 12l5 5L20 7"/></svg>
@@ -1197,7 +1197,7 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
                 </button>
                 {checked.size > 0 && (
                   <button onClick={saveSelected} disabled={bulkSaving}
-                    className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                    className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-600 disabled:opacity-50 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
                     {bulkSaving
                       ? <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving…</>
                       : `💾 Save ${checked.size} Lead${checked.size !== 1 ? 's' : ''} to Pipeline`}
@@ -1222,12 +1222,12 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
                 <button
                   onClick={handleFindMore}
                   disabled={findingMore}
-                  className="flex items-center gap-2 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 disabled:opacity-40 px-4 py-2 rounded-xl transition-colors shrink-0 ml-4"
+                  className="flex items-center gap-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-40 px-4 py-2 rounded-xl transition-colors shrink-0 ml-4"
                 >
                   {findingMore ? (
                     <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Finding…</>
                   ) : (
-                    <>+ Find More <span className="text-violet-300 font-normal">(10 credits)</span></>
+                    <>+ Find More <span className="text-blue-300 font-normal">(10 credits)</span></>
                   )}
                 </button>
               </div>
@@ -1241,7 +1241,7 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
               <p className="text-slate-500 text-xs max-w-xs mx-auto">
                 {message || 'All leads for this combination may have already been scraped, or no results exist for this keyword + location.'}
               </p>
-              <button onClick={handleSearch} className="mt-4 text-xs text-violet-400 hover:text-violet-300 border border-violet-800/40 px-3 py-1.5 rounded-lg">
+              <button onClick={handleSearch} className="mt-4 text-xs text-blue-400 hover:text-blue-300 border border-slate-700/40 px-3 py-1.5 rounded-lg">
                 Try again
               </button>
             </div>
@@ -1251,7 +1251,7 @@ export function FindLeadsTab({ businessId }: { businessId: string }) {
 
       {loadingSessions && !loading && !searched && (
         <div className="bg-slate-900 border border-slate-800 rounded-xl py-14 text-center">
-          <span className="inline-block w-6 h-6 border-2 border-violet-600/40 border-t-violet-500 rounded-full animate-spin" />
+          <span className="inline-block w-6 h-6 border-2 border-blue-600/40 border-t-violet-500 rounded-full animate-spin" />
           <p className="text-slate-500 text-xs mt-3">Loading your sessions…</p>
         </div>
       )}

@@ -21,8 +21,8 @@ interface Campaign {
 const STATUS_BADGE: Record<Campaign['status'], string> = {
   draft:     'bg-slate-800 text-slate-300 border-slate-700',
   scheduled: 'bg-blue-900/50 text-blue-300 border-blue-800/40',
-  sending:   'bg-violet-900/50 text-violet-300 border-violet-800/40',
-  sent:      'bg-emerald-900/50 text-emerald-300 border-emerald-800/40',
+  sending:   'bg-slate-900/50 text-blue-300 border-slate-700/40',
+  sent:      'bg-slate-900/50 text-blue-300 border-slate-700/40',
 }
 
 const STATUS_LABEL: Record<Campaign['status'], string> = {
@@ -114,60 +114,60 @@ function CreateCampaignModal({
                 <div>
                   <label className="block text-sm text-slate-400 mb-1.5">Campaign Name *</label>
                   <input value={form.name} onChange={set('name')} placeholder="e.g. Q3 Newsletter"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
                 </div>
                 <div>
                   <label className="block text-sm text-slate-400 mb-1.5">From Name</label>
                   <input value={form.from_name} onChange={set('from_name')} placeholder={`The ${businessName} Team`}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm text-slate-400 mb-1.5">Email Subject Line *</label>
                 <input value={form.subject} onChange={set('subject')} placeholder="e.g. Our biggest update yet — here's what's new"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm text-slate-400 mb-1.5">Recipient Segment</label>
                   <select value={form.segment} onChange={set('segment')}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors">
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors">
                     {SEGMENTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm text-slate-400 mb-1.5">Schedule (optional)</label>
                   <input type="datetime-local" value={form.scheduled_at} onChange={set('scheduled_at')}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors" />
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors" />
                 </div>
               </div>
               <div className="flex justify-end pt-2">
                 <button onClick={() => setStep('content')} disabled={!form.name || !form.subject}
-                  className="bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
                   Next: Write Content →
                 </button>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="bg-violet-950/20 border border-violet-800/30 rounded-xl p-4 space-y-3">
-                <p className="text-violet-300 text-sm font-medium">✨ AI Content Generator</p>
+              <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-4 space-y-3">
+                <p className="text-blue-300 text-sm font-medium">✨ AI Content Generator</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-slate-400 mb-1">Campaign goal</label>
                     <input value={aiGoal} onChange={e => setAiGoal(e.target.value)} placeholder="e.g. announce new feature, drive sales"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors" />
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors" />
                   </div>
                   <div>
                     <label className="block text-xs text-slate-400 mb-1">Tone</label>
                     <select value={aiTone} onChange={e => setAiTone(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors">
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors">
                       {TONES.map(t => <option key={t}>{t}</option>)}
                     </select>
                   </div>
                 </div>
                 <button onClick={generateContent} disabled={generating}
-                  className="w-full bg-violet-600/80 hover:bg-violet-600 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                  className="w-full bg-blue-600/80 hover:bg-blue-600 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
                   {generating
                     ? <><div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating…</>
                     : '✨ Generate Email Content'}
@@ -177,7 +177,7 @@ function CreateCampaignModal({
                 <label className="block text-sm text-slate-400 mb-1.5">Email Body</label>
                 <textarea value={content} onChange={e => setContent(e.target.value)} rows={10}
                   placeholder={'Write your email body here, or use the AI generator above…\n\nTip: Use {{first_name}} for personalization.'}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors resize-none font-mono text-xs" />
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none font-mono text-xs" />
               </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <div className="flex gap-2 pt-1">
@@ -186,7 +186,7 @@ function CreateCampaignModal({
                   ← Back
                 </button>
                 <button onClick={save} disabled={saving || !content.trim()}
-                  className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
                   {saving ? 'Saving…' : form.scheduled_at ? 'Schedule Campaign' : 'Save as Draft'}
                 </button>
               </div>
@@ -308,12 +308,12 @@ function EmailConnectionBanner({ settings, serverResend }: { settings: EmailSett
 
   if (status.ready) {
     return (
-      <div className="bg-emerald-950/20 border border-emerald-800/30 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-4 mb-6 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{status.icon}</span>
           <div>
-            <p className="text-emerald-300 text-sm font-semibold flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+            <p className="text-blue-300 text-sm font-semibold flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block animate-pulse" />
               Email sending ready
             </p>
             <p className="text-slate-400 text-xs mt-0.5">
@@ -343,7 +343,7 @@ function EmailConnectionBanner({ settings, serverResend }: { settings: EmailSett
           </div>
         </div>
         <a href="/settings/email"
-          className="flex-shrink-0 bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
+          className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
           Set up now →
         </a>
       </div>
@@ -352,18 +352,18 @@ function EmailConnectionBanner({ settings, serverResend }: { settings: EmailSett
 
   // Nothing configured at all (shouldn't happen in production since platform always has Resend)
   return (
-    <div className="bg-slate-900 border border-amber-800/40 rounded-2xl p-5 mb-6 flex items-start justify-between gap-4">
+    <div className="bg-slate-900 border border-slate-700/40 rounded-2xl p-5 mb-6 flex items-start justify-between gap-4">
       <div className="flex items-start gap-3">
         <span className="text-2xl">⚙️</span>
         <div>
-          <p className="text-amber-300 text-sm font-semibold">Set your sender details</p>
+          <p className="text-slate-400 text-sm font-semibold">Set your sender details</p>
           <p className="text-slate-400 text-xs mt-0.5">
             Add your business name and reply-to email to start sending campaigns.
           </p>
         </div>
       </div>
       <a href="/settings/email"
-        className="flex-shrink-0 bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
+        className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
         Configure →
       </a>
     </div>
@@ -456,7 +456,7 @@ export default function CampaignsClient({
             🔄 Drip Sequences
           </a>
           <button onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
             <span className="text-lg leading-none">+</span> New Campaign
           </button>
         </div>
@@ -492,7 +492,7 @@ export default function CampaignsClient({
             Create your first email campaign — AI will write compelling copy in seconds.
           </p>
           <button onClick={() => setShowCreate(true)}
-            className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors">
+            className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors">
             Create First Campaign
           </button>
         </div>
@@ -512,7 +512,7 @@ export default function CampaignsClient({
                   <p className="text-slate-400 text-sm truncate">{c.subject}</p>
                   <p className="text-slate-600 text-xs mt-1">From: {c.from_name} · {c.recipient_count} recipients</p>
                   {sendMsg?.id === c.id && (
-                    <p className={`text-xs mt-1.5 font-medium ${sendMsg.ok ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    <p className={`text-xs mt-1.5 font-medium ${sendMsg.ok ? 'text-blue-400' : 'text-slate-500'}`}>
                       {sendMsg.msg}
                     </p>
                   )}
@@ -544,10 +544,10 @@ export default function CampaignsClient({
                     <button
                       onClick={e => sendNow(c.id, e)}
                       disabled={sending === c.id}
-                      className="text-sm bg-violet-600/20 hover:bg-violet-600/40 border border-violet-700/50 text-violet-300 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                      className="text-sm bg-blue-600/20 hover:bg-blue-600/40 border border-slate-700/50 text-blue-300 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                     >
                       {sending === c.id
-                        ? <span className="flex items-center gap-1.5"><span className="w-3 h-3 border border-violet-300/30 border-t-violet-300 rounded-full animate-spin inline-block" />Sending…</span>
+                        ? <span className="flex items-center gap-1.5"><span className="w-3 h-3 border border-blue-300/30 border-t-violet-300 rounded-full animate-spin inline-block" />Sending…</span>
                         : '▶ Send Now'}
                     </button>
                   )}

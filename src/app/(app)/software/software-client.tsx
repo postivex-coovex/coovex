@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import { LayoutGrid, Star, ExternalLink, Sparkles, Trash2, Plus, Check } from 'lucide-react'
@@ -65,13 +65,13 @@ const CATEGORIES = [
 
 const PRIORITY_META = {
   'must-have':    { label: 'Must-Have',    cls: 'bg-red-500/20 text-red-400 border border-red-500/30' },
-  'recommended':  { label: 'Recommended', cls: 'bg-violet-500/20 text-violet-400 border border-violet-500/30' },
+  'recommended':  { label: 'Recommended', cls: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
   'nice-to-have': { label: 'Nice to Have', cls: 'bg-slate-700 text-slate-400 border border-slate-600' },
 }
 
 const STATUS_META = {
-  using:        { label: 'Using',      cls: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' },
-  interested:   { label: 'Interested', cls: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+  using:        { label: 'Using',      cls: 'bg-blue-600/20 text-blue-400 border border-blue-500/30' },
+  interested:   { label: 'Interested', cls: 'bg-slate-600/20 text-slate-500 border border-slate-500/30' },
   not_relevant: { label: 'Skipped',    cls: 'bg-slate-700 text-slate-400 border border-slate-600' },
 }
 
@@ -94,7 +94,7 @@ function formatPrice(pricingModel: string, priceFrom: number): string {
 }
 
 function pricingBadgeCls(model: string): string {
-  if (model === 'free') return 'bg-emerald-500/20 text-emerald-400'
+  if (model === 'free') return 'bg-blue-600/20 text-blue-400'
   if (model === 'freemium') return 'bg-blue-500/20 text-blue-400'
   return 'bg-slate-700 text-slate-300'
 }
@@ -125,7 +125,7 @@ function SoftwareCard({
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-semibold text-white">{sw.name}</span>
             {sw.is_coovex_pick && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-slate-600/20 text-slate-500 border border-slate-500/30">
                 CooVex Pick
               </span>
             )}
@@ -142,7 +142,7 @@ function SoftwareCard({
           {[1, 2, 3, 4, 5].map(s => (
             <Star
               key={s}
-              className={`w-3 h-3 ${s <= Math.round(sw.rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}`}
+              className={`w-3 h-3 ${s <= Math.round(sw.rating) ? 'text-slate-500 fill-amber-400' : 'text-slate-600'}`}
             />
           ))}
           <span className="text-[11px] text-slate-500 ml-1">{sw.rating}</span>
@@ -154,8 +154,8 @@ function SoftwareCard({
           onClick={() => onToggle(sw)}
           className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors flex-1 justify-center ${
             inStack
-              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30'
-              : 'bg-violet-600 hover:bg-violet-500 text-white'
+              ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30'
+              : 'bg-blue-600 hover:bg-blue-500 text-white'
           }`}
         >
           {inStack ? <><Check className="w-3 h-3" /> Using</> : <><Plus className="w-3 h-3" /> Add</>}
@@ -260,8 +260,8 @@ export default function SoftwareClient({ initialCatalog, initialStack, businessN
       {/* Header */}
       <div className="bg-slate-900 border-b border-slate-800 px-6 py-5">
         <div className="max-w-6xl mx-auto flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-violet-600/20 flex items-center justify-center">
-            <LayoutGrid className="w-5 h-5 text-violet-400" />
+          <div className="w-9 h-9 rounded-xl bg-blue-600/20 flex items-center justify-center">
+            <LayoutGrid className="w-5 h-5 text-blue-400" />
           </div>
           <div>
             <h1 className="text-lg font-semibold text-white">Software Hub</h1>
@@ -282,7 +282,7 @@ export default function SoftwareClient({ initialCatalog, initialStack, businessN
               key={t.key}
               onClick={() => setActiveTab(t.key)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === t.key ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                activeTab === t.key ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
               {t.label}
@@ -295,7 +295,7 @@ export default function SoftwareClient({ initialCatalog, initialStack, businessN
           <div className="space-y-4 pb-10">
             {recommendations.length === 0 ? (
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center">
-                <Sparkles className="w-12 h-12 text-violet-400 mx-auto mb-4" />
+                <Sparkles className="w-12 h-12 text-blue-400 mx-auto mb-4" />
                 <h2 className="text-lg font-medium text-white mb-2">AI Software Recommendations</h2>
                 <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
                   Get personalized software recommendations based on your business profile
@@ -307,7 +307,7 @@ export default function SoftwareClient({ initialCatalog, initialStack, businessN
                 <button
                   onClick={handleGetRecommendations}
                   disabled={recLoading}
-                  className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 mx-auto"
+                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 mx-auto"
                 >
                   <Sparkles className="w-4 h-4" />
                   {recLoading ? 'Analyzing your business...' : 'Get AI Recommendations (5 credits)'}
@@ -320,7 +320,7 @@ export default function SoftwareClient({ initialCatalog, initialStack, businessN
                   <button
                     onClick={handleGetRecommendations}
                     disabled={recLoading}
-                    className="text-xs text-violet-400 hover:text-violet-300 disabled:opacity-50 transition-colors"
+                    className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors"
                   >
                     {recLoading ? 'Refreshing...' : 'Refresh'}
                   </button>
@@ -358,8 +358,8 @@ export default function SoftwareClient({ initialCatalog, initialStack, businessN
                               onClick={() => handleAddFromRec(rec)}
                               className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors ${
                                 alreadyIn
-                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                  : 'bg-violet-600 hover:bg-violet-500 text-white'
+                                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+                                  : 'bg-blue-600 hover:bg-blue-500 text-white'
                               }`}
                             >
                               {alreadyIn ? <><Check className="w-3 h-3" /> Added</> : <><Plus className="w-3 h-3" /> Add to Stack</>}
@@ -397,7 +397,7 @@ export default function SoftwareClient({ initialCatalog, initialStack, businessN
                   onClick={() => setActiveCategory(cat.key)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     activeCategory === cat.key
-                      ? 'bg-violet-600 text-white'
+                      ? 'bg-blue-600 text-white'
                       : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
                   }`}
                 >
@@ -436,7 +436,7 @@ export default function SoftwareClient({ initialCatalog, initialStack, businessN
                 </p>
                 <button
                   onClick={() => setActiveTab('browse')}
-                  className="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl text-sm transition-colors"
+                  className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm transition-colors"
                 >
                   Browse Software
                 </button>

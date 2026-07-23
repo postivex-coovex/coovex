@@ -217,10 +217,10 @@ export function CoachWidget() {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-sm">🧠</div>
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-sm">🧠</div>
             <div>
               <p className="text-white font-semibold text-sm leading-none">AI Business Coach</p>
-              <p className="text-violet-400 text-[10px] mt-0.5">{ctx.label} · Can take real actions</p>
+              <p className="text-blue-400 text-[10px] mt-0.5">{ctx.label} · Can take real actions</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -246,13 +246,13 @@ export function CoachWidget() {
             <div className="text-center pt-4">
               <div className="text-4xl mb-3">🧠</div>
               <p className="text-slate-300 font-semibold text-sm mb-1">AI Business Coach</p>
-              <p className="text-slate-500 text-xs mb-1 leading-relaxed">I can <span className="text-violet-400">take real actions</span> — find leads, create campaigns, write posts, generate proposals, and more.</p>
+              <p className="text-slate-500 text-xs mb-1 leading-relaxed">I can <span className="text-blue-400">take real actions</span> — find leads, create campaigns, write posts, generate proposals, and more.</p>
               <p className="text-slate-600 text-[10px] mb-5">Your data is private. I only access your workspace.</p>
               <div className="space-y-2">
                 <p className="text-slate-600 text-[10px] uppercase tracking-wider mb-2">Try saying:</p>
                 {ctx.prompts.map((p, i) => (
                   <button key={i} onClick={() => send(p)}
-                    className="w-full text-left text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-violet-500/40 text-slate-300 hover:text-white px-3 py-2.5 rounded-xl transition-all">
+                    className="w-full text-left text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-blue-500/40 text-slate-300 hover:text-white px-3 py-2.5 rounded-xl transition-all">
                     {p}
                   </button>
                 ))}
@@ -265,16 +265,16 @@ export function CoachWidget() {
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[90%] ${msg.role === 'user' ? 'order-2' : 'order-1'}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-5 h-5 rounded-md bg-violet-600 flex items-center justify-center text-[10px] mb-1.5">🧠</div>
+                  <div className="w-5 h-5 rounded-md bg-blue-600 flex items-center justify-center text-[10px] mb-1.5">🧠</div>
                 )}
                 <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
-                  msg.role === 'user' ? 'bg-violet-600 text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'
+                  msg.role === 'user' ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'
                 }`}>
                   {msg.content}
                 </div>
                 {msg.action_url && (
                   <Link href={msg.action_url}
-                    className="inline-flex items-center gap-1 mt-1.5 text-xs text-violet-400 hover:text-violet-300 bg-violet-600/10 border border-violet-500/20 px-3 py-1.5 rounded-lg transition-colors">
+                    className="inline-flex items-center gap-1 mt-1.5 text-xs text-blue-400 hover:text-blue-300 bg-blue-600/10 border border-blue-500/20 px-3 py-1.5 rounded-lg transition-colors">
                     → Open in CooVex
                   </Link>
                 )}
@@ -289,8 +289,8 @@ export function CoachWidget() {
                 <div key={i} className="bg-slate-800/60 border border-slate-700/50 rounded-xl p-3">
                   <div className="flex items-center gap-2 mb-2">
                     {tool.done
-                      ? <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px]">✓</span>
-                      : <div className="w-4 h-4 border-2 border-violet-500/30 border-t-violet-400 rounded-full animate-spin flex-shrink-0" />
+                      ? <span className="w-4 h-4 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center text-[10px]">✓</span>
+                      : <div className="w-4 h-4 border-2 border-blue-500/30 border-t-violet-400 rounded-full animate-spin flex-shrink-0" />
                     }
                     <span className="text-xs font-medium text-slate-300">{TOOL_LABELS[tool.tool] ?? tool.tool}</span>
                   </div>
@@ -300,12 +300,12 @@ export function CoachWidget() {
                   {tool.done && tool.result && (
                     <div className="mt-1.5 pl-6">
                       {!!(tool.result.saved || tool.result.added || tool.result.count) && (
-                        <span className="text-[11px] text-emerald-400 font-medium">
+                        <span className="text-[11px] text-blue-400 font-medium">
                           ✅ {String(tool.result.saved ?? tool.result.added ?? tool.result.count)} {tool.result.saved ? 'leads saved' : tool.result.added ? 'competitors added' : 'records'}
                         </span>
                       )}
                       {!!(tool.result.success && !tool.result.saved && !tool.result.added) && (
-                        <span className="text-[11px] text-emerald-400">✅ Done</span>
+                        <span className="text-[11px] text-blue-400">✅ Done</span>
                       )}
                     </div>
                   )}
@@ -315,9 +315,9 @@ export function CoachWidget() {
                 <div className="flex justify-start">
                   <div className="bg-slate-800 rounded-2xl rounded-tl-sm px-4 py-3">
                     <div className="flex gap-1.5 items-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   </div>
                 </div>
@@ -342,7 +342,7 @@ export function CoachWidget() {
 
         {/* Input */}
         <div className="px-4 py-3 border-t border-slate-800 flex-shrink-0">
-          <div className="flex gap-2 items-end bg-slate-800 border border-slate-700 focus-within:border-violet-500 rounded-xl transition-colors p-1">
+          <div className="flex gap-2 items-end bg-slate-800 border border-slate-700 focus-within:border-blue-500 rounded-xl transition-colors p-1">
             <textarea
               ref={inputRef}
               value={input}
@@ -357,7 +357,7 @@ export function CoachWidget() {
             <button
               onClick={() => send()}
               disabled={!input.trim() || loading}
-              className="flex-shrink-0 w-8 h-8 bg-violet-600 hover:bg-violet-500 disabled:opacity-30 text-white rounded-lg flex items-center justify-center transition-colors mb-0.5"
+              className="flex-shrink-0 w-8 h-8 bg-blue-600 hover:bg-blue-500 disabled:opacity-30 text-white rounded-lg flex items-center justify-center transition-colors mb-0.5"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />

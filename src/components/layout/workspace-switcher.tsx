@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -22,10 +22,10 @@ const INDUSTRIES = [
 
 const PLAN_BADGE: Record<string, string> = {
   starter:    'text-slate-500',
-  growth:     'text-violet-400',
+  growth:     'text-blue-400',
   scale:      'text-blue-400',
-  agency:     'text-amber-400',
-  enterprise: 'text-emerald-400',
+  agency:     'text-slate-500',
+  enterprise: 'text-blue-400',
 }
 
 interface Props {
@@ -124,7 +124,7 @@ export function WorkspaceSwitcher({ currentBusinessName }: Props) {
         className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-slate-800 transition-colors group"
       >
         {/* Business avatar */}
-        <div className="w-7 h-7 rounded-md bg-gradient-to-br from-violet-600 to-violet-800 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+        <div className="w-7 h-7 rounded-md bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
           {initials || <Building2 className="w-3.5 h-3.5" />}
         </div>
         <div className="flex-1 min-w-0 text-left">
@@ -151,7 +151,7 @@ export function WorkspaceSwitcher({ currentBusinessName }: Props) {
                   disabled={ws.is_current || switching === ws.workspace_id}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
                     ws.is_current
-                      ? 'bg-violet-600/10 cursor-default'
+                      ? 'bg-blue-600/10 cursor-default'
                       : 'hover:bg-slate-800 cursor-pointer'
                   }`}
                 >
@@ -160,7 +160,7 @@ export function WorkspaceSwitcher({ currentBusinessName }: Props) {
                     {ws.business_name.split(' ').slice(0,2).map(w => w[0]?.toUpperCase() ?? '').join('')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${ws.is_current ? 'text-violet-300' : 'text-white'}`}>
+                    <p className={`text-sm font-medium truncate ${ws.is_current ? 'text-blue-300' : 'text-white'}`}>
                       {ws.business_name}
                     </p>
                     <div className="flex items-center gap-1.5">
@@ -172,7 +172,7 @@ export function WorkspaceSwitcher({ currentBusinessName }: Props) {
                       )}
                     </div>
                   </div>
-                  {ws.is_current && <Check className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />}
+                  {ws.is_current && <Check className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />}
                   {switching === ws.workspace_id && <Loader2 className="w-3.5 h-3.5 text-slate-400 animate-spin flex-shrink-0" />}
                 </button>
               ))}
@@ -200,13 +200,13 @@ export function WorkspaceSwitcher({ currentBusinessName }: Props) {
                   value={addForm.business_name}
                   onChange={e => setAddForm(f => ({ ...f, business_name: e.target.value }))}
                   placeholder="Business name *"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 />
 
                 <select
                   value={addForm.industry}
                   onChange={e => setAddForm(f => ({ ...f, industry: e.target.value }))}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none text-white"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none text-white"
                 >
                   <option value="">Select industry *</option>
                   {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
@@ -216,7 +216,7 @@ export function WorkspaceSwitcher({ currentBusinessName }: Props) {
                   value={addForm.website_url}
                   onChange={e => setAddForm(f => ({ ...f, website_url: e.target.value }))}
                   placeholder="Website URL (optional)"
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 />
 
                 {addErr && <p className="text-red-400 text-xs">{addErr}</p>}
@@ -231,7 +231,7 @@ export function WorkspaceSwitcher({ currentBusinessName }: Props) {
                   <button
                     onClick={addBusiness}
                     disabled={adding}
-                    className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium py-1.5 rounded-lg transition-colors"
+                    className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-1.5 rounded-lg transition-colors"
                   >
                     {adding ? 'Creating…' : 'Create'}
                   </button>

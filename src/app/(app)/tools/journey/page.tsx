@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef } from 'react'
 import { Plus, X, Trash2 } from 'lucide-react'
@@ -21,8 +21,8 @@ interface Stage {
 const EMOTIONS: { emoji: string; label: string; color: string }[] = [
   { emoji: '😟', label: 'Frustrated',  color: 'text-red-400'    },
   { emoji: '😐', label: 'Neutral',     color: 'text-slate-400'  },
-  { emoji: '🙂', label: 'Satisfied',   color: 'text-amber-400'  },
-  { emoji: '😄', label: 'Delighted',   color: 'text-emerald-400'},
+  { emoji: '🙂', label: 'Satisfied',   color: 'text-slate-500'  },
+  { emoji: '😄', label: 'Delighted',   color: 'text-blue-400'},
 ]
 
 const CHANNEL_OPTIONS = ['Website', 'LinkedIn', 'Email', 'Phone', 'Event', 'Referral', 'Ad', 'Chat', 'Demo', 'Video']
@@ -83,10 +83,10 @@ function StageCard({
               value={stage.name}
               onChange={e => onUpdate({ ...stage, name: e.target.value })}
               onBlur={() => setEditing(null)}
-              className="bg-transparent text-white text-sm font-semibold border-b border-violet-500 outline-none w-full"
+              className="bg-transparent text-white text-sm font-semibold border-b border-blue-500 outline-none w-full"
             />
           ) : (
-            <button onClick={() => setEditing('name')} className="text-white text-sm font-semibold hover:text-violet-400 text-left">
+            <button onClick={() => setEditing('name')} className="text-white text-sm font-semibold hover:text-blue-400 text-left">
               {stage.name}
             </button>
           )}
@@ -136,9 +136,9 @@ function StageCard({
             onChange={e => setNewTp(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && addTouchpoint()}
             placeholder="Add touchpoint…"
-            className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+            className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
           />
-          <button onClick={addTouchpoint} className="text-slate-500 hover:text-violet-400 px-1">
+          <button onClick={addTouchpoint} className="text-slate-500 hover:text-blue-400 px-1">
             <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -150,7 +150,7 @@ function StageCard({
         <div className="flex flex-wrap gap-1">
           {stage.channels.map(ch => (
             <button key={ch} onClick={() => toggleChannel(ch)}
-              className="text-[10px] px-1.5 py-0.5 bg-violet-900/50 text-violet-300 border border-violet-800/40 rounded hover:bg-red-900/40 hover:text-red-300 hover:border-red-800/40 transition-colors">
+              className="text-[10px] px-1.5 py-0.5 bg-slate-900/50 text-blue-300 border border-slate-700/40 rounded hover:bg-red-900/40 hover:text-red-300 hover:border-red-800/40 transition-colors">
               {ch}
             </button>
           ))}
@@ -231,7 +231,7 @@ export default function JourneyPage() {
           <input
             value={mapName}
             onChange={e => setMapName(e.target.value)}
-            className="text-2xl font-bold text-white bg-transparent border-b border-transparent hover:border-slate-700 focus:border-violet-500 outline-none transition-colors"
+            className="text-2xl font-bold text-white bg-transparent border-b border-transparent hover:border-slate-700 focus:border-blue-500 outline-none transition-colors"
           />
           <p className="text-slate-400 text-sm mt-0.5">Click any field to edit • {stages.length} stages</p>
         </div>
@@ -244,7 +244,7 @@ export default function JourneyPage() {
           </button>
           <button
             onClick={addStage}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" /> Add Stage
           </button>
@@ -258,7 +258,7 @@ export default function JourneyPage() {
           {stages.map((s, i) => {
             const heights = [32, 56, 80, 104]
             const h = heights[s.emotion]
-            const colors = ['bg-red-500', 'bg-slate-500', 'bg-amber-500', 'bg-emerald-500']
+            const colors = ['bg-red-500', 'bg-slate-500', 'bg-slate-600', 'bg-blue-600']
             const color = colors[s.emotion]
             return (
               <div key={s.id} className="flex-1 flex flex-col items-center gap-1">
@@ -284,7 +284,7 @@ export default function JourneyPage() {
         ))}
         <button
           onClick={addStage}
-          className="w-56 flex-shrink-0 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-600 hover:border-violet-800 hover:text-violet-500 transition-colors"
+          className="w-56 flex-shrink-0 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-600 hover:border-slate-700 hover:text-blue-500 transition-colors"
         >
           <Plus className="w-6 h-6" />
           <span className="text-sm font-medium">Add Stage</span>

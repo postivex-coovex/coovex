@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, Trash2, Check, Target, Zap, Sparkles } from 'lucide-react'
@@ -48,12 +48,12 @@ const CAT: Record<GoalCategory, { label: string; icon: string; hint: string; def
   custom:  { label: 'Custom',       icon: '🎯', hint: 'Set and update progress manually',             defaultUnit: '' },
 }
 const COLORS: Record<GoalCategory, string> = {
-  leads: '#8b5cf6', revenue: '#10b981', reviews: '#f59e0b',
-  content: '#3b82f6', health: '#14b8a6', custom: '#ec4899',
+  leads: '#3b82f6', revenue: '#2563eb', reviews: '#64748b',
+  content: '#3b82f6', health: '#60a5fa', custom: '#94a3b8',
 }
 const BAR_COLORS: Record<GoalCategory, string> = {
-  leads: 'bg-violet-500', revenue: 'bg-emerald-500', reviews: 'bg-amber-500',
-  content: 'bg-blue-500', health: 'bg-teal-500', custom: 'bg-pink-500',
+  leads: 'bg-blue-500', revenue: 'bg-blue-600', reviews: 'bg-slate-600',
+  content: 'bg-blue-500', health: 'bg-blue-500', custom: 'bg-blue-500',
 }
 
 function ProgressRing({ pct, color }: { pct: number; color: string }) {
@@ -251,19 +251,19 @@ export default function GoalsPage() {
           <p className="text-slate-400 text-sm mt-0.5">Track progress toward your monthly and quarterly targets</p>
         </div>
         <div className="flex items-center gap-3">
-          {saved && <span className="text-emerald-400 text-sm">✓ Saved</span>}
+          {saved && <span className="text-blue-400 text-sm">✓ Saved</span>}
           <button onClick={() => persist(goals)} disabled={saving}
             className="px-4 py-2 bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-sm rounded-lg transition-colors disabled:opacity-50">
             {saving ? 'Saving…' : 'Save All'}
           </button>
           <button onClick={getSuggestions} disabled={suggesting}
-            className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 border border-violet-700/50 text-violet-300 hover:text-violet-200 hover:border-violet-600 text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
+            className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 border border-slate-700/50 text-blue-300 hover:text-blue-200 hover:border-blue-600 text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
             {suggesting
-              ? <><span className="w-3.5 h-3.5 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin" /> Thinking…</>
+              ? <><span className="w-3.5 h-3.5 border-2 border-blue-400/30 border-t-violet-400 rounded-full animate-spin" /> Thinking…</>
               : <><Sparkles className="w-4 h-4" /> AI Suggestions</>}
           </button>
           <button onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors">
+            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors">
             <Plus className="w-4 h-4" /> Add Goal
           </button>
         </div>
@@ -273,8 +273,8 @@ export default function GoalsPage() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
           { label: 'Total Goals',    value: totalGoals, color: 'text-white' },
-          { label: 'On Track (≥50%)', value: onTrack,   color: 'text-violet-400' },
-          { label: 'Achieved',        value: achieved,   color: 'text-emerald-400' },
+          { label: 'On Track (≥50%)', value: onTrack,   color: 'text-blue-400' },
+          { label: 'Achieved',        value: achieved,   color: 'text-blue-400' },
         ].map(s => (
           <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
             <p className="text-slate-500 text-xs mb-1">{s.label}</p>
@@ -284,20 +284,20 @@ export default function GoalsPage() {
       </div>
 
       {/* Auto-track notice */}
-      <div className="flex items-start gap-3 bg-violet-950/20 border border-violet-800/30 rounded-xl p-4 mb-6">
-        <Zap className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 bg-slate-950/20 border border-slate-700/30 rounded-xl p-4 mb-6">
+        <Zap className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
         <p className="text-slate-400 text-sm">
-          Goals with <span className="text-violet-300 font-medium">Auto</span> badge track live from your real data (leads, deals, posts, reviews, health score).
+          Goals with <span className="text-blue-300 font-medium">Auto</span> badge track live from your real data (leads, deals, posts, reviews, health score).
           Set your target and we handle the progress tracking.
         </p>
       </div>
 
       {/* AI Suggestions panel */}
       {showSuggestions && (
-        <div className="bg-slate-900 border border-violet-800/40 rounded-2xl p-5 mb-6">
+        <div className="bg-slate-900 border border-slate-700/40 rounded-2xl p-5 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-violet-400" />
+              <Sparkles className="w-4 h-4 text-blue-400" />
               <h2 className="text-white font-semibold text-sm">AI Goal Suggestions</h2>
               <span className="text-slate-600 text-xs">based on your real data</span>
             </div>
@@ -317,12 +317,12 @@ export default function GoalsPage() {
           ) : suggestError ? (
             <div className="text-center py-6">
               <p className="text-red-400 text-sm mb-1">❌ {suggestError}</p>
-              <button onClick={getSuggestions} className="text-violet-400 text-xs hover:underline mt-2">Try again</button>
+              <button onClick={getSuggestions} className="text-blue-400 text-xs hover:underline mt-2">Try again</button>
             </div>
           ) : suggestions.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-slate-500 text-sm">No suggestions generated.</p>
-              <button onClick={getSuggestions} className="text-violet-400 text-xs hover:underline mt-2">Try again</button>
+              <button onClick={getSuggestions} className="text-blue-400 text-xs hover:underline mt-2">Try again</button>
             </div>
           ) : (
             <>
@@ -331,12 +331,12 @@ export default function GoalsPage() {
                   const isAdded = addedIds.has(i)
                   const diff = s.difficulty
                   const diffCls = diff === 'easy'
-                    ? 'text-emerald-400 bg-emerald-950/40 border-emerald-800/40'
+                    ? 'text-blue-400 bg-slate-950/40 border-slate-700/40'
                     : diff === 'stretch'
-                    ? 'text-amber-400 bg-amber-950/40 border-amber-800/40'
+                    ? 'text-slate-500 bg-slate-950/40 border-slate-700/40'
                     : 'text-blue-400 bg-blue-950/40 border-blue-800/40'
                   return (
-                    <div key={i} className={`bg-slate-800/50 border rounded-xl p-4 flex flex-col gap-3 transition-all ${isAdded ? 'border-emerald-800/40 opacity-60' : 'border-slate-700/50 hover:border-slate-600'}`}>
+                    <div key={i} className={`bg-slate-800/50 border rounded-xl p-4 flex flex-col gap-3 transition-all ${isAdded ? 'border-slate-700/40 opacity-60' : 'border-slate-700/50 hover:border-slate-600'}`}>
                       <div>
                         <div className="flex items-start justify-between gap-2 mb-1.5">
                           <p className="text-white text-sm font-medium leading-snug">{s.title}</p>
@@ -358,8 +358,8 @@ export default function GoalsPage() {
                         disabled={isAdded}
                         className={`w-full text-xs font-medium py-2 rounded-lg transition-colors ${
                           isAdded
-                            ? 'bg-emerald-950/40 text-emerald-500 border border-emerald-800/40'
-                            : 'bg-violet-600 hover:bg-violet-500 text-white'
+                            ? 'bg-slate-950/40 text-blue-500 border border-slate-700/40'
+                            : 'bg-blue-600 hover:bg-blue-500 text-white'
                         }`}
                       >
                         {isAdded ? '✓ Added' : '+ Add this goal'}
@@ -378,20 +378,20 @@ export default function GoalsPage() {
 
       {/* Add goal form */}
       {adding && (
-        <div className="bg-slate-900 border border-violet-800/40 rounded-2xl p-6 mb-6">
+        <div className="bg-slate-900 border border-slate-700/40 rounded-2xl p-6 mb-6">
           <h2 className="text-white font-semibold mb-4">New Goal</h2>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="col-span-2">
               <label className="block text-xs text-slate-400 mb-1.5">Goal Title *</label>
               <input type="text" value={draft.title} onChange={e => setDraft(d => ({ ...d, title: e.target.value }))}
                 placeholder="e.g. Reach 50 new leads this month"
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500" />
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Category</label>
               <select value={draft.category}
                 onChange={e => setDraft(d => ({ ...d, category: e.target.value as GoalCategory, unit: CAT[e.target.value as GoalCategory].defaultUnit }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 appearance-none">
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 appearance-none">
                 {(Object.keys(CAT) as GoalCategory[]).map(k => (
                   <option key={k} value={k}>{CAT[k].icon} {CAT[k].label}</option>
                 ))}
@@ -401,7 +401,7 @@ export default function GoalsPage() {
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Period</label>
               <select value={draft.period} onChange={e => setDraft(d => ({ ...d, period: e.target.value as GoalPeriod }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 appearance-none">
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 appearance-none">
                 <option value="monthly">Monthly</option>
                 <option value="quarterly">Quarterly</option>
                 <option value="yearly">Yearly</option>
@@ -410,29 +410,29 @@ export default function GoalsPage() {
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Target *</label>
               <input type="number" value={draft.target} onChange={e => setDraft(d => ({ ...d, target: Number(e.target.value) }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500" />
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Unit label</label>
               <input type="text" value={draft.unit} onChange={e => setDraft(d => ({ ...d, unit: e.target.value }))}
                 placeholder={CAT[draft.category].defaultUnit || 'units'}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500" />
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500" />
             </div>
             {draft.category === 'custom' && (
               <div>
                 <label className="block text-xs text-slate-400 mb-1.5">Current Progress</label>
                 <input type="number" value={draft.custom_current} onChange={e => setDraft(d => ({ ...d, custom_current: Number(e.target.value) }))}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500" />
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
               </div>
             )}
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Due Date (optional)</label>
               <input type="date" value={draft.due} onChange={e => setDraft(d => ({ ...d, due: e.target.value }))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500" />
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500" />
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={addGoal} className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors">
+            <button onClick={addGoal} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors">
               Add Goal
             </button>
             <button onClick={() => setAdding(false)} className="px-4 py-2 bg-slate-800 text-slate-300 hover:text-white text-sm rounded-lg transition-colors">
@@ -465,10 +465,10 @@ export default function GoalsPage() {
                   const isEditing  = editingId === goal.id
                   const remaining  = goal.target - goal.current
                   return (
-                    <div key={goal.id} className={`bg-slate-900 border rounded-xl p-4 ${isAchieved ? 'border-emerald-800/40' : 'border-slate-800'}`}>
+                    <div key={goal.id} className={`bg-slate-900 border rounded-xl p-4 ${isAchieved ? 'border-slate-700/40' : 'border-slate-800'}`}>
                       <div className="flex items-center gap-4">
                         <div className="relative shrink-0">
-                          <ProgressRing pct={pct} color={isAchieved ? '#10b981' : COLORS[cat]} />
+                          <ProgressRing pct={pct} color={isAchieved ? '#2563eb' : COLORS[cat]} />
                           <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white" style={{ transform: 'rotate(90deg)' }}>
                             {Math.round(pct)}%
                           </span>
@@ -477,12 +477,12 @@ export default function GoalsPage() {
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <p className="text-white font-medium text-sm">{goal.title}</p>
                             {goal.auto_tracked && (
-                              <span className="flex items-center gap-0.5 text-[9px] font-medium text-violet-400 bg-violet-950/50 border border-violet-800/40 px-1.5 py-0.5 rounded-full">
+                              <span className="flex items-center gap-0.5 text-[9px] font-medium text-blue-400 bg-slate-950/50 border border-slate-700/40 px-1.5 py-0.5 rounded-full">
                                 <Zap className="w-2.5 h-2.5" /> Auto
                               </span>
                             )}
                             {isAchieved && (
-                              <span className="flex items-center gap-0.5 text-[9px] text-emerald-400 bg-emerald-900/30 border border-emerald-800/40 px-1.5 py-0.5 rounded-full">
+                              <span className="flex items-center gap-0.5 text-[9px] text-blue-400 bg-slate-900/30 border border-slate-700/40 px-1.5 py-0.5 rounded-full">
                                 <Check className="w-2.5 h-2.5" /> Done
                               </span>
                             )}
@@ -521,13 +521,13 @@ export default function GoalsPage() {
                                   }
                                   if (e.key === 'Escape') setEditingId(null)
                                 }}
-                                className="w-24 bg-slate-800 border border-violet-500 rounded px-2 py-1 text-white text-xs focus:outline-none" />
+                                className="w-24 bg-slate-800 border border-blue-500 rounded px-2 py-1 text-white text-xs focus:outline-none" />
                               <button onClick={() => setEditingId(null)} className="text-slate-600 text-xs hover:text-slate-400">cancel</button>
                             </div>
                           )}
 
                           <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full transition-all duration-700 ${isAchieved ? 'bg-emerald-500' : BAR_COLORS[cat]}`}
+                            <div className={`h-full rounded-full transition-all duration-700 ${isAchieved ? 'bg-blue-600' : BAR_COLORS[cat]}`}
                               style={{ width: `${pct}%` }} />
                           </div>
                           <p className="text-slate-600 text-[10px] mt-1.5">
@@ -547,10 +547,10 @@ export default function GoalsPage() {
                         <button
                           onClick={() => getPlan(goal)}
                           disabled={planLoading === goal.id}
-                          className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors disabled:opacity-50"
+                          className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
                         >
                           {planLoading === goal.id ? (
-                            <><span className="w-3 h-3 border border-violet-400/30 border-t-violet-400 rounded-full animate-spin" /> Building plan…</>
+                            <><span className="w-3 h-3 border border-blue-400/30 border-t-violet-400 rounded-full animate-spin" /> Building plan…</>
                           ) : openPlanId === goal.id && plans[goal.id] ? (
                             <><Sparkles className="w-3.5 h-3.5" /> Hide execution plan</>
                           ) : (
@@ -568,11 +568,11 @@ export default function GoalsPage() {
                             <p className="text-slate-300 text-sm leading-relaxed">{plan.overview}</p>
 
                             {/* Bottleneck */}
-                            <div className="flex items-start gap-2 bg-amber-950/30 border border-amber-800/30 rounded-lg px-3 py-2">
-                              <span className="text-amber-400 text-sm shrink-0">⚠️</span>
+                            <div className="flex items-start gap-2 bg-slate-950/30 border border-slate-700/30 rounded-lg px-3 py-2">
+                              <span className="text-slate-500 text-sm shrink-0">⚠️</span>
                               <div>
-                                <p className="text-amber-400 text-[10px] font-semibold uppercase tracking-wider mb-0.5">Main Bottleneck</p>
-                                <p className="text-amber-200/80 text-xs leading-relaxed">{plan.bottleneck}</p>
+                                <p className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider mb-0.5">Main Bottleneck</p>
+                                <p className="text-slate-300/80 text-xs leading-relaxed">{plan.bottleneck}</p>
                               </div>
                             </div>
 
@@ -582,7 +582,7 @@ export default function GoalsPage() {
                               <div className="space-y-2">
                                 {plan.quick_wins.map((qw, i) => (
                                   <div key={i} className="flex items-start gap-2">
-                                    <span className="text-violet-400 text-xs shrink-0 mt-0.5">→</span>
+                                    <span className="text-blue-400 text-xs shrink-0 mt-0.5">→</span>
                                     <div>
                                       <p className="text-slate-300 text-xs font-medium">{qw.action}</p>
                                       <p className="text-slate-600 text-[10px]">{qw.impact}</p>
@@ -597,9 +597,9 @@ export default function GoalsPage() {
                               <p className="text-slate-500 text-[10px] font-semibold uppercase tracking-wider mb-2">📅 Execution Phases</p>
                               <div className="space-y-3">
                                 {plan.phases.map((ph, i) => (
-                                  <div key={i} className="border-l-2 border-violet-800/50 pl-3">
+                                  <div key={i} className="border-l-2 border-slate-700/50 pl-3">
                                     <div className="flex items-center gap-2 mb-1.5">
-                                      <span className="text-violet-400 text-[10px] font-bold">{ph.label}</span>
+                                      <span className="text-blue-400 text-[10px] font-bold">{ph.label}</span>
                                       <span className="text-slate-500 text-[10px]">· {ph.focus}</span>
                                     </div>
                                     <ul className="space-y-1">
@@ -615,11 +615,11 @@ export default function GoalsPage() {
                             </div>
 
                             {/* KPI */}
-                            <div className="flex items-center gap-2 bg-violet-950/30 border border-violet-800/30 rounded-lg px-3 py-2">
-                              <span className="text-violet-400 text-sm">📊</span>
+                            <div className="flex items-center gap-2 bg-slate-950/30 border border-slate-700/30 rounded-lg px-3 py-2">
+                              <span className="text-blue-400 text-sm">📊</span>
                               <div>
-                                <p className="text-violet-400 text-[10px] font-semibold uppercase tracking-wider">Daily KPI to watch</p>
-                                <p className="text-violet-200/80 text-xs">{plan.kpi}</p>
+                                <p className="text-blue-400 text-[10px] font-semibold uppercase tracking-wider">Daily KPI to watch</p>
+                                <p className="text-blue-200/80 text-xs">{plan.kpi}</p>
                               </div>
                             </div>
                           </div>

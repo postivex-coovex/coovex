@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Copy, Check, RefreshCw, Eye, EyeOff, Zap, Globe, Code2, ChevronDown, ChevronUp } from 'lucide-react'
@@ -12,7 +12,7 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
       onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
       className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors whitespace-nowrap"
     >
-      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+      {copied ? <Check className="w-3.5 h-3.5 text-blue-400" /> : <Copy className="w-3.5 h-3.5" />}
       {copied ? 'Copied!' : (label ?? 'Copy')}
     </button>
   )
@@ -624,7 +624,7 @@ export default function ContentPushSection({ appUrl }: ContentPushSectionProps) 
             </div>
             <p className="text-slate-500 text-xs leading-relaxed">
               When enabled, CooVex automatically pushes content to your webhook immediately after AI generates it — no manual button click needed.
-              {!webhookUrl && <span className="text-amber-500"> Requires a webhook URL above.</span>}
+              {!webhookUrl && <span className="text-slate-600"> Requires a webhook URL above.</span>}
             </p>
             {autoPush && webhookUrl && (
               <p className="text-blue-400 text-xs mt-1.5">
@@ -711,7 +711,7 @@ export default function ContentPushSection({ appUrl }: ContentPushSectionProps) 
           <button onClick={() => setDocsOpen(v => !v)}
             className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-800/30 transition-colors">
             <div className="flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-violet-400" />
+              <Code2 className="w-4 h-4 text-blue-400" />
               <span className="text-sm font-semibold text-slate-200">Integration Code & Docs</span>
               <span className="text-[10px] text-slate-500">— PHP · WordPress · Node.js · Next.js · Python · Ghost · JavaScript · cURL</span>
             </div>
@@ -726,7 +726,7 @@ export default function ContentPushSection({ appUrl }: ContentPushSectionProps) 
                   <button key={p.key} onClick={() => setPlatform(p.key)}
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors text-left ${
                       platform === p.key
-                        ? 'bg-violet-600/20 text-violet-300 border border-violet-600/30'
+                        ? 'bg-blue-600/20 text-blue-300 border border-blue-600/30'
                         : 'bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800 hover:text-slate-200'
                     }`}>
                     <span>{p.emoji}</span>
@@ -739,12 +739,12 @@ export default function ContentPushSection({ appUrl }: ContentPushSectionProps) 
                 {/* Platform description */}
                 <div className={`rounded-xl px-4 py-3 text-sm border ${
                   platform === 'wordpress' ? 'bg-blue-950/20 border-blue-900/30 text-blue-300' :
-                  platform === 'php'       ? 'bg-indigo-950/20 border-indigo-900/30 text-indigo-300' :
-                  platform === 'node'      ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-300' :
+                  platform === 'php'       ? 'bg-slate-950/20 border-slate-800/30 text-blue-300' :
+                  platform === 'node'      ? 'bg-slate-950/20 border-slate-800/30 text-blue-300' :
                   platform === 'nextjs'    ? 'bg-slate-800/50 border-slate-700 text-slate-300' :
-                  platform === 'python'    ? 'bg-amber-950/20 border-amber-900/30 text-amber-300' :
+                  platform === 'python'    ? 'bg-slate-950/20 border-slate-800/30 text-slate-400' :
                   platform === 'ghost'     ? 'bg-gray-900 border-gray-700 text-gray-300' :
-                  platform === 'ajax'      ? 'bg-yellow-950/20 border-yellow-900/30 text-yellow-300' :
+                  platform === 'ajax'      ? 'bg-slate-950/20 border-slate-800/30 text-slate-400' :
                                              'bg-slate-800/50 border-slate-700 text-slate-300'
                 }`}>
                   {platform === 'wordpress' && (

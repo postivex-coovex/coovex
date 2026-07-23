@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -116,7 +116,7 @@ export default function RedditTrends() {
                       href={trend.reddit_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-orange-400 text-xs font-medium hover:underline"
+                      className="text-slate-500 text-xs font-medium hover:underline"
                     >
                       r/{trend.subreddit}
                     </a>

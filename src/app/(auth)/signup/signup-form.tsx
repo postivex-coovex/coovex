@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -97,7 +97,7 @@ export function SignupForm() {
     })
   }
 
-  const inputCls = "w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-violet-500 focus:outline-none text-slate-900 text-sm placeholder:text-slate-400 transition-colors bg-slate-50 focus:bg-white"
+  const inputCls = "w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none text-slate-900 text-sm placeholder:text-slate-400 transition-colors bg-slate-50 focus:bg-white"
   const selectCls = `${inputCls} appearance-none cursor-pointer`
 
   return (
@@ -172,7 +172,7 @@ export function SignupForm() {
           {/* Role */}
           <div>
             <label htmlFor="role" className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Your role <span className="text-violet-500">*</span>
+              Your role <span className="text-blue-500">*</span>
             </label>
             <div className="relative">
               <select
@@ -196,7 +196,7 @@ export function SignupForm() {
           {/* Referral source */}
           <div>
             <label htmlFor="referral" className="block text-xs font-semibold text-slate-700 mb-1.5">
-              How did you find us? <span className="text-violet-500">*</span>
+              How did you find us? <span className="text-blue-500">*</span>
             </label>
             <div className="relative">
               <select
@@ -219,7 +219,7 @@ export function SignupForm() {
 
           <button
             type="submit" disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-violet-600 hover:bg-violet-700 active:scale-[0.99] text-white font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+            className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1"
           >
             {loading ? 'Creating account…' : 'Create free account →'}
           </button>
@@ -228,14 +228,14 @@ export function SignupForm() {
         {/* Terms */}
         <p className="text-center text-xs text-slate-400 mt-4">
           By signing up, you agree to our{' '}
-          <Link href="/terms" className="text-violet-600 hover:underline">Terms</Link>
+          <Link href="/terms" className="text-blue-600 hover:underline">Terms</Link>
           {' '}and{' '}
-          <Link href="/privacy" className="text-violet-600 hover:underline">Privacy Policy</Link>.
+          <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
         </p>
 
         <p className="text-center text-sm text-slate-500 mt-3">
           Already have an account?{' '}
-          <Link href="/login" className="text-violet-600 hover:text-violet-700 font-semibold">Sign in</Link>
+          <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold">Sign in</Link>
         </p>
       </div>
     </div>

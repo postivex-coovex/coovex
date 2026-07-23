@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -52,17 +52,17 @@ interface ContentClientProps {
 
 const CHANNEL_META: Record<PostChannel, { label: string; icon: string; color: string }> = {
   linkedin: { label: 'LinkedIn', icon: '💼', color: 'bg-blue-950/40 border-blue-700/40 text-blue-300' },
-  facebook: { label: 'Facebook', icon: '📘', color: 'bg-indigo-950/40 border-indigo-700/40 text-indigo-300' },
-  instagram: { label: 'Instagram', icon: '📸', color: 'bg-pink-950/40 border-pink-700/40 text-pink-300' },
+  facebook: { label: 'Facebook', icon: '📘', color: 'bg-slate-950/40 border-slate-700/40 text-blue-300' },
+  instagram: { label: 'Instagram', icon: '📸', color: 'bg-slate-950/40 border-slate-700/40 text-slate-400' },
   tiktok: { label: 'TikTok', icon: '🎵', color: 'bg-slate-800/60 border-slate-600/40 text-slate-300' },
-  wordpress: { label: 'Blog', icon: '📝', color: 'bg-orange-950/40 border-orange-700/40 text-orange-300' },
+  wordpress: { label: 'Blog', icon: '📝', color: 'bg-slate-950/40 border-slate-700/40 text-slate-400' },
 }
 
 const STATUS_META: Record<PostStatus, { label: string; color: string }> = {
   draft: { label: 'Draft', color: 'bg-slate-800 text-slate-400' },
-  pending_approval: { label: 'Pending', color: 'bg-amber-950/60 text-amber-400' },
-  scheduled: { label: 'Scheduled', color: 'bg-violet-950/60 text-violet-400' },
-  published: { label: 'Published', color: 'bg-emerald-950/60 text-emerald-400' },
+  pending_approval: { label: 'Pending', color: 'bg-slate-950/60 text-slate-500' },
+  scheduled: { label: 'Scheduled', color: 'bg-slate-950/60 text-blue-400' },
+  published: { label: 'Published', color: 'bg-slate-950/60 text-blue-400' },
   failed: { label: 'Failed', color: 'bg-red-950/60 text-red-400' },
 }
 
@@ -78,7 +78,7 @@ function formatScheduled(iso: string) {
 
 const IMPACT_STYLE = {
   high:   'bg-rose-500/15 text-rose-400 border-rose-500/25',
-  medium: 'bg-amber-500/15 text-amber-400 border-amber-500/25',
+  medium: 'bg-slate-600/15 text-slate-500 border-slate-500/25',
   low:    'bg-slate-700/50 text-slate-400 border-slate-600/25',
 }
 
@@ -99,7 +99,7 @@ function GeoIdeaRow({ gap, onGenerated }: { gap: ContentGap; onGenerated: () => 
   }
 
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-violet-700/40 transition-colors">
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-slate-700/40 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <span className="text-[10px] uppercase tracking-wide font-bold text-slate-500">{gap.type}</span>
@@ -113,8 +113,8 @@ function GeoIdeaRow({ gap, onGenerated }: { gap: ContentGap; onGenerated: () => 
         onClick={generate}
         disabled={loading || done}
         className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-          done ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-700/40 cursor-default'
-               : 'bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-50'
+          done ? 'bg-slate-900/40 text-blue-400 border border-slate-700/40 cursor-default'
+               : 'bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50'
         }`}
       >
         {loading ? <span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" /> : null}
@@ -371,7 +371,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
       />
       {/* Content Push Integration Alert */}
       {!hasWebhook && !pushAlertDismissed && (
-        <div className="mb-6 rounded-2xl border border-blue-600/50 bg-gradient-to-r from-blue-900/80 via-violet-900/60 to-blue-900/80 p-5 flex items-start gap-4">
+        <div className="mb-6 rounded-2xl border border-blue-600/50 bg-gradient-to-r from-blue-900/80 via-slate-900/60 to-blue-900/80 p-5 flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-blue-500/30 border border-blue-500/40 flex items-center justify-center text-xl flex-shrink-0 mt-0.5">
             📤
           </div>
@@ -449,7 +449,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
           </button>
           <button
             onClick={openNewModal}
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             <span className="text-lg leading-none">+</span> New Post
           </button>
@@ -459,10 +459,10 @@ export default function ContentClient({ initialPosts, businessName, industry, au
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Scheduled', value: scheduled, icon: '📅', color: 'text-violet-400', filterVal: 'scheduled' as PostStatus | 'geo' },
-          { label: 'Drafts', value: drafts, icon: '✏️', color: 'text-amber-400', filterVal: 'draft' as PostStatus | 'geo' },
-          { label: 'Published This Month', value: publishedThisMonth, icon: '✅', color: 'text-emerald-400', filterVal: 'published' as PostStatus | 'geo' },
-          { label: 'Content to Create', value: contentGaps.length, icon: '🧠', color: 'text-violet-400', filterVal: 'need_to_create' as PostStatus | 'need_to_create' },
+          { label: 'Scheduled', value: scheduled, icon: '📅', color: 'text-blue-400', filterVal: 'scheduled' as PostStatus | 'geo' },
+          { label: 'Drafts', value: drafts, icon: '✏️', color: 'text-slate-500', filterVal: 'draft' as PostStatus | 'geo' },
+          { label: 'Published This Month', value: publishedThisMonth, icon: '✅', color: 'text-blue-400', filterVal: 'published' as PostStatus | 'geo' },
+          { label: 'Content to Create', value: contentGaps.length, icon: '🧠', color: 'text-blue-400', filterVal: 'need_to_create' as PostStatus | 'need_to_create' },
         ].map(s => (
           <button
             key={s.label}
@@ -483,16 +483,16 @@ export default function ContentClient({ initialPosts, businessName, industry, au
 
       {/* Pending approvals banner */}
       {pendingApproval > 0 && (
-        <div className="mb-4 bg-amber-950/20 border border-amber-800/30 rounded-xl p-3 flex items-center justify-between">
+        <div className="mb-4 bg-slate-950/20 border border-slate-700/30 rounded-xl p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-            <p className="text-amber-300 text-sm font-medium">
+            <span className="w-2 h-2 rounded-full bg-slate-500 animate-pulse" />
+            <p className="text-slate-400 text-sm font-medium">
               {pendingApproval} post{pendingApproval > 1 ? 's' : ''} pending team approval
             </p>
           </div>
           <button
             onClick={() => setFilter('pending_approval')}
-            className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
+            className="text-xs text-slate-500 hover:text-slate-400 transition-colors"
           >
             Review now →
           </button>
@@ -521,7 +521,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
               onClick={() => setFilter(f)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                 filter === f
-                  ? 'border-violet-500/50 bg-violet-600/20 text-violet-300'
+                  ? 'border-blue-500/50 bg-blue-600/20 text-blue-300'
                   : 'border-slate-800 text-slate-500 hover:text-slate-400'
               }`}
             >
@@ -530,12 +530,12 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                 : f === 'draft' ? 'Drafts'
                 : f.charAt(0).toUpperCase() + f.slice(1)}
               {f === 'draft' && drafts > 0 && (
-                <span className="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center">
+                <span className="bg-slate-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center">
                   {drafts}
                 </span>
               )}
               {f === 'pending_approval' && pendingApproval > 0 && (
-                <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center">
+                <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center">
                   {pendingApproval}
                 </span>
               )}
@@ -546,9 +546,9 @@ export default function ContentClient({ initialPosts, businessName, industry, au
             onClick={() => setFilter('need_to_create')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
               filter === 'need_to_create'
-                ? 'border-violet-500/50 bg-violet-600/20 text-violet-300'
+                ? 'border-blue-500/50 bg-blue-600/20 text-blue-300'
                 : contentGaps.length > 0
-                ? 'border-violet-700/60 bg-violet-950/40 text-violet-400 hover:text-violet-300 animate-pulse'
+                ? 'border-slate-700/60 bg-slate-950/40 text-blue-400 hover:text-blue-300 animate-pulse'
                 : 'border-slate-800 text-slate-500 hover:text-slate-400'
             }`}
           >
@@ -565,7 +565,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
               <div className="text-4xl mb-3">🧠</div>
               <p className="text-white font-semibold mb-2">No content ideas yet</p>
               <p className="text-slate-400 text-sm mb-4">Run GEO Intelligence to get AI-personalized content ideas.</p>
-              <a href="/geo" className="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors">
+              <a href="/geo" className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors">
                 Go to GEO Optimizer →
               </a>
             </div>
@@ -573,7 +573,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
             <>
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-slate-500">AI assistants frequently cite these content types. Generate to save as draft and publish automatically.</p>
-                <a href="/content/ideas" className="text-xs text-violet-400 hover:text-violet-300 transition-colors flex-shrink-0 ml-4">
+                <a href="/content/ideas" className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex-shrink-0 ml-4">
                   Full page →
                 </a>
               </div>
@@ -600,7 +600,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
               </p>
               <button
                 onClick={openNewModal}
-                className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
+                className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors"
               >
                 Create First Post
               </button>
@@ -636,7 +636,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                       {publishResults[post.id]?.length > 0 && (
                         <div className="flex flex-col gap-0.5">
                           {publishResults[post.id].map((r, i) => (
-                            <span key={i} className={`text-[10px] px-2 py-0.5 rounded ${r.success ? 'text-emerald-400 bg-emerald-950/40' : 'text-red-400 bg-red-950/40'}`}>
+                            <span key={i} className={`text-[10px] px-2 py-0.5 rounded ${r.success ? 'text-blue-400 bg-slate-950/40' : 'text-red-400 bg-red-950/40'}`}>
                               {r.success ? '✓' : '✗'} {r.integration}{r.url ? ` →` : ''}{r.error ? `: ${r.error.slice(0, 30)}` : ''}
                             </span>
                           ))}
@@ -647,7 +647,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                         <button
                           onClick={() => handlePublish(post.id)}
                           disabled={publishingId === post.id}
-                          className="text-xs text-violet-400 hover:text-violet-300 px-2 py-1 rounded-md hover:bg-violet-950/40 transition-colors font-medium disabled:opacity-50"
+                          className="text-xs text-blue-400 hover:text-blue-300 px-2 py-1 rounded-md hover:bg-slate-950/40 transition-colors font-medium disabled:opacity-50"
                         >
                           {publishingId === post.id ? '⏳ Publishing…' : '🚀 Publish'}
                         </button>
@@ -656,7 +656,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                         <button
                           onClick={() => handleStatusChange(post.id, 'pending_approval')}
                           disabled={isPending}
-                          className="text-xs text-amber-400 hover:text-amber-300 px-2 py-1 rounded-md hover:bg-amber-950/30 transition-colors"
+                          className="text-xs text-slate-500 hover:text-slate-400 px-2 py-1 rounded-md hover:bg-slate-950/30 transition-colors"
                         >
                           Submit
                         </button>
@@ -666,7 +666,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                           <button
                             onClick={() => handleStatusChange(post.id, 'scheduled')}
                             disabled={isPending}
-                            className="text-xs text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-md hover:bg-emerald-950/30 transition-colors font-medium"
+                            className="text-xs text-blue-400 hover:text-blue-300 px-2 py-1 rounded-md hover:bg-slate-950/30 transition-colors font-medium"
                           >
                             ✓ Approve
                           </button>
@@ -724,7 +724,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                 <div
                   key={day}
                   className={`min-h-16 p-1.5 rounded-lg border transition-colors cursor-pointer hover:border-slate-700 ${
-                    isToday ? 'border-violet-600/50 bg-violet-950/20' : 'border-slate-800/50'
+                    isToday ? 'border-blue-600/50 bg-slate-950/20' : 'border-slate-800/50'
                   }`}
                   onClick={() => {
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T09:00`
@@ -732,7 +732,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                     openNewModal()
                   }}
                 >
-                  <span className={`text-xs font-medium ${isToday ? 'text-violet-400' : 'text-slate-500'}`}>{day}</span>
+                  <span className={`text-xs font-medium ${isToday ? 'text-blue-400' : 'text-slate-500'}`}>{day}</span>
                   <div className="mt-1 space-y-0.5">
                     {dayPosts.slice(0, 2).map(p => (
                       <div
@@ -782,7 +782,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                       >
                         {m.icon} {m.label}
                         {!isConnected && (
-                          <span className="ml-0.5 text-amber-500 text-[10px]">⚠</span>
+                          <span className="ml-0.5 text-slate-600 text-[10px]">⚠</span>
                         )}
                       </button>
                     )
@@ -791,11 +791,11 @@ export default function ContentClient({ initialPosts, businessName, industry, au
 
                 {/* Not connected warning */}
                 {channel !== 'wordpress' && !connectedChannels.includes(channel) && (
-                  <div className="mt-2 flex items-center gap-2 bg-amber-950/20 border border-amber-800/30 rounded-lg px-3 py-2">
-                    <span className="text-amber-400 text-sm flex-shrink-0">⚠</span>
-                    <p className="text-amber-300/80 text-xs">
+                  <div className="mt-2 flex items-center gap-2 bg-slate-950/20 border border-slate-700/30 rounded-lg px-3 py-2">
+                    <span className="text-slate-500 text-sm flex-shrink-0">⚠</span>
+                    <p className="text-slate-400/80 text-xs">
                       <span className="font-medium">{CHANNEL_META[channel].label} not connected</span> — posts will be saved but not published automatically.{' '}
-                      <a href="/settings/integrations#social" className="text-amber-400 hover:text-amber-300 underline underline-offset-2">Connect account →</a>
+                      <a href="/settings/integrations#social" className="text-slate-500 hover:text-slate-400 underline underline-offset-2">Connect account →</a>
                     </p>
                   </div>
                 )}
@@ -803,9 +803,9 @@ export default function ContentClient({ initialPosts, businessName, industry, au
 
               {/* AI generation */}
               {!editPost && (
-                <div className="bg-violet-950/20 border border-violet-800/30 rounded-xl p-4 space-y-3">
+                <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-violet-300">✨ AI Generate</label>
+                    <label className="text-xs font-medium text-blue-300">✨ AI Generate</label>
                   </div>
 
                   {/* Audit context selector */}
@@ -818,7 +818,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                           setSelectedAuditId(e.target.value)
                           fetchSuggestions(channel, e.target.value)
                         }}
-                        className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-300 text-xs focus:outline-none focus:border-violet-500 transition-colors"
+                        className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-300 text-xs focus:outline-none focus:border-blue-500 transition-colors"
                       >
                         <option value="">— No audit selected —</option>
                         {auditOptions.map(a => (
@@ -839,8 +839,8 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                         onChange={e => setSelectedProductId(e.target.value)}
                         className={`flex-1 bg-slate-900 border rounded-lg px-2 py-1.5 text-xs focus:outline-none transition-colors ${
                           selectedProductId
-                            ? 'border-violet-500/60 text-violet-200 focus:border-violet-400'
-                            : 'border-slate-700 text-slate-300 focus:border-violet-500'
+                            ? 'border-blue-500/60 text-blue-200 focus:border-blue-400'
+                            : 'border-slate-700 text-slate-300 focus:border-blue-500'
                         }`}
                       >
                         <option value="">— General content (no product) —</option>
@@ -860,7 +860,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                     <select
                       value={tone}
                       onChange={e => setTone(e.target.value)}
-                      className="flex-shrink-0 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-violet-500 appearance-none transition-colors"
+                      className="flex-shrink-0 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-blue-500 appearance-none transition-colors"
                     >
                       {TONES.map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                     </select>
@@ -884,16 +884,16 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                               handleGenerate(t.title)
                             }}
                             disabled={isGenerating}
-                            className="w-full text-left flex items-start gap-3 bg-slate-900/60 hover:bg-slate-800 border border-slate-700 hover:border-violet-600/50 rounded-lg px-3 py-2.5 transition-colors group"
+                            className="w-full text-left flex items-start gap-3 bg-slate-900/60 hover:bg-slate-800 border border-slate-700 hover:border-blue-600/50 rounded-lg px-3 py-2.5 transition-colors group"
                           >
-                            <span className="text-xs mt-0.5 flex-shrink-0 bg-slate-800 group-hover:bg-violet-900/40 text-slate-400 group-hover:text-violet-400 border border-slate-700 group-hover:border-violet-700/40 px-2 py-0.5 rounded uppercase tracking-wide">
+                            <span className="text-xs mt-0.5 flex-shrink-0 bg-slate-800 group-hover:bg-slate-900/40 text-slate-400 group-hover:text-blue-400 border border-slate-700 group-hover:border-slate-700/40 px-2 py-0.5 rounded uppercase tracking-wide">
                               {t.angle}
                             </span>
                             <div className="min-w-0">
                               <p className="text-sm text-slate-200 group-hover:text-white leading-snug font-medium">{t.title}</p>
                               <p className="text-xs text-slate-500 group-hover:text-slate-400 mt-0.5">{t.why}</p>
                             </div>
-                            <span className="flex-shrink-0 text-slate-500 group-hover:text-violet-400 text-sm mt-0.5 ml-auto">→</span>
+                            <span className="flex-shrink-0 text-slate-500 group-hover:text-blue-400 text-sm mt-0.5 ml-auto">→</span>
                           </button>
                         ))}
                       </div>
@@ -906,13 +906,13 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                       value={topic}
                       onChange={e => setTopic(e.target.value)}
                       placeholder="Or type your own topic…"
-                      className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+                      className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                       onKeyDown={e => e.key === 'Enter' && handleGenerate()}
                     />
                     <button
                       onClick={() => handleGenerate()}
                       disabled={isGenerating}
-                      className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+                      className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
                     >
                       {isGenerating ? (
                         <span className="flex items-center gap-1.5">
@@ -943,7 +943,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                   <select
                     value={postStatus}
                     onChange={e => setPostStatus(e.target.value as PostStatus)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 appearance-none transition-colors"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 appearance-none transition-colors"
                   >
                     <option value="draft">Draft</option>
                     <option value="pending_approval">Pending Approval</option>
@@ -958,7 +958,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
                     type="datetime-local"
                     value={scheduledAt}
                     onChange={e => setScheduledAt(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                   />
                 </div>
               </div>
@@ -969,7 +969,7 @@ export default function ContentClient({ initialPosts, businessName, industry, au
               <button
                 onClick={handleSave}
                 disabled={isSaving || !content.trim()}
-                className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
               >
                 {isSaving ? 'Saving…' : editPost ? 'Save Changes' : 'Create Post'}
               </button>

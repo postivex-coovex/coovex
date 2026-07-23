@@ -34,13 +34,13 @@ interface RedditLead {
 }
 
 const STATUS_STYLE = {
-  active:       'bg-emerald-900/40 text-emerald-300 border-emerald-800/40',
+  active:       'bg-slate-900/40 text-blue-300 border-slate-700/40',
   draft:        'bg-slate-800 text-slate-400 border-slate-700',
   discontinued: 'bg-red-900/30 text-red-400 border-red-800/30',
 }
 
 const TYPE_STYLE = {
-  service: 'bg-violet-900/30 text-violet-300 border-violet-800/30',
+  service: 'bg-slate-900/30 text-blue-300 border-slate-700/30',
   product: 'bg-blue-900/30 text-blue-300 border-blue-800/30',
 }
 
@@ -119,7 +119,7 @@ function ProductModal({
               <button key={t} onClick={() => set('type', t)}
                 className={`py-2.5 rounded-lg border text-sm font-medium transition-colors ${
                   form.type === t
-                    ? 'bg-violet-600 border-violet-500 text-white'
+                    ? 'bg-blue-600 border-blue-500 text-white'
                     : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-600'
                 }`}>
                 {t === 'service' ? '⚙️ Service' : '🛍️ Product'}
@@ -131,21 +131,21 @@ function ProductModal({
             <label className="block text-xs text-slate-400 mb-1.5">Name *</label>
             <input value={form.name} onChange={e => set('name', e.target.value)}
               placeholder={form.type === 'service' ? 'e.g. Website Design' : 'e.g. Marketing Course'}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
           </div>
 
           <div>
             <label className="block text-xs text-slate-400 mb-1.5">One-line tagline</label>
             <input value={form.tagline} onChange={e => set('tagline', e.target.value)}
               placeholder="e.g. Professional websites delivered in 5 days"
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
           </div>
 
           <div>
             <label className="block text-xs text-slate-400 mb-1.5">Description</label>
             <textarea value={form.description} onChange={e => set('description', e.target.value)} rows={3}
               placeholder="What exactly does this product/service include? What problem does it solve?"
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600 resize-none" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600 resize-none" />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -153,19 +153,19 @@ function ProductModal({
               <label className="block text-xs text-slate-400 mb-1.5">Price</label>
               <input value={form.price} onChange={e => set('price', e.target.value)}
                 type="number" min="0" placeholder="0"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Unit</label>
               <select value={form.price_unit} onChange={e => set('price_unit', e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors">
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors">
                 {PRICE_UNITS.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Currency</label>
               <select value={form.currency} onChange={e => set('currency', e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors">
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors">
                 {['USD','EUR','GBP','BDT','INR','AUD','CAD'].map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
@@ -175,7 +175,7 @@ function ProductModal({
             <label className="block text-xs text-slate-400 mb-1.5">Target Market <span className="text-slate-600">(who + where)</span></label>
             <input value={form.target_audience} onChange={e => set('target_audience', e.target.value)}
               placeholder="e.g. SMB owners in USA & UK, E-commerce stores in South Asia"
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
             <p className="text-slate-600 text-[10px] mt-1">Used by AI to generate targeted content and campaigns for this product</p>
           </div>
 
@@ -183,7 +183,7 @@ function ProductModal({
             <label className="block text-xs text-slate-400 mb-1.5">Key Benefits <span className="text-slate-600">(one per line)</span></label>
             <textarea value={form.key_benefits} onChange={e => set('key_benefits', e.target.value)} rows={3}
               placeholder={'Fast delivery\n24/7 support\nMoney-back guarantee'}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600 resize-none font-mono" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600 resize-none font-mono" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -191,12 +191,12 @@ function ProductModal({
               <label className="block text-xs text-slate-400 mb-1.5">Category</label>
               <input value={form.category} onChange={e => set('category', e.target.value)}
                 placeholder="e.g. Design, Marketing, Consulting"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
             </div>
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Status</label>
               <select value={form.status} onChange={e => set('status', e.target.value as typeof form.status)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors">
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors">
                 <option value="active">Active</option>
                 <option value="draft">Draft</option>
                 <option value="discontinued">Discontinued</option>
@@ -211,7 +211,7 @@ function ProductModal({
               Cancel
             </button>
             <button onClick={save} disabled={saving}
-              className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
+              className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors">
               {saving ? 'Saving…' : initial ? 'Save Changes' : 'Add'}
             </button>
           </div>
@@ -323,7 +323,7 @@ export default function ProductsPage() {
         <div className="flex gap-2">
           <button
             onClick={() => { setEditProduct(null); setShowModal(true) }}
-            className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
           >
             + Add Product / Service
           </button>
@@ -346,10 +346,10 @@ export default function ProductsPage() {
       </div>
 
       {/* AI context banner */}
-      <div className="bg-violet-950/20 border border-violet-800/30 rounded-xl p-4 mb-8 flex items-start gap-3">
-        <span className="text-violet-400 text-lg flex-shrink-0">🤖</span>
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-4 mb-8 flex items-start gap-3">
+        <span className="text-blue-400 text-lg flex-shrink-0">🤖</span>
         <div>
-          <p className="text-violet-300 text-sm font-medium">AI-Powered Marketing Intelligence</p>
+          <p className="text-blue-300 text-sm font-medium">AI-Powered Marketing Intelligence</p>
           <p className="text-slate-400 text-xs mt-0.5">
             The AI Agent reads your products/services daily — generating content ideas, flagging underperformers,
             and suggesting campaigns. Click <strong className="text-slate-300">&ldquo;Analyze&rdquo;</strong> on any product to get instant signals in your Agent Inbox.
@@ -359,9 +359,9 @@ export default function ProductsPage() {
 
       {/* Reddit Leads Panel — appears after adding a new product */}
       {redditPanel && (
-        <div ref={panelRef} className="mb-8 bg-slate-900 border border-orange-800/40 rounded-2xl overflow-hidden">
+        <div ref={panelRef} className="mb-8 bg-slate-900 border border-slate-700/40 rounded-2xl overflow-hidden">
           {/* Panel header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-orange-950/20">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/20">
             <div className="flex items-center gap-2.5">
               <span className="text-xl">🎯</span>
               <div>
@@ -407,12 +407,12 @@ export default function ProductsPage() {
                 <div key={lead.id} className="px-5 py-3.5 hover:bg-slate-800/30 transition-colors flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-orange-400 text-xs font-medium bg-orange-950/40 border border-orange-800/30 px-2 py-0.5 rounded-full">
+                      <span className="text-slate-500 text-xs font-medium bg-slate-950/40 border border-slate-700/30 px-2 py-0.5 rounded-full">
                         r/{lead.subreddit}
                       </span>
                       <span className="text-slate-500 text-xs">▲ {lead.score}</span>
                       <span className="text-slate-500 text-xs">💬 {lead.num_comments}</span>
-                      <span className="text-yellow-500 text-xs">{Array(Math.min(lead.quality, 5)).fill('★').join('')}</span>
+                      <span className="text-slate-600 text-xs">{Array(Math.min(lead.quality, 5)).fill('★').join('')}</span>
                     </div>
                     <p className="text-slate-200 text-sm leading-snug line-clamp-2">{lead.title}</p>
                     <p className="text-slate-600 text-xs mt-0.5">u/{lead.author}</p>
@@ -421,7 +421,7 @@ export default function ProductsPage() {
                     href={lead.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 text-xs bg-orange-600/20 hover:bg-orange-600/40 border border-orange-700/40 text-orange-300 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                    className="shrink-0 text-xs bg-blue-600/20 hover:bg-blue-600/40 border border-slate-700/40 text-slate-400 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
                   >
                     View →
                   </a>
@@ -434,7 +434,7 @@ export default function ProductsPage() {
           {!redditPanel.loading && redditPanel.leads.length === 0 && (
             <div className="py-10 text-center text-slate-500 text-sm">
               No leads found yet. Try scanning again from{' '}
-              <a href="/settings/integrations#reddit" className="text-orange-400 hover:underline">
+              <a href="/settings/integrations#reddit" className="text-slate-500 hover:underline">
                 Integrations → Reddit
               </a>
             </div>
@@ -468,7 +468,7 @@ export default function ProductsPage() {
           </p>
           <button
             onClick={() => { setEditProduct(null); setShowModal(true) }}
-            className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors"
+            className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors"
           >
             Add First Product / Service
           </button>
@@ -514,7 +514,7 @@ export default function ProductsPage() {
 
               {/* Lead count */}
               <div className="mt-auto pt-3 border-t border-slate-800 flex items-center justify-between">
-                <span className={`text-sm font-medium ${p.lead_count > 0 ? 'text-violet-400' : 'text-slate-600'}`}>
+                <span className={`text-sm font-medium ${p.lead_count > 0 ? 'text-blue-400' : 'text-slate-600'}`}>
                   👤 {p.lead_count} lead{p.lead_count !== 1 ? 's' : ''}
                 </span>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -522,7 +522,7 @@ export default function ProductsPage() {
                     onClick={() => generateSignals(p.id)}
                     disabled={generatingSignals === p.id}
                     title="Analyze — add AI signals to Agent Inbox"
-                    className="text-xs bg-violet-600/20 hover:bg-violet-600/40 border border-violet-700/40 text-violet-300 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                    className="text-xs bg-blue-600/20 hover:bg-blue-600/40 border border-slate-700/40 text-blue-300 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                   >
                     {generatingSignals === p.id ? '…' : '🤖 Analyze'}
                   </button>
@@ -550,7 +550,7 @@ export default function ProductsPage() {
 
               {/* Signal message */}
               {signalMsg?.id === p.id && (
-                <p className={`text-xs mt-2 font-medium ${signalMsg.ok ? 'text-emerald-400' : 'text-red-400'}`}>
+                <p className={`text-xs mt-2 font-medium ${signalMsg.ok ? 'text-blue-400' : 'text-red-400'}`}>
                   {signalMsg.text}
                 </p>
               )}
@@ -560,7 +560,7 @@ export default function ProductsPage() {
           {/* Add card */}
           <button
             onClick={() => { setEditProduct(null); setShowModal(true) }}
-            className="border-2 border-dashed border-slate-800 hover:border-violet-700/50 rounded-2xl p-5 text-slate-600 hover:text-violet-400 transition-colors flex flex-col items-center justify-center gap-3 min-h-[200px]"
+            className="border-2 border-dashed border-slate-800 hover:border-slate-700/50 rounded-2xl p-5 text-slate-600 hover:text-blue-400 transition-colors flex flex-col items-center justify-center gap-3 min-h-[200px]"
           >
             <span className="text-3xl">+</span>
             <span className="text-sm font-medium">Add Product / Service</span>
@@ -574,9 +574,9 @@ export default function ProductsPage() {
           <p className="text-slate-400 text-sm font-medium mb-3">Breakdown</p>
           <div className="flex flex-wrap gap-3">
             {[
-              { label: `${services.length} Services`, color: 'text-violet-400' },
+              { label: `${services.length} Services`, color: 'text-blue-400' },
               { label: `${prods.length} Products`, color: 'text-blue-400' },
-              { label: `${active.length} Active`, color: 'text-emerald-400' },
+              { label: `${active.length} Active`, color: 'text-blue-400' },
               { label: `${products.filter(p => p.status === 'draft').length} Drafts`, color: 'text-slate-500' },
             ].map(b => (
               <span key={b.label} className={`text-sm font-medium ${b.color}`}>{b.label}</span>

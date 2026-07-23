@@ -1,25 +1,25 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import type { ExecutionPlan, PlanMilestone } from '@/types/business-plan'
 
 const PRIORITY_COLOR: Record<string, string> = {
   high:   'bg-red-500/20 text-red-300 border-red-500/30',
-  medium: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+  medium: 'bg-slate-600/20 text-slate-400 border-slate-500/30',
   low:    'bg-slate-700/50 text-slate-400 border-slate-600/30',
 }
 const QUARTER_ACCENT = [
-  'border-violet-500/40 bg-violet-950/10',
+  'border-blue-500/40 bg-slate-950/10',
   'border-blue-500/40 bg-blue-950/10',
-  'border-emerald-500/40 bg-emerald-950/10',
-  'border-amber-500/40 bg-amber-950/10',
+  'border-blue-500/40 bg-slate-950/10',
+  'border-slate-500/40 bg-slate-950/10',
 ]
-const QUARTER_LABEL = ['text-violet-400','text-blue-400','text-emerald-400','text-amber-400']
+const QUARTER_LABEL = ['text-blue-400','text-blue-400','text-blue-400','text-slate-500']
 
 function buildPdfHtml(plan: ExecutionPlan): string {
   const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
   const priorityBg: Record<string, string> = { high: '#fef2f2', medium: '#fffbeb', low: '#f8fafc' }
-  const priorityColor: Record<string, string> = { high: '#dc2626', medium: '#d97706', low: '#64748b' }
+  const priorityColor: Record<string, string> = { high: '#dc2626', medium: '#475569', low: '#64748b' }
 
   const milestonesHtml = (ms: PlanMilestone[]) => ms.map(m => `
     <div style="border:1px solid #e2e8f0;border-radius:8px;padding:14px;margin-bottom:12px;background:${priorityBg[m.priority]}">
@@ -35,7 +35,7 @@ function buildPdfHtml(plan: ExecutionPlan): string {
     </div>`).join('')
 
   const quartersHtml = plan.quarters.map((q, i) => {
-    const colors = ['#7c3aed','#2563eb','#059669','#d97706']
+    const colors = ['#2563eb','#2563eb','#1d4ed8','#475569']
     return `
     <div style="margin-bottom:40px;page-break-inside:avoid;">
       <div style="border-left:4px solid ${colors[i]};padding-left:16px;margin-bottom:16px;">
@@ -54,7 +54,7 @@ function buildPdfHtml(plan: ExecutionPlan): string {
   return `<!DOCTYPE html><html><head><title>Execution Plan — ${plan.product}</title>
 <style>body{font-family:-apple-system,Arial,sans-serif;max-width:860px;margin:40px auto;color:#1e293b;line-height:1.6;}@media print{body{margin:20px;}}</style>
 </head><body>
-<div style="border-bottom:3px solid #7c3aed;padding-bottom:16px;margin-bottom:24px;">
+<div style="border-bottom:3px solid #2563eb;padding-bottom:16px;margin-bottom:24px;">
   <h1 style="margin:0;font-size:28px;color:#0f172a">${plan.product}</h1>
   <p style="margin:4px 0 0;font-size:13px;color:#64748b">Execution Roadmap · Generated ${date}</p>
 </div>
@@ -66,7 +66,7 @@ function buildPdfHtml(plan: ExecutionPlan): string {
   ${plan.key_metrics.map(m => `
     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
       <p style="margin:0 0 4px;font-size:11px;color:#94a3b8">${m.label}</p>
-      <p style="margin:0 0 2px;font-size:18px;font-weight:700;color:#7c3aed">${m.target}</p>
+      <p style="margin:0 0 2px;font-size:18px;font-weight:700;color:#2563eb">${m.target}</p>
       <p style="margin:0;font-size:11px;color:#94a3b8">Now: ${m.current}</p>
     </div>`).join('')}
 </div>
@@ -190,7 +190,7 @@ export default function BusinessPlanPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-6 h-6 border-2 border-violet-500/30 border-t-violet-400 rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-blue-500/30 border-t-violet-400 rounded-full animate-spin" />
       </div>
     )
   }
@@ -207,7 +207,7 @@ export default function BusinessPlanPage() {
           {plan && (
             <button
               onClick={() => setExportHtml(buildPdfHtml(plan))}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors flex-shrink-0"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors flex-shrink-0"
             >
               📄 Export PDF
             </button>
@@ -219,7 +219,7 @@ export default function BusinessPlanPage() {
           <button
             onClick={() => selectProduct(null)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              activeProduct === null ? 'bg-violet-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+              activeProduct === null ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
             }`}
           >
             Overall Business
@@ -229,7 +229,7 @@ export default function BusinessPlanPage() {
               <button
                 onClick={() => selectProduct(p)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors pr-7 ${
-                  activeProduct === p ? 'bg-violet-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                  activeProduct === p ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
                 }`}
               >
                 {p}
@@ -250,9 +250,9 @@ export default function BusinessPlanPage() {
                 onChange={e => setNewProduct(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addProduct(); if (e.key === 'Escape') setShowAddInput(false) }}
                 placeholder="Product name…"
-                className="bg-slate-800 border border-violet-500/50 rounded-lg px-3 py-1.5 text-white text-sm placeholder-slate-600 focus:outline-none w-40"
+                className="bg-slate-800 border border-blue-500/50 rounded-lg px-3 py-1.5 text-white text-sm placeholder-slate-600 focus:outline-none w-40"
               />
-              <button onClick={addProduct} className="text-violet-400 hover:text-violet-300 text-sm px-2 py-1.5">Add</button>
+              <button onClick={addProduct} className="text-blue-400 hover:text-blue-300 text-sm px-2 py-1.5">Add</button>
               <button onClick={() => setShowAddInput(false)} className="text-slate-600 hover:text-slate-400 text-sm px-1">✕</button>
             </div>
           ) : (
@@ -278,7 +278,7 @@ export default function BusinessPlanPage() {
             <button
               onClick={generate}
               disabled={generating}
-              className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-medium px-8 py-3 rounded-xl transition-colors flex items-center gap-2 mx-auto"
+              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium px-8 py-3 rounded-xl transition-colors flex items-center gap-2 mx-auto"
             >
               {generating
                 ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Building roadmap…</>
@@ -305,7 +305,7 @@ export default function BusinessPlanPage() {
                 {plan.key_metrics.map((m, i) => (
                   <div key={i} className="bg-slate-800/60 rounded-xl p-3">
                     <p className="text-slate-500 text-xs mb-1">{m.label}</p>
-                    <p className="text-violet-400 font-bold text-base">{m.target}</p>
+                    <p className="text-blue-400 font-bold text-base">{m.target}</p>
                     <p className="text-slate-600 text-xs mt-0.5">Now: {m.current}</p>
                   </div>
                 ))}
@@ -353,7 +353,7 @@ export default function BusinessPlanPage() {
                                 <span className="text-slate-600 text-[10px]">{Math.round((completedSteps / m.steps.length) * 100)}%</span>
                               </div>
                               <div className="h-1 bg-slate-700 rounded-full">
-                                <div className="h-1 bg-violet-500 rounded-full transition-all" style={{ width: `${(completedSteps / m.steps.length) * 100}%` }} />
+                                <div className="h-1 bg-blue-500 rounded-full transition-all" style={{ width: `${(completedSteps / m.steps.length) * 100}%` }} />
                               </div>
                             </div>
                           )}
@@ -363,7 +363,7 @@ export default function BusinessPlanPage() {
                               const done = checkedSteps[id]
                               return (
                                 <li key={si} onClick={() => toggleStep(id)} className="flex items-start gap-2 cursor-pointer group">
-                                  <span className={`mt-0.5 w-3.5 h-3.5 rounded flex-shrink-0 border flex items-center justify-center transition-colors ${done ? 'bg-violet-600 border-violet-600' : 'border-slate-600 group-hover:border-slate-400'}`}>
+                                  <span className={`mt-0.5 w-3.5 h-3.5 rounded flex-shrink-0 border flex items-center justify-center transition-colors ${done ? 'bg-blue-600 border-blue-600' : 'border-slate-600 group-hover:border-slate-400'}`}>
                                     {done && <span className="text-white text-[8px]">✓</span>}
                                   </span>
                                   <span className={`text-xs leading-relaxed transition-colors ${done ? 'text-slate-600 line-through' : 'text-slate-300 group-hover:text-slate-200'}`}>
@@ -389,7 +389,7 @@ export default function BusinessPlanPage() {
           <div className="flex items-center justify-between px-5 py-3 bg-slate-900 border-b border-slate-800 flex-shrink-0">
             <span className="text-white font-medium text-sm">Execution Roadmap — Print / Save PDF</span>
             <div className="flex gap-2">
-              <button onClick={() => iframeRef.current?.contentWindow?.print()} className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors">
+              <button onClick={() => iframeRef.current?.contentWindow?.print()} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors">
                 🖨️ Print / Save PDF
               </button>
               <button onClick={() => setExportHtml(null)} className="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 text-sm px-4 py-1.5 rounded-lg transition-colors">

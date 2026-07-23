@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { saveBusiness } from '../actions'
@@ -60,8 +60,8 @@ const SIZES = [
   { value: '500+', label: '500+ people' },
 ]
 
-const inputCls = "w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-violet-500 focus:bg-white transition-colors text-base"
-const selectCls = "w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-violet-500 transition-colors appearance-none text-base"
+const inputCls = "w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-colors text-base"
+const selectCls = "w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:border-blue-500 transition-colors appearance-none text-base"
 const labelCls = "block text-sm font-semibold text-slate-700 mb-2"
 
 export default function BusinessPage() {
@@ -111,13 +111,13 @@ export default function BusinessPage() {
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-10">
         {[1, 2, 3, 4, 5, 6].map((s) => (
-          <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors ${s <= 2 ? 'bg-violet-500' : 'bg-slate-200'}`} />
+          <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors ${s <= 2 ? 'bg-blue-500' : 'bg-slate-200'}`} />
         ))}
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 space-y-6">
         <div>
-          <p className="text-violet-600 text-sm font-semibold mb-1">Step 2 of 6</p>
+          <p className="text-blue-600 text-sm font-semibold mb-1">Step 2 of 6</p>
           <h1 className="text-2xl font-bold text-slate-900">Tell me about your business</h1>
           <p className="text-slate-500 mt-1 text-base">This helps your AI agent understand your context.</p>
         </div>
@@ -125,7 +125,7 @@ export default function BusinessPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Business Name */}
           <div>
-            <label className={labelCls}>Business Name <span className="text-violet-500">*</span></label>
+            <label className={labelCls}>Business Name <span className="text-blue-500">*</span></label>
             <input
               type="text"
               value={form.name}
@@ -138,7 +138,7 @@ export default function BusinessPage() {
           {/* Industry + Size */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Industry <span className="text-violet-500">*</span></label>
+              <label className={labelCls}>Industry <span className="text-blue-500">*</span></label>
               <select value={form.industry} onChange={e => set('industry', e.target.value)} className={selectCls}>
                 <option value="">Select industry</option>
                 {INDUSTRIES.map(ind => <option key={ind} value={ind}>{ind}</option>)}
@@ -164,8 +164,8 @@ export default function BusinessPage() {
                     onClick={() => set('target_customer', tc)}
                     className={`flex-1 py-3 rounded-xl text-sm font-semibold border-2 transition-colors ${
                       form.target_customer === tc
-                        ? 'bg-violet-600 border-violet-600 text-white'
-                        : 'bg-white border-slate-200 text-slate-500 hover:border-violet-300'
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300'
                     }`}
                   >
                     {tc.toUpperCase()}
@@ -174,7 +174,7 @@ export default function BusinessPage() {
               </div>
             </div>
             <div>
-              <label className={labelCls}>Country <span className="text-violet-500">*</span></label>
+              <label className={labelCls}>Country <span className="text-blue-500">*</span></label>
               <select
                 value={form.country}
                 onChange={e => {
@@ -191,7 +191,7 @@ export default function BusinessPage() {
               </select>
               {form.country && (
                 <p className="text-slate-400 text-xs mt-1.5">
-                  Currency: <span className="text-violet-600 font-semibold">{form.currency}</span>
+                  Currency: <span className="text-blue-600 font-semibold">{form.currency}</span>
                 </p>
               )}
             </div>
@@ -199,7 +199,7 @@ export default function BusinessPage() {
 
           {/* Website URL */}
           <div>
-            <label className={labelCls}>Website URL <span className="text-violet-500">*</span></label>
+            <label className={labelCls}>Website URL <span className="text-blue-500">*</span></label>
             <input
               type="url"
               value={form.website_url}
@@ -233,7 +233,7 @@ export default function BusinessPage() {
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 active:scale-[0.99] disabled:opacity-50 text-white font-bold px-8 py-3 rounded-xl transition-all text-base"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 text-white font-bold px-8 py-3 rounded-xl transition-all text-base"
             >
               {isPending ? 'Saving...' : 'Continue'}
               {!isPending && (

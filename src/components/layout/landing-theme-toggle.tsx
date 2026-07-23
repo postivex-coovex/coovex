@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useTheme } from 'next-themes'
 import { Sun, Moon } from 'lucide-react'
@@ -18,8 +18,8 @@ export function LandingThemeToggle() {
       title={isDark ? 'Light mode' : 'Dark mode'}
     >
       {isDark
-        ? <Sun  className="w-4 h-4 text-amber-400" />
-        : <Moon className="w-4 h-4 text-violet-500" />}
+        ? <Sun  className="w-4 h-4 text-slate-500" />
+        : <Moon className="w-4 h-4 text-blue-500" />}
     </button>
   )
 }

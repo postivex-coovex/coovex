@@ -15,15 +15,15 @@ export default function EmbedSnippet({ token, appUrl }: { token: string; appUrl:
 
   return (
     <div className="space-y-3">
-      <p className="text-slate-400 text-sm">Paste this snippet before the closing <code className="text-violet-400">&lt;/body&gt;</code> tag on your website:</p>
+      <p className="text-slate-400 text-sm">Paste this snippet before the closing <code className="text-blue-400">&lt;/body&gt;</code> tag on your website:</p>
       <div className="relative">
-        <pre className="bg-slate-950 border border-slate-700 rounded-xl p-4 text-sm text-emerald-400 overflow-x-auto whitespace-pre-wrap break-all font-mono">
+        <pre className="bg-slate-950 border border-slate-700 rounded-xl p-4 text-sm text-blue-400 overflow-x-auto whitespace-pre-wrap break-all font-mono">
           {snippet}
         </pre>
         <button
           onClick={copy}
           className={`absolute top-3 right-3 text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
-            copied ? 'bg-emerald-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+            copied ? 'bg-blue-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
           }`}
         >
           {copied ? '✓ Copied!' : 'Copy'}

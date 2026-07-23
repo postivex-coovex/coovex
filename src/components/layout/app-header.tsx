@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Bell, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -44,7 +44,7 @@ export function AppHeader({ user }: AppHeaderProps) {
   }, [])
 
   const pct = credits ? Math.min(100, Math.round((credits.balance / Math.max(credits.monthly, 1)) * 100)) : null
-  const creditColor = pct === null ? 'text-slate-400' : pct > 50 ? 'text-emerald-400' : pct > 20 ? 'text-amber-400' : 'text-red-400'
+  const creditColor = pct === null ? 'text-slate-400' : pct > 50 ? 'text-blue-400' : pct > 20 ? 'text-slate-500' : 'text-red-400'
 
   return (
     <header className="hidden md:flex h-16 items-center justify-between px-6 border-b border-slate-800 bg-slate-900/50 backdrop-blur flex-shrink-0">
@@ -77,7 +77,7 @@ export function AppHeader({ user }: AppHeaderProps) {
 
         <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white hover:bg-slate-800">
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-violet-500 rounded-full" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" />
         </Button>
 
         <Link

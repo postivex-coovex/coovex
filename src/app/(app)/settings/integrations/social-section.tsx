@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -125,7 +125,7 @@ function PageSelector({
           value={selectedId ?? ''}
           onChange={e => select(e.target.value === '' ? null : e.target.value)}
           disabled={saving}
-          className="w-full appearance-none bg-slate-800 border border-slate-700 hover:border-slate-600 rounded-lg pl-3 pr-8 py-1.5 text-white text-xs focus:outline-none focus:border-violet-500 transition-colors cursor-pointer disabled:opacity-60"
+          className="w-full appearance-none bg-slate-800 border border-slate-700 hover:border-slate-600 rounded-lg pl-3 pr-8 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500 transition-colors cursor-pointer disabled:opacity-60"
         >
           {options.map(o => (
             <option key={String(o.id)} value={o.id ?? ''}>
@@ -202,7 +202,7 @@ export default function SocialSection({ connections: initial, linkedinConfigured
       {toast && (
         <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm ${
           toast.type === 'success'
-            ? 'bg-emerald-950/30 border-emerald-800/40 text-emerald-300'
+            ? 'bg-slate-950/30 border-slate-700/40 text-blue-300'
             : 'bg-red-950/30 border-red-800/40 text-red-300'
         }`}>
           <span>{toast.type === 'success' ? '✓' : '✗'}</span>
@@ -235,12 +235,12 @@ export default function SocialSection({ connections: initial, linkedinConfigured
 
         return (
           <div key={ch.key} className={`bg-slate-900 border rounded-2xl p-5 transition-colors ${
-            isConnected ? 'border-emerald-800/30' : 'border-slate-800'
+            isConnected ? 'border-slate-700/30' : 'border-slate-800'
           }`}>
             <div className="flex items-start gap-4">
               {/* Icon */}
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${
-                isConnected ? 'bg-emerald-950/40 border border-emerald-800/40' : 'bg-slate-800'
+                isConnected ? 'bg-slate-950/40 border border-slate-700/40' : 'bg-slate-800'
               }`}>
                 {ch.icon}
               </div>
@@ -250,7 +250,7 @@ export default function SocialSection({ connections: initial, linkedinConfigured
                 <div className="flex items-center gap-2 mb-0.5">
                   <h3 className="text-white font-medium">{ch.name}</h3>
                   {isConnected ? (
-                    <span className="text-xs px-2 py-0.5 bg-emerald-950/50 text-emerald-400 border border-emerald-800/40 rounded-full">
+                    <span className="text-xs px-2 py-0.5 bg-slate-950/50 text-blue-400 border border-slate-700/40 rounded-full">
                       Connected
                     </span>
                   ) : (
@@ -326,11 +326,11 @@ export default function SocialSection({ connections: initial, linkedinConfigured
                       className="text-sm px-4 py-2 bg-slate-800 text-slate-600 border border-slate-700 rounded-lg cursor-not-allowed">
                       Connect
                     </button>
-                    <p className="text-[10px] text-amber-600 mt-1">API keys not set</p>
+                    <p className="text-[10px] text-slate-600 mt-1">API keys not set</p>
                   </div>
                 ) : (
                   <a href={ch.authPath}
-                    className="inline-block text-sm px-4 py-2 bg-violet-700 hover:bg-violet-600 text-white rounded-lg transition-colors font-medium">
+                    className="inline-block text-sm px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium">
                     Connect
                   </a>
                 )}
@@ -343,21 +343,21 @@ export default function SocialSection({ connections: initial, linkedinConfigured
       {/* Setup instructions */}
       {(!linkedinConfigured || !facebookConfigured) && (
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 text-sm text-slate-500">
-          <p className="font-medium text-slate-400 mb-2">Setup required — add to <code className="text-violet-400">.env.local</code>:</p>
+          <p className="font-medium text-slate-400 mb-2">Setup required — add to <code className="text-blue-400">.env.local</code>:</p>
           <div className="font-mono text-xs space-y-1 text-slate-500">
             {!linkedinConfigured && (
               <>
                 <p className="text-slate-600"># LinkedIn Developer App → Auth → OAuth 2.0 settings</p>
-                <p>LINKEDIN_CLIENT_ID=<span className="text-amber-500">your_client_id</span></p>
-                <p>LINKEDIN_CLIENT_SECRET=<span className="text-amber-500">your_client_secret</span></p>
+                <p>LINKEDIN_CLIENT_ID=<span className="text-slate-600">your_client_id</span></p>
+                <p>LINKEDIN_CLIENT_SECRET=<span className="text-slate-600">your_client_secret</span></p>
                 <p className="text-slate-600 mt-1"># For company page posting: enable &quot;Marketing Developer Platform&quot; product</p>
               </>
             )}
             {!facebookConfigured && (
               <>
                 <p className="text-slate-600 mt-2"># Meta for Developers → Your App → Settings → Basic</p>
-                <p>FACEBOOK_APP_ID=<span className="text-amber-500">your_app_id</span></p>
-                <p>FACEBOOK_APP_SECRET=<span className="text-amber-500">your_app_secret</span></p>
+                <p>FACEBOOK_APP_ID=<span className="text-slate-600">your_app_id</span></p>
+                <p>FACEBOOK_APP_SECRET=<span className="text-slate-600">your_app_secret</span></p>
               </>
             )}
           </div>

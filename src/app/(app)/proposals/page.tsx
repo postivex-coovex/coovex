@@ -33,8 +33,8 @@ interface SavedProposal {
 const STATUS_META: Record<SavedProposal['status'], { label: string; color: string }> = {
   draft:    { label: 'Draft',    color: 'bg-slate-800 text-slate-300 border-slate-700' },
   sent:     { label: 'Sent',     color: 'bg-blue-900/50 text-blue-300 border-blue-800/40' },
-  viewed:   { label: 'Viewed',   color: 'bg-amber-900/50 text-amber-300 border-amber-800/40' },
-  accepted: { label: 'Accepted', color: 'bg-emerald-900/50 text-emerald-300 border-emerald-800/40' },
+  viewed:   { label: 'Viewed',   color: 'bg-slate-900/50 text-slate-400 border-slate-700/40' },
+  accepted: { label: 'Accepted', color: 'bg-slate-900/50 text-blue-300 border-slate-700/40' },
   declined: { label: 'Declined', color: 'bg-red-900/50 text-red-300 border-red-800/40' },
 }
 
@@ -199,7 +199,7 @@ export default function ProposalsPage() {
         p { margin: 0 0 16px; white-space: pre-wrap; }
         .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 13px; font-style: italic; }
         .share-box { margin-top: 32px; padding: 16px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; }
-        .share-box p { margin: 0; font-size: 12px; color: #6d28d9; }
+        .share-box p { margin: 0; font-size: 12px; color: #1d4ed8; }
         .share-box a { color: #4f46e5; word-break: break-all; }
         @media print { .share-box { background: #f5f3ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
       </style></head><body>
@@ -236,7 +236,7 @@ export default function ProposalsPage() {
         p { margin: 0 0 16px; white-space: pre-wrap; }
         .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 13px; font-style: italic; }
         .share-box { margin-top: 32px; padding: 16px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 8px; }
-        .share-box p { margin: 0; font-size: 12px; color: #6d28d9; }
+        .share-box p { margin: 0; font-size: 12px; color: #1d4ed8; }
         .share-box a { color: #4f46e5; word-break: break-all; }
         @media print { .share-box { background: #f5f3ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
       </style></head><body>
@@ -303,12 +303,12 @@ export default function ProposalsPage() {
                   <div>
                     <label className="block text-sm text-slate-400 mb-1.5">Client Name *</label>
                     <input value={form.client_name} onChange={set('client_name')} placeholder="Jane Smith" required
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
                   </div>
                   <div>
                     <label className="block text-sm text-slate-400 mb-1.5">Company</label>
                     <input value={form.client_company} onChange={set('client_company')} placeholder="Acme Corp"
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
                   </div>
                 </div>
 
@@ -316,19 +316,19 @@ export default function ProposalsPage() {
                   <label className="block text-sm text-slate-400 mb-1.5">Service / Project Description *</label>
                   <textarea value={form.service_description} onChange={set('service_description')} required rows={3}
                     placeholder="e.g. 6-month SEO and content marketing campaign to increase organic traffic by 40%"
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600 resize-none" />
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600 resize-none" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm text-slate-400 mb-1.5">Budget / Pricing</label>
                     <input value={form.budget} onChange={set('budget')} placeholder="$2,500/month"
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
                   </div>
                   <div>
                     <label className="block text-sm text-slate-400 mb-1.5">Timeline</label>
                     <input value={form.timeline} onChange={set('timeline')} placeholder="3 months, Q3 2026"
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600" />
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600" />
                   </div>
                 </div>
 
@@ -336,7 +336,7 @@ export default function ProposalsPage() {
                   <label className="block text-sm text-slate-400 mb-1.5">Additional Notes</label>
                   <textarea value={form.notes} onChange={set('notes')} rows={2}
                     placeholder="Any specific requirements, pain points, or context to include..."
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600 resize-none" />
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600 resize-none" />
                 </div>
 
                 {genError && (
@@ -346,7 +346,7 @@ export default function ProposalsPage() {
                 )}
 
                 <button type="submit" disabled={generating || !form.client_name || !form.service_description}
-                  className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                  className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
                   {generating
                     ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Generating proposal…</>
                     : '✨ Generate Proposal'}
@@ -361,7 +361,7 @@ export default function ProposalsPage() {
                   'Include a budget range to get realistic pricing sections',
                   'Mention any pain points the client expressed'].map(t => (
                   <li key={t} className="text-slate-500 text-sm flex gap-2">
-                    <span className="text-violet-500 flex-shrink-0">•</span>{t}
+                    <span className="text-blue-500 flex-shrink-0">•</span>{t}
                   </li>
                 ))}
               </ul>
@@ -384,7 +384,7 @@ export default function ProposalsPage() {
                       {copied ? '✓ Copied' : '📋 Copy'}
                     </button>
                     <button onClick={() => printProposal(undefined)}
-                      className="text-sm bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-lg transition-colors">
+                      className="text-sm bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition-colors">
                       📄 Export PDF
                     </button>
                   </div>
@@ -405,7 +405,7 @@ export default function ProposalsPage() {
                   </div>
                   {proposal.sections.map((s, i) => (
                     <div key={i} className="border-t border-slate-800 pt-4">
-                      <h3 className="text-violet-400 text-xs font-semibold uppercase tracking-wider mb-2">{s.heading}</h3>
+                      <h3 className="text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">{s.heading}</h3>
                       <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{s.body}</p>
                     </div>
                   ))}
@@ -456,7 +456,7 @@ export default function ProposalsPage() {
               </p>
               <button
                 onClick={() => setTab('generator')}
-                className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors"
+                className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors"
               >
                 Generate First Proposal
               </button>
@@ -487,7 +487,7 @@ export default function ProposalsPage() {
                             Created {new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
                           {p.view_count > 0 ? (
-                            <span className="text-amber-400 text-xs font-medium flex items-center gap-1">
+                            <span className="text-slate-500 text-xs font-medium flex items-center gap-1">
                               👁 {p.view_count} view{p.view_count !== 1 ? 's' : ''}
                               {p.last_viewed_at && <span className="text-slate-500 font-normal">· last {timeAgo(p.last_viewed_at)}</span>}
                             </span>
@@ -505,7 +505,7 @@ export default function ProposalsPage() {
                             title="Copy shareable link"
                             className={`text-sm px-3 py-2 rounded-lg border transition-colors ${
                               copiedLink === p.share_token
-                                ? 'bg-emerald-900/40 border-emerald-700 text-emerald-300'
+                                ? 'bg-slate-900/40 border-slate-700 text-blue-300'
                                 : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                             }`}
                           >
@@ -522,7 +522,7 @@ export default function ProposalsPage() {
                         <select
                           value={p.status}
                           onChange={e => updateStatus(p.id, e.target.value as SavedProposal['status'])}
-                          className="text-sm bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-300 focus:outline-none focus:border-violet-500 transition-colors"
+                          className="text-sm bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-300 focus:outline-none focus:border-blue-500 transition-colors"
                         >
                           {(['draft', 'sent', 'viewed', 'accepted', 'declined'] as const).map(s => (
                             <option key={s} value={s}>{STATUS_META[s].label}</option>

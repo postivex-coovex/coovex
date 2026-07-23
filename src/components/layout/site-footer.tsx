@@ -56,7 +56,7 @@ export function SiteFooter() {
               <Link href="/contact" className="text-xs text-slate-500 hover:text-white border border-slate-800 hover:border-slate-700 px-3 py-1.5 rounded-lg transition-colors">
                 Contact us
               </Link>
-              <Link href="/signup" className="text-xs text-white bg-violet-600 hover:bg-violet-500 px-3 py-1.5 rounded-lg transition-colors font-medium">
+              <Link href="/signup" className="text-xs text-white bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-lg transition-colors font-medium">
                 Start Free Trial
               </Link>
             </div>

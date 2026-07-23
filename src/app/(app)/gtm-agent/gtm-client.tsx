@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -120,7 +120,7 @@ function StepResult({ id, data }: { id: string; data?: Record<string, unknown> }
     const geo = data.geo as number | null
     const ageDays = data.age_days as number
     return (
-      <span className="text-xs text-emerald-400 ml-1">
+      <span className="text-xs text-blue-400 ml-1">
         {overall}/100 overall · GEO {geo ?? 'N/A'}/100
         {ageDays > 7 ? ` · ⚠️ ${ageDays}d old` : ''}
       </span>
@@ -129,7 +129,7 @@ function StepResult({ id, data }: { id: string; data?: Record<string, unknown> }
   if (id === 'icp') {
     const total = data.total as number
     const hot = data.hot as number
-    return <span className="text-xs text-emerald-400 ml-1">{total} leads · {hot} hot</span>
+    return <span className="text-xs text-blue-400 ml-1">{total} leads · {hot} hot</span>
   }
   if (id === 'leads') {
     const found = data.found as number
@@ -137,24 +137,24 @@ function StepResult({ id, data }: { id: string; data?: Record<string, unknown> }
     const saved = data.saved as number | undefined
     if (!found) return <span className="text-xs text-slate-500 ml-1">no results (search may be offline)</span>
     return (
-      <span className="text-xs text-emerald-400 ml-1">
+      <span className="text-xs text-blue-400 ml-1">
         {found} found {real ? '(real)' : '(ICP-generated)'}
         {saved ? ` · ${saved} added to pipeline` : ''}
       </span>
     )
   }
   if (id === 'geo') {
-    if (data.stale) return <span className="text-xs text-amber-400 ml-1">not run yet — run GEO Optimizer</span>
+    if (data.stale) return <span className="text-xs text-slate-500 ml-1">not run yet — run GEO Optimizer</span>
     const visRate = data.ai_visibility_rate as number | null
     return (
-      <span className="text-xs text-emerald-400 ml-1">
+      <span className="text-xs text-blue-400 ml-1">
         {data.high_impact as number} high-impact gaps
         {visRate != null ? ` · Gemini: ${visRate}%` : ''}
       </span>
     )
   }
-  if (id === 'ai') return <span className="text-xs text-emerald-400 ml-1">3 action items generated</span>
-  if (id === 'inbox') return <span className="text-xs text-emerald-400 ml-1">saved to Agent Inbox</span>
+  if (id === 'ai') return <span className="text-xs text-blue-400 ml-1">3 action items generated</span>
+  if (id === 'inbox') return <span className="text-xs text-blue-400 ml-1">saved to Agent Inbox</span>
   return null
 }
 
@@ -263,14 +263,14 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">🚀</span>
             <h1 className="text-xl font-bold text-white">GTM Autopilot</h1>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-400 border border-violet-500/30">AI-Powered</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">AI-Powered</span>
           </div>
           <p className="text-slate-400 text-xs">Runs leads, GEO, content gaps, and action plan in one click.</p>
           {lastRun && <p className="text-xs text-slate-600 mt-0.5">Last run: {timeAgo(lastRun.ran_at)}</p>}
         </div>
         <button
           onClick={runGtm} disabled={running}
-          className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-semibold rounded-xl transition-colors text-sm"
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-semibold rounded-xl transition-colors text-sm"
         >
           {running
             ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Running…</>
@@ -280,11 +280,11 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
 
       {/* Error */}
       {error === 'requires_audit' && (
-        <div className="mb-5 p-4 bg-amber-950/20 border border-amber-800/40 rounded-2xl flex items-center gap-3">
+        <div className="mb-5 p-4 bg-slate-950/20 border border-slate-700/40 rounded-2xl flex items-center gap-3">
           <span className="text-xl">⚠️</span>
           <div>
-            <p className="text-amber-300 font-semibold text-sm">Website Audit required</p>
-            <Link href="/audit" className="text-xs text-amber-400 underline">Run Website Audit →</Link>
+            <p className="text-slate-400 font-semibold text-sm">Website Audit required</p>
+            <Link href="/audit" className="text-xs text-slate-500 underline">Run Website Audit →</Link>
           </div>
         </div>
       )}
@@ -303,7 +303,7 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
               const active = state.status === 'running'
               return (
                 <div key={step.id} className="flex items-start gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs mt-0.5 ${done ? 'bg-emerald-500 text-white' : active ? 'bg-violet-600 text-white' : 'bg-slate-800 text-slate-600'}`}>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs mt-0.5 ${done ? 'bg-blue-600 text-white' : active ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-600'}`}>
                     {done ? '✓' : active ? <span className="w-2.5 h-2.5 border border-white/40 border-t-white rounded-full animate-spin block" /> : '·'}
                   </div>
                   <div className="flex-1 pt-0.5">
@@ -336,13 +336,13 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
             className="h-2 rounded-full transition-all duration-500"
             style={{
               width: `${progress.pct}%`,
-              background: progress.pct >= 70 ? '#10b981' : progress.pct >= 40 ? '#8b5cf6' : '#ef4444',
+              background: progress.pct >= 70 ? '#2563eb' : progress.pct >= 40 ? '#3b82f6' : '#ef4444',
             }}
           />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
           {progress.items.map(item => (
-            <div key={item.label} className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] ${item.done ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800/60 text-slate-500'}`}>
+            <div key={item.label} className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] ${item.done ? 'bg-blue-600/10 text-blue-400' : 'bg-slate-800/60 text-slate-500'}`}>
               <span className="flex-shrink-0">{item.done ? '✓' : '○'}</span>
               <span className="truncate">{item.label}</span>
             </div>
@@ -356,22 +356,22 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
           {
             label: 'Audit Score', value: `${staticData.auditScore}/100`,
             sub: `GEO: ${staticData.auditGeoScore ?? 'N/A'}/100${staticData.auditAgeDays > 7 ? ` · ⚠️ ${staticData.auditAgeDays}d old` : ''}`,
-            color: staticData.auditScore >= 70 ? 'text-emerald-400' : 'text-amber-400', link: '/audit',
+            color: staticData.auditScore >= 70 ? 'text-blue-400' : 'text-slate-500', link: '/audit',
           },
           {
             label: 'Hot Leads', value: displayHotLeads,
             sub: `${staticData.totalLeads} total · ${staticData.competitors} competitors tracked`,
-            color: displayHotLeads > 0 ? 'text-emerald-400' : 'text-rose-400', link: '/leads',
+            color: displayHotLeads > 0 ? 'text-blue-400' : 'text-rose-400', link: '/leads',
           },
           {
             label: 'Content Pipeline', value: displayDrafts,
             sub: `${staticData.scheduledPosts} scheduled`,
-            color: displayDrafts > 0 ? 'text-amber-400' : 'text-slate-500', link: '/content',
+            color: displayDrafts > 0 ? 'text-slate-500' : 'text-slate-500', link: '/content',
           },
           {
             label: 'AI Visibility', value: displayAIVis != null ? `${displayAIVis}%` : '—',
             sub: `${staticData.geoHighImpact} high-impact GEO gaps`,
-            color: displayAIVis != null ? (displayAIVis >= 30 ? 'text-emerald-400' : 'text-violet-400') : 'text-slate-500',
+            color: displayAIVis != null ? (displayAIVis >= 30 ? 'text-blue-400' : 'text-blue-400') : 'text-slate-500',
             link: '/content/ideas',
           },
         ].map(s => (
@@ -393,7 +393,7 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
             {sp ? (
               <span className="ml-auto text-[10px] text-slate-500">from latest audit</span>
             ) : (
-              <Link href="/audit" className="ml-auto text-[10px] text-amber-400 hover:underline">Run audit to check →</Link>
+              <Link href="/audit" className="ml-auto text-[10px] text-slate-500 hover:underline">Run audit to check →</Link>
             )}
           </div>
           <div className="space-y-2">
@@ -402,13 +402,13 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
               return (
                 <div key={chk.key} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 ${done ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-600'}`}>
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 ${done ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-600'}`}>
                       {done ? '✓' : '○'}
                     </span>
                     <span className={`text-xs ${done ? 'text-slate-300' : 'text-slate-500'}`}>{chk.label}</span>
                   </div>
                   {!done && (
-                    <Link href={chk.fix} className="text-[10px] text-violet-400 hover:text-violet-300">fix →</Link>
+                    <Link href={chk.fix} className="text-[10px] text-blue-400 hover:text-blue-300">fix →</Link>
                   )}
                 </div>
               )
@@ -421,14 +421,14 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
           <div className="flex items-center gap-2 mb-4">
             <span>🧠</span>
             <h2 className="text-sm font-semibold text-white">AI Search Gaps</h2>
-            <Link href="/content/ideas" className="ml-auto text-[10px] text-violet-400 hover:underline">GEO Optimizer →</Link>
+            <Link href="/content/ideas" className="ml-auto text-[10px] text-blue-400 hover:underline">GEO Optimizer →</Link>
           </div>
           {staticData.geoContentGaps === 0 && staticData.geminiRate === null ? (
             <div className="flex flex-col items-center justify-center py-6 text-center">
               <span className="text-3xl mb-2">🧠</span>
               <p className="text-sm text-slate-400 font-medium">GEO not analyzed yet</p>
               <p className="text-xs text-slate-600 mt-1">Run GEO Optimizer to check Gemini AI visibility</p>
-              <Link href="/content/ideas" className="mt-3 px-3 py-1.5 bg-violet-500/15 text-violet-400 border border-violet-500/30 rounded-lg text-xs font-medium hover:bg-violet-500/25 transition-colors">
+              <Link href="/content/ideas" className="mt-3 px-3 py-1.5 bg-blue-500/15 text-blue-400 border border-blue-500/30 rounded-lg text-xs font-medium hover:bg-blue-500/25 transition-colors">
                 Run GEO Optimizer →
               </Link>
             </div>
@@ -441,7 +441,7 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
                 </div>
                 <div className="w-px h-8 bg-slate-700" />
                 <div className="text-center flex-1">
-                  <p className="text-xl font-bold text-amber-400">{staticData.geoHighImpact}</p>
+                  <p className="text-xl font-bold text-slate-500">{staticData.geoHighImpact}</p>
                   <p className="text-[10px] text-slate-500">high-impact gaps</p>
                 </div>
                 <div className="w-px h-8 bg-slate-700" />
@@ -455,7 +455,7 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
                   <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Top gaps to fill</p>
                   {staticData.topGaps.map((gap, i) => (
                     <Link key={i} href="/content/ideas" className="flex items-center gap-2 p-2 bg-slate-800/50 rounded-lg hover:bg-slate-800 transition-colors group">
-                      <span className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 text-[9px] flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                      <span className="w-4 h-4 rounded-full bg-slate-600/20 text-slate-500 text-[9px] flex items-center justify-center flex-shrink-0">{i + 1}</span>
                       <span className="text-xs text-slate-400 group-hover:text-slate-300 truncate">{gap}</span>
                     </Link>
                   ))}
@@ -468,25 +468,25 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
 
       {/* ── AI Action Plan ──────────────────────────────────────────────────── */}
       {actions.length > 0 && (
-        <div className="mb-5 bg-slate-900 border border-violet-800/30 rounded-2xl p-5">
+        <div className="mb-5 bg-slate-900 border border-slate-700/30 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-1">
             <span>⚡</span>
             <h2 className="text-sm font-semibold text-white">This Week&apos;s GTM Actions</h2>
-            <span className="text-[10px] px-1.5 py-0.5 bg-violet-500/15 text-violet-400 border border-violet-500/25 rounded-full">AI Generated</span>
+            <span className="text-[10px] px-1.5 py-0.5 bg-blue-500/15 text-blue-400 border border-blue-500/25 rounded-full">AI Generated</span>
             {lastRun && <span className="ml-auto text-[10px] text-slate-600">{timeAgo(lastRun.ran_at)}</span>}
           </div>
           {lastRun?.summary && (
-            <p className="text-xs text-slate-400 mb-4 leading-relaxed border-l-2 border-violet-700/40 pl-3">{lastRun.summary}</p>
+            <p className="text-xs text-slate-400 mb-4 leading-relaxed border-l-2 border-slate-700/40 pl-3">{lastRun.summary}</p>
           )}
           <div className="space-y-2.5">
             {actions.map((action, i) => (
-              <Link key={i} href={action.link} className="flex items-start gap-3 p-4 bg-slate-800/60 border border-slate-700/50 rounded-xl hover:border-violet-700/40 transition-colors group">
-                <div className={`w-5 h-5 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center text-[10px] font-bold ${action.priority === 'high' ? 'bg-rose-500 text-white' : 'bg-amber-500/30 text-amber-400'}`}>
+              <Link key={i} href={action.link} className="flex items-start gap-3 p-4 bg-slate-800/60 border border-slate-700/50 rounded-xl hover:border-slate-700/40 transition-colors group">
+                <div className={`w-5 h-5 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center text-[10px] font-bold ${action.priority === 'high' ? 'bg-rose-500 text-white' : 'bg-slate-600/30 text-slate-500'}`}>
                   {i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <p className="text-sm font-medium text-white group-hover:text-violet-300">{action.title}</p>
+                    <p className="text-sm font-medium text-white group-hover:text-blue-300">{action.title}</p>
                     {action.priority === 'high' && (
                       <span className="text-[9px] font-bold px-1.5 py-0.5 bg-rose-500/15 text-rose-400 border border-rose-500/25 rounded-full flex-shrink-0">HIGH</span>
                     )}
@@ -502,22 +502,22 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
 
       {/* ── Pending Tasks ───────────────────────────────────────────────────── */}
       {pendingTasks.length > 0 && (
-        <div className="mb-5 bg-slate-900 border border-amber-800/30 rounded-2xl p-5">
+        <div className="mb-5 bg-slate-900 border border-slate-700/30 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <span>📋</span>
             <h2 className="text-sm font-semibold text-white">Pending Tasks</h2>
-            <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/15 text-amber-400 border border-amber-500/25 rounded-full">{pendingTasks.length}</span>
+            <span className="text-[10px] px-1.5 py-0.5 bg-slate-600/15 text-slate-500 border border-slate-500/25 rounded-full">{pendingTasks.length}</span>
             <span className="ml-auto text-[10px] text-slate-500">from last audit scan</span>
           </div>
           <div className="space-y-2">
             {pendingTasks.map(task => (
               <div key={task.id} className="flex items-start gap-3 p-3 bg-slate-800/60 border border-slate-700/40 rounded-xl">
-                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${task.type === 'warning' ? 'bg-rose-400' : task.type === 'opportunity' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${task.type === 'warning' ? 'bg-rose-400' : task.type === 'opportunity' ? 'bg-blue-500' : 'bg-slate-500'}`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-white leading-snug">{task.title}</p>
                   <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{task.body}</p>
                   {task.action_data_json?.url && (
-                    <Link href={task.action_data_json.url} className="text-[10px] text-violet-400 hover:text-violet-300 mt-1 inline-block">
+                    <Link href={task.action_data_json.url} className="text-[10px] text-blue-400 hover:text-blue-300 mt-1 inline-block">
                       {task.action_label || 'Fix →'}
                     </Link>
                   )}
@@ -563,12 +563,12 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
                   const detectedUrl = entry.url
                   const toggling = togglingPlatform === p.id
                   return (
-                    <div key={p.id} className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-colors ${done ? 'bg-emerald-500/8 border-emerald-700/30' : 'bg-slate-800/50 border-slate-700/50'}`}>
+                    <div key={p.id} className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-colors ${done ? 'bg-blue-600/8 border-slate-700/30' : 'bg-slate-800/50 border-slate-700/50'}`}>
                       <button
                         onClick={() => togglePlatform(p.id, entry)}
                         disabled={toggling}
                         className={`w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center text-[10px] transition-colors ${
-                          done ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-slate-600 text-slate-600 hover:border-slate-400'
+                          done ? 'bg-blue-600 border-blue-400 text-white' : 'border-slate-600 text-slate-600 hover:border-slate-400'
                         }`}
                       >
                         {toggling ? <span className="w-2.5 h-2.5 border border-current border-t-transparent rounded-full animate-spin" /> : done ? '✓' : '○'}
@@ -577,15 +577,15 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
                       <div className="flex-1 min-w-0">
                         <span className={`text-xs block truncate ${done ? 'text-slate-300 line-through decoration-emerald-600' : 'text-slate-400'}`}>{p.label}</span>
                         {isAutoDetected && (
-                          <span className="text-[9px] text-emerald-500 font-medium">AI detected</span>
+                          <span className="text-[9px] text-blue-500 font-medium">AI detected</span>
                         )}
                       </div>
                       {done && detectedUrl && (
                         <a href={detectedUrl} target="_blank" rel="noopener noreferrer"
-                          className="text-[10px] text-emerald-600 hover:text-emerald-400 flex-shrink-0 transition-colors" title="View listing">↗</a>
+                          className="text-[10px] text-blue-600 hover:text-blue-400 flex-shrink-0 transition-colors" title="View listing">↗</a>
                       )}
                       {!done && (
-                        <a href={p.href} target="_blank" rel="noopener noreferrer" className="text-[10px] text-slate-600 hover:text-violet-400 flex-shrink-0 transition-colors">↗</a>
+                        <a href={p.href} target="_blank" rel="noopener noreferrer" className="text-[10px] text-slate-600 hover:text-blue-400 flex-shrink-0 transition-colors">↗</a>
                       )}
                     </div>
                   )
@@ -598,10 +598,10 @@ export function GtmClient({ initialLastRun, staticData, pendingTasks: initialPen
 
       {/* Pre-run prompt if no last run */}
       {!lastRun && !running && (
-        <div className="mt-5 p-4 bg-violet-950/20 border border-violet-800/30 rounded-2xl text-center">
+        <div className="mt-5 p-4 bg-slate-950/20 border border-slate-700/30 rounded-2xl text-center">
           <p className="text-sm text-slate-300 mb-1">Ready to run your full GTM sweep?</p>
           <p className="text-xs text-slate-500 mb-3">Finds leads, checks Gemini visibility, generates your action plan — 30 credits · ~45 seconds</p>
-          <button onClick={runGtm} disabled={running} className="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold rounded-xl transition-colors">
+          <button onClick={runGtm} disabled={running} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-colors">
             ⚡ Run GTM Autopilot
           </button>
         </div>

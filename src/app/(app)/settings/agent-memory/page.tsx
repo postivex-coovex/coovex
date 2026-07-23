@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -26,9 +26,9 @@ interface Observation {
 }
 
 const SIGNAL_COLORS: Record<string, string> = {
-  opportunity: 'text-emerald-400 bg-emerald-950/40 border-emerald-800/30',
-  warning:     'text-yellow-400 bg-yellow-950/40 border-yellow-800/30',
-  action:      'text-violet-400 bg-violet-950/40 border-violet-800/30',
+  opportunity: 'text-blue-400 bg-slate-950/40 border-slate-700/30',
+  warning:     'text-slate-500 bg-slate-950/40 border-slate-700/30',
+  action:      'text-blue-400 bg-slate-950/40 border-slate-700/30',
   insight:     'text-blue-400 bg-blue-950/40 border-blue-800/30',
   alert:       'text-red-400 bg-red-950/40 border-red-800/30',
 }
@@ -78,8 +78,8 @@ export default function AgentMemoryPage() {
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Settings
         </Link>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-700/40 flex items-center justify-center">
-            <Brain className="w-5 h-5 text-violet-400" />
+          <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-slate-700/40 flex items-center justify-center">
+            <Brain className="w-5 h-5 text-blue-400" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Agent Memory</h1>
@@ -89,11 +89,11 @@ export default function AgentMemoryPage() {
       </div>
 
       {/* Context explanation */}
-      <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-4 mb-6">
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-4 mb-6">
         <div className="flex items-start gap-3">
-          <Bot className="w-4 h-4 text-violet-400 mt-0.5 flex-shrink-0" />
+          <Bot className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-slate-300">
-            <p className="font-medium mb-1 text-violet-300">How the agent uses this</p>
+            <p className="font-medium mb-1 text-blue-300">How the agent uses this</p>
             <p className="text-slate-400 text-xs leading-relaxed">
               Every AI action — brief generation, content creation, lead scoring, coach responses — is informed by
               the context below. The more complete your business profile, the more relevant and accurate the
@@ -114,7 +114,7 @@ export default function AgentMemoryPage() {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-colors ${
-              tab === t.key ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+              tab === t.key ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
             }`}
           >
             <t.icon className="w-3.5 h-3.5" />
@@ -136,7 +136,7 @@ export default function AgentMemoryPage() {
               {facts.length === 0 ? (
                 <div className="p-8 text-center text-slate-600">
                   <p>No business profile data yet.</p>
-                  <Link href="/settings" className="text-violet-400 text-sm mt-2 inline-block">
+                  <Link href="/settings" className="text-blue-400 text-sm mt-2 inline-block">
                     Complete your business profile →
                   </Link>
                 </div>
@@ -149,7 +149,7 @@ export default function AgentMemoryPage() {
                     </div>
                   ))}
                   <div className="px-5 py-3 border-t border-slate-800 bg-slate-900/50">
-                    <Link href="/settings" className="text-violet-400 hover:text-violet-300 text-xs transition-colors">
+                    <Link href="/settings" className="text-blue-400 hover:text-blue-300 text-xs transition-colors">
                       Edit business profile →
                     </Link>
                   </div>
@@ -172,7 +172,7 @@ export default function AgentMemoryPage() {
                   <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] text-violet-400 bg-violet-950/40 border border-violet-800/30 px-1.5 py-0.5 rounded-full capitalize">
+                        <span className="text-[10px] text-blue-400 bg-slate-950/40 border border-slate-700/30 px-1.5 py-0.5 rounded-full capitalize">
                           {m.memory_type ?? 'context'}
                         </span>
                         <span className="text-slate-600 text-[10px]">{timeAgo(m.created_at)}</span>
@@ -219,7 +219,7 @@ export default function AgentMemoryPage() {
               )}
               {observations.length > 0 && (
                 <div className="text-center">
-                  <Link href="/dashboard" className="text-violet-400 text-xs hover:text-violet-300 transition-colors">
+                  <Link href="/dashboard" className="text-blue-400 text-xs hover:text-blue-300 transition-colors">
                     View all in Agent Inbox →
                   </Link>
                 </div>

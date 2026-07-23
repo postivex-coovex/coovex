@@ -32,7 +32,7 @@ function RatingStars({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map(i => (
-        <Star key={i} className={`w-3 h-3 ${i <= Math.round(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700'}`} />
+        <Star key={i} className={`w-3 h-3 ${i <= Math.round(rating) ? 'text-slate-500 fill-yellow-400' : 'text-slate-700'}`} />
       ))}
     </div>
   )
@@ -41,13 +41,13 @@ function RatingStars({ rating }: { rating: number }) {
 function DataBadge({ source }: { source: 'real' | 'ai_estimated' }) {
   if (source === 'real') {
     return (
-      <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-blue-400 bg-blue-600/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full">
         <CheckCircle className="w-2.5 h-2.5" /> Real
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">
+    <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-slate-500 bg-slate-600/10 border border-slate-500/20 px-1.5 py-0.5 rounded-full">
       <Bot className="w-2.5 h-2.5" /> AI Est.
     </span>
   )
@@ -58,7 +58,7 @@ const MARKET_LABEL: Record<string, string> = {
 }
 
 const THREAT_COLOR: Record<string, string> = {
-  high: 'text-red-400', medium: 'text-amber-400', low: 'text-emerald-400',
+  high: 'text-red-400', medium: 'text-slate-500', low: 'text-blue-400',
 }
 
 export default function CompetitorBenchmarkPage() {
@@ -108,20 +108,20 @@ export default function CompetitorBenchmarkPage() {
       {showInfo && (
         <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 space-y-3">
           <p className="text-white font-semibold text-sm flex items-center gap-2">
-            <Info className="w-4 h-4 text-violet-400" /> How data is collected
+            <Info className="w-4 h-4 text-blue-400" /> How data is collected
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="flex items-start gap-3 p-3 bg-emerald-950/20 border border-emerald-800/30 rounded-xl">
-              <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 bg-slate-950/20 border border-slate-700/30 rounded-xl">
+              <CheckCircle className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-emerald-300 font-semibold mb-1">Real Data (Your Business)</p>
+                <p className="text-blue-300 font-semibold mb-1">Real Data (Your Business)</p>
                 <p className="text-slate-400 leading-relaxed">Rating & reviews pulled from your connected integrations. Leads, content, and health score from CooVex tracking.</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 p-3 bg-amber-950/20 border border-amber-800/30 rounded-xl">
-              <Bot className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 bg-slate-950/20 border border-slate-700/30 rounded-xl">
+              <Bot className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-amber-300 font-semibold mb-1">AI Estimated (Competitors)</p>
+                <p className="text-slate-400 font-semibold mb-1">AI Estimated (Competitors)</p>
                 <p className="text-slate-400 leading-relaxed">Competitor scores are AI-estimated based on public knowledge. For precise data, connect Google Business or add actual review counts manually.</p>
               </div>
             </div>
@@ -134,10 +134,10 @@ export default function CompetitorBenchmarkPage() {
 
       {/* Why it matters banner — shown when no competitors */}
       {!loading && benchmark && benchmark.competitors.length === 0 && (
-        <div className="bg-gradient-to-br from-violet-950/40 to-slate-900 border border-violet-800/30 rounded-2xl p-6">
+        <div className="bg-gradient-to-br from-slate-950/40 to-slate-900 border border-slate-700/30 rounded-2xl p-6">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center flex-shrink-0">
-              <Target className="w-6 h-6 text-violet-400" />
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+              <Target className="w-6 h-6 text-blue-400" />
             </div>
             <div>
               <h2 className="text-white font-bold text-lg mb-2">Why Competitor Intelligence matters</h2>
@@ -155,7 +155,7 @@ export default function CompetitorBenchmarkPage() {
                 ))}
               </div>
               <Link href="/competitors"
-                className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors">
                 <Bot className="w-4 h-4" /> Start Competitor Analysis
               </Link>
             </div>
@@ -169,17 +169,17 @@ export default function CompetitorBenchmarkPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl flex flex-col items-center justify-center py-16 text-slate-600">
           <Target className="w-8 h-8 mb-3 opacity-30" />
           <p className="text-sm">No benchmark data yet.</p>
-          <Link href="/competitors" className="mt-3 text-violet-400 hover:text-violet-300 text-xs transition-colors">Add competitors →</Link>
+          <Link href="/competitors" className="mt-3 text-blue-400 hover:text-blue-300 text-xs transition-colors">Add competitors →</Link>
         </div>
       ) : (
         <>
           {/* Leader card */}
           {leader && benchmark.competitors.length > 0 && (
-            <div className={`rounded-2xl p-4 border ${leader.is_self ? 'bg-emerald-950/20 border-emerald-800/40' : 'bg-rose-950/20 border-rose-800/40'}`}>
+            <div className={`rounded-2xl p-4 border ${leader.is_self ? 'bg-slate-950/20 border-slate-700/40' : 'bg-rose-950/20 border-rose-800/40'}`}>
               <div className="flex items-center gap-3">
-                <Shield className={`w-5 h-5 ${leader.is_self ? 'text-emerald-400' : 'text-rose-400'}`} />
+                <Shield className={`w-5 h-5 ${leader.is_self ? 'text-blue-400' : 'text-rose-400'}`} />
                 <div>
-                  <p className={`font-semibold text-sm ${leader.is_self ? 'text-emerald-300' : 'text-rose-300'}`}>
+                  <p className={`font-semibold text-sm ${leader.is_self ? 'text-blue-300' : 'text-rose-300'}`}>
                     {leader.is_self ? 'You are leading this market 🏆' : `${leader.name} leads the market`}
                   </p>
                   <p className="text-slate-500 text-xs">
@@ -197,13 +197,13 @@ export default function CompetitorBenchmarkPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {all.map(entry => (
                 <div key={entry.id}
-                  className={`bg-slate-900 border rounded-2xl p-5 ${entry.is_self ? 'border-violet-700/50' : 'border-slate-800'}`}>
+                  className={`bg-slate-900 border rounded-2xl p-5 ${entry.is_self ? 'border-slate-700/50' : 'border-slate-800'}`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap mb-1">
                         <p className="text-white font-semibold text-sm truncate">{entry.name}</p>
                         {entry.is_self && (
-                          <span className="text-[9px] text-violet-400 bg-violet-950/40 border border-violet-800/30 px-1.5 py-0.5 rounded-full flex-shrink-0">you</span>
+                          <span className="text-[9px] text-blue-400 bg-slate-950/40 border border-slate-700/30 px-1.5 py-0.5 rounded-full flex-shrink-0">you</span>
                         )}
                         <DataBadge source={entry.data_source} />
                         {!entry.is_self && entry.market_type && (
@@ -223,8 +223,8 @@ export default function CompetitorBenchmarkPage() {
                       <div className="flex justify-between text-xs">
                         <span className="text-slate-500">Rating</span>
                         <span className="flex items-center gap-1">
-                          <span className="text-yellow-400">{entry.avg_rating.toFixed(1)} ★</span>
-                          {!entry.is_self && <span className="text-amber-600 text-[9px]">est.</span>}
+                          <span className="text-slate-500">{entry.avg_rating.toFixed(1)} ★</span>
+                          {!entry.is_self && <span className="text-slate-600 text-[9px]">est.</span>}
                         </span>
                       </div>
                     )}
@@ -233,14 +233,14 @@ export default function CompetitorBenchmarkPage() {
                         <span className="text-slate-500">Reviews</span>
                         <span className="flex items-center gap-1">
                           <span className="text-slate-300">{entry.review_count}</span>
-                          {!entry.is_self && <span className="text-amber-600 text-[9px]">est.</span>}
+                          {!entry.is_self && <span className="text-slate-600 text-[9px]">est.</span>}
                         </span>
                       </div>
                     )}
                     {entry.intelligence_score > 0 && (
                       <div className="flex justify-between text-xs">
                         <span className="text-slate-500">Strength Score</span>
-                        <span className={`font-semibold ${entry.intelligence_score >= 75 ? 'text-red-400' : entry.intelligence_score >= 50 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                        <span className={`font-semibold ${entry.intelligence_score >= 75 ? 'text-red-400' : entry.intelligence_score >= 50 ? 'text-slate-500' : 'text-blue-400'}`}>
                           {entry.intelligence_score}/100
                         </span>
                       </div>
@@ -273,7 +273,7 @@ export default function CompetitorBenchmarkPage() {
           {scanned > 0 && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
               <h2 className="text-white font-semibold text-sm mb-1 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-violet-400" />
+                <TrendingUp className="w-4 h-4 text-blue-400" />
                 Strength Score Comparison
               </h2>
               <p className="text-slate-500 text-xs mb-5">Your health score vs competitor intelligence scores (AI estimated for competitors)</p>
@@ -284,14 +284,14 @@ export default function CompetitorBenchmarkPage() {
                   return (
                     <div key={entry.id} className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5 w-36 flex-shrink-0">
-                        <span className={`text-xs truncate ${entry.is_self ? 'text-violet-300 font-medium' : 'text-slate-400'}`}>
+                        <span className={`text-xs truncate ${entry.is_self ? 'text-blue-300 font-medium' : 'text-slate-400'}`}>
                           {entry.name}
                         </span>
-                        {!entry.is_self && <span className="text-amber-600 text-[9px] flex-shrink-0">est.</span>}
+                        {!entry.is_self && <span className="text-slate-600 text-[9px] flex-shrink-0">est.</span>}
                       </div>
                       <div className="flex-1 h-2.5 bg-slate-800 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-700 ${entry.is_self ? 'bg-violet-500' : 'bg-slate-600'}`}
+                          className={`h-full rounded-full transition-all duration-700 ${entry.is_self ? 'bg-blue-500' : 'bg-slate-600'}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -309,7 +309,7 @@ export default function CompetitorBenchmarkPage() {
           {benchmark.competitors.some(c => c.avg_rating > 0) && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
               <h2 className="text-white font-semibold text-sm mb-1 flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-400" />
+                <Star className="w-4 h-4 text-slate-500" />
                 Rating Comparison
               </h2>
               <p className="text-slate-500 text-xs mb-5">
@@ -321,18 +321,18 @@ export default function CompetitorBenchmarkPage() {
                   return (
                     <div key={entry.id} className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5 w-36 flex-shrink-0">
-                        <span className={`text-xs truncate ${entry.is_self ? 'text-violet-300 font-medium' : 'text-slate-400'}`}>
+                        <span className={`text-xs truncate ${entry.is_self ? 'text-blue-300 font-medium' : 'text-slate-400'}`}>
                           {entry.name}
                         </span>
-                        {!entry.is_self && <span className="text-amber-600 text-[9px] flex-shrink-0">est.</span>}
+                        {!entry.is_self && <span className="text-slate-600 text-[9px] flex-shrink-0">est.</span>}
                       </div>
                       <div className="flex-1 h-2.5 bg-slate-800 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-700 ${entry.is_self ? 'bg-yellow-500' : 'bg-yellow-500/40'}`}
+                          className={`h-full rounded-full transition-all duration-700 ${entry.is_self ? 'bg-slate-600' : 'bg-slate-600/40'}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className={`text-xs w-12 text-right flex-shrink-0 ${entry.is_self ? 'text-yellow-400 font-bold' : 'text-slate-500'}`}>
+                      <span className={`text-xs w-12 text-right flex-shrink-0 ${entry.is_self ? 'text-slate-500 font-bold' : 'text-slate-500'}`}>
                         ★{entry.avg_rating.toFixed(1)}
                       </span>
                     </div>
@@ -344,11 +344,11 @@ export default function CompetitorBenchmarkPage() {
 
           {/* Data accuracy footer */}
           <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 flex items-start gap-3">
-            <Bot className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            <Bot className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
             <div className="text-xs text-slate-500 leading-relaxed">
-              <span className="text-amber-400 font-medium">AI Estimated</span> — competitor ratings, reviews and scores are Claude AI estimates, not real-time scraped data.
-              Your own data is <span className="text-emerald-400 font-medium">Real</span> — pulled from your reviews, leads and health score in CooVex.
-              {' '}<button onClick={() => setShowInfo(true)} className="text-violet-400 hover:text-violet-300 transition-colors">Learn about data sources →</button>
+              <span className="text-slate-500 font-medium">AI Estimated</span> — competitor ratings, reviews and scores are Claude AI estimates, not real-time scraped data.
+              Your own data is <span className="text-blue-400 font-medium">Real</span> — pulled from your reviews, leads and health score in CooVex.
+              {' '}<button onClick={() => setShowInfo(true)} className="text-blue-400 hover:text-blue-300 transition-colors">Learn about data sources →</button>
             </div>
           </div>
         </>

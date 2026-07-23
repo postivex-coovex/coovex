@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
       <CardContent>
         {sent ? (
           <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-emerald-950/50 border border-emerald-900/50 rounded-full flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 bg-slate-950/50 border border-slate-800/50 rounded-full flex items-center justify-center mx-auto">
               <span className="text-3xl">📧</span>
             </div>
             <p className="text-slate-400 text-sm">
@@ -71,13 +71,13 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-violet-600 hover:bg-violet-500 text-white"
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white"
             >
               {loading ? 'Sending…' : 'Send reset link'}
             </Button>
             <p className="text-center text-sm text-slate-400">
               Remember it?{' '}
-              <Link href="/login" className="text-violet-400 hover:text-violet-300 font-medium">
+              <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
                 Sign in
               </Link>
             </p>

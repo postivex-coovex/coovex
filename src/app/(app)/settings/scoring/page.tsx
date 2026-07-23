@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Plus, Trash2, Check, GripVertical } from 'lucide-react'
@@ -54,25 +54,25 @@ function RuleRow({ rule, onChange, onDelete }: {
       <GripVertical className="w-4 h-4 text-slate-700 flex-shrink-0 cursor-grab" />
 
       <select value={rule.field} onChange={e => onChange({ ...rule, field: e.target.value as Field })}
-        className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-violet-500">
+        className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-white text-xs focus:outline-none focus:border-blue-500">
         {FIELD_OPTS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
       </select>
 
       <select value={rule.operator} onChange={e => onChange({ ...rule, operator: e.target.value as Operator })}
-        className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-300 text-xs focus:outline-none focus:border-violet-500">
+        className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-300 text-xs focus:outline-none focus:border-blue-500">
         {OP_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
 
       <input value={rule.value} onChange={e => onChange({ ...rule, value: e.target.value })}
         placeholder="value…"
-        className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-violet-500 min-w-0" />
+        className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-blue-500 min-w-0" />
 
       <span className="text-slate-500 text-xs flex-shrink-0">→</span>
 
       <div className="flex items-center gap-1 flex-shrink-0">
         <button onClick={() => onChange({ ...rule, adjustment: Math.max(-100, rule.adjustment - 5) })}
           className="w-6 h-6 rounded bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm">−</button>
-        <span className={`text-sm font-bold w-12 text-center ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+        <span className={`text-sm font-bold w-12 text-center ${isPositive ? 'text-blue-400' : 'text-red-400'}`}>
           {isPositive ? '+' : ''}{rule.adjustment}
         </span>
         <button onClick={() => onChange({ ...rule, adjustment: Math.min(100, rule.adjustment + 5) })}
@@ -129,7 +129,7 @@ export default function ScoringRulesPage() {
           <p className="text-slate-400 text-sm mt-0.5">Define rules that automatically adjust lead scores based on their attributes</p>
         </div>
         <button onClick={save}
-          className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-xl transition-colors">
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-colors">
           {saved ? <><Check className="w-4 h-4" />Saved</> : 'Save Rules'}
         </button>
       </div>
@@ -156,7 +156,7 @@ export default function ScoringRulesPage() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-white font-semibold text-sm">Scoring Rules ({rules.length})</h2>
           <button onClick={addRule}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600/30 text-violet-400 text-xs font-medium rounded-lg border border-violet-800/40 transition-colors">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-medium rounded-lg border border-slate-700/40 transition-colors">
             <Plus className="w-3.5 h-3.5" /> Add Rule
           </button>
         </div>
@@ -190,12 +190,12 @@ export default function ScoringRulesPage() {
 
       {/* Summary */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-emerald-950/20 border border-emerald-800/30 rounded-xl p-4">
-          <p className="text-emerald-400 text-xs font-semibold mb-2">Score Boosters ({positiveRules.length})</p>
+        <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-4">
+          <p className="text-blue-400 text-xs font-semibold mb-2">Score Boosters ({positiveRules.length})</p>
           {positiveRules.map(r => (
             <div key={r.id} className="flex justify-between text-xs text-slate-400 mb-1">
               <span>{r.field} {r.operator} &quot;{r.value}&quot;</span>
-              <span className="text-emerald-400 font-medium">+{r.adjustment}</span>
+              <span className="text-blue-400 font-medium">+{r.adjustment}</span>
             </div>
           ))}
         </div>

@@ -14,9 +14,9 @@ interface FunnelStage {
 const STAGE_META: Record<string, { label: string; color: string; bg: string }> = {
   new:           { label: 'New',           color: 'text-slate-300',   bg: 'bg-slate-600' },
   contacted:     { label: 'Contacted',     color: 'text-blue-300',    bg: 'bg-blue-600' },
-  qualified:     { label: 'Qualified',     color: 'text-violet-300',  bg: 'bg-violet-600' },
-  proposal_sent: { label: 'Proposal Sent', color: 'text-amber-300',   bg: 'bg-amber-600' },
-  won:           { label: 'Won',           color: 'text-emerald-300', bg: 'bg-emerald-600' },
+  qualified:     { label: 'Qualified',     color: 'text-blue-300',  bg: 'bg-blue-600' },
+  proposal_sent: { label: 'Proposal Sent', color: 'text-slate-400',   bg: 'bg-slate-600' },
+  won:           { label: 'Won',           color: 'text-blue-300', bg: 'bg-blue-600' },
   lost:          { label: 'Lost',          color: 'text-red-300',     bg: 'bg-red-600' },
 }
 
@@ -56,7 +56,7 @@ export default function LeadFunnelPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <Filter className="w-6 h-6 text-violet-400" />
+            <Filter className="w-6 h-6 text-blue-400" />
             <h1 className="text-2xl font-bold text-white">Lead Funnel</h1>
           </div>
           <p className="text-slate-400 text-base">Stage-by-stage pipeline conversion analysis</p>
@@ -74,8 +74,8 @@ export default function LeadFunnelPage() {
         <div className="grid grid-cols-4 gap-4 mb-8">
           {[
             { label: 'Total Leads',  value: String(summary.total_leads),          color: 'text-slate-300' },
-            { label: 'Won',          value: String(summary.won_leads),             color: 'text-emerald-400' },
-            { label: 'Win Rate',     value: `${summary.overall_win_rate}%`,        color: 'text-violet-400' },
+            { label: 'Won',          value: String(summary.won_leads),             color: 'text-blue-400' },
+            { label: 'Win Rate',     value: `${summary.overall_win_rate}%`,        color: 'text-blue-400' },
             { label: 'Pipeline',     value: fmtMoney(summary.pipeline_value),      color: 'text-blue-400' },
           ].map(s => (
             <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center">
@@ -93,7 +93,7 @@ export default function LeadFunnelPage() {
           <Filter className="w-10 h-10 mb-4 opacity-20" />
           <p className="text-base font-medium">No leads yet</p>
           <p className="text-sm mt-1">Add your first lead to see funnel analytics here.</p>
-          <Link href="/leads" className="mt-5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+          <Link href="/leads" className="mt-5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
             Go to Leads →
           </Link>
         </div>

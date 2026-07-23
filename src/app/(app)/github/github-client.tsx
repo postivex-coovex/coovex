@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import {
@@ -58,14 +58,14 @@ function TreeNodeRow({
         ) : <span className="w-3 flex-shrink-0" />}
         {isDir
           ? isExpanded
-            ? <FolderOpen className="w-3.5 h-3.5 text-amber-400/80 flex-shrink-0" />
+            ? <FolderOpen className="w-3.5 h-3.5 text-slate-500/80 flex-shrink-0" />
             : <Folder className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-          : <FileCode className={`w-3.5 h-3.5 flex-shrink-0 ${isStaged ? 'text-emerald-400' : 'text-slate-500'}`} />
+          : <FileCode className={`w-3.5 h-3.5 flex-shrink-0 ${isStaged ? 'text-blue-400' : 'text-slate-500'}`} />
         }
-        <span className={`text-[12px] truncate ${isDir ? 'text-slate-300' : isStaged ? 'text-emerald-300' : 'text-slate-400'}`}>
+        <span className={`text-[12px] truncate ${isDir ? 'text-slate-300' : isStaged ? 'text-blue-300' : 'text-slate-400'}`}>
           {node.name}
         </span>
-        {isStaged && <span className="ml-auto text-[9px] text-emerald-400 flex-shrink-0">M</span>}
+        {isStaged && <span className="ml-auto text-[9px] text-blue-400 flex-shrink-0">M</span>}
       </button>
       {isDir && isExpanded && (
         <>
@@ -118,10 +118,10 @@ function AssistantMessage({ msg }: { msg: Message }) {
       {msg.new_staged && msg.new_staged.length > 0 && (
         <div className="space-y-1 pt-1">
           {msg.new_staged.map(f => (
-            <div key={f.path} className="flex items-center gap-2 bg-emerald-900/20 border border-emerald-700/30 rounded px-3 py-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-              <span className="text-[12px] font-mono text-emerald-300">{f.path}</span>
-              <span className="ml-auto text-[10px] text-emerald-500">staged</span>
+            <div key={f.path} className="flex items-center gap-2 bg-slate-900/20 border border-slate-700/30 rounded px-3 py-1.5">
+              <Check className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+              <span className="text-[12px] font-mono text-blue-300">{f.path}</span>
+              <span className="ml-auto text-[10px] text-blue-500">staged</span>
             </div>
           ))}
         </div>
@@ -517,7 +517,7 @@ export default function FolderGit2Client({ initialConfig }: { initialConfig: Git
             <div className="space-y-0.5 max-h-28 overflow-y-auto">
               {stagedFiles.map(f => (
                 <div key={f.path} className="flex items-center gap-1.5 group">
-                  <span className="text-[11px] text-emerald-300 font-mono truncate flex-1">{f.path}</span>
+                  <span className="text-[11px] text-blue-300 font-mono truncate flex-1">{f.path}</span>
                   <button
                     onClick={() => setViewingFile({ path: f.path, content: f.content })}
                     className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-500 hover:text-slate-300 transition-all"
@@ -537,7 +537,7 @@ export default function FolderGit2Client({ initialConfig }: { initialConfig: Git
               className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
             />
             {commitResult && (
-              <div className="flex items-center gap-1.5 text-[11px] text-emerald-400">
+              <div className="flex items-center gap-1.5 text-[11px] text-blue-400">
                 <Check className="w-3 h-3" />
                 Pushed {commitResult.sha}
                 <a href={commitResult.url} target="_blank" rel="noreferrer" className="hover:underline inline-flex items-center gap-0.5">
@@ -548,7 +548,7 @@ export default function FolderGit2Client({ initialConfig }: { initialConfig: Git
             <button
               onClick={handleCommit}
               disabled={!commitMsg.trim() || committing}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded py-1.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
+              className="w-full bg-blue-600 hover:bg-blue-600 disabled:opacity-50 text-white rounded py-1.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
             >
               {committing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <GitCommit className="w-3.5 h-3.5" />}
               Commit & Push
@@ -561,8 +561,8 @@ export default function FolderGit2Client({ initialConfig }: { initialConfig: Git
       <div className="flex-1 flex flex-col overflow-hidden bg-slate-950">
         {/* Chat header */}
         <div className="px-5 py-3 border-b border-slate-800 bg-slate-900/60 flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
-            <GitBranch className="w-3.5 h-3.5 text-violet-400" />
+          <div className="w-7 h-7 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+            <GitBranch className="w-3.5 h-3.5 text-blue-400" />
           </div>
           <div>
             <p className="text-sm font-medium text-white">AI Coding Assistant</p>
@@ -597,8 +597,8 @@ export default function FolderGit2Client({ initialConfig }: { initialConfig: Git
           {messages.map((msg, i) => (
             <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'assistant' && (
-                <div className="w-7 h-7 rounded-full bg-violet-600/20 border border-violet-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <GitBranch className="w-3.5 h-3.5 text-violet-400" />
+                <div className="w-7 h-7 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <GitBranch className="w-3.5 h-3.5 text-blue-400" />
                 </div>
               )}
               <div className={`max-w-[80%] rounded-xl px-4 py-2.5 ${
@@ -613,8 +613,8 @@ export default function FolderGit2Client({ initialConfig }: { initialConfig: Git
 
           {aiLoading && (
             <div className="flex gap-3 justify-start">
-              <div className="w-7 h-7 rounded-full bg-violet-600/20 border border-violet-500/30 flex items-center justify-center flex-shrink-0">
-                <Loader2 className="w-3.5 h-3.5 text-violet-400 animate-spin" />
+              <div className="w-7 h-7 rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin" />
               </div>
               <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl px-4 py-2.5">
                 <span className="text-sm text-slate-400">Reading repository...</span>
@@ -643,12 +643,12 @@ export default function FolderGit2Client({ initialConfig }: { initialConfig: Git
               }}
               placeholder="Ask the AI to read, write, or fix anything in your repo... (Enter to send, Shift+Enter for newline)"
               rows={2}
-              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none"
+              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || aiLoading}
-              className="w-10 h-10 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
+              className="w-10 h-10 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
             >
               {aiLoading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <Send className="w-4 h-4 text-white" />}
             </button>

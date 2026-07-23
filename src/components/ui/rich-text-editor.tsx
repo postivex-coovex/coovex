@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef } from 'react'
 import { Bold, Italic, List, ListOrdered, Undo, Redo, Minus } from 'lucide-react'
@@ -53,7 +53,7 @@ function ToolBtn({ onClick, title, children, active }: {
       title={title}
       className={`p-1.5 rounded-md transition-colors text-xs font-medium min-w-[28px] flex items-center justify-center ${
         active
-          ? 'bg-violet-600/30 text-violet-300 border border-violet-600/40'
+          ? 'bg-blue-600/30 text-blue-300 border border-blue-600/40'
           : 'hover:bg-slate-700 text-slate-400 hover:text-white'
       }`}
     >
@@ -103,7 +103,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your cont
   const charCount = value.replace(/<[^>]+>/g, '').length
 
   return (
-    <div className="border border-slate-700 rounded-xl overflow-hidden bg-slate-950 focus-within:border-violet-500 transition-colors">
+    <div className="border border-slate-700 rounded-xl overflow-hidden bg-slate-950 focus-within:border-blue-500 transition-colors">
       {/* Toolbar */}
       <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-slate-800 bg-slate-900 flex-wrap">
         <ToolBtn onClick={() => exec('formatBlock', 'h1')} title="Heading 1">H1</ToolBtn>
@@ -146,7 +146,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Write your cont
           [&_li]:mb-0.5
           [&_strong]:text-white [&_strong]:font-semibold
           [&_em]:text-slate-300
-          [&_code]:bg-slate-800 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_code]:text-violet-300
+          [&_code]:bg-slate-800 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_code]:text-blue-300
           [&_hr]:border-slate-700 [&_hr]:my-3
           empty:before:content-[attr(data-placeholder)] empty:before:text-slate-600 empty:before:pointer-events-none"
         style={{ minHeight }}

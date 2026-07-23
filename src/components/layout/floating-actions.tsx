@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -41,11 +41,11 @@ export function FloatingActions({ hasCoachHistory }: { hasCoachHistory?: boolean
         </button>
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('coovex:toggle-coach'))}
-          className="flex items-center gap-2 pl-4 pr-3 py-2.5 bg-violet-600 hover:bg-violet-500 active:bg-violet-700 text-white text-xs font-semibold rounded-l-xl shadow-xl whitespace-nowrap transition-colors"
+          className="flex items-center gap-2 pl-4 pr-3 py-2.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold rounded-l-xl shadow-xl whitespace-nowrap transition-colors"
         >
           <span>🧠</span>
           <span>AI Coach</span>
-          {hasCoachHistory && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />}
+          {hasCoachHistory && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />}
         </button>
       </div>
 

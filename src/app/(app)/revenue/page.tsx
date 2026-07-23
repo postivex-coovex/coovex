@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { RefreshCw, DollarSign, TrendingUp, Target, Users, Link2 } from 'lucide-react'
@@ -40,7 +40,7 @@ const STAGE_LABELS: Record<string, string> = {
   new: 'New', contacted: 'Contacted', qualified: 'Qualified', proposal: 'Proposal', negotiation: 'Negotiation',
 }
 const STAGE_COLORS: Record<string, string> = {
-  new: '#475569', contacted: '#3b82f6', qualified: '#8b5cf6', proposal: '#f59e0b', negotiation: '#10b981',
+  new: '#475569', contacted: '#3b82f6', qualified: '#3b82f6', proposal: '#64748b', negotiation: '#2563eb',
 }
 const CRM_LABELS: Record<string, { name: string; icon: string }> = {
   hubspot:   { name: 'HubSpot',   icon: '🔗' },
@@ -89,7 +89,7 @@ function RevenueChart({ data }: { data: RevenueData['by_month'] }) {
         return (
           <g key={i}>
             <rect x={x} y={y} width={bW} height={Math.max(h, m.revenue > 0 ? 2 : 0)}
-              fill={m.revenue > 0 ? '#10b981' : '#1e293b'} rx={2} fillOpacity={0.8} />
+              fill={m.revenue > 0 ? '#2563eb' : '#1e293b'} rx={2} fillOpacity={0.8} />
             <text x={x + bW / 2} y={H - 6} textAnchor="middle" fill="#475569" fontSize={9}>{m.label}</text>
           </g>
         )
@@ -187,7 +187,7 @@ export default function RevenuePage() {
                 </button>
               ))
           )}
-          <Link href="/leads" className="text-sm text-violet-400 hover:text-violet-300 transition-colors border border-slate-800 px-3 py-2 rounded-lg">
+          <Link href="/leads" className="text-sm text-blue-400 hover:text-blue-300 transition-colors border border-slate-800 px-3 py-2 rounded-lg">
             View Leads →
           </Link>
         </div>
@@ -197,7 +197,7 @@ export default function RevenuePage() {
       {syncMsg && (
         <div className={`mb-4 p-3 rounded-xl border text-sm flex items-center gap-2 ${
           syncMsg.type === 'success'
-            ? 'bg-emerald-950/20 border-emerald-800/30 text-emerald-300'
+            ? 'bg-slate-950/20 border-slate-700/30 text-blue-300'
             : 'bg-red-950/20 border-red-800/30 text-red-300'
         }`}>
           {syncMsg.type === 'success' ? '✅' : '❌'} {syncMsg.msg}
@@ -206,7 +206,7 @@ export default function RevenuePage() {
 
       {/* CRM connect banner — shown when no data and no CRM connected */}
       {!data.has_real_data && !hasConnectedCRM && (
-        <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5 mb-6">
+        <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5 mb-6">
           <div className="flex items-start gap-4">
             <div className="text-3xl shrink-0">🔌</div>
             <div className="flex-1">
@@ -232,7 +232,7 @@ export default function RevenuePage() {
               </div>
               <Link
                 href="/settings/integrations"
-                className="inline-flex items-center gap-2 mt-4 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 mt-4 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
               >
                 <Link2 className="w-4 h-4" />
                 Go to Integrations
@@ -245,8 +245,8 @@ export default function RevenuePage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         {[
-          { label: 'Won Revenue',      val: fmt(data.won_revenue),    sub: `${data.won_count} deals closed`,    icon: DollarSign, color: 'text-emerald-400' },
-          { label: 'Pipeline Value',   val: fmt(data.pipeline_value), sub: `${data.active_count} open deals`,  icon: Target,     color: 'text-violet-400' },
+          { label: 'Won Revenue',      val: fmt(data.won_revenue),    sub: `${data.won_count} deals closed`,    icon: DollarSign, color: 'text-blue-400' },
+          { label: 'Pipeline Value',   val: fmt(data.pipeline_value), sub: `${data.active_count} open deals`,  icon: Target,     color: 'text-blue-400' },
           { label: 'Weighted Forecast',val: fmt(data.forecast),       sub: 'probability-adjusted',             icon: TrendingUp, color: 'text-blue-400' },
           { label: 'Total Leads',      val: data.total_leads.toString(), sub: 'all stages',                    icon: Users,      color: 'text-white' },
         ].map(kpi => (
@@ -297,7 +297,7 @@ export default function RevenuePage() {
               })}
               <div className="border-t border-slate-800 pt-2 flex justify-between">
                 <span className="text-slate-600 text-xs">Weighted</span>
-                <span className="text-violet-400 text-xs font-medium">{fmt(data.forecast)}</span>
+                <span className="text-blue-400 text-xs font-medium">{fmt(data.forecast)}</span>
               </div>
             </div>
           )}
@@ -328,7 +328,7 @@ export default function RevenuePage() {
                       {d.crm_id && <span className="ml-1 text-slate-700">· via CRM</span>}
                     </p>
                   </div>
-                  <span className="text-emerald-400 text-sm font-semibold shrink-0">{fmt(d.value)}</span>
+                  <span className="text-blue-400 text-sm font-semibold shrink-0">{fmt(d.value)}</span>
                 </div>
               ))}
             </div>
@@ -353,7 +353,7 @@ export default function RevenuePage() {
                         <span className="text-white text-xs">{fmt(rev)} <span className="text-slate-600">({pct}%)</span></span>
                       </div>
                       <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-violet-600 rounded-full" style={{ width: `${pct}%` }} />
+                        <div className="h-full bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   )
@@ -370,7 +370,7 @@ export default function RevenuePage() {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-semibold text-sm">Data Sources</h2>
-            <Link href="/settings/integrations" className="text-xs text-violet-400 hover:text-violet-300">
+            <Link href="/settings/integrations" className="text-xs text-blue-400 hover:text-blue-300">
               Manage →
             </Link>
           </div>
@@ -380,7 +380,7 @@ export default function RevenuePage() {
               <p className="text-slate-700 text-xs">Connect HubSpot, Pipedrive, QuickBooks, or Xero to sync real revenue data automatically.</p>
               <Link
                 href="/settings/integrations"
-                className="inline-flex items-center gap-1.5 mt-2 text-xs text-violet-400 border border-violet-800/40 px-3 py-1.5 rounded-lg hover:bg-violet-950/20 transition-colors"
+                className="inline-flex items-center gap-1.5 mt-2 text-xs text-blue-400 border border-slate-700/40 px-3 py-1.5 rounded-lg hover:bg-slate-950/20 transition-colors"
               >
                 <Link2 className="w-3 h-3" /> Connect a CRM
               </Link>
@@ -402,7 +402,7 @@ export default function RevenuePage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${i.has_api_key ? 'bg-emerald-500' : 'bg-slate-600'}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${i.has_api_key ? 'bg-blue-600' : 'bg-slate-600'}`} />
                       {syncable && i.has_api_key && (
                         <button
                           onClick={() => syncCRM(i.type)}
@@ -431,7 +431,7 @@ export default function RevenuePage() {
             <h2 className="text-white font-semibold text-sm">Health Score Breakdown</h2>
             <button
               onClick={recalcHealth} disabled={recalcing}
-              className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50 transition-colors"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${recalcing ? 'animate-spin' : ''}`} />
               {recalcing ? 'Recalculating…' : 'Recalculate'}
@@ -461,7 +461,7 @@ export default function RevenuePage() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="text-3xl font-bold text-white">{healthResult.score}</div>
                 <div>
-                  <p className="text-emerald-400 text-xs font-medium">Health Score Updated</p>
+                  <p className="text-blue-400 text-xs font-medium">Health Score Updated</p>
                   <p className="text-slate-500 text-xs">average of 4 components</p>
                 </div>
               </div>
@@ -473,7 +473,7 @@ export default function RevenuePage() {
                   </div>
                   <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${b.score >= 70 ? 'bg-emerald-500' : b.score >= 40 ? 'bg-amber-500' : 'bg-red-500'}`}
+                      className={`h-full rounded-full ${b.score >= 70 ? 'bg-blue-600' : b.score >= 40 ? 'bg-slate-600' : 'bg-red-500'}`}
                       style={{ width: `${b.score}%` }}
                     />
                   </div>

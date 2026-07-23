@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -55,14 +55,14 @@ const PROVIDERS: {
   bg: string
   docs?: string
 }[] = [
-  { key: 'coovex',   name: 'CooVex',      icon: '🚀', desc: 'Zero setup',            bg: 'bg-violet-950/50 border-violet-700' },
+  { key: 'coovex',   name: 'CooVex',      icon: '🚀', desc: 'Zero setup',            bg: 'bg-slate-950/50 border-slate-700' },
   { key: 'gmail',    name: 'Gmail',        icon: '📧', desc: 'App Password',          bg: 'bg-red-950/40 border-red-700',     docs: 'https://myaccount.google.com/apppasswords' },
   { key: 'outlook',  name: 'Outlook',      icon: '📨', desc: 'Microsoft 365',         bg: 'bg-blue-950/40 border-blue-700' },
   { key: 'resend',   name: 'Resend',       icon: '⚡', desc: 'Custom domain',          bg: 'bg-slate-800 border-slate-600',    docs: 'https://resend.com/signup' },
   { key: 'sendgrid', name: 'SendGrid',     icon: '📮', desc: 'Twilio SendGrid',        bg: 'bg-sky-950/40 border-sky-700',     docs: 'https://app.sendgrid.com/settings/api_keys' },
   { key: 'mailgun',  name: 'Mailgun',      icon: '🔫', desc: 'Mailgun API',            bg: 'bg-red-950/30 border-red-800',     docs: 'https://app.mailgun.com/settings/api_security' },
-  { key: 'brevo',    name: 'Brevo',        icon: '💌', desc: 'Sendinblue / Brevo',     bg: 'bg-cyan-950/40 border-cyan-700',   docs: 'https://app.brevo.com/settings/keys/api' },
-  { key: 'postmark', name: 'Postmark',     icon: '📬', desc: 'Transactional email',    bg: 'bg-yellow-950/40 border-yellow-700', docs: 'https://account.postmarkapp.com/servers' },
+  { key: 'brevo',    name: 'Brevo',        icon: '💌', desc: 'Sendinblue / Brevo',     bg: 'bg-slate-950/40 border-slate-700',   docs: 'https://app.brevo.com/settings/keys/api' },
+  { key: 'postmark', name: 'Postmark',     icon: '📬', desc: 'Transactional email',    bg: 'bg-slate-950/40 border-slate-700', docs: 'https://account.postmarkapp.com/servers' },
   { key: 'smtp',     name: 'Custom SMTP',  icon: '🔧', desc: 'Any SMTP server',        bg: 'bg-slate-800 border-slate-600' },
 ]
 
@@ -85,7 +85,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   )
 }
 
-const inputCls = 'w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600'
+const inputCls = 'w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors placeholder-slate-600'
 const inputMonoCls = inputCls + ' font-mono'
 
 export default function EmailSettingsPage() {
@@ -200,9 +200,9 @@ export default function EmailSettingsPage() {
       {/* ── Sender Identity ── */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</div>
+          <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</div>
           <p className="text-white font-semibold text-sm">Sender Identity</p>
-          <span className="ml-auto text-[10px] px-2 py-0.5 bg-emerald-950/50 text-emerald-400 border border-emerald-800/40 rounded-full">Required</span>
+          <span className="ml-auto text-[10px] px-2 py-0.5 bg-slate-950/50 text-blue-400 border border-slate-700/40 rounded-full">Required</span>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Field label="From Name" hint="Shown in inbox — e.g. Acme Team">
@@ -219,7 +219,7 @@ export default function EmailSettingsPage() {
       {/* ── Provider Picker ── */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-full bg-violet-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</div>
+          <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</div>
           <p className="text-white font-semibold text-sm">Email Provider</p>
         </div>
         <div className="grid grid-cols-3 gap-2.5">
@@ -229,7 +229,7 @@ export default function EmailSettingsPage() {
               onClick={() => set('method', p.key)}
               className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-center ${
                 form.method === p.key
-                  ? `${p.bg} ring-1 ring-violet-500`
+                  ? `${p.bg} ring-1 ring-blue-500`
                   : 'bg-slate-800/60 border-slate-700 hover:border-slate-600'
               }`}
             >
@@ -237,7 +237,7 @@ export default function EmailSettingsPage() {
               <span className={`text-xs font-semibold ${form.method === p.key ? 'text-white' : 'text-slate-300'}`}>{p.name}</span>
               <span className="text-[10px] text-slate-500">{p.desc}</span>
               {form.method === p.key && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-violet-400" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-400" />
               )}
             </button>
           ))}
@@ -252,7 +252,7 @@ export default function EmailSettingsPage() {
             <div>
               <p className="text-white font-semibold text-sm">{activeProvider.name} Settings</p>
               {activeProvider.docs && (
-                <a href={activeProvider.docs} target="_blank" rel="noreferrer" className="text-[10px] text-violet-400 hover:text-violet-300 transition-colors">
+                <a href={activeProvider.docs} target="_blank" rel="noreferrer" className="text-[10px] text-blue-400 hover:text-blue-300 transition-colors">
                   Get credentials →
                 </a>
               )}
@@ -262,7 +262,7 @@ export default function EmailSettingsPage() {
           {/* Gmail */}
           {form.method === 'gmail' && (
             <>
-              <div className="bg-amber-950/20 border border-amber-800/30 rounded-xl px-4 py-3 text-xs text-amber-300">
+              <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl px-4 py-3 text-xs text-slate-400">
                 📌 Gmail requires an <strong>App Password</strong> — not your regular password.{' '}
                 <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noreferrer" className="underline">Create one →</a>
               </div>
@@ -306,7 +306,7 @@ export default function EmailSettingsPage() {
           {form.method === 'resend' && (
             <>
               <div className="bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-xs text-slate-300">
-                Create account at <a href="https://resend.com/signup" target="_blank" rel="noreferrer" className="text-violet-400 underline">resend.com</a> → Verify your domain → Create API Key
+                Create account at <a href="https://resend.com/signup" target="_blank" rel="noreferrer" className="text-blue-400 underline">resend.com</a> → Verify your domain → Create API Key
               </div>
               <Field label="Resend API Key">
                 <input value={form.resend_api_key} onChange={e => set('resend_api_key', e.target.value)}
@@ -361,7 +361,7 @@ export default function EmailSettingsPage() {
                     <button key={r} onClick={() => set('mailgun_region', r)}
                       className={`px-4 py-2 rounded-lg text-sm border transition-all ${
                         form.mailgun_region === r
-                          ? 'bg-violet-700 border-violet-600 text-white'
+                          ? 'bg-blue-700 border-blue-600 text-white'
                           : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600'
                       }`}>
                       {r.toUpperCase()}
@@ -375,7 +375,7 @@ export default function EmailSettingsPage() {
           {/* Brevo */}
           {form.method === 'brevo' && (
             <>
-              <div className="bg-cyan-950/20 border border-cyan-800/30 rounded-xl px-4 py-3 text-xs text-cyan-300">
+              <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl px-4 py-3 text-xs text-blue-300">
                 <a href="https://app.brevo.com/settings/keys/api" target="_blank" rel="noreferrer" className="underline">Brevo</a> → Settings → API Keys → Generate a new API key. Your login email is used as the SMTP username.
               </div>
               <Field label="Brevo Login Email" hint="The email you use to log into Brevo">
@@ -396,7 +396,7 @@ export default function EmailSettingsPage() {
           {/* Postmark */}
           {form.method === 'postmark' && (
             <>
-              <div className="bg-yellow-950/20 border border-yellow-800/30 rounded-xl px-4 py-3 text-xs text-yellow-300">
+              <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl px-4 py-3 text-xs text-slate-400">
                 <a href="https://account.postmarkapp.com/servers" target="_blank" rel="noreferrer" className="underline">Postmark</a> → Servers → Your server → API Tokens → Server API Token
               </div>
               <Field label="Server API Token">
@@ -449,10 +449,10 @@ export default function EmailSettingsPage() {
 
       {/* CooVex default notice */}
       {form.method === 'coovex' && (
-        <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5">
-          <p className="text-violet-300 text-sm font-semibold mb-1">🚀 CooVex Default — Ready to use</p>
-          <p className="text-violet-300/70 text-xs leading-relaxed">
-            Campaigns are sent from <code className="bg-violet-900/40 px-1.5 py-0.5 rounded text-violet-200">noreply@coovex.com</code> with your From Name.
+        <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5">
+          <p className="text-blue-300 text-sm font-semibold mb-1">🚀 CooVex Default — Ready to use</p>
+          <p className="text-blue-300/70 text-xs leading-relaxed">
+            Campaigns are sent from <code className="bg-slate-900/40 px-1.5 py-0.5 rounded text-blue-200">noreply@coovex.com</code> with your From Name.
             For better deliverability and your own brand, connect a provider above.
           </p>
         </div>
@@ -460,7 +460,7 @@ export default function EmailSettingsPage() {
 
       {msg && (
         <div className={`rounded-xl px-4 py-3 text-sm ${
-          msg.ok ? 'bg-emerald-900/30 border border-emerald-800/30 text-emerald-300'
+          msg.ok ? 'bg-slate-900/30 border border-slate-700/30 text-blue-300'
                  : 'bg-red-900/30 border border-red-800/30 text-red-300'
         }`}>
           {msg.ok ? '✓ ' : '✗ '}{msg.text}
@@ -478,14 +478,14 @@ export default function EmailSettingsPage() {
             : '📧 Send Test Email'}
         </button>
         <button onClick={save} disabled={saving || testing || !form.from_name || !form.reply_to}
-          className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium py-3 rounded-xl transition-colors">
+          className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium py-3 rounded-xl transition-colors">
           {saving ? 'Saving…' : 'Save Settings'}
         </button>
       </div>
 
       <p className="text-slate-600 text-xs text-center">
         Test email is sent to your CooVex account email. ·{' '}
-        <Link href="/campaigns" className="text-violet-500 hover:text-violet-400">Back to Campaigns</Link>
+        <Link href="/campaigns" className="text-blue-500 hover:text-blue-400">Back to Campaigns</Link>
       </p>
     </div>
   )

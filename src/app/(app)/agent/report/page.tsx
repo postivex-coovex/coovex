@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Progress Report — CooVex' }
 
 function delta(curr: number, prev: number) {
   const d = curr - prev
-  return { d, sign: d > 0 ? '+' : '', color: d > 0 ? 'text-emerald-400' : d < 0 ? 'text-rose-400' : 'text-slate-500' }
+  return { d, sign: d > 0 ? '+' : '', color: d > 0 ? 'text-blue-400' : d < 0 ? 'text-rose-400' : 'text-slate-500' }
 }
 
 function fmtDate(iso: string) {
@@ -207,7 +207,7 @@ export default async function ProgressReportPage({
             <Link
               key={tab.value}
               href={`/agent/report?period=${tab.value}`}
-              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-colors ${period === tab.value ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-colors ${period === tab.value ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
             >
               {tab.label}
             </Link>
@@ -216,11 +216,11 @@ export default async function ProgressReportPage({
       </div>
 
       {/* What CooVex did section */}
-      <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5">
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-3">
           <span>🤖</span>
           <h2 className="text-sm font-semibold text-white">What CooVex did for you</h2>
-          <span className="text-[10px] text-violet-400 bg-violet-500/15 px-1.5 py-0.5 rounded-full border border-violet-500/25">{periodLabel}</span>
+          <span className="text-[10px] text-blue-400 bg-blue-500/15 px-1.5 py-0.5 rounded-full border border-blue-500/25">{periodLabel}</span>
         </div>
         {valueItems.length === 0 ? (
           <p className="text-slate-500 text-sm">No activity recorded yet. Run GTM Autopilot or Website Audit to see your report here.</p>
@@ -228,7 +228,7 @@ export default async function ProgressReportPage({
           <ul className="space-y-1.5">
             {valueItems.map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                <span className="text-emerald-400 mt-0.5 flex-shrink-0">✓</span>
+                <span className="text-blue-400 mt-0.5 flex-shrink-0">✓</span>
                 {item}
               </li>
             ))}
@@ -265,7 +265,7 @@ export default async function ProgressReportPage({
                   )}
                   <span className={`text-sm font-bold ${m.curr != null && m.curr > 0 ? 'text-white' : 'text-slate-500'}`}>{currVal}</span>
                   {d && d.d !== 0 && (
-                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${d.d > 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`}>
+                    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${d.d > 0 ? 'bg-blue-600/15 text-blue-400' : 'bg-rose-500/15 text-rose-400'}`}>
                       {d.sign}{d.d}{m.unit}
                     </span>
                   )}
@@ -290,7 +290,7 @@ export default async function ProgressReportPage({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             {spChecked.map(c => (
-              <div key={c.label} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${c.done ? 'bg-emerald-500/8 text-emerald-400' : 'bg-slate-800/50 text-slate-500'}`}>
+              <div key={c.label} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs ${c.done ? 'bg-blue-600/8 text-blue-400' : 'bg-slate-800/50 text-slate-500'}`}>
                 <span>{c.done ? '✓' : '○'}</span>
                 <span>{c.label}</span>
               </div>
@@ -317,11 +317,11 @@ export default async function ProgressReportPage({
               const icon = typeIcon(sig.type, sig.title)
               const typeBadgeClass: Record<string, string> = {
                 urgent: 'bg-rose-500/15 text-rose-400',
-                warning: 'bg-amber-500/15 text-amber-400',
+                warning: 'bg-slate-600/15 text-slate-500',
                 opportunity: 'bg-blue-500/15 text-blue-400',
-                done: 'bg-emerald-500/15 text-emerald-400',
-                insight: 'bg-violet-500/15 text-violet-400',
-                task: 'bg-amber-500/15 text-amber-400',
+                done: 'bg-blue-600/15 text-blue-400',
+                insight: 'bg-blue-500/15 text-blue-400',
+                task: 'bg-slate-600/15 text-slate-500',
               }
               return (
                 <div key={sig.id} className="flex gap-4 px-5 py-3.5 hover:bg-slate-800/20 transition-colors">
@@ -357,7 +357,7 @@ export default async function ProgressReportPage({
           { href: '/content',        label: '✍️ Content' },
           { href: '/getting-started',label: '📋 Getting Started' },
         ].map(l => (
-          <Link key={l.href} href={l.href} className="text-slate-500 hover:text-violet-400 transition-colors">
+          <Link key={l.href} href={l.href} className="text-slate-500 hover:text-blue-400 transition-colors">
             {l.label} →
           </Link>
         ))}

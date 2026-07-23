@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar'
@@ -10,7 +10,7 @@ export function NavigationProgress() {
   return (
     <ProgressBar
       height="2px"
-      color="#7c3aed"
+      color="#2563eb"
       options={{ showSpinner: false }}
       shallowRouting
     />

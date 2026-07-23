@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createInitialData } from '../actions'
@@ -38,13 +38,13 @@ export default function ScanningPage() {
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-10">
         {[1, 2, 3, 4, 5, 6].map((s) => (
-          <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors ${s <= 5 ? 'bg-violet-500' : 'bg-slate-200'}`} />
+          <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors ${s <= 5 ? 'bg-blue-500' : 'bg-slate-200'}`} />
         ))}
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-10 space-y-10 text-center">
         <div>
-          <p className="text-violet-600 text-sm font-semibold mb-2">Step 5 of 6</p>
+          <p className="text-blue-600 text-sm font-semibold mb-2">Step 5 of 6</p>
           <h1 className="text-2xl font-bold text-slate-900">
             {done ? 'Analysis complete!' : 'Setting up your AI agent...'}
           </h1>
@@ -72,7 +72,7 @@ export default function ScanningPage() {
               {done ? (
                 <span className="text-4xl">✅</span>
               ) : (
-                <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
               )}
             </div>
           </div>
@@ -91,11 +91,11 @@ export default function ScanningPage() {
               >
                 <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
                   {isCompleted ? (
-                    <svg className="w-5 h-5 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   ) : isActive ? (
-                    <div className="w-3 h-3 bg-violet-500 rounded-full animate-pulse" />
+                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
                   ) : (
                     <div className="w-3 h-3 bg-slate-300 rounded-full" />
                   )}

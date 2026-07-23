@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -99,19 +99,19 @@ function Toggle({ checked, onChange, label, sub }: { checked: boolean; onChange:
       type="button"
       onClick={() => onChange(!checked)}
       className="w-full flex items-center justify-between gap-4 p-3.5 rounded-xl border transition-all text-left"
-      style={{ borderColor: checked ? '#7c3aed' : '#e2e8f0', background: checked ? '#f5f3ff' : '#f8fafc' }}
+      style={{ borderColor: checked ? '#2563eb' : '#e2e8f0', background: checked ? '#f5f3ff' : '#f8fafc' }}
     >
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-slate-800">{label}</p>
         {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
-        <span className={`text-xs font-bold transition-colors ${checked ? 'text-violet-600' : 'text-slate-400'}`}>
+        <span className={`text-xs font-bold transition-colors ${checked ? 'text-blue-600' : 'text-slate-400'}`}>
           {checked ? 'Yes' : 'No'}
         </span>
         <div
           className="relative rounded-full transition-colors duration-200"
-          style={{ background: checked ? '#7c3aed' : '#cbd5e1', width: 40, height: 22 }}
+          style={{ background: checked ? '#2563eb' : '#cbd5e1', width: 40, height: 22 }}
         >
           <div
             className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
@@ -190,7 +190,7 @@ function SwitchBusinessButton({
               >
                 <span className="text-base">🏢</span>
                 <span className="text-sm text-slate-700 font-medium">{ws.business_name}</span>
-                <span className="ml-auto text-xs text-violet-600">Switch →</span>
+                <span className="ml-auto text-xs text-blue-600">Switch →</span>
               </button>
             ))
           )}
@@ -504,17 +504,17 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
 
       <div className="relative z-10 w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Gradient bar */}
-        <div className="h-1 flex-shrink-0 bg-gradient-to-r from-violet-600 via-blue-500 to-violet-600" />
+        <div className="h-1 flex-shrink-0 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600" />
 
         {/* ── OVERVIEW ── */}
         {step === 'overview' && (
           <div className="p-8 overflow-y-auto">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0">
-                <Zap className="w-6 h-6 text-violet-600" />
+              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <Zap className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <span className="text-xs font-semibold text-violet-600 uppercase tracking-widest">New Business Setup</span>
+                <span className="text-xs font-semibold text-blue-600 uppercase tracking-widest">New Business Setup</span>
                 <p className="text-base font-bold text-slate-900 leading-tight mt-0.5">{businessName}</p>
               </div>
             </div>
@@ -531,7 +531,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                 const Icon = s.icon
                 return (
                   <div key={i} className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                    <div className="w-6 h-6 rounded-full bg-violet-600 text-white flex items-center justify-center text-[11px] font-bold flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[11px] font-bold flex-shrink-0 mt-0.5">
                       {i + 1}
                     </div>
                     <Icon className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
@@ -546,7 +546,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
 
             <button
               onClick={() => setStep('step1')}
-              className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-semibold py-3.5 rounded-xl transition-colors text-sm"
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 rounded-xl transition-colors text-sm"
             >
               Start &amp; Continue <ChevronRight className="w-4 h-4" />
             </button>
@@ -562,18 +562,18 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               <div className="flex items-center gap-2 mb-4">
                 {STEPS_META.map((_, i) => (
                   <div key={i} className="flex-1 h-1.5 rounded-full overflow-hidden bg-slate-100">
-                    <div className="h-full rounded-full bg-violet-600" />
+                    <div className="h-full rounded-full bg-blue-600" />
                   </div>
                 ))}
               </div>
-              <span className="text-xs font-bold text-violet-600 uppercase tracking-widest">Step 4 of 4 — Final</span>
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Step 4 of 4 — Final</span>
               <h3 className="text-xl font-extrabold text-slate-900 mt-1">Launch Your AI Business Agent</h3>
               <p className="text-xs text-slate-400 mt-0.5">Complete each task once. CooVex AI runs them 24/7 for you after setup.</p>
             </div>
 
             <div className="flex-1 overflow-y-auto px-8 py-5 space-y-4">
               {/* Hero banner */}
-              <div className="rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 p-4 text-white">
+              <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-4 text-white">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
                     <Zap className="w-5 h-5 text-white" />
@@ -605,10 +605,10 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                   ]).map(({ n, icon, title, desc, ai }) => (
                     <div
                       key={n}
-                      className="flex gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50 hover:border-violet-200 hover:bg-violet-50/50 transition-all"
+                      className="flex gap-3 p-3.5 rounded-xl border border-slate-100 bg-slate-50 hover:border-blue-200 hover:bg-blue-50/50 transition-all"
                     >
                       <div className="flex-shrink-0 flex flex-col items-center gap-1 pt-0.5">
-                        <div className="w-6 h-6 rounded-full bg-violet-600 text-white flex items-center justify-center text-[10px] font-extrabold">
+                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-extrabold">
                           {n}
                         </div>
                       </div>
@@ -617,7 +617,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                           <span className="text-base leading-none">{icon}</span>
                           <p className="text-xs font-bold text-slate-800 leading-tight">{title}</p>
                           {ai && (
-                            <span className="flex-shrink-0 text-[9px] font-bold bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded uppercase tracking-wide">AI</span>
+                            <span className="flex-shrink-0 text-[9px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-wide">AI</span>
                           )}
                         </div>
                         <p className="text-[11px] text-slate-500 leading-snug">{desc}</p>
@@ -628,9 +628,9 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               </div>
 
               {/* Bottom note */}
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                <p className="text-xs text-emerald-700 font-medium">These tasks appear in your Dashboard. Complete them in any order — AI starts working immediately after each one.</p>
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-blue-50 border border-blue-200">
+                <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                <p className="text-xs text-blue-700 font-medium">These tasks appear in your Dashboard. Complete them in any order — AI starts working immediately after each one.</p>
               </div>
             </div>
 
@@ -638,7 +638,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               <button
                 onClick={finishOnboarding}
                 disabled={saving}
-                className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all text-sm shadow-lg shadow-violet-200"
+                className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-500 hover:to-blue-500 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all text-sm shadow-lg shadow-violet-200"
               >
                 {saving
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Launching…</>
@@ -662,11 +662,11 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               <div className="flex items-center gap-2 mb-4">
                 {STEPS_META.map((_, i) => (
                   <div key={i} className="flex-1 h-1.5 rounded-full overflow-hidden bg-slate-100">
-                    <div className={`h-full rounded-full transition-all ${i <= 2 ? 'bg-violet-600' : 'bg-transparent'}`} />
+                    <div className={`h-full rounded-full transition-all ${i <= 2 ? 'bg-blue-600' : 'bg-transparent'}`} />
                   </div>
                 ))}
               </div>
-              <span className="text-xs font-bold text-violet-600 uppercase tracking-widest">Step 3 of 4</span>
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Step 3 of 4</span>
               <h3 className="text-lg font-extrabold text-slate-900 mt-1">Set your growth goals</h3>
               <p className="text-xs text-slate-400 mt-0.5">AI will track progress and give you a daily execution plan to hit these targets.</p>
             </div>
@@ -674,11 +674,11 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
             <div className="flex-1 overflow-y-auto px-8 py-5 space-y-5">
 
               {/* MRR Target — primary */}
-              <div className="p-4 rounded-xl border-2 border-violet-200 bg-violet-50">
+              <div className="p-4 rounded-xl border-2 border-blue-200 bg-blue-50">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-base">💰</span>
-                  <p className="text-sm font-bold text-violet-800">MRR / Revenue Target</p>
-                  <span className="text-[10px] bg-violet-200 text-violet-700 px-1.5 py-0.5 rounded font-semibold ml-auto">Primary Goal</span>
+                  <p className="text-sm font-bold text-blue-800">MRR / Revenue Target</p>
+                  <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold ml-auto">Primary Goal</span>
                 </div>
                 <div className="flex gap-2">
                   <div className="w-24 flex-shrink-0">
@@ -692,12 +692,12 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                     value={mrrTarget}
                     onChange={e => { setMrrTarget(e.target.value); setStep3Error('') }}
                     placeholder="e.g. 5000"
-                    className={`flex-1 border rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 bg-white transition-all ${step3Error ? 'border-red-400 focus:ring-red-200' : 'border-slate-200 focus:border-violet-400 focus:ring-violet-200'}`}
+                    className={`flex-1 border rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 bg-white transition-all ${step3Error ? 'border-red-400 focus:ring-red-200' : 'border-slate-200 focus:border-blue-400 focus:ring-blue-200'}`}
                   />
                   <select
                     value={mrrPeriod}
                     onChange={e => setMrrPeriod(e.target.value as typeof mrrPeriod)}
-                    className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-1 focus:border-violet-400"
+                    className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-1 focus:border-blue-400"
                   >
                     <option value="monthly">Monthly</option>
                     <option value="quarterly">Quarterly</option>
@@ -726,8 +726,8 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                       onClick={() => setGoalTimeframe(g => g === key ? '' : key)}
                       className={`py-2 rounded-xl border text-xs font-semibold transition-all ${
                         goalTimeframe === key
-                          ? 'bg-violet-600 border-violet-600 text-white'
-                          : 'bg-white border-slate-200 text-slate-500 hover:border-violet-300'
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'bg-white border-slate-200 text-slate-500 hover:border-blue-300'
                       }`}
                     >
                       {label}
@@ -749,7 +749,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                     return (
                       <div
                         key={key}
-                        className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${g.on ? 'border-violet-200 bg-violet-50' : 'border-slate-100 bg-slate-50'}`}
+                        className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${g.on ? 'border-blue-200 bg-blue-50' : 'border-slate-100 bg-slate-50'}`}
                       >
                         <span className="text-base flex-shrink-0">{icon}</span>
                         <p className="text-sm font-semibold text-slate-700 flex-1">{label}</p>
@@ -760,7 +760,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                               min="1"
                               value={g.target}
                               onChange={e => setExtraGoals(prev => ({ ...prev, [key]: { ...prev[key], target: e.target.value } }))}
-                              className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:border-violet-400 bg-white text-center"
+                              className="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-1 focus:border-blue-400 bg-white text-center"
                             />
                             <span className="text-xs text-slate-400 flex-shrink-0">{unit}</span>
                             <select
@@ -780,7 +780,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                           onClick={() => setExtraGoals(prev => ({ ...prev, [key]: { ...prev[key], on: !prev[key].on } }))}
                           className="flex-shrink-0"
                         >
-                          <div className="relative rounded-full transition-colors duration-200" style={{ background: g.on ? '#7c3aed' : '#cbd5e1', width: 36, height: 20 }}>
+                          <div className="relative rounded-full transition-colors duration-200" style={{ background: g.on ? '#2563eb' : '#cbd5e1', width: 36, height: 20 }}>
                             <div className="absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow transition-transform duration-200"
                               style={{ transform: g.on ? 'translateX(18px)' : 'translateX(2px)', margin: 1 }} />
                           </div>
@@ -803,7 +803,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                 <button
                   onClick={saveStep3}
                   disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
                 >
                   {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : <>Save &amp; Continue <ChevronRight className="w-4 h-4" /></>}
                 </button>
@@ -823,11 +823,11 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               <div className="flex items-center gap-2 mb-4">
                 {STEPS_META.map((_, i) => (
                   <div key={i} className="flex-1 h-1.5 rounded-full overflow-hidden bg-slate-100">
-                    <div className={`h-full rounded-full transition-all ${i <= 1 ? 'bg-violet-600' : 'bg-transparent'}`} />
+                    <div className={`h-full rounded-full transition-all ${i <= 1 ? 'bg-blue-600' : 'bg-transparent'}`} />
                   </div>
                 ))}
               </div>
-              <span className="text-xs font-bold text-violet-600 uppercase tracking-widest">Step 2 of 4</span>
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Step 2 of 4</span>
               <h3 className="text-lg font-extrabold text-slate-900 mt-1">Setup your competitors with AI</h3>
               <p className="text-xs text-slate-400 mt-0.5">Add competitor URLs so AI can track them and surface insights for you.</p>
             </div>
@@ -845,7 +845,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                       value={url}
                       onChange={e => setCompetitorUrl(i, e.target.value)}
                       placeholder="https://competitor.com"
-                      className="w-full border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:border-violet-400 focus:ring-violet-200 bg-white transition-all"
+                      className="w-full border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:border-blue-400 focus:ring-blue-200 bg-white transition-all"
                     />
                   </div>
                   {competitorUrls.length > 1 && (
@@ -863,7 +863,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               <button
                 type="button"
                 onClick={addCompetitorUrl}
-                className="flex items-center gap-2 text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors py-1"
+                className="flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors py-1"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Another Competitor
               </button>
@@ -872,7 +872,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                 <button
                   type="button"
                   onClick={() => setStep('step3')}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-violet-300 bg-violet-50 hover:bg-violet-100 hover:border-violet-400 transition-all text-xs font-semibold text-violet-600"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-50 hover:border-blue-400 transition-all text-xs font-semibold text-blue-600"
                 >
                   <span>⚡</span>
                   Skip Now → AI will search competitors after onboarding
@@ -891,7 +891,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               <button
                 onClick={saveStep2}
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
               >
                 {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : <>Save &amp; Continue <ChevronRight className="w-4 h-4" /></>}
               </button>
@@ -908,12 +908,12 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               <div className="flex items-center gap-2 mb-4">
                 {STEPS_META.map((_, i) => (
                   <div key={i} className="flex-1 h-1.5 rounded-full overflow-hidden bg-slate-100">
-                    <div className={`h-full rounded-full transition-all ${i === 0 ? 'bg-violet-600' : 'bg-transparent'}`} />
+                    <div className={`h-full rounded-full transition-all ${i === 0 ? 'bg-blue-600' : 'bg-transparent'}`} />
                   </div>
                 ))}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-violet-600 uppercase tracking-widest">Step 1 of 4</span>
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Step 1 of 4</span>
               </div>
               <h3 className="text-lg font-extrabold text-slate-900 mt-1">Provide your business details</h3>
               <p className="text-xs text-slate-400 mt-0.5">Help AI understand your business so it can work accurately from day one.</p>
@@ -923,7 +923,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
             <div className="flex-1 overflow-y-auto px-8 py-5 space-y-4">
               {loadingBiz ? (
                 <div className="flex items-center justify-center py-10">
-                  <Loader2 className="w-6 h-6 animate-spin text-violet-400" />
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
                 </div>
               ) : (
                 <>
@@ -960,7 +960,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                           onClick={() => setPricingMode(key)}
                           className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${
                             pricingMode === key
-                              ? 'bg-violet-600 border-violet-600 text-white'
+                              ? 'bg-blue-600 border-blue-600 text-white'
                               : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                           }`}
                         >
@@ -1025,7 +1025,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                         <button
                           type="button"
                           onClick={() => setPricingPackages(ps => [...ps, { name: '', price: '', plan: 'monthly' }])}
-                          className="flex items-center gap-1.5 text-[11px] font-semibold text-violet-600 hover:text-violet-700 transition-colors py-0.5"
+                          className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors py-0.5"
                         >
                           <Plus className="w-3 h-3" /> Add Package
                         </button>
@@ -1033,9 +1033,9 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                     )}
 
                     {pricingMode === 'none' && (
-                      <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200">
+                      <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-slate-100 border border-slate-300">
                         <span className="text-base">💡</span>
-                        <p className="text-xs text-amber-700">No pricing plan yet — you can add it later from Settings. AI will skip MRR analysis until then.</p>
+                        <p className="text-xs text-slate-700">No pricing plan yet — you can add it later from Settings. AI will skip MRR analysis until then.</p>
                       </div>
                     )}
 
@@ -1061,13 +1061,13 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
                           onClick={() => { set('business_stage', s.value); if (s.value !== 'live_transactions') set('current_mrr', '') }}
                           className={`p-3 rounded-xl border text-left transition-all text-sm ${
                             form.business_stage === s.value
-                              ? 'border-violet-500 bg-violet-50 ring-1 ring-violet-400'
+                              ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-400'
                               : 'border-slate-200 hover:border-slate-300 bg-slate-50'
                           }`}
                         >
                           <div className="flex items-center gap-2">
-                            {form.business_stage === s.value && <CheckCircle2 className="w-3.5 h-3.5 text-violet-600 flex-shrink-0" />}
-                            <span className={`font-semibold ${form.business_stage === s.value ? 'text-violet-700' : 'text-slate-700'}`}>{s.label}</span>
+                            {form.business_stage === s.value && <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />}
+                            <span className={`font-semibold ${form.business_stage === s.value ? 'text-blue-700' : 'text-slate-700'}`}>{s.label}</span>
                           </div>
                           <p className="text-[11px] text-slate-400 mt-0.5 pl-0">{s.desc}</p>
                         </button>
@@ -1176,7 +1176,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
               <button
                 onClick={saveStep1}
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
               >
                 {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : <>Save &amp; Next <ChevronRight className="w-4 h-4" /></>}
               </button>
@@ -1191,7 +1191,7 @@ export function BusinessOnboardingModal({ open, businessName, previousWorkspaceI
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 function input(err: boolean) {
   return `w-full border rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 transition-all ${
-    err ? 'border-red-400 focus:ring-red-300 bg-red-50' : 'border-slate-200 focus:border-violet-400 focus:ring-violet-200 bg-white'
+    err ? 'border-red-400 focus:ring-red-300 bg-red-50' : 'border-slate-200 focus:border-blue-400 focus:ring-blue-200 bg-white'
   }`
 }
 

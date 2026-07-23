@@ -26,8 +26,8 @@ interface EmailDraft {
 const STAGE_COLORS: Record<string, string> = {
   new: 'text-slate-400 bg-slate-800',
   contacted: 'text-blue-400 bg-blue-950/40',
-  qualified: 'text-violet-400 bg-violet-950/40',
-  proposal_sent: 'text-amber-400 bg-amber-950/40',
+  qualified: 'text-blue-400 bg-slate-950/40',
+  proposal_sent: 'text-slate-500 bg-slate-950/40',
 }
 
 function daysAgo(iso: string) {
@@ -112,11 +112,11 @@ export default function ColdLeadsPage() {
             <p className="text-slate-500 text-sm mt-1">Cold Leads</p>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center">
-            <p className="text-4xl font-bold text-amber-400">{avgDays}d</p>
+            <p className="text-4xl font-bold text-slate-500">{avgDays}d</p>
             <p className="text-slate-500 text-sm mt-1">Avg. Inactive</p>
           </div>
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center">
-            <p className="text-4xl font-bold text-violet-400">{Object.keys(drafts).length}</p>
+            <p className="text-4xl font-bold text-blue-400">{Object.keys(drafts).length}</p>
             <p className="text-slate-500 text-sm mt-1">Emails Drafted</p>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function ColdLeadsPage() {
               <div>
                 <h2 className="text-white font-semibold text-base mb-1">What are Cold Leads?</h2>
                 <p className="text-slate-400 text-sm leading-relaxed">
-                  Leads with <span className="text-amber-400 font-medium">no activity for 30+ days</span> automatically appear here.
+                  Leads with <span className="text-slate-500 font-medium">no activity for 30+ days</span> automatically appear here.
                   Use AI to draft personalized re-engagement emails and bring them back into your pipeline.
                 </p>
               </div>
@@ -147,29 +147,29 @@ export default function ColdLeadsPage() {
               <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 font-bold text-sm mb-3">1</div>
               <p className="text-white text-sm font-medium mb-1">Add your leads</p>
               <p className="text-slate-500 text-xs leading-relaxed">Add leads via AI Find Leads or manually. The more leads you track, the more opportunities you have.</p>
-              <Link href="/leads/find" className="inline-flex items-center gap-1 mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors">
+              <Link href="/leads/find" className="inline-flex items-center gap-1 mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors">
                 AI Find Leads <ChevronRight className="w-3 h-3" />
               </Link>
             </div>
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-sm mb-3">2</div>
+              <div className="w-8 h-8 rounded-lg bg-slate-600/20 flex items-center justify-center text-slate-500 font-bold text-sm mb-3">2</div>
               <p className="text-white text-sm font-medium mb-1">They go cold after 30 days</p>
               <p className="text-slate-500 text-xs leading-relaxed">Any lead with no activity for 30+ days is automatically moved here so nothing slips through the cracks.</p>
             </div>
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm mb-3">3</div>
+              <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center text-blue-400 font-bold text-sm mb-3">3</div>
               <p className="text-white text-sm font-medium mb-1">Re-engage with AI</p>
               <p className="text-slate-500 text-xs leading-relaxed">Click "Draft email" and AI generates a personalized re-engagement email for that lead in seconds.</p>
             </div>
           </div>
 
           {/* Current status */}
-          <div className="bg-emerald-950/20 border border-emerald-800/30 rounded-2xl p-5 flex items-center gap-4">
-            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-emerald-400 text-sm">✓</span>
+          <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5 flex items-center gap-4">
+            <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-blue-400 text-sm">✓</span>
             </div>
             <div className="flex-1">
-              <p className="text-emerald-400 text-sm font-medium">All leads are active!</p>
+              <p className="text-blue-400 text-sm font-medium">All leads are active!</p>
               <p className="text-slate-500 text-xs mt-0.5">All your leads have had recent activity. Any lead inactive for 30+ days will appear here automatically.</p>
             </div>
             <Link href="/leads" className="flex-shrink-0 text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors">
@@ -215,8 +215,8 @@ export default function ColdLeadsPage() {
                       {lead.job_title && <span className="text-slate-600 text-sm">{lead.job_title}</span>}
                     </div>
                     <div className="flex items-center gap-1.5 mt-2">
-                      <Clock className="w-4 h-4 text-amber-500" />
-                      <span className="text-amber-500 text-sm font-medium">{days} days inactive</span>
+                      <Clock className="w-4 h-4 text-slate-600" />
+                      <span className="text-slate-600 text-sm font-medium">{days} days inactive</span>
                       <span className="text-slate-600 text-sm">· last seen {fmtDate(lead.updated_at)}</span>
                     </div>
                   </div>
@@ -233,7 +233,7 @@ export default function ColdLeadsPage() {
                     <button
                       onClick={() => draftEmail(lead)}
                       disabled={isDrafting}
-                      className="flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 bg-violet-950/30 hover:bg-violet-950/50 border border-violet-800/30 px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
+                      className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 bg-slate-950/30 hover:bg-slate-950/50 border border-slate-700/30 px-4 py-2 rounded-xl transition-colors disabled:opacity-50"
                     >
                       {isDrafting ? (
                         <RefreshCw className="w-4 h-4 animate-spin" />
@@ -250,8 +250,8 @@ export default function ColdLeadsPage() {
                   <div className="border-t border-slate-800 bg-slate-950/50 p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-violet-400" />
-                        <span className="text-violet-300 text-sm font-medium">AI Re-engagement Email</span>
+                        <Mail className="w-4 h-4 text-blue-400" />
+                        <span className="text-blue-300 text-sm font-medium">AI Re-engagement Email</span>
                         <span className="text-xs text-slate-600 bg-slate-800 px-2 py-0.5 rounded-full">friendly tone</span>
                       </div>
                       <button
@@ -278,7 +278,7 @@ export default function ColdLeadsPage() {
                       <div className="flex gap-3 mt-4 pt-4 border-t border-slate-800">
                         <a
                           href={`mailto:${lead.email}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.email)}`}
-                          className="flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 bg-emerald-950/30 border border-emerald-800/30 px-4 py-2 rounded-xl transition-colors"
+                          className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 bg-slate-950/30 border border-slate-700/30 px-4 py-2 rounded-xl transition-colors"
                         >
                           <Mail className="w-4 h-4" />
                           Open in email client
@@ -302,7 +302,7 @@ export default function ColdLeadsPage() {
 
       {!loading && leads.length > 0 && (
         <p className="text-slate-600 text-sm text-center mt-6">
-          Showing {leads.length} leads inactive for 30+ days · <Link href="/leads" className="text-violet-500 hover:text-violet-400">View all leads</Link>
+          Showing {leads.length} leads inactive for 30+ days · <Link href="/leads" className="text-blue-500 hover:text-blue-400">View all leads</Link>
         </p>
       )}
     </div>

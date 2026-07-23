@@ -180,7 +180,7 @@ export default async function IntegrationsPage() {
       <div className="grid grid-cols-3 gap-4 mb-10">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
           <p className="text-slate-500 text-sm mb-1">Connected</p>
-          <p className={`text-4xl font-bold ${connectedCount > 0 ? 'text-emerald-400' : 'text-slate-400'}`}>
+          <p className={`text-4xl font-bold ${connectedCount > 0 ? 'text-blue-400' : 'text-slate-400'}`}>
             {connectedCount}
           </p>
         </div>
@@ -195,12 +195,12 @@ export default async function IntegrationsPage() {
       </div>
 
       {connectedCount === 0 && (
-        <div className="mb-8 bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5 flex items-center justify-between">
+        <div className="mb-8 bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5 flex items-center justify-between">
           <div>
-            <p className="text-violet-300 font-medium">No integrations connected yet</p>
+            <p className="text-blue-300 font-medium">No integrations connected yet</p>
             <p className="text-slate-500 text-sm mt-0.5">Start with social media — connect LinkedIn or Facebook to publish content directly.</p>
           </div>
-          <Link href="/settings/integrations" className="flex-shrink-0 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+          <Link href="/settings/integrations" className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
             Get Started →
           </Link>
         </div>
@@ -218,7 +218,7 @@ export default async function IntegrationsPage() {
                   <div
                     key={integration.type}
                     className={`bg-slate-900 border rounded-2xl p-5 flex items-center gap-4 transition-colors ${
-                      isConnected ? 'border-emerald-800/40 bg-emerald-950/10' : 'border-slate-800'
+                      isConnected ? 'border-slate-700/40 bg-slate-950/10' : 'border-slate-800'
                     }`}
                   >
                     <div className="text-3xl flex-shrink-0">{integration.icon}</div>
@@ -230,8 +230,8 @@ export default async function IntegrationsPage() {
                       href={href}
                       className={`flex-shrink-0 text-sm font-medium px-4 py-2 rounded-xl border transition-colors ${
                         isConnected
-                          ? 'bg-emerald-950/40 border-emerald-700/40 text-emerald-400 hover:bg-emerald-950/60'
-                          : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-violet-500/50 hover:text-white'
+                          ? 'bg-slate-950/40 border-slate-700/40 text-blue-400 hover:bg-slate-950/60'
+                          : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-blue-500/50 hover:text-white'
                       }`}
                     >
                       {isConnected ? 'Connected ✓' : 'Configure →'}

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -11,8 +11,8 @@ const STAGE_LABELS: Record<string, string> = {
   proposal: 'Proposal', negotiation: 'Negotiation', won: 'Won', lost: 'Lost',
 }
 const STAGE_COLORS: Record<string, string> = {
-  new: 'bg-slate-500', contacted: 'bg-blue-500', qualified: 'bg-cyan-500',
-  proposal: 'bg-violet-500', negotiation: 'bg-amber-500', won: 'bg-emerald-500', lost: 'bg-red-500',
+  new: 'bg-slate-500', contacted: 'bg-blue-500', qualified: 'bg-blue-500',
+  proposal: 'bg-blue-500', negotiation: 'bg-slate-600', won: 'bg-blue-600', lost: 'bg-red-500',
 }
 const SIGNAL_ICONS: Record<string, string> = {
   opportunity: '💡', warning: '⚠️', task: '✅', insight: '📊', alert: '🔔',
@@ -31,7 +31,7 @@ function timeAgo(iso: string) {
   return `${Math.floor(h / 24)}d ago`
 }
 
-function SparkBar({ values, color = 'bg-violet-500' }: { values: number[]; color?: string }) {
+function SparkBar({ values, color = 'bg-blue-500' }: { values: number[]; color?: string }) {
   const max = Math.max(...values, 1)
   return (
     <div className="flex items-end gap-0.5 h-12">
@@ -146,7 +146,7 @@ export default async function AnalyticsPage() {
   const closingThisMonth = openDeals.filter(d => d.close_date && new Date(d.close_date) >= thisMonthStart)
   const closingValue = closingThisMonth.reduce((s, d) => s + Number(d.value), 0)
 
-  const scoreColor = currentScore >= 70 ? 'text-emerald-400' : currentScore >= 40 ? 'text-amber-400' : 'text-red-400'
+  const scoreColor = currentScore >= 70 ? 'text-blue-400' : currentScore >= 40 ? 'text-slate-500' : 'text-red-400'
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
@@ -164,12 +164,12 @@ export default async function AnalyticsPage() {
           { label: 'Health Score', value: `${currentScore}`, unit: '/100', delta: scoreDelta !== 0 ? `${scoreDelta > 0 ? '+' : ''}${scoreDelta} vs prev` : null, good: scoreDelta >= 0, color: scoreColor },
           { label: 'Total Leads', value: `${totalLeadsN}`, unit: '', delta: hotLeads > 0 ? `${hotLeads} hot (≥70)` : null, good: true, color: 'text-white' },
           { label: 'Posts Created', value: `${totalPosts ?? 0}`, unit: '', delta: null, good: true, color: 'text-white' },
-          { label: 'Win Rate', value: `${winRate}%`, unit: '', delta: closedLeads.length > 0 ? `${closedLeads.length} closed deals` : 'No closed deals yet', good: winRate >= 30, color: winRate >= 30 ? 'text-emerald-400' : 'text-amber-400' },
+          { label: 'Win Rate', value: `${winRate}%`, unit: '', delta: closedLeads.length > 0 ? `${closedLeads.length} closed deals` : 'No closed deals yet', good: winRate >= 30, color: winRate >= 30 ? 'text-blue-400' : 'text-slate-500' },
         ].map(s => (
           <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
             <p className="text-slate-500 text-xs mb-2">{s.label}</p>
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}<span className="text-slate-600 text-sm">{s.unit}</span></p>
-            {s.delta && <p className={`text-xs mt-1 ${s.good ? 'text-emerald-400' : 'text-amber-400'}`}>{s.delta}</p>}
+            {s.delta && <p className={`text-xs mt-1 ${s.good ? 'text-blue-400' : 'text-slate-500'}`}>{s.delta}</p>}
           </div>
         ))}
       </div>
@@ -179,10 +179,10 @@ export default async function AnalyticsPage() {
         <h3 className="text-white font-semibold mb-4">Revenue & Pipeline</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Won Revenue', value: fmt(wonRevenue), sub: `${wonDeals.length} deals won`, color: 'text-emerald-400' },
-            { label: 'Open Pipeline', value: fmt(pipeline), sub: `${openDeals.length} open deals`, color: 'text-violet-400' },
+            { label: 'Won Revenue', value: fmt(wonRevenue), sub: `${wonDeals.length} deals won`, color: 'text-blue-400' },
+            { label: 'Open Pipeline', value: fmt(pipeline), sub: `${openDeals.length} open deals`, color: 'text-blue-400' },
             { label: 'Weighted Forecast', value: fmt(weighted), sub: 'probability adjusted', color: 'text-blue-400' },
-            { label: 'Closing This Month', value: fmt(closingValue), sub: `${closingThisMonth.length} deals`, color: 'text-amber-400' },
+            { label: 'Closing This Month', value: fmt(closingValue), sub: `${closingThisMonth.length} deals`, color: 'text-slate-500' },
           ].map(s => (
             <div key={s.label} className="bg-slate-800/50 rounded-xl p-4">
               <p className="text-slate-500 text-xs mb-1">{s.label}</p>
@@ -193,7 +193,7 @@ export default async function AnalyticsPage() {
         </div>
         {allDeals.length === 0 && (
           <p className="text-slate-600 text-sm text-center mt-4">
-            No deals yet — add deal values to leads or connect your CRM in <a href="/settings/integrations" className="text-violet-400 hover:underline">Integrations</a>
+            No deals yet — add deal values to leads or connect your CRM in <a href="/settings/integrations" className="text-blue-400 hover:underline">Integrations</a>
           </p>
         )}
       </div>
@@ -211,7 +211,7 @@ export default async function AnalyticsPage() {
               <div className="flex items-end gap-1 h-20">
                 {healthScores.map((v, i) => (
                   <div key={i}
-                    className={`flex-1 rounded-t transition-opacity hover:opacity-100 opacity-70 ${v >= 70 ? 'bg-emerald-500' : v >= 40 ? 'bg-amber-500' : 'bg-red-500'}`}
+                    className={`flex-1 rounded-t transition-opacity hover:opacity-100 opacity-70 ${v >= 70 ? 'bg-blue-600' : v >= 40 ? 'bg-slate-600' : 'bg-red-500'}`}
                     style={{ height: `${v}%` }} title={`Score: ${v}`} />
                 ))}
               </div>
@@ -261,7 +261,7 @@ export default async function AnalyticsPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
           <h3 className="text-white font-semibold mb-1">Leads (7 days)</h3>
           <p className="text-slate-600 text-xs mb-4">New leads per day</p>
-          <SparkBar values={leadsByDay} color="bg-emerald-500" />
+          <SparkBar values={leadsByDay} color="bg-blue-600" />
           <div className="flex justify-between text-xs text-slate-700 mt-2">
             {last7.map((d, i) => <span key={i}>{new Date(d + 'T12:00:00').getDate()}</span>)}
           </div>
@@ -295,7 +295,7 @@ export default async function AnalyticsPage() {
                       <span className="text-slate-500">{count} ({pct}%)</span>
                     </div>
                     <div className="h-1.5 bg-slate-800 rounded-full">
-                      <div className="h-1.5 bg-violet-500 rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 )
@@ -355,7 +355,7 @@ export default async function AnalyticsPage() {
                       <span className="text-slate-500">{count} ({pct}%)</span>
                     </div>
                     <div className="h-1.5 bg-slate-800 rounded-full">
-                      <div className="h-1.5 bg-cyan-500 rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 )

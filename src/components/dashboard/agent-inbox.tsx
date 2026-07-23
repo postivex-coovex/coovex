@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -42,10 +42,10 @@ function execLabel(type: SignalActionType): string {
 
 const SIGNAL_CONFIG = {
   urgent:      { icon: AlertCircle,   color: 'text-red-400',     bg: 'bg-red-500/10 border-red-500/20',        badge: 'bg-red-500/20 text-red-400',        label: 'Urgent' },
-  warning:     { icon: AlertTriangle, color: 'text-amber-400',   bg: 'bg-amber-500/10 border-amber-500/20',    badge: 'bg-amber-500/20 text-amber-400',    label: 'Warning' },
+  warning:     { icon: AlertTriangle, color: 'text-slate-500',   bg: 'bg-slate-600/10 border-slate-500/20',    badge: 'bg-slate-600/20 text-slate-500',    label: 'Warning' },
   opportunity: { icon: Lightbulb,     color: 'text-blue-400',    bg: 'bg-blue-500/10 border-blue-500/20',      badge: 'bg-blue-500/20 text-blue-400',      label: 'Opportunity' },
-  done:        { icon: CheckCircle2,  color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20',badge: 'bg-emerald-500/20 text-emerald-400', label: 'Done' },
-  insight:     { icon: BarChart2,     color: 'text-violet-400',  bg: 'bg-violet-500/10 border-violet-500/20',  badge: 'bg-violet-500/20 text-violet-400',  label: 'Insight' },
+  done:        { icon: CheckCircle2,  color: 'text-blue-400', bg: 'bg-blue-600/10 border-blue-500/20',badge: 'bg-blue-600/20 text-blue-400', label: 'Done' },
+  insight:     { icon: BarChart2,     color: 'text-blue-400',  bg: 'bg-blue-500/10 border-blue-500/20',  badge: 'bg-blue-500/20 text-blue-400',  label: 'Insight' },
 }
 
 // ── chain helpers ─────────────────────────────────────────────────────────
@@ -145,21 +145,21 @@ function ChainGroup({
   const allSel    = signals.every(s => selected.has(s.id))
 
   return (
-    <div className="border-l-2 border-violet-500/60 bg-violet-500/5">
+    <div className="border-l-2 border-blue-500/60 bg-blue-500/5">
       {/* Chain header */}
       <button
         onClick={() => setExpanded(v => !v)}
-        className="w-full flex items-center gap-3 px-5 py-3 hover:bg-violet-500/5 transition-colors text-left"
+        className="w-full flex items-center gap-3 px-5 py-3 hover:bg-blue-500/5 transition-colors text-left"
       >
-        <Zap className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
-        <span className="text-xs font-semibold text-violet-300 flex-1">
+        <Zap className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+        <span className="text-xs font-semibold text-blue-300 flex-1">
           ⚡ Chain — {chainLength} related action{chainLength !== 1 ? 's' : ''} from 1 trigger
         </span>
         <span className={cn(
           'text-[9px] font-bold px-1.5 py-0.5 rounded-full border',
           urgentAny
             ? 'text-red-400 bg-red-950/40 border-red-800/50'
-            : 'text-violet-400 bg-violet-950/40 border-violet-800/50'
+            : 'text-blue-400 bg-slate-950/40 border-slate-700/50'
         )}>
           {urgentAny ? 'Urgent' : 'Cross-module'}
         </span>
@@ -185,7 +185,7 @@ function ChainGroup({
               >
                 <div className="flex items-start gap-3">
                   {/* Step number */}
-                  <span className="w-5 h-5 rounded-full bg-violet-900/60 border border-violet-700/50 flex items-center justify-center text-[9px] font-bold text-violet-300 flex-shrink-0 mt-0.5">
+                  <span className="w-5 h-5 rounded-full bg-slate-900/60 border border-slate-700/50 flex items-center justify-center text-[9px] font-bold text-blue-300 flex-shrink-0 mt-0.5">
                     {idx + 1}
                   </span>
                   <button onClick={() => onToggleSelect(signal.id)} className="flex-shrink-0 mt-0.5 text-slate-600 hover:text-blue-400 transition-colors">
@@ -201,7 +201,7 @@ function ChainGroup({
                     <div className="flex items-center gap-2 mt-2">
                       {isExec && (
                         <Button size="sm" disabled={exec} onClick={() => onExecute(signal)}
-                          className="h-6 text-[11px] bg-violet-600 hover:bg-violet-500 text-white border-0 gap-1">
+                          className="h-6 text-[11px] bg-blue-600 hover:bg-blue-500 text-white border-0 gap-1">
                           {exec
                             ? <><span className="w-2.5 h-2.5 border border-white/40 border-t-white rounded-full animate-spin" />Executing…</>
                             : <><Play className="w-2.5 h-2.5" />{execLabel(signal.action_type)}</>
@@ -283,8 +283,8 @@ function ConfidenceBadge({ score, actionType }: { score?: number; actionType: Si
   const [open, setOpen] = useState(false)
   if (!score) return null
   const model = CONFIDENCE_MODEL[actionType]
-  const color = score >= 85 ? 'text-emerald-400 bg-emerald-950/40 border-emerald-800/50'
-              : score >= 70 ? 'text-amber-400 bg-amber-950/40 border-amber-800/50'
+  const color = score >= 85 ? 'text-blue-400 bg-slate-950/40 border-slate-700/50'
+              : score >= 70 ? 'text-slate-500 bg-slate-950/40 border-slate-700/50'
                             : 'text-red-400 bg-red-950/40 border-red-800/50'
   return (
     <span className="relative inline-flex items-center gap-1">
@@ -305,7 +305,7 @@ function ConfidenceBadge({ score, actionType }: { score?: number; actionType: Si
           <ul className="space-y-1 mb-2">
             {model.factors.map(f => (
               <li key={f} className="text-slate-400 text-[11px] flex items-start gap-1.5">
-                <span className="text-violet-400 mt-0.5">•</span> {f}
+                <span className="text-blue-400 mt-0.5">•</span> {f}
               </li>
             ))}
           </ul>
@@ -476,7 +476,7 @@ export function AgentInbox({ signals: initialSignals, businessId }: AgentInboxPr
               <Badge className="bg-red-500/20 text-red-400 border-0 text-xs">{urgentCount} urgent</Badge>
             )}
             {queueSignals.length > 0 && (
-              <Badge className="bg-violet-500/20 text-violet-400 border-0 text-xs">
+              <Badge className="bg-blue-500/20 text-blue-400 border-0 text-xs">
                 {queueSignals.length} action{queueSignals.length !== 1 ? 's' : ''} pending
               </Badge>
             )}
@@ -584,18 +584,18 @@ export function AgentInbox({ signals: initialSignals, businessId }: AgentInboxPr
                         {sel ? <CheckSquare className="w-4 h-4 text-blue-400" /> : <Square className="w-4 h-4" />}
                       </button>
                     )}
-                    {isAutoExec && <Zap className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />}
+                    {isAutoExec && <Zap className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />}
                     <Icon className={cn('w-4 h-4 mt-0.5 flex-shrink-0', cfg.color)} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', cfg.badge)}>{cfg.label}</span>
                         {isExec && !isAutoExec && (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-400">
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">
                             Needs approval
                           </span>
                         )}
                         {isAutoExec && (
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center gap-1">
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-600/20 text-blue-400 flex items-center gap-1">
                             <Zap className="w-2.5 h-2.5" /> Auto-executed
                           </span>
                         )}
@@ -616,7 +616,7 @@ export function AgentInbox({ signals: initialSignals, businessId }: AgentInboxPr
                             size="sm"
                             disabled={exec}
                             onClick={() => executeSignal(signal)}
-                            className="h-7 text-xs bg-violet-600 hover:bg-violet-500 text-white border-0 gap-1"
+                            className="h-7 text-xs bg-blue-600 hover:bg-blue-500 text-white border-0 gap-1"
                           >
                             {exec
                               ? <><span className="w-2.5 h-2.5 border border-white/40 border-t-white rounded-full animate-spin" />Executing…</>
@@ -683,7 +683,7 @@ export function AgentInbox({ signals: initialSignals, businessId }: AgentInboxPr
                   size="sm"
                   disabled={bulkLoading}
                   onClick={bulkExecute}
-                  className="h-8 text-xs bg-violet-600 hover:bg-violet-500 text-white border-0 gap-1"
+                  className="h-8 text-xs bg-blue-600 hover:bg-blue-500 text-white border-0 gap-1"
                 >
                   {bulkLoading
                     ? <><span className="w-3 h-3 border border-white/40 border-t-white rounded-full animate-spin" />Executing…</>
@@ -727,7 +727,7 @@ function EmptyExecuted() {
       <p className="text-slate-300 font-medium">No auto-executions yet</p>
       <p className="text-slate-500 text-sm mt-1">
         Enable auto-execute in{' '}
-        <a href="/settings/agent" className="text-violet-400 hover:underline">Agent Settings</a>.
+        <a href="/settings/agent" className="text-blue-400 hover:underline">Agent Settings</a>.
       </p>
     </div>
   )
@@ -736,7 +736,7 @@ function EmptyExecuted() {
 function EmptyClear({ onRefresh, generating }: { onRefresh: () => void; generating: boolean }) {
   return (
     <div className="px-5 py-12 text-center">
-      <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-3" />
+      <CheckCircle2 className="w-8 h-8 text-blue-500 mx-auto mb-3" />
       <p className="text-slate-300 font-medium">All clear</p>
       <p className="text-slate-500 text-sm mt-1">Your agent is monitoring everything.</p>
       <button

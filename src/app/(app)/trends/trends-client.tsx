@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -16,7 +16,7 @@ interface Trend {
 
 const IMPACT_META = {
   high:   { badge: 'bg-red-950/50 text-red-400 border-red-900/50',    label: 'High' },
-  medium: { badge: 'bg-amber-950/50 text-amber-400 border-amber-900/50', label: 'Medium' },
+  medium: { badge: 'bg-slate-950/50 text-slate-500 border-slate-800/50', label: 'Medium' },
   low:    { badge: 'bg-slate-800 text-slate-400 border-slate-700',    label: 'Low' },
 }
 const CATEGORY_ICONS: Record<string, string> = {
@@ -81,7 +81,7 @@ export default function TrendsClient({
         <div>
           <h1 className="text-2xl font-bold text-white">Industry Trends</h1>
           <p className="text-slate-400 text-sm mt-0.5">
-            AI-curated for <span className="text-violet-400">{industry}</span>
+            AI-curated for <span className="text-blue-400">{industry}</span>
             {country && <> · <span className="text-slate-300">{country}</span></>}
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function TrendsClient({
           <button
             onClick={() => generate(canRefresh)}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
           >
             {loading ? (
               <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" /> Generating…</>
@@ -118,8 +118,8 @@ export default function TrendsClient({
             <p className="text-slate-400 text-sm leading-relaxed">
               This page shows <span className="text-white">6 AI-generated industry trends</span> tailored specifically to your business —
               using your industry, country, competitor data, win rate, and pipeline stats.
-              Each trend comes with a <span className="text-violet-300">key stat</span>, an <span className="text-amber-300">action tip</span> you can act on this month,
-              and a button to <span className="text-violet-300">instantly create a social post</span> from the trend.
+              Each trend comes with a <span className="text-blue-300">key stat</span>, an <span className="text-slate-400">action tip</span> you can act on this month,
+              and a button to <span className="text-blue-300">instantly create a social post</span> from the trend.
             </p>
             <div className="grid grid-cols-3 gap-3 mt-4">
               {[
@@ -156,7 +156,7 @@ export default function TrendsClient({
             Click "Generate Trends" to get AI-curated industry insights personalized for your business — including your competitors, win rate, and top channels.
           </p>
           <button onClick={() => generate(true)} disabled={loading}
-            className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
             ✨ Generate Trends Now
           </button>
         </div>
@@ -168,7 +168,7 @@ export default function TrendsClient({
           <div className="grid grid-cols-3 gap-3 mb-5">
             {[
               { label: 'High Impact', value: loading ? '—' : highCount.toString(), color: 'text-red-400', sub: 'trends to act on now' },
-              { label: 'Relevant to You', value: loading ? '—' : highRelCount.toString(), color: 'text-violet-400', sub: 'directly applicable' },
+              { label: 'Relevant to You', value: loading ? '—' : highRelCount.toString(), color: 'text-blue-400', sub: 'directly applicable' },
               { label: 'Last Updated', value: loading ? 'Generating…' : lastGen ? timeAgo(lastGen) : '—', color: 'text-slate-300', sub: 'from your business data' },
             ].map(s => (
               <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
@@ -196,7 +196,7 @@ export default function TrendsClient({
                 const isHighRelevance = trend.relevance === 'high'
                 return (
                   <div key={i} className={`bg-slate-900 border rounded-2xl p-5 transition-colors hover:border-slate-700 ${
-                    isHighRelevance ? 'border-violet-800/40' : 'border-slate-800'
+                    isHighRelevance ? 'border-slate-700/40' : 'border-slate-800'
                   }`}>
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-2 min-w-0">
@@ -208,7 +208,7 @@ export default function TrendsClient({
                           {im.label}
                         </span>
                         {isHighRelevance && (
-                          <span className="text-[10px] px-1.5 py-0.5 bg-violet-950/50 text-violet-400 border border-violet-800/40 rounded-full">
+                          <span className="text-[10px] px-1.5 py-0.5 bg-slate-950/50 text-blue-400 border border-slate-700/40 rounded-full">
                             For you
                           </span>
                         )}
@@ -219,7 +219,7 @@ export default function TrendsClient({
 
                     {trend.stat && (
                       <div className="mb-3 px-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-xl">
-                        <p className="text-violet-300 text-xs font-medium">📊 {trend.stat}</p>
+                        <p className="text-blue-300 text-xs font-medium">📊 {trend.stat}</p>
                       </div>
                     )}
 
@@ -233,7 +233,7 @@ export default function TrendsClient({
                         const params = new URLSearchParams({ trend: trend.title, tip: trend.action_tip })
                         router.push(`/content?${params.toString()}`)
                       }}
-                      className="w-full text-xs font-medium px-3 py-2 bg-violet-950/50 hover:bg-violet-900/50 text-violet-300 border border-violet-900/50 rounded-lg transition-colors"
+                      className="w-full text-xs font-medium px-3 py-2 bg-slate-950/50 hover:bg-slate-900/50 text-blue-300 border border-slate-800/50 rounded-lg transition-colors"
                     >
                       ✍️ Create Post from This Trend
                     </button>

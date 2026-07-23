@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -251,7 +251,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
         {/* Action status */}
         {actionStatus && (
-          <div className="px-4 py-2.5 bg-violet-950/40 border-b border-violet-800/30 text-violet-300 text-xs flex items-center gap-2">
+          <div className="px-4 py-2.5 bg-slate-950/40 border-b border-slate-700/30 text-blue-300 text-xs flex items-center gap-2">
             <Sparkles className="w-3 h-3 animate-pulse" />
             {actionStatus}
           </div>
@@ -272,13 +272,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                     key={item.href}
                     onClick={() => handleSelect(i)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                      isSelected ? 'bg-violet-600/20 text-white' : 'text-slate-300 hover:bg-slate-800'
+                      isSelected ? 'bg-blue-600/20 text-white' : 'text-slate-300 hover:bg-slate-800'
                     }`}
                   >
-                    <item.icon className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-violet-400' : 'text-slate-500'}`} />
+                    <item.icon className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-blue-400' : 'text-slate-500'}`} />
                     <span className="flex-1 text-sm">{item.label}</span>
                     <span className="text-[10px] text-slate-600">{item.group}</span>
-                    {isSelected && <ArrowRight className="w-3 h-3 text-violet-500" />}
+                    {isSelected && <ArrowRight className="w-3 h-3 text-blue-500" />}
                   </button>
                 )
               })}
@@ -299,13 +299,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                     key={action.label}
                     onClick={() => handleSelect(i)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                      isSelected ? 'bg-violet-600/20 text-white' : 'text-slate-300 hover:bg-slate-800'
+                      isSelected ? 'bg-blue-600/20 text-white' : 'text-slate-300 hover:bg-slate-800'
                     }`}
                   >
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      isSelected ? 'bg-violet-600/30 border border-violet-500/30' : 'bg-slate-800 border border-slate-700'
+                      isSelected ? 'bg-blue-600/30 border border-blue-500/30' : 'bg-slate-800 border border-slate-700'
                     }`}>
-                      <action.icon className={`w-3.5 h-3.5 ${isSelected ? 'text-violet-400' : 'text-slate-500'}`} />
+                      <action.icon className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-400' : 'text-slate-500'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{action.label}</p>

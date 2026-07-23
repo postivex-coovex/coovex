@@ -36,18 +36,18 @@ const CHANNEL_ICONS: Record<string, string> = {
 
 const CHANNEL_COLORS: Record<string, string> = {
   linkedin:  'bg-blue-900/30 text-blue-300',
-  instagram: 'bg-pink-900/30 text-pink-300',
-  facebook:  'bg-indigo-900/30 text-indigo-300',
+  instagram: 'bg-slate-900/30 text-slate-400',
+  facebook:  'bg-slate-900/30 text-blue-300',
   tiktok:    'bg-slate-700/50 text-slate-300',
-  wordpress: 'bg-orange-900/30 text-orange-300',
+  wordpress: 'bg-slate-900/30 text-slate-400',
   twitter:   'bg-sky-900/30 text-sky-300',
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  published:        'text-emerald-400 bg-emerald-950/40 border-emerald-800/30',
+  published:        'text-blue-400 bg-slate-950/40 border-slate-700/30',
   scheduled:        'text-blue-400 bg-blue-950/40 border-blue-800/30',
   draft:            'text-slate-500 bg-slate-800 border-slate-700',
-  pending_approval: 'text-amber-400 bg-amber-950/40 border-amber-800/30',
+  pending_approval: 'text-slate-500 bg-slate-950/40 border-slate-700/30',
 }
 
 function fmt(n: number) {
@@ -101,14 +101,14 @@ export default function ContentPerformancePage() {
       </div>
 
       {/* Connect banner */}
-      <div className="mb-6 bg-violet-950/20 border border-violet-800/30 rounded-xl px-4 py-3 flex items-center gap-3">
-        <span className="text-violet-400 text-lg flex-shrink-0">🔌</span>
-        <p className="text-violet-300/80 text-sm flex-1">
-          <span className="font-medium text-violet-300">Connect your social accounts</span> to automatically sync real engagement metrics (views, likes, comments, shares).
+      <div className="mb-6 bg-slate-950/20 border border-slate-700/30 rounded-xl px-4 py-3 flex items-center gap-3">
+        <span className="text-blue-400 text-lg flex-shrink-0">🔌</span>
+        <p className="text-blue-300/80 text-sm flex-1">
+          <span className="font-medium text-blue-300">Connect your social accounts</span> to automatically sync real engagement metrics (views, likes, comments, shares).
         </p>
         <Link
           href="/settings/integrations#social"
-          className="flex-shrink-0 text-xs px-3 py-1.5 bg-violet-700/30 hover:bg-violet-700/50 border border-violet-600/40 text-violet-300 rounded-lg transition-colors whitespace-nowrap"
+          className="flex-shrink-0 text-xs px-3 py-1.5 bg-blue-700/30 hover:bg-blue-700/50 border border-blue-600/40 text-blue-300 rounded-lg transition-colors whitespace-nowrap"
         >
           Connect accounts →
         </Link>
@@ -118,8 +118,8 @@ export default function ContentPerformancePage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Published Posts', value: String(published.length), icon: Eye,        color: 'text-blue-400' },
-          { label: 'Total Posts',     value: String(totalPosts),       icon: BarChart3,  color: 'text-violet-400' },
-          { label: 'Total Views',     value: '—',                      icon: TrendingUp, color: 'text-emerald-400', note: 'Connect to see' },
+          { label: 'Total Posts',     value: String(totalPosts),       icon: BarChart3,  color: 'text-blue-400' },
+          { label: 'Total Views',     value: '—',                      icon: TrendingUp, color: 'text-blue-400', note: 'Connect to see' },
           { label: 'Avg Engagement',  value: '—',                      icon: Heart,      color: 'text-rose-400',   note: 'Connect to see' },
         ].map(({ label, value, icon: Icon, color, note }) => (
           <div key={label} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center">
@@ -173,8 +173,8 @@ export default function ContentPerformancePage() {
                 {[
                   { label: 'Views',    icon: Eye,           color: 'text-blue-400' },
                   { label: 'Likes',    icon: Heart,         color: 'text-rose-400' },
-                  { label: 'Comments', icon: MessageCircle, color: 'text-violet-400' },
-                  { label: 'Shares',   icon: Share2,        color: 'text-emerald-400' },
+                  { label: 'Comments', icon: MessageCircle, color: 'text-blue-400' },
+                  { label: 'Shares',   icon: Share2,        color: 'text-blue-400' },
                 ].map(({ label, icon: Icon, color }) => (
                   <div key={label} className="bg-slate-800/50 rounded-xl p-4 text-center">
                     <Icon className={`w-5 h-5 ${color} mx-auto mb-2`} />
@@ -199,7 +199,7 @@ export default function ContentPerformancePage() {
               <button
                 key={k}
                 onClick={() => setSortBy(k)}
-                className={`px-3 py-1 rounded transition-colors capitalize ${sortBy === k ? 'text-violet-400 bg-violet-950/40' : 'hover:text-slate-300'}`}
+                className={`px-3 py-1 rounded transition-colors capitalize ${sortBy === k ? 'text-blue-400 bg-slate-950/40' : 'hover:text-slate-300'}`}
               >
                 {k === 'ctr' ? 'CTR' : k.charAt(0).toUpperCase() + k.slice(1)}
               </button>
@@ -214,7 +214,7 @@ export default function ContentPerformancePage() {
             <div className="text-5xl mb-4">✍️</div>
             <p className="text-slate-300 font-semibold text-lg mb-2">No posts yet</p>
             <p className="text-slate-500 text-sm mb-6">Create content and it will appear here with performance metrics</p>
-            <Link href="/content" className="text-violet-400 hover:text-violet-300 text-sm transition-colors">Go to Content Calendar →</Link>
+            <Link href="/content" className="text-blue-400 hover:text-blue-300 text-sm transition-colors">Go to Content Calendar →</Link>
           </div>
         ) : (
           <div className="divide-y divide-slate-800/50">

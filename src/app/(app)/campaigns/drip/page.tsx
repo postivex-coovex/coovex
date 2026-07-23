@@ -72,19 +72,19 @@ function StepCard({
     <div className="relative pl-8">
       {/* Timeline line */}
       <div className="absolute left-3 top-0 bottom-0 w-px bg-slate-800" />
-      <div className="absolute left-1.5 top-4 w-3 h-3 rounded-full bg-violet-600 border-2 border-slate-950" />
+      <div className="absolute left-1.5 top-4 w-3 h-3 rounded-full bg-blue-600 border-2 border-slate-950" />
 
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-3">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-slate-500 text-xs">
             {step.day === 0 ? 'Immediately' : `Day ${step.day}`}
           </span>
-          <span className="text-violet-400 text-xs font-medium">— Email {index + 1}</span>
+          <span className="text-blue-400 text-xs font-medium">— Email {index + 1}</span>
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => onGenerate(step.id)}
               disabled={generating === step.id}
-              className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+              className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
             >
               {generating === step.id ? '…' : '✨ AI Write'}
             </button>
@@ -99,7 +99,7 @@ function StepCard({
               type="number" min={0}
               value={step.day}
               onChange={e => onUpdate({ ...step, day: parseInt(e.target.value) || 0 })}
-              className="w-16 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-violet-500"
+              className="w-16 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-blue-500"
             />
           </div>
           <div>
@@ -107,7 +107,7 @@ function StepCard({
               value={step.subject}
               onChange={e => onUpdate({ ...step, subject: e.target.value })}
               placeholder="Email subject line"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <div>
@@ -116,7 +116,7 @@ function StepCard({
               onChange={e => onUpdate({ ...step, content: e.target.value })}
               placeholder="Email body preview…"
               rows={3}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
             />
           </div>
         </div>
@@ -220,7 +220,7 @@ function SequenceBuilder({ onSave, onCancel }: { onSave: (s: DripSequence) => vo
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="e.g. New Lead Welcome Sequence"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
             <div>
@@ -228,7 +228,7 @@ function SequenceBuilder({ onSave, onCancel }: { onSave: (s: DripSequence) => vo
               <select
                 value={trigger}
                 onChange={e => setTrigger(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
               >
                 {TRIGGERS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
@@ -238,7 +238,7 @@ function SequenceBuilder({ onSave, onCancel }: { onSave: (s: DripSequence) => vo
               <select
                 value={segment}
                 onChange={e => setSegment(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
               >
                 {SEGMENTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
@@ -252,7 +252,7 @@ function SequenceBuilder({ onSave, onCancel }: { onSave: (s: DripSequence) => vo
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs text-slate-400 font-medium">Email Steps</label>
-              <button onClick={addStep} className="text-xs text-violet-400 hover:text-violet-300 transition-colors">+ Add Step</button>
+              <button onClick={addStep} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">+ Add Step</button>
             </div>
             <div>
               {steps.map((step, i) => (
@@ -276,7 +276,7 @@ function SequenceBuilder({ onSave, onCancel }: { onSave: (s: DripSequence) => vo
             <button
               onClick={save}
               disabled={saving || !name.trim()}
-              className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+              className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
             >
               {saving ? 'Saving…' : 'Save Sequence'}
             </button>
@@ -312,7 +312,7 @@ export default function DripPage() {
         </div>
         <button
           onClick={() => setShowBuilder(true)}
-          className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           <span className="text-lg leading-none">+</span> New Sequence
         </button>
@@ -326,7 +326,7 @@ export default function DripPage() {
         </div>
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
           <p className="text-slate-500 text-xs mb-1">Active</p>
-          <p className="text-emerald-400 text-2xl font-bold">{sequences.filter(s => s.active).length}</p>
+          <p className="text-blue-400 text-2xl font-bold">{sequences.filter(s => s.active).length}</p>
         </div>
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
           <p className="text-slate-500 text-xs mb-1">Total Enrolled</p>
@@ -334,10 +334,10 @@ export default function DripPage() {
         </div>
       </div>
 
-      <div className="bg-amber-950/20 border border-amber-800/30 rounded-xl p-4 mb-6 flex items-start gap-3">
-        <span className="text-amber-400 text-lg flex-shrink-0">⚡</span>
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-4 mb-6 flex items-start gap-3">
+        <span className="text-slate-500 text-lg flex-shrink-0">⚡</span>
         <div>
-          <p className="text-amber-300 text-sm font-medium">Email sending requires Resend</p>
+          <p className="text-slate-400 text-sm font-medium">Email sending requires Resend</p>
           <p className="text-slate-400 text-xs mt-0.5">Sequences can be designed now. Connect Resend to start enrolling leads automatically.</p>
         </div>
       </div>
@@ -350,7 +350,7 @@ export default function DripPage() {
             Build automated email sequences that nurture leads on autopilot — triggered by their actions.
           </p>
           <button onClick={() => setShowBuilder(true)}
-            className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+            className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
             Build First Sequence
           </button>
         </div>
@@ -362,7 +362,7 @@ export default function DripPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-white font-semibold text-sm">{seq.name}</h3>
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${seq.active ? 'bg-emerald-900/50 text-emerald-300' : 'bg-slate-800 text-slate-400'}`}>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${seq.active ? 'bg-slate-900/50 text-blue-300' : 'bg-slate-800 text-slate-400'}`}>
                       {seq.active ? '● Active' : '○ Paused'}
                     </span>
                   </div>
@@ -380,7 +380,7 @@ export default function DripPage() {
                     className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
                       seq.active
                         ? 'border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
-                        : 'border-emerald-700/40 text-emerald-400 hover:bg-emerald-900/20'
+                        : 'border-slate-700/40 text-blue-400 hover:bg-slate-900/20'
                     }`}
                   >
                     {seq.active ? 'Pause' : 'Activate'}

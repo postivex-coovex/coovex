@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -15,19 +15,19 @@ interface Notification {
 }
 
 const TYPE_META: Record<string, { icon: string; label: string; color: string; bg: string }> = {
-  opportunity: { icon: '💡', label: 'Opportunity', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  warning:     { icon: '⚠️', label: 'Warning',     color: 'text-amber-400',   bg: 'bg-amber-500/10'  },
+  opportunity: { icon: '💡', label: 'Opportunity', color: 'text-blue-400', bg: 'bg-blue-600/10' },
+  warning:     { icon: '⚠️', label: 'Warning',     color: 'text-slate-500',   bg: 'bg-slate-600/10'  },
   urgent:      { icon: '❗', label: 'Urgent',      color: 'text-red-400',     bg: 'bg-red-500/10'    },
   alert:       { icon: '🔴', label: 'Alert',       color: 'text-red-400',     bg: 'bg-red-500/10'    },
-  action:      { icon: '⚡', label: 'Action',      color: 'text-violet-400',  bg: 'bg-violet-500/10' },
+  action:      { icon: '⚡', label: 'Action',      color: 'text-blue-400',  bg: 'bg-blue-500/10' },
   insight:     { icon: '📊', label: 'Insight',     color: 'text-blue-400',    bg: 'bg-blue-500/10'   },
   info:        { icon: '📌', label: 'Info',        color: 'text-slate-400',   bg: 'bg-slate-800'     },
-  done:        { icon: '✅', label: 'Done',        color: 'text-emerald-400', bg: 'bg-emerald-500/10'},
+  done:        { icon: '✅', label: 'Done',        color: 'text-blue-400', bg: 'bg-blue-600/10'},
 }
 
 const PRIORITY_BADGE: Record<string, string> = {
   high:   'text-red-400   bg-red-950/40   border-red-800/30',
-  medium: 'text-amber-400 bg-amber-950/40 border-amber-800/30',
+  medium: 'text-slate-500 bg-slate-950/40 border-slate-700/30',
   low:    'text-slate-400 bg-slate-800    border-slate-700',
 }
 
@@ -110,10 +110,10 @@ export default function NotificationsPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <Bell className="w-5 h-5 text-violet-400" />
+            <Bell className="w-5 h-5 text-blue-400" />
             <h1 className="text-2xl font-bold text-white">Notifications</h1>
             {unread > 0 && (
-              <span className="text-xs text-white bg-violet-600 px-2 py-0.5 rounded-full font-semibold">{unread}</span>
+              <span className="text-xs text-white bg-blue-600 px-2 py-0.5 rounded-full font-semibold">{unread}</span>
             )}
           </div>
           <p className="text-slate-400 text-sm">Agent signals and alerts from your AI</p>
@@ -140,7 +140,7 @@ export default function NotificationsPage() {
         <div className="grid grid-cols-3 gap-3">
           {[
             { label: 'Total',         value: notifications.length,                   color: 'text-white',       bg: 'bg-slate-900' },
-            { label: 'Unread',        value: unread,                                 color: 'text-violet-400',  bg: 'bg-violet-500/10' },
+            { label: 'Unread',        value: unread,                                 color: 'text-blue-400',  bg: 'bg-blue-500/10' },
             { label: 'High Priority', value: highCount,                              color: highCount > 0 ? 'text-red-400' : 'text-slate-500', bg: highCount > 0 ? 'bg-red-500/10' : 'bg-slate-900' },
           ].map(s => (
             <div key={s.label} className={`${s.bg} border border-slate-800 rounded-xl p-4 text-center`}>
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
                       <div className="flex items-start gap-4">
                         {/* Unread dot */}
                         <div className="flex-shrink-0 mt-1.5">
-                          {!n.read && <div className="w-2 h-2 rounded-full bg-violet-500" />}
+                          {!n.read && <div className="w-2 h-2 rounded-full bg-blue-500" />}
                           {n.read  && <div className="w-2 h-2 rounded-full bg-transparent" />}
                         </div>
 
@@ -214,10 +214,10 @@ export default function NotificationsPage() {
                               {!n.read && (
                                 <button
                                   onClick={() => markRead(n.id)}
-                                  className="w-6 h-6 rounded-full bg-slate-800 hover:bg-violet-600/20 border border-slate-700 hover:border-violet-500/50 flex items-center justify-center transition-colors group"
+                                  className="w-6 h-6 rounded-full bg-slate-800 hover:bg-blue-600/20 border border-slate-700 hover:border-blue-500/50 flex items-center justify-center transition-colors group"
                                   title="Mark as read"
                                 >
-                                  <Check className="w-3 h-3 text-slate-500 group-hover:text-violet-400" />
+                                  <Check className="w-3 h-3 text-slate-500 group-hover:text-blue-400" />
                                 </button>
                               )}
                             </div>
@@ -243,7 +243,7 @@ export default function NotificationsPage() {
 
           <p className="text-slate-600 text-xs text-center pt-2">
             {visible.length} notification{visible.length !== 1 ? 's' : ''} ·{' '}
-            <Link href="/dashboard" className="text-violet-500 hover:text-violet-400 transition-colors">
+            <Link href="/dashboard" className="text-blue-500 hover:text-blue-400 transition-colors">
               Open Agent Inbox
             </Link>
           </p>
@@ -255,17 +255,17 @@ export default function NotificationsPage() {
 
 function EmptyState({ filter }: { filter: 'all' | 'unread' }) {
   const COMING = [
-    { icon: <Zap className="w-4 h-4 text-violet-400" />,      title: 'AI Signals',         desc: 'Business insights and opportunities detected by your AI agent' },
-    { icon: <AlertTriangle className="w-4 h-4 text-amber-400" />, title: 'Priority Alerts', desc: 'Urgent issues like review drops, lead churn, or campaign failures' },
-    { icon: <TrendingUp className="w-4 h-4 text-emerald-400" />, title: 'Growth Insights',  desc: 'Lead score changes, content performance spikes, proposal views' },
+    { icon: <Zap className="w-4 h-4 text-blue-400" />,      title: 'AI Signals',         desc: 'Business insights and opportunities detected by your AI agent' },
+    { icon: <AlertTriangle className="w-4 h-4 text-slate-500" />, title: 'Priority Alerts', desc: 'Urgent issues like review drops, lead churn, or campaign failures' },
+    { icon: <TrendingUp className="w-4 h-4 text-blue-400" />, title: 'Growth Insights',  desc: 'Lead score changes, content performance spikes, proposal views' },
     { icon: <Bot className="w-4 h-4 text-blue-400" />,          title: 'Agent Actions',     desc: 'What your AI completed — posts drafted, audits run, briefs generated' },
   ]
 
   return (
     <div className="space-y-4">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-10 flex flex-col items-center text-center">
-        <div className="w-14 h-14 rounded-full bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
-          <Bell className="w-6 h-6 text-violet-400" />
+        <div className="w-14 h-14 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4">
+          <Bell className="w-6 h-6 text-blue-400" />
         </div>
         <h3 className="text-white font-semibold text-base mb-1">
           {filter === 'unread' ? 'All caught up!' : 'No notifications yet'}
@@ -277,7 +277,7 @@ function EmptyState({ filter }: { filter: 'all' | 'unread' }) {
         </p>
         <Link
           href="/dashboard"
-          className="mt-4 text-sm text-violet-400 hover:text-violet-300 transition-colors font-medium"
+          className="mt-4 text-sm text-blue-400 hover:text-blue-300 transition-colors font-medium"
         >
           → Go to Agent Inbox
         </Link>

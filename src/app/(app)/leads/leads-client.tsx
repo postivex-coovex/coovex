@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -25,7 +25,7 @@ function LeadAvatar({ name, email, website, size = 7 }: { name: string; email?: 
 
   if (!domain || step === 'initials') {
     return (
-      <div className={`${sizeClass} rounded-full bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-300 text-xs font-bold flex-shrink-0`}>
+      <div className={`${sizeClass} rounded-full bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-300 text-xs font-bold flex-shrink-0`}>
         {initial}
       </div>
     )
@@ -58,10 +58,10 @@ const STAGE_LABELS: Record<string, string> = {
 
 const STAGE_COLORS: Record<string, string> = {
   new: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  contacted: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
-  qualified: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  proposal_sent: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  won: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+  contacted: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  qualified: 'bg-slate-600/20 text-slate-400 border-slate-500/30',
+  proposal_sent: 'bg-blue-600/20 text-slate-400 border-slate-500/30',
+  won: 'bg-blue-600/20 text-blue-300 border-blue-500/30',
   lost: 'bg-red-500/20 text-red-300 border-red-500/30',
 }
 
@@ -227,7 +227,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
             </Link>
             <button
               onClick={() => setShowAdd(true)}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
               <span className="text-lg leading-none">+</span> Add Lead
             </button>
           </div>
@@ -241,7 +241,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
           className={cn(
             'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
             activeTab === 'leads'
-              ? 'bg-violet-600 text-white'
+              ? 'bg-blue-600 text-white'
               : 'text-slate-400 hover:text-white hover:bg-slate-800'
           )}
         >
@@ -252,7 +252,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
           className={cn(
             'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
             activeTab === 'reddit'
-              ? 'bg-orange-600 text-white'
+              ? 'bg-blue-600 text-white'
               : 'text-slate-400 hover:text-white hover:bg-slate-800'
           )}
         >
@@ -272,7 +272,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
               'flex items-center gap-3 px-4 py-3 rounded-xl border text-sm',
               importing
                 ? 'bg-slate-900 border-slate-700 text-slate-300'
-                : 'bg-emerald-950/50 border-emerald-700/50 text-emerald-300'
+                : 'bg-slate-950/50 border-slate-700/50 text-blue-300'
             )}>
               {importing ? (
                 <><span className="animate-spin">⏳</span> Importing CSV...</>
@@ -314,12 +314,12 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search leads..."
-              className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-violet-500 transition-colors flex-1 min-w-48 max-w-xs"
+              className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition-colors flex-1 min-w-48 max-w-xs"
             />
             <select
               value={stageFilter}
               onChange={e => setStageFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none"
+              className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none"
             >
               <option value="all">All stages</option>
               {stages.map(s => <option key={s} value={s}>{STAGE_LABELS[s]}</option>)}
@@ -331,7 +331,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                   onClick={() => setView(v)}
                   className={cn(
                     'px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
-                    view === v ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                    view === v ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
                   )}
                 >
                   {v === 'pipeline' ? '🎯 Pipeline' : '☰ List'}
@@ -350,7 +350,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                   <p className="text-slate-600 text-sm mt-1">Add your first lead or connect your lead sources</p>
                   <button
                     onClick={() => setShowAdd(true)}
-                    className="mt-4 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                    className="mt-4 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
                   >
                     + Add First Lead
                   </button>
@@ -361,7 +361,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                     <tr className="border-b border-slate-800">
                       <th className="px-4 py-3 w-8" onClick={toggleSelectAll}>
                         <div className={`w-3.5 h-3.5 rounded border-2 flex items-center justify-center cursor-pointer transition-colors ${
-                          selectedIds.size === filtered.length && filtered.length > 0 ? 'bg-violet-600 border-violet-600' : 'border-slate-600 hover:border-slate-400'
+                          selectedIds.size === filtered.length && filtered.length > 0 ? 'bg-blue-600 border-blue-600' : 'border-slate-600 hover:border-slate-400'
                         }`}>
                           {selectedIds.size === filtered.length && filtered.length > 0 && (
                             <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 12l5 5L20 7"/></svg>
@@ -384,11 +384,11 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                       <tr
                         key={lead.id}
                         onClick={() => router.push(`/leads/${lead.id}`)}
-                        className={`border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors cursor-pointer ${selectedIds.has(lead.id) ? 'bg-violet-950/20' : ''}`}
+                        className={`border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors cursor-pointer ${selectedIds.has(lead.id) ? 'bg-slate-950/20' : ''}`}
                       >
                         <td className="px-4 py-3 w-8" onClick={e => toggleSelectLead(lead.id, e)}>
                           <div className={`w-3.5 h-3.5 rounded border-2 flex items-center justify-center transition-colors ${
-                            selectedIds.has(lead.id) ? 'bg-violet-600 border-violet-600' : 'border-slate-600 hover:border-violet-500'
+                            selectedIds.has(lead.id) ? 'bg-blue-600 border-blue-600' : 'border-slate-600 hover:border-blue-500'
                           }`}>
                             {selectedIds.has(lead.id) && (
                               <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 12l5 5L20 7"/></svg>
@@ -411,7 +411,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                         {/* Research done */}
                         <td className="px-3 py-3 text-center">
                           {lead.research_data
-                            ? <span title="Research done" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-xs">✓</span>
+                            ? <span title="Research done" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-600/20 text-blue-400 text-xs">✓</span>
                             : <span title="No research" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 text-slate-600 text-xs">—</span>
                           }
                         </td>
@@ -425,7 +425,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                         {/* Call script done */}
                         <td className="px-3 py-3 text-center">
                           {lead.research_data?.call_script_done
-                            ? <span title="Call script ready" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-violet-500/20 text-violet-400 text-xs">✓</span>
+                            ? <span title="Call script ready" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs">✓</span>
                             : <span title="No call script" className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 text-slate-600 text-xs">—</span>
                           }
                         </td>
@@ -449,7 +449,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <div className="w-16 bg-slate-800 rounded-full h-1.5">
-                              <div className="h-1.5 bg-violet-500 rounded-full" style={{ width: `${lead.score}%` }} />
+                              <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: `${lead.score}%` }} />
                             </div>
                             <span className="text-slate-400 text-xs">{lead.score}</span>
                           </div>
@@ -467,12 +467,12 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
 
           {/* Selection action bar */}
           {selectedIds.size > 0 && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 border border-violet-700/50 shadow-2xl shadow-violet-900/30 px-5 py-3 rounded-2xl">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 border border-slate-700/50 shadow-2xl shadow-violet-900/30 px-5 py-3 rounded-2xl">
               <span className="text-slate-300 text-sm font-medium">{selectedIds.size} lead{selectedIds.size !== 1 ? 's' : ''} selected</span>
               <div className="w-px h-4 bg-slate-700" />
               <button
                 onClick={() => setShowCampaignModal(true)}
-                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold px-4 py-1.5 rounded-xl transition-colors"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-1.5 rounded-xl transition-colors"
               >
                 📣 Create Campaign
               </button>
@@ -500,7 +500,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                       value={campaignName}
                       onChange={e => setCampaignName(e.target.value)}
                       placeholder="e.g. Digital Marketing Outreach July"
-                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -509,7 +509,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                       value={campaignSubject}
                       onChange={e => setCampaignSubject(e.target.value)}
                       placeholder="e.g. Quick question about your business"
-                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -520,7 +520,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                   <button
                     onClick={createCampaign}
                     disabled={creatingCampaign || !campaignName.trim() || !campaignSubject.trim()}
-                    className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
                   >
                     {creatingCampaign
                       ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Creating…</>
@@ -583,7 +583,7 @@ export function LeadsClient({ leads, businessId }: LeadsClientProps) {
                               <span className="text-slate-600 text-xs">{SOURCE_LABELS[lead.source]}</span>
                               <div className="flex items-center gap-1">
                                 <div className="w-10 bg-slate-800 rounded-full h-1">
-                                  <div className="h-1 bg-violet-500 rounded-full" style={{ width: `${lead.score}%` }} />
+                                  <div className="h-1 bg-blue-500 rounded-full" style={{ width: `${lead.score}%` }} />
                                 </div>
                                 <span className="text-slate-500 text-xs">{lead.score}</span>
                               </div>
@@ -667,21 +667,21 @@ function AddLeadModal({ businessId, onClose }: { businessId: string; onClose: ()
                   required={req}
                   value={form[k as keyof typeof form]}
                   onChange={e => set(k, e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
             ))}
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1">Source</label>
               <select value={form.source} onChange={e => set('source', e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none">
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none">
                 {Object.entries(SOURCE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1">Stage</label>
               <select value={form.stage} onChange={e => set('stage', e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none">
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none">
                 {Object.entries(STAGE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
@@ -689,7 +689,7 @@ function AddLeadModal({ businessId, onClose }: { businessId: string; onClose: ()
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1">Notes</label>
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)} rows={2}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors resize-none" />
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none" />
           </div>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
@@ -697,7 +697,7 @@ function AddLeadModal({ businessId, onClose }: { businessId: string; onClose: ()
               Cancel
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
+              className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">
               {saving ? 'Saving...' : 'Add Lead'}
             </button>
           </div>

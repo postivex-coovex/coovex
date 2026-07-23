@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -248,17 +248,17 @@ export function AppSidebar({ user, currentBusinessName = 'My Business', onNavCli
             item.sub ? 'px-3 py-1.5 ml-4 pr-7' : 'px-3 py-2 pr-7',
             active
               ? isDashboard
-                ? 'bg-gradient-to-r from-violet-600/30 to-blue-600/20 text-white ring-1 ring-violet-500/50 shadow-sm shadow-violet-900/30'
+                ? 'bg-gradient-to-r from-blue-600/30 to-blue-600/20 text-white ring-1 ring-blue-500/50 shadow-sm shadow-violet-900/30'
                 : 'bg-blue-600/20 text-blue-400'
               : isDashboard
-                ? 'bg-gradient-to-r from-violet-900/50 to-slate-800 text-slate-100 hover:from-violet-800/50 hover:to-slate-700 ring-1 ring-violet-700/40 shadow-sm shadow-violet-900/20'
+                ? 'bg-gradient-to-r from-slate-900/50 to-slate-800 text-slate-100 hover:from-blue-700/50 hover:to-slate-700 ring-1 ring-blue-700/40 shadow-sm shadow-violet-900/20'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
           )}
         >
           <item.icon className={cn(
             'flex-shrink-0',
             item.sub ? 'w-3.5 h-3.5' : 'w-4 h-4',
-            isDashboard ? 'text-violet-400' : active ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-400'
+            isDashboard ? 'text-blue-400' : active ? 'text-blue-400' : 'text-slate-500 group-hover:text-slate-400'
           )} />
           <span className={cn('flex-1 truncate', item.sub && 'text-[13px]', isDashboard && 'font-semibold')}>{item.label}</span>
           {item.badge && (
@@ -267,12 +267,12 @@ export function AppSidebar({ user, currentBusinessName = 'My Business', onNavCli
             </Badge>
           )}
           {item.href === '/content' && contentDraftCount > 0 && (
-            <span className="bg-amber-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center leading-none flex-shrink-0">
+            <span className="bg-slate-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center leading-none flex-shrink-0">
               {contentDraftCount}
             </span>
           )}
           {item.href === '/agent/inbox' && inboxCount > 0 && (
-            <span className="bg-violet-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center leading-none flex-shrink-0">
+            <span className="bg-blue-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center leading-none flex-shrink-0">
               {inboxCount}
             </span>
           )}
@@ -284,7 +284,7 @@ export function AppSidebar({ user, currentBusinessName = 'My Business', onNavCli
           <button
             onClick={(e) => { e.stopPropagation(); togglePin(item.href) }}
             title={isPinned ? 'Remove from favorites' : 'Add to favorites'}
-            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded text-slate-600 hover:text-amber-400 transition-colors"
+            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded text-slate-600 hover:text-slate-500 transition-colors"
           >
             {isPinned
               ? <PinOff className="w-3 h-3" />
@@ -324,7 +324,7 @@ export function AppSidebar({ user, currentBusinessName = 'My Business', onNavCli
         {/* ── FAVORITES (drag-sortable) ── */}
         {pinnedItems.length > 0 && (
           <div className="mb-3">
-            <p className="px-3 py-1 text-[10px] font-semibold text-amber-500/80 uppercase tracking-wider flex items-center gap-1.5">
+            <p className="px-3 py-1 text-[10px] font-semibold text-slate-600/80 uppercase tracking-wider flex items-center gap-1.5">
               <Star className="w-2.5 h-2.5 fill-amber-500/80" /> Favorites
             </p>
             <div className="space-y-0.5">
@@ -346,7 +346,7 @@ export function AppSidebar({ user, currentBusinessName = 'My Business', onNavCli
                     onMouseLeave={() => setHoveredHref(null)}
                     className={cn(
                       'relative rounded-md transition-all',
-                      isDragOver && 'ring-1 ring-amber-500/40 bg-amber-500/5'
+                      isDragOver && 'ring-1 ring-slate-400/40 bg-slate-600/5'
                     )}
                   >
                     <Link
@@ -370,12 +370,12 @@ export function AppSidebar({ user, currentBusinessName = 'My Business', onNavCli
                         </Badge>
                       )}
                       {item.href === '/content' && contentDraftCount > 0 && (
-                        <span className="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none flex-shrink-0">
+                        <span className="bg-slate-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none flex-shrink-0">
                           {contentDraftCount}
                         </span>
                       )}
                       {item.href === '/agent/inbox' && inboxCount > 0 && (
-                        <span className="bg-violet-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none flex-shrink-0">
+                        <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none flex-shrink-0">
                           {inboxCount}
                         </span>
                       )}

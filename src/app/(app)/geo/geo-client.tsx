@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, Component, type ReactNode } from 'react'
 import { CheckCircle2, XCircle, RefreshCw, Copy, Download, ChevronDown, ChevronUp, Globe2, Brain, Sparkles, AlertCircle } from 'lucide-react'
@@ -169,7 +169,7 @@ function ScoreRing({ score, size = 140, label = '/ 100' }: { score: number; size
   const r = size * 0.39
   const circ = 2 * Math.PI * r
   const dash = (score / 100) * circ
-  const color = score >= 65 ? '#10b981' : score >= 35 ? '#f59e0b' : '#ef4444'
+  const color = score >= 65 ? '#2563eb' : score >= 35 ? '#64748b' : '#ef4444'
   return (
     <div className="relative flex items-center justify-center">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
@@ -188,8 +188,8 @@ function ScoreRing({ score, size = 140, label = '/ 100' }: { score: number; size
 
 function LikelihoodBadge({ v }: { v: 'high' | 'medium' | 'low' }) {
   const meta = {
-    high:   { cls: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25', label: 'High' },
-    medium: { cls: 'bg-amber-500/15 text-amber-400 border border-amber-500/25',     label: 'Medium' },
+    high:   { cls: 'bg-blue-600/15 text-blue-400 border border-blue-500/25', label: 'High' },
+    medium: { cls: 'bg-slate-600/15 text-slate-500 border border-slate-500/25',     label: 'Medium' },
     low:    { cls: 'bg-slate-700 text-slate-400 border border-slate-600',             label: 'Low' },
   }[v]
   return <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${meta.cls}`}>{meta.label}</span>
@@ -198,7 +198,7 @@ function LikelihoodBadge({ v }: { v: 'high' | 'medium' | 'low' }) {
 function ImpactBadge({ v }: { v: 'high' | 'medium' | 'low' }) {
   const meta = {
     high:   { cls: 'bg-red-500/15 text-red-400 border border-red-500/25',          label: 'High impact' },
-    medium: { cls: 'bg-amber-500/15 text-amber-400 border border-amber-500/25',     label: 'Medium impact' },
+    medium: { cls: 'bg-slate-600/15 text-slate-500 border border-slate-500/25',     label: 'Medium impact' },
     low:    { cls: 'bg-slate-700 text-slate-400 border border-slate-600',            label: 'Low impact' },
   }[v]
   return <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${meta.cls}`}>{meta.label}</span>
@@ -223,24 +223,24 @@ function VerifiedTaskCard({ task, verified, scanned, onGoToGenerators }: {
   const [expanded, setExpanded] = useState(false)
   const priorityMeta = {
     critical: { label: 'Critical', cls: 'bg-red-500/20 text-red-400 border border-red-500/30' },
-    high:     { label: 'High',     cls: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' },
+    high:     { label: 'High',     cls: 'bg-slate-600/20 text-slate-500 border border-slate-500/30' },
     medium:   { label: 'Medium',   cls: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
   }
   const meta = priorityMeta[task.priority]
   return (
-    <div className={`border rounded-xl transition-all ${!scanned ? 'bg-slate-900 border-slate-800' : verified ? 'bg-emerald-950/20 border-emerald-800/30' : 'bg-slate-900 border-slate-800'}`}>
+    <div className={`border rounded-xl transition-all ${!scanned ? 'bg-slate-900 border-slate-800' : verified ? 'bg-slate-950/20 border-slate-700/30' : 'bg-slate-900 border-slate-800'}`}>
       <div className="flex items-start gap-3 p-4">
         <div className="flex-shrink-0 mt-0.5">
           {!scanned ? <div className="w-5 h-5 rounded-full border-2 border-slate-700 bg-slate-800" />
-            : verified ? <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            : verified ? <CheckCircle2 className="w-5 h-5 text-blue-400" />
             : <XCircle className="w-5 h-5 text-red-400" />}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className={`text-sm font-medium ${verified ? 'text-emerald-300' : 'text-white'}`}>{task.title}</p>
+            <p className={`text-sm font-medium ${verified ? 'text-blue-300' : 'text-white'}`}>{task.title}</p>
             <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${meta.cls}`}>{meta.label}</span>
             {scanned && (
-              <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${verified ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/15 text-red-400 border border-red-500/20'}`}>
+              <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${verified ? 'bg-blue-600/15 text-blue-400 border border-blue-500/20' : 'bg-red-500/15 text-red-400 border border-red-500/20'}`}>
                 {verified ? '✓ Verified' : '✗ Not detected'}
               </span>
             )}
@@ -249,7 +249,7 @@ function VerifiedTaskCard({ task, verified, scanned, onGoToGenerators }: {
             <div className="mt-3 space-y-2">
               <p className="text-xs text-slate-400 leading-relaxed">{task.howTo}</p>
               {!verified && task.generatorTab && (
-                <button onClick={onGoToGenerators} className="text-xs text-violet-400 hover:text-violet-300 underline transition-colors">
+                <button onClick={onGoToGenerators} className="text-xs text-blue-400 hover:text-blue-300 underline transition-colors">
                   → Open Generators tab to create this file
                 </button>
               )}
@@ -302,7 +302,7 @@ class IntelligenceBoundary extends Component<{ children: ReactNode; onReset: () 
         <p className="text-slate-400 text-sm mb-6">The cached data may be corrupted. Regenerate to fix this.</p>
         <button
           onClick={() => { this.setState({ crashed: false }); this.props.onReset() }}
-          className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm rounded-lg transition-colors"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg transition-colors"
         >
           Regenerate Analysis
         </button>
@@ -403,9 +403,9 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
   if (!intelligence || generating) {
     return (
       <div className="space-y-4 pb-10">
-        <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-8">
+        <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-8">
           <div className="text-center mb-6">
-            <Brain className={`w-12 h-12 text-violet-400 mx-auto mb-4 ${generating ? 'animate-pulse' : ''}`} />
+            <Brain className={`w-12 h-12 text-blue-400 mx-auto mb-4 ${generating ? 'animate-pulse' : ''}`} />
             <h2 className="text-lg font-semibold text-white mb-2">AI Visibility Intelligence</h2>
             {!generating && (
               <>
@@ -421,10 +421,10 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                     { icon: '🤖', title: 'Entity Score', desc: 'How clearly AI can identify your business (0–100)' },
                     { icon: '🗣️', title: 'AI Voice', desc: 'The exact words AI would use to describe you when recommending you' },
                   ].map((f, i) => (
-                    <div key={i} className={`flex items-start gap-2.5 p-3 rounded-xl border ${f.highlight ? 'bg-violet-950/30 border-violet-700/40' : 'bg-slate-900/50 border-slate-800'}`}>
+                    <div key={i} className={`flex items-start gap-2.5 p-3 rounded-xl border ${f.highlight ? 'bg-slate-950/30 border-slate-700/40' : 'bg-slate-900/50 border-slate-800'}`}>
                       <span className="text-lg flex-shrink-0">{f.icon}</span>
                       <div>
-                        <p className={`text-xs font-semibold ${f.highlight ? 'text-violet-300' : 'text-slate-300'}`}>{f.title}</p>
+                        <p className={`text-xs font-semibold ${f.highlight ? 'text-blue-300' : 'text-slate-300'}`}>{f.title}</p>
                         <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{f.desc}</p>
                       </div>
                     </div>
@@ -436,7 +436,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
             <button
               onClick={onGenerate}
               disabled={generating}
-              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-colors"
             >
               <Sparkles className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} />
               {generating ? 'Analyzing…' : 'Generate Full AI Report'}
@@ -456,8 +456,8 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
               <div className="flex items-center gap-2 px-4 py-2 bg-slate-900 border-b border-slate-800">
                 <div className="flex gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-red-500/60" />
-                  <span className="w-3 h-3 rounded-full bg-amber-500/60" />
-                  <span className="w-3 h-3 rounded-full bg-emerald-500/60" />
+                  <span className="w-3 h-3 rounded-full bg-slate-600/60" />
+                  <span className="w-3 h-3 rounded-full bg-blue-600/60" />
                 </div>
                 <span className="text-[11px] font-mono text-slate-500 ml-1">coovex ~ geo-intelligence</span>
               </div>
@@ -466,9 +466,9 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                   <div key={i} className="flex items-start gap-2">
                     <span className="text-slate-600 select-none flex-shrink-0">$</span>
                     <span className={
-                      line.startsWith('✅') ? 'text-emerald-400' :
+                      line.startsWith('✅') ? 'text-blue-400' :
                       line.startsWith('❌') || line.startsWith('Error') ? 'text-red-400' :
-                      line.startsWith('⚠️') ? 'text-amber-400' :
+                      line.startsWith('⚠️') ? 'text-slate-500' :
                       'text-slate-300'
                     }>
                       {line}
@@ -476,9 +476,9 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                   </div>
                 ))}
                 {generating && (
-                  <div className="flex items-center gap-2 text-violet-400">
+                  <div className="flex items-center gap-2 text-blue-400">
                     <span className="text-slate-600 select-none">$</span>
-                    <span className="inline-block w-2 h-4 bg-violet-400 animate-pulse rounded-sm" />
+                    <span className="inline-block w-2 h-4 bg-blue-400 animate-pulse rounded-sm" />
                   </div>
                 )}
               </div>
@@ -495,8 +495,8 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
     : intelligence.prompt_examples.filter(p => p.ai === promptFilter)
 
   const coverageMeta = {
-    strong:  { icon: '✅', cls: 'text-emerald-400', bg: 'bg-emerald-950/20 border-emerald-800/30' },
-    weak:    { icon: '⚠️',  cls: 'text-amber-400',   bg: 'bg-amber-950/20 border-amber-800/30'   },
+    strong:  { icon: '✅', cls: 'text-blue-400', bg: 'bg-slate-950/20 border-slate-700/30' },
+    weak:    { icon: '⚠️',  cls: 'text-slate-500',   bg: 'bg-slate-950/20 border-slate-700/30'   },
     missing: { icon: '❌', cls: 'text-red-400',      bg: 'bg-red-950/20 border-red-800/30'       },
   }
 
@@ -517,12 +517,12 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
           <button
             onClick={onGenerate}
             disabled={generating}
-            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-3 h-3 ${generating ? 'animate-spin' : ''}`} />
             {generating ? 'Regenerating…' : 'Regenerate'}
           </button>
-          <p className="text-[10px] text-violet-400/60">5 credits · 7-day cache</p>
+          <p className="text-[10px] text-blue-400/60">5 credits · 7-day cache</p>
         </div>
       </div>
 
@@ -539,7 +539,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
               <span>🗣️</span> How AI Would Describe You
             </p>
             <p className="text-xs text-slate-500 mb-3">When a user asks a relevant question, AI assistants (once optimized) would say:</p>
-            <blockquote className="text-slate-200 text-sm leading-relaxed border-l-2 border-violet-500 pl-4 italic">
+            <blockquote className="text-slate-200 text-sm leading-relaxed border-l-2 border-blue-500 pl-4 italic">
               &ldquo;{intelligence.ai_voice_summary}&rdquo;
             </blockquote>
           </div>
@@ -554,7 +554,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
       {intelligence.actual_ai_visibility ? (
         <LiveVisibilityCheck visibility={intelligence.actual_ai_visibility} geo={currentGeo} />
       ) : (
-        <div className="bg-violet-950/15 border border-violet-800/30 rounded-2xl p-5 flex items-center justify-between gap-4">
+        <div className="bg-slate-950/15 border border-slate-700/30 rounded-2xl p-5 flex items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0">✨</span>
             <div>
@@ -568,7 +568,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
           <button
             onClick={onGenerate}
             disabled={generating}
-            className="flex-shrink-0 flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+            className="flex-shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
           >
             <Sparkles className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} />
             {generating ? 'Checking…' : 'Run Check'}
@@ -588,7 +588,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
         <div className="flex gap-1 flex-wrap mb-4">
           <button
             onClick={() => setPromptFilter('all')}
-            className={`text-xs px-3 py-1 rounded-lg border transition-colors ${promptFilter === 'all' ? 'bg-violet-600 border-violet-600 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}`}
+            className={`text-xs px-3 py-1 rounded-lg border transition-colors ${promptFilter === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}`}
           >
             All ({intelligence.prompt_examples.length})
           </button>
@@ -596,7 +596,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
             <button
               key={ai}
               onClick={() => setPromptFilter(ai)}
-              className={`text-xs px-3 py-1 rounded-lg border transition-colors ${promptFilter === ai ? 'bg-violet-600 border-violet-600 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}`}
+              className={`text-xs px-3 py-1 rounded-lg border transition-colors ${promptFilter === ai ? 'bg-blue-600 border-blue-600 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}`}
             >
               {AI_ICONS[ai]} {ai}
             </button>
@@ -626,7 +626,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-white mb-1">📊 Topic Coverage</h3>
         <p className="text-xs text-slate-500 mb-4">
-          Topics where AI needs to know about your business. <span className="text-violet-400">Not covered</span> or <span className="text-amber-400">Weak</span> = create a page on your website for that topic — CooVex can write it for you.
+          Topics where AI needs to know about your business. <span className="text-blue-400">Not covered</span> or <span className="text-slate-500">Weak</span> = create a page on your website for that topic — CooVex can write it for you.
         </p>
         <div className="space-y-3">
           {intelligence.topic_clusters.map((cluster, i) => {
@@ -644,8 +644,8 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                      cluster.coverage === 'strong' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' :
-                      cluster.coverage === 'weak'   ? 'bg-amber-500/15 text-amber-400 border-amber-500/25' :
+                      cluster.coverage === 'strong' ? 'bg-blue-600/15 text-blue-400 border-blue-500/25' :
+                      cluster.coverage === 'weak'   ? 'bg-slate-600/15 text-slate-500 border-slate-500/25' :
                                                       'bg-red-500/15 text-red-400 border-red-500/25'
                     }`}>
                       {cluster.coverage === 'strong' ? 'Strong' : cluster.coverage === 'weak' ? 'Weak' : 'Not covered'}
@@ -653,17 +653,17 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                     {needsContent && (
                       isClusterDone ? (
                         <a href="/content"
-                          className="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 transition-colors whitespace-nowrap">
+                          className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-900/40 hover:bg-slate-900/60 text-blue-400 border border-slate-700/40 transition-colors whitespace-nowrap">
                           View draft →
                         </a>
                       ) : (
                         <button
                           onClick={() => handleGenerateCluster(cluster, i)}
                           disabled={isClusterGenerating}
-                          className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 disabled:opacity-50 text-violet-300 border border-violet-700/40 transition-colors whitespace-nowrap"
+                          className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 disabled:opacity-50 text-blue-300 border border-slate-700/40 transition-colors whitespace-nowrap"
                         >
                           {isClusterGenerating ? (
-                            <><span className="w-2.5 h-2.5 border border-violet-400 border-t-transparent rounded-full animate-spin" />Writing…</>
+                            <><span className="w-2.5 h-2.5 border border-blue-400 border-t-transparent rounded-full animate-spin" />Writing…</>
                           ) : (
                             <>✨ Write with AI · 8 credits</>
                           )}
@@ -683,7 +683,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                   <div className="mt-2 flex items-center gap-1.5">
                     <span className="text-[10px] text-slate-500">Create this page on your site:</span>
                     <span className={`text-[10px] font-mono font-medium ${
-                      cluster.coverage === 'missing' ? 'text-red-400' : cluster.coverage === 'weak' ? 'text-amber-400' : 'text-emerald-400'
+                      cluster.coverage === 'missing' ? 'text-red-400' : cluster.coverage === 'weak' ? 'text-slate-500' : 'text-blue-400'
                     }`}>
                       {baseUrl}{cluster.suggested_url}
                     </span>
@@ -712,9 +712,9 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
             const doneInfo = gapDone[i]
             return (
               <div key={i} className={`flex items-start gap-3 p-4 rounded-xl border transition-colors ${
-                isDone            ? 'bg-emerald-950/20 border-emerald-800/30' :
+                isDone            ? 'bg-slate-950/20 border-slate-700/30' :
                 gap.impact === 'high'   ? 'bg-red-950/10 border-red-800/20' :
-                gap.impact === 'medium' ? 'bg-amber-950/10 border-amber-800/20' :
+                gap.impact === 'medium' ? 'bg-slate-950/10 border-slate-700/20' :
                                           'bg-slate-800/30 border-slate-700/50'
               }`}>
                 <span className="text-lg flex-shrink-0 mt-0.5">{isDone ? '✅' : CONTENT_TYPE_ICONS[gap.type]}</span>
@@ -723,7 +723,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                     <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{gap.type}</span>
                     <ImpactBadge v={gap.impact} />
                     {isDone && doneInfo && (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-600/15 text-blue-400 border border-blue-500/25">
                         {doneInfo.pushed ? `Pushed to site ✓` : `Saved to ${doneInfo.channel} drafts`}
                       </span>
                     )}
@@ -736,7 +736,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                 {isDone ? (
                   <a
                     href="/content"
-                    className="flex-shrink-0 text-[11px] px-3 py-1.5 rounded-lg bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800/40 transition-colors"
+                    className="flex-shrink-0 text-[11px] px-3 py-1.5 rounded-lg bg-slate-900/40 hover:bg-slate-900/60 text-blue-400 border border-slate-700/40 transition-colors"
                   >
                     View →
                   </a>
@@ -744,11 +744,11 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                   <button
                     onClick={() => handleGenerateContent(gap, i)}
                     disabled={isGenerating}
-                    className="flex-shrink-0 flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 disabled:opacity-50 text-violet-300 border border-violet-700/40 transition-colors whitespace-nowrap"
+                    className="flex-shrink-0 flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 disabled:opacity-50 text-blue-300 border border-slate-700/40 transition-colors whitespace-nowrap"
                   >
                     {isGenerating ? (
                       <>
-                        <span className="w-3 h-3 border border-violet-400 border-t-transparent rounded-full animate-spin" />
+                        <span className="w-3 h-3 border border-blue-400 border-t-transparent rounded-full animate-spin" />
                         Writing…
                       </>
                     ) : (
@@ -763,7 +763,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
       </div>
 
       {/* Regenerate after creating content */}
-      <div className="bg-gradient-to-r from-violet-950/40 to-slate-900 border border-violet-700/40 rounded-2xl p-5 flex items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-slate-950/40 to-slate-900 border border-slate-700/40 rounded-2xl p-5 flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-semibold text-white mb-1">✅ Published the content above?</p>
           <p className="text-xs text-slate-400 leading-relaxed">
@@ -774,12 +774,12 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
           <button
             onClick={onGenerate}
             disabled={generating}
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-violet-900/40 whitespace-nowrap"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-violet-900/40 whitespace-nowrap"
           >
             <RefreshCw className={`w-4 h-4 ${generating ? 'animate-spin' : ''}`} />
             {generating ? 'Regenerating…' : 'Regenerate Report'}
           </button>
-          <p className="text-[10px] text-violet-400/70">5 AI credits</p>
+          <p className="text-[10px] text-blue-400/70">5 AI credits</p>
         </div>
       </div>
 
@@ -891,8 +891,8 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
   const discoverability = currentGeo?.ai_discoverability ?? null
   const score = currentGeo?.geo_score ?? 0
   const discColors = {
-    high:   'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-    medium: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
+    high:   'bg-blue-600/20 text-blue-400 border border-blue-500/30',
+    medium: 'bg-slate-600/20 text-slate-500 border border-slate-500/30',
     low:    'bg-red-500/20 text-red-400 border border-red-500/30',
   }
 
@@ -913,8 +913,8 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
       <div className="bg-slate-900 border-b border-slate-800 px-6 py-5">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-violet-600/20 flex items-center justify-center">
-              <Globe2 className="w-5 h-5 text-violet-400" />
+            <div className="w-9 h-9 rounded-xl bg-blue-600/20 flex items-center justify-center">
+              <Globe2 className="w-5 h-5 text-blue-400" />
             </div>
             <div>
               <h1 className="text-lg font-semibold text-white">GEO Optimizer</h1>
@@ -926,7 +926,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
             <button
               onClick={handleScan}
               disabled={scanning}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm transition-colors"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm transition-colors"
             >
               <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
               {scanning ? 'Scanning…' : 'Run GEO Scan'}
@@ -949,12 +949,12 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeTab === tab.id ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                activeTab === tab.id ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
               {tab.label}
               {'badge' in tab && tab.badge && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-violet-400" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-400" />
               )}
             </button>
           ))}
@@ -968,7 +968,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                 <Globe2 className="w-12 h-12 text-slate-600 mx-auto mb-4" />
                 <h2 className="text-lg font-medium text-white mb-2">No GEO data yet</h2>
                 <p className="text-slate-400 text-sm mb-5">Run a website audit or click "Run GEO Scan" to check your AI discoverability.</p>
-                <button onClick={handleScan} disabled={scanning} className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm transition-colors">
+                <button onClick={handleScan} disabled={scanning} className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm transition-colors">
                   {scanning ? 'Scanning…' : 'Run GEO Scan'}
                 </button>
               </div>
@@ -1006,13 +1006,13 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                           <div
                             key={item.key}
                             className={`flex items-start gap-2 p-3 rounded-xl border ${
-                              pass ? 'bg-emerald-950/30 border-emerald-800/30' : 'bg-slate-800/50 border-slate-700/50'
+                              pass ? 'bg-slate-950/30 border-slate-700/30' : 'bg-slate-800/50 border-slate-700/50'
                             }`}
                           >
-                            {pass ? <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                            {pass ? <CheckCircle2 className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                                   : <XCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />}
                             <div>
-                              <p className={`text-xs font-medium ${pass ? 'text-emerald-300' : 'text-slate-300'}`}>{item.label}</p>
+                              <p className={`text-xs font-medium ${pass ? 'text-blue-300' : 'text-slate-300'}`}>{item.label}</p>
                               <p className="text-[11px] text-slate-500 mt-0.5">{qualityNote || item.desc}</p>
                             </div>
                           </div>
@@ -1025,7 +1025,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                 {/* Enhanced signals row — only shown if this is a new-format scan */}
                 {currentGeo.llms_txt_quality !== undefined ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div className={`flex items-center gap-3 p-4 rounded-xl border ${currentGeo.robots_ai_allowed ? 'bg-emerald-950/20 border-emerald-800/30' : 'bg-slate-900 border-slate-800'}`}>
+                    <div className={`flex items-center gap-3 p-4 rounded-xl border ${currentGeo.robots_ai_allowed ? 'bg-slate-950/20 border-slate-700/30' : 'bg-slate-900 border-slate-800'}`}>
                       <span className="text-xl">{currentGeo.robots_ai_allowed ? '✅' : '⚠️'}</span>
                       <div>
                         <p className="text-xs font-semibold text-white">AI Bot Access</p>
@@ -1033,8 +1033,8 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                       </div>
                     </div>
                     <div className={`flex items-center gap-3 p-4 rounded-xl border ${
-                      currentGeo.llms_txt_quality === 'good'  ? 'bg-emerald-950/20 border-emerald-800/30' :
-                      currentGeo.llms_txt_quality === 'basic' ? 'bg-amber-950/20 border-amber-800/30' :
+                      currentGeo.llms_txt_quality === 'good'  ? 'bg-slate-950/20 border-slate-700/30' :
+                      currentGeo.llms_txt_quality === 'basic' ? 'bg-slate-950/20 border-slate-700/30' :
                                                                  'bg-slate-900 border-slate-800'
                     }`}>
                       <span className="text-xl">
@@ -1048,7 +1048,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                         </p>
                       </div>
                     </div>
-                    <div className={`flex items-center gap-3 p-4 rounded-xl border ${currentGeo.faq_content ? 'bg-emerald-950/20 border-emerald-800/30' : 'bg-slate-900 border-slate-800'}`}>
+                    <div className={`flex items-center gap-3 p-4 rounded-xl border ${currentGeo.faq_content ? 'bg-slate-950/20 border-slate-700/30' : 'bg-slate-900 border-slate-800'}`}>
                       <span className="text-xl">{currentGeo.faq_content ? '✅' : '❌'}</span>
                       <div>
                         <p className="text-xs font-semibold text-white">FAQ Content</p>
@@ -1071,13 +1071,13 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
 
                 {/* ── Intelligence summary or nudge ── */}
                 {!intelligence ? (
-                  <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5 flex items-center justify-between gap-4">
+                  <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5 flex items-center justify-between gap-4">
                     <div>
                       <p className="text-sm font-semibold text-white mb-0.5">🤖 See which prompts should find you</p>
                       <p className="text-xs text-slate-400">AI Intelligence tab tells you exactly what users type in ChatGPT/Perplexity that should surface your business, and what content to create.</p>
                     </div>
                     <button onClick={() => setActiveTab('intelligence')}
-                      className="flex-shrink-0 bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+                      className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
                       Analyze →
                     </button>
                   </div>
@@ -1091,15 +1091,15 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                           <p className="text-sm font-semibold text-white flex items-center gap-2">
                             ✨ Live AI Visibility
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                              intelligence.actual_ai_visibility.visibility_rate >= 60 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25' :
-                              intelligence.actual_ai_visibility.visibility_rate >= 30 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25' :
+                              intelligence.actual_ai_visibility.visibility_rate >= 60 ? 'bg-blue-600/15 text-blue-400 border border-blue-500/25' :
+                              intelligence.actual_ai_visibility.visibility_rate >= 30 ? 'bg-slate-600/15 text-slate-500 border border-slate-500/25' :
                               'bg-red-500/15 text-red-400 border border-red-500/25'
                             }`}>
                               {intelligence.actual_ai_visibility.visibility_rate}%
                             </span>
                           </p>
                           <button onClick={() => setActiveTab('intelligence')}
-                            className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                            className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
                             See full check →
                           </button>
                         </div>
@@ -1108,7 +1108,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                             <div key={i} className="flex items-center gap-2.5 py-1">
                               <span className="flex-shrink-0 text-sm">{c.found ? '✅' : '❌'}</span>
                               <p className="text-xs text-slate-400 truncate flex-1">&ldquo;{c.query}&rdquo;</p>
-                              <span className={`text-[10px] font-semibold flex-shrink-0 ${c.found ? 'text-emerald-400' : 'text-red-400'}`}>
+                              <span className={`text-[10px] font-semibold flex-shrink-0 ${c.found ? 'text-blue-400' : 'text-red-400'}`}>
                                 {c.found ? 'Mentioned' : 'Not found'}
                               </span>
                             </div>
@@ -1119,7 +1119,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                             <span className="text-sm flex-shrink-0">💡</span>
                             <p className="text-[11px] text-slate-500 leading-relaxed">
                               To get mentioned: create the <strong className="text-slate-400">content below</strong>, add JSON-LD structured data, publish /llms.txt, and get listed on G2/Capterra. Then regenerate to re-check.
-                              <button onClick={() => setActiveTab('intelligence')} className="ml-1 text-violet-400 hover:text-violet-300 underline transition-colors">See full guide →</button>
+                              <button onClick={() => setActiveTab('intelligence')} className="ml-1 text-blue-400 hover:text-blue-300 underline transition-colors">See full guide →</button>
                             </p>
                           </div>
                         )}
@@ -1132,7 +1132,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm font-semibold text-white">✍️ Content to Create</p>
                           <button onClick={() => setActiveTab('intelligence')}
-                            className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                            className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
                             See all {intelligence.content_gaps.length} →
                           </button>
                         </div>
@@ -1150,7 +1150,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-1.5 mb-0.5">
                                     <span className="text-[10px] font-semibold text-slate-500 uppercase">{gap.type}</span>
-                                    <span className={`text-[10px] font-semibold px-1 rounded ${gap.impact === 'high' ? 'text-red-400' : 'text-amber-400'}`}>
+                                    <span className={`text-[10px] font-semibold px-1 rounded ${gap.impact === 'high' ? 'text-red-400' : 'text-slate-500'}`}>
                                       {gap.impact} impact
                                     </span>
                                   </div>
@@ -1158,7 +1158,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                                 </div>
                                 <button
                                   onClick={() => setActiveTab('intelligence')}
-                                  className="flex-shrink-0 text-[11px] px-2.5 py-1 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-700/40 transition-colors whitespace-nowrap"
+                                  className="flex-shrink-0 text-[11px] px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-slate-700/40 transition-colors whitespace-nowrap"
                                 >
                                   Generate
                                 </button>
@@ -1179,7 +1179,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                           <div className="flex items-center justify-between mb-3">
                             <p className="text-sm font-semibold text-white">📋 Pending AI Tasks</p>
                             <button onClick={() => setActiveTab('tasks')}
-                              className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                              className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
                               See all tasks →
                             </button>
                           </div>
@@ -1190,7 +1190,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                                 <p className="text-xs text-slate-300 flex-1">{task.title}</p>
                                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${
                                   task.priority === 'critical' ? 'bg-red-500/15 text-red-400 border-red-500/25' :
-                                  task.priority === 'high'     ? 'bg-amber-500/15 text-amber-400 border-amber-500/25' :
+                                  task.priority === 'high'     ? 'bg-slate-600/15 text-slate-500 border-slate-500/25' :
                                   'bg-blue-500/15 text-blue-400 border-blue-500/25'
                                 }`}>{task.priority}</span>
                               </div>
@@ -1227,7 +1227,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                       <p className="text-xs text-slate-400">Scanning</p>
                       <p className="text-sm text-white mt-0.5">{websiteUrl}</p>
                     </div>
-                    <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                    <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
                       Visit site →
                     </a>
                   </div>
@@ -1269,7 +1269,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                   <p className="text-xs text-slate-400 mt-1">An emerging standard that tells AI models (Perplexity, ChatGPT, Gemini) about your business. Place at your website root at <code className="text-slate-300">/llms.txt</code>.</p>
                 </div>
                 <button onClick={() => handleGenerate('llms_txt')} disabled={genLoading === 'llms_txt'}
-                  className="flex-shrink-0 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm transition-colors ml-4">
+                  className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm transition-colors ml-4">
                   {genLoading === 'llms_txt' ? 'Generating…' : 'Generate llms.txt'}
                 </button>
               </div>
@@ -1293,7 +1293,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                   <p className="text-xs text-slate-400 mt-1">Structured data that helps Google SGE, Bing AI, and other AI search engines understand your business entity.</p>
                 </div>
                 <button onClick={() => handleGenerate('jsonld')} disabled={genLoading === 'jsonld'}
-                  className="flex-shrink-0 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm transition-colors ml-4">
+                  className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm transition-colors ml-4">
                   {genLoading === 'jsonld' ? 'Generating…' : 'Generate JSON-LD'}
                 </button>
               </div>
@@ -1330,7 +1330,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                 ) : (
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <p className="text-xl font-bold text-emerald-400">{verifiedCount}</p>
+                      <p className="text-xl font-bold text-blue-400">{verifiedCount}</p>
                       <p className="text-xs text-slate-500">Verified</p>
                     </div>
                     <div className="w-px h-8 bg-slate-700" />
@@ -1348,7 +1348,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
               </div>
               <div className="flex flex-col items-end gap-1">
                 <button onClick={handleScan} disabled={scanning}
-                  className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm transition-colors">
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-4 py-2 rounded-xl text-sm transition-colors">
                   <RefreshCw className={`w-3.5 h-3.5 ${scanning ? 'animate-spin' : ''}`} />
                   {scanning ? 'Verifying…' : 'Re-scan to Verify'}
                 </button>

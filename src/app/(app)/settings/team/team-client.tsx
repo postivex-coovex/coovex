@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { Copy, Check, ChevronDown, ChevronUp, Trash2, Shield } from 'lucide-react'
@@ -19,9 +19,9 @@ const PERMISSION_LABELS: Record<string, { label: string; icon: string; desc: str
 }
 
 const ROLE_META: Record<string, { label: string; color: string }> = {
-  owner:  { label: 'Owner',  color: 'text-violet-400' },
+  owner:  { label: 'Owner',  color: 'text-blue-400' },
   admin:  { label: 'Admin',  color: 'text-blue-400' },
-  member: { label: 'Member', color: 'text-emerald-400' },
+  member: { label: 'Member', color: 'text-blue-400' },
   viewer: { label: 'Viewer', color: 'text-slate-400' },
 }
 
@@ -70,7 +70,7 @@ function PermissionGrid({
             key={key}
             className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
               checked
-                ? 'bg-violet-950/30 border-violet-700/50'
+                ? 'bg-slate-950/30 border-slate-700/50'
                 : 'bg-slate-800/30 border-slate-800 opacity-60'
             } ${readonly ? 'pointer-events-none' : 'hover:border-slate-700'}`}
           >
@@ -144,7 +144,7 @@ function MemberRow({
         {/* Avatar */}
         <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
           isPending ? 'bg-slate-800 text-slate-500 border border-dashed border-slate-700'
-                    : 'bg-violet-600/25 border border-violet-500/30 text-violet-300'
+                    : 'bg-blue-600/25 border border-blue-500/30 text-blue-300'
         }`}>
           {initials}
         </div>
@@ -155,7 +155,7 @@ function MemberRow({
             <p className="text-sm font-medium text-white truncate">{member.name || member.email}</p>
             {isMe && <span className="text-[10px] text-slate-600">(you)</span>}
             {isPending && (
-              <span className="text-[10px] bg-amber-950/40 text-amber-400 border border-amber-800/40 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] bg-slate-950/40 text-slate-500 border border-slate-700/40 px-1.5 py-0.5 rounded-full">
                 Pending
               </span>
             )}
@@ -179,9 +179,9 @@ function MemberRow({
               <button
                 onClick={copyLink}
                 title="Copy invite link"
-                className="p-1.5 rounded-lg text-slate-500 hover:text-violet-400 hover:bg-slate-800 transition-colors"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-blue-400 hover:bg-slate-800 transition-colors"
               >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                {copied ? <Check className="w-4 h-4 text-blue-400" /> : <Copy className="w-4 h-4" />}
               </button>
             )}
             <button
@@ -230,7 +230,7 @@ function MemberRow({
             <button
               onClick={save}
               disabled={saving}
-              className="px-4 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
             >
               {saving ? 'Saving…' : 'Save Changes'}
             </button>
@@ -335,7 +335,7 @@ export function TeamClient({
             <h2 className="text-sm font-semibold text-white">Invite Team Member</h2>
             <button
               onClick={() => { setShowInvite(v => !v); setInviteLink('') }}
-              className="text-xs bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-lg transition-colors"
+              className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition-colors"
             >
               {showInvite ? 'Cancel' : '+ Invite'}
             </button>
@@ -349,14 +349,14 @@ export function TeamClient({
                   value={inviteEmail}
                   onChange={e => setInviteEmail(e.target.value)}
                   placeholder="colleague@company.com"
-                  className="sm:col-span-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500"
+                  className="sm:col-span-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500"
                 />
                 <input
                   type="text"
                   value={inviteName}
                   onChange={e => setInviteName(e.target.value)}
                   placeholder="Name (optional)"
-                  className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500"
+                  className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500"
                 />
                 <select
                   value={inviteRole}
@@ -373,7 +373,7 @@ export function TeamClient({
                 <button
                   type="button"
                   onClick={() => setShowPermsForm(v => !v)}
-                  className="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors"
+                  className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
                 >
                   <Shield className="w-3.5 h-3.5" />
                   {showPermsForm ? 'Hide' : 'Set'} feature permissions
@@ -387,11 +387,11 @@ export function TeamClient({
               </div>
 
               {inviteLink && (
-                <div className="flex items-center gap-2 bg-slate-800 border border-violet-700/40 rounded-lg px-3 py-2.5">
+                <div className="flex items-center gap-2 bg-slate-800 border border-slate-700/40 rounded-lg px-3 py-2.5">
                   <span className="text-slate-400 text-xs flex-1 truncate">{inviteLink}</span>
                   <button type="button" onClick={() => copyLink(inviteLink)}
-                    className="flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 transition-colors flex-shrink-0">
-                    {linkCopied ? <><Check className="w-3.5 h-3.5 text-emerald-400" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy Link</>}
+                    className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors flex-shrink-0">
+                    {linkCopied ? <><Check className="w-3.5 h-3.5 text-blue-400" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy Link</>}
                   </button>
                 </div>
               )}
@@ -399,7 +399,7 @@ export function TeamClient({
               <button
                 type="submit"
                 disabled={inviting}
-                className="px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors"
               >
                 {inviting ? 'Generating…' : inviteLink ? '↻ Regenerate Link' : 'Generate Invite Link →'}
               </button>
@@ -476,7 +476,7 @@ export function TeamClient({
                         <span className="text-xs font-semibold text-white">{name}</span>
                         <span className="text-xs text-slate-400">{log.description ?? log.action}</span>
                         {log.credits_used > 0 && (
-                          <span className="text-[10px] text-violet-400 bg-violet-950/40 border border-violet-800/40 px-1.5 py-0.5 rounded-full">
+                          <span className="text-[10px] text-blue-400 bg-slate-950/40 border border-slate-700/40 px-1.5 py-0.5 rounded-full">
                             {log.credits_used} credits
                           </span>
                         )}

@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 
@@ -20,15 +20,15 @@ export default async function WelcomePage() {
       {/* Step indicator */}
       <div className="flex items-center gap-2 mb-10">
         {[1, 2, 3, 4, 5, 6].map((s) => (
-          <div key={s} className={`h-1.5 rounded-full flex-1 ${s === 1 ? 'bg-violet-500' : 'bg-slate-200'}`} />
+          <div key={s} className={`h-1.5 rounded-full flex-1 ${s === 1 ? 'bg-blue-500' : 'bg-slate-200'}`} />
         ))}
       </div>
 
       {/* ── Hero ── */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-full px-4 py-1.5 mb-5">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-violet-700 text-sm font-semibold">AI Agent Ready</span>
+        <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-full px-4 py-1.5 mb-5">
+          <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
+          <span className="text-blue-700 text-sm font-semibold">AI Agent Ready</span>
         </div>
 
         <h1 className="text-4xl font-extrabold text-slate-900 mb-4 leading-tight">
@@ -61,14 +61,14 @@ export default async function WelcomePage() {
               icon: '🔗',
               title: 'Your website & social links',
               desc: 'Website URL, LinkedIn, Facebook, Instagram — all optional',
-              color: 'bg-violet-50 border-violet-100',
+              color: 'bg-blue-50 border-blue-100',
             },
             {
               step: '3',
               icon: '👥',
               title: 'Team members',
               desc: 'Invite colleagues — or skip and do it later',
-              color: 'bg-emerald-50 border-emerald-100',
+              color: 'bg-blue-50 border-emerald-100',
             },
           ].map((item) => (
             <div key={item.step} className={`flex items-center gap-4 rounded-xl border p-4 ${item.color}`}>
@@ -106,7 +106,7 @@ export default async function WelcomePage() {
       <div className="text-center">
         <Link
           href="/onboarding/business"
-          className="inline-flex items-center gap-3 bg-violet-600 hover:bg-violet-700 active:scale-[0.99] text-white font-bold px-10 py-4 rounded-xl transition-all text-lg shadow-lg shadow-violet-200"
+          className="inline-flex items-center gap-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold px-10 py-4 rounded-xl transition-all text-lg shadow-lg shadow-violet-200"
         >
           Start Setup — 3 min
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

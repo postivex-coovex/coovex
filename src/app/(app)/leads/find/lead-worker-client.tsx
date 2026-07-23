@@ -40,7 +40,7 @@ interface LeadWorkerClientProps {
 }
 
 function ScoreRing({ score }: { score: number }) {
-  const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#6366f1'
+  const color = score >= 80 ? '#2563eb' : score >= 60 ? '#64748b' : '#6366f1'
   return (
     <div className="flex items-center gap-1.5">
       <svg width="28" height="28" viewBox="0 0 28 28">
@@ -55,8 +55,8 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 function FitBar({ score }: { score: number }) {
-  const color = score >= 80 ? 'bg-emerald-500' : score >= 60 ? 'bg-amber-500' : 'bg-slate-400'
-  const textColor = score >= 80 ? 'text-emerald-600 dark:text-emerald-400' : score >= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500'
+  const color = score >= 80 ? 'bg-blue-600' : score >= 60 ? 'bg-slate-600' : 'bg-slate-400'
+  const textColor = score >= 80 ? 'text-blue-600 dark:text-blue-400' : score >= 60 ? 'text-slate-600 dark:text-slate-500' : 'text-slate-500'
   return (
     <div className="flex items-center gap-2">
       <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -177,7 +177,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
         <Link href="/leads" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-sm transition-colors">← Leads</Link>
         <span className="text-slate-300 dark:text-slate-700">/</span>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">AI Lead Worker</h1>
-        <span className="text-xs bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700/40 px-2 py-0.5 rounded-full font-medium">Beta</span>
+        <span className="text-xs bg-blue-50 dark:bg-slate-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-slate-700/40 px-2 py-0.5 rounded-full font-medium">Beta</span>
       </div>
       <p className="text-slate-500 text-sm mb-6">
         AI reads your selected Business Audit to understand your services, then builds an Ideal Customer Profile and searches for matching leads.
@@ -192,7 +192,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
         {audits.length === 0 ? (
           <div className="text-center py-4">
             <p className="text-slate-500 text-sm mb-3">No audits found. Run a Business Audit first so AI knows your services and target market.</p>
-            <Link href="/audit" className="text-violet-600 hover:text-violet-500 text-sm font-medium">→ Run Business Audit</Link>
+            <Link href="/audit" className="text-blue-600 hover:text-blue-500 text-sm font-medium">→ Run Business Audit</Link>
           </div>
         ) : (
           <div className="space-y-2 mb-4">
@@ -201,7 +201,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
                 key={audit.id}
                 className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
                   selectedAuditId === audit.id
-                    ? 'border-violet-500 bg-white dark:bg-slate-800'
+                    ? 'border-blue-500 bg-white dark:bg-slate-800'
                     : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
@@ -218,8 +218,8 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{audit.url}</p>
                   <p className="text-xs text-slate-400">
                     {new Date(audit.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    {audit.hasIntel && <span className="ml-2 text-emerald-500">✓ AI intel available</span>}
-                    {!audit.hasIntel && <span className="ml-2 text-amber-500">⚠ Re-run audit for better results</span>}
+                    {audit.hasIntel && <span className="ml-2 text-blue-500">✓ AI intel available</span>}
+                    {!audit.hasIntel && <span className="ml-2 text-slate-600">⚠ Re-run audit for better results</span>}
                   </p>
                 </div>
               </label>
@@ -230,7 +230,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
         <button
           onClick={findLeads}
           disabled={loading || !selectedAuditId || audits.length === 0}
-          className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -255,7 +255,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
             {!setup.tavily && (
               <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-blue-200 dark:border-slate-700 rounded-xl px-4 py-2.5">
                 <div>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Tavily Search <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded ml-1">Not configured</span></p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Tavily Search <span className="text-[10px] bg-slate-100 dark:bg-slate-900/30 text-slate-700 dark:text-slate-500 px-1.5 py-0.5 rounded ml-1">Not configured</span></p>
                   <p className="text-xs text-slate-500">AI-powered web search — 1,000 free calls/month</p>
                   <code className="text-[10px] text-slate-400">TAVILY_API_KEY=tvly-...</code>
                 </div>
@@ -268,7 +268,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
             {!setup.hunter && (
               <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-blue-200 dark:border-slate-700 rounded-xl px-4 py-2.5">
                 <div>
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Hunter.io Email Finder <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded ml-1">Not configured</span></p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Hunter.io Email Finder <span className="text-[10px] bg-slate-100 dark:bg-slate-900/30 text-slate-700 dark:text-slate-500 px-1.5 py-0.5 rounded ml-1">Not configured</span></p>
                   <p className="text-xs text-slate-500">Finds decision-maker emails from company domains — 25 free/month</p>
                   <code className="text-[10px] text-slate-400">HUNTER_API_KEY=...</code>
                 </div>
@@ -279,7 +279,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
               </div>
             )}
             {setup.tavily && !setup.hunter && (
-              <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
                 <span>✓</span> Tavily configured — real web search active
               </div>
             )}
@@ -308,14 +308,14 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5">
               <h2 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <span>🎯</span> Ideal Customer Profile
-                <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded ml-auto">AI Generated</span>
+                <span className="text-[10px] bg-blue-50 dark:bg-slate-900/30 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded ml-auto">AI Generated</span>
               </h2>
               <div className="space-y-4">
                 <div>
                   <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Company Types</p>
                   <div className="flex flex-wrap gap-1.5">
                     {icp.company_types.map((t, i) => (
-                      <span key={i} className="text-xs bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800/40 px-2 py-0.5 rounded-md">{t}</span>
+                      <span key={i} className="text-xs bg-blue-50 dark:bg-slate-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-slate-700/40 px-2 py-0.5 rounded-md">{t}</span>
                     ))}
                   </div>
                 </div>
@@ -344,7 +344,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
                   <div className="space-y-1">
                     {icp.pain_points.map((p, i) => (
                       <div key={i} className="text-xs text-slate-600 dark:text-slate-400 flex items-start gap-1.5">
-                        <span className="text-amber-500 mt-0.5 flex-shrink-0">•</span> {p}
+                        <span className="text-slate-600 mt-0.5 flex-shrink-0">•</span> {p}
                       </div>
                     ))}
                   </div>
@@ -369,12 +369,12 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
               </h2>
               <div className="flex items-center gap-2">
                 {!hasRealResults && (
-                  <span className="text-xs bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/30 px-2 py-0.5 rounded-full">
+                  <span className="text-xs bg-slate-100 dark:bg-slate-950/20 text-slate-700 dark:text-slate-500 border border-slate-300 dark:border-slate-700/30 px-2 py-0.5 rounded-full">
                     ⚠ AI-Generated (web search unavailable)
                   </span>
                 )}
                 {hasRealResults && (
-                  <span className="text-xs bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30 px-2 py-0.5 rounded-full">
+                  <span className="text-xs bg-blue-50 dark:bg-slate-950/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-slate-700/30 px-2 py-0.5 rounded-full">
                     ✓ From web search
                   </span>
                 )}
@@ -382,7 +382,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
             </div>
 
             {!hasRealResults && (
-              <div className="bg-amber-50 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-800/30 rounded-xl px-4 py-3 mb-4 text-xs text-amber-700 dark:text-amber-400">
+              <div className="bg-slate-100 dark:bg-slate-950/10 border border-slate-300 dark:border-slate-700/30 rounded-xl px-4 py-3 mb-4 text-xs text-slate-700 dark:text-slate-500">
                 <strong>Note:</strong> Web search is currently unavailable. These profiles were generated by AI based on your ICP — they represent the <em>type</em> of company you should target, not real verified contacts. Use them as outreach templates or search manually on LinkedIn/Apollo.
               </div>
             )}
@@ -394,7 +394,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
                 return (
                   <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 hover:border-slate-300 dark:hover:border-slate-700 transition-colors">
                     <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                         {c.name.trim()[0]?.toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -402,15 +402,15 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="font-semibold text-slate-900 dark:text-white text-sm">{c.name}</p>
-                              {!c.is_real && <span className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 px-1.5 py-0.5 rounded">AI Profile</span>}
-                              {c.is_real && <span className="text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 px-1.5 py-0.5 rounded">Real</span>}
+                              {!c.is_real && <span className="text-[10px] text-slate-600 dark:text-slate-500 bg-slate-100 dark:bg-slate-950/20 border border-slate-300 dark:border-slate-700/30 px-1.5 py-0.5 rounded">AI Profile</span>}
+                              {c.is_real && <span className="text-[10px] text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-950/20 border border-blue-200 dark:border-slate-700/30 px-1.5 py-0.5 rounded">Real</span>}
                             </div>
                             <p className="text-slate-500 text-xs">
                               {c.title ? `${c.title} @ ` : ''}<span className="text-slate-700 dark:text-slate-300">{c.company}</span>
                               {c.website && (
                                 <a href={c.website.startsWith('http') ? c.website : `https://${c.website}`}
                                   target="_blank" rel="noopener noreferrer"
-                                  className="ml-1.5 text-violet-500 hover:text-violet-600"
+                                  className="ml-1.5 text-blue-500 hover:text-blue-600"
                                   title="Visit website"
                                 >↗</a>
                               )}
@@ -436,7 +436,7 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
                                   Email not found —{' '}
                                   <a href={`https://${c.website.replace(/^https?:\/\//, '')}/contact`}
                                     target="_blank" rel="noopener noreferrer"
-                                    className="text-violet-500 hover:text-violet-600">
+                                    className="text-blue-500 hover:text-blue-600">
                                     check contact page ↗
                                   </a>
                                 </p>
@@ -464,8 +464,8 @@ export function LeadWorkerClient({ audits }: LeadWorkerClientProps) {
                             disabled={isAdded || isAdding}
                             className={`flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
                               isAdded
-                                ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 cursor-default'
-                                : 'bg-violet-600 hover:bg-violet-500 text-white'
+                                ? 'bg-blue-50 dark:bg-slate-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-slate-700/40 cursor-default'
+                                : 'bg-blue-600 hover:bg-blue-500 text-white'
                             }`}
                           >
                             {isAdding ? '…' : isAdded ? '✓ Added' : '+ Add Lead'}

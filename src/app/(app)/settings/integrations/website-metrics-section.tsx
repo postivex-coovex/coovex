@@ -223,7 +223,7 @@ export default function WebsiteMetricsSection() {
         <div className="px-5 pt-4 pb-0">
           <p className="text-slate-500 text-xs mb-1.5 font-medium uppercase tracking-wider">Your API Token</p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-violet-300 text-xs font-mono truncate">
+            <code className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-blue-300 text-xs font-mono truncate">
               {token}
             </code>
             <button onClick={() => copy(token, 'token')}
@@ -239,7 +239,7 @@ export default function WebsiteMetricsSection() {
         <div className="flex gap-1 bg-slate-800/50 rounded-lg p-1 w-fit">
           {TAB_LABELS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`text-xs px-3 py-1.5 rounded-md transition-colors font-medium ${tab === t.id ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+              className={`text-xs px-3 py-1.5 rounded-md transition-colors font-medium ${tab === t.id ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}>
               {t.label}
             </button>
           ))}
@@ -261,7 +261,7 @@ export default function WebsiteMetricsSection() {
                       value={(form as Record<string, number | undefined>)[f.key] ?? ''}
                       onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value === '' ? undefined : Number(e.target.value) }))}
                       placeholder={f.placeholder}
-                      className={`w-full bg-slate-800 border border-slate-700 rounded-lg py-2 text-white text-sm focus:outline-none focus:border-violet-500 ${f.prefix ? 'pl-6 pr-3' : f.suffix ? 'pl-3 pr-6' : 'px-3'}`}
+                      className={`w-full bg-slate-800 border border-slate-700 rounded-lg py-2 text-white text-sm focus:outline-none focus:border-blue-500 ${f.prefix ? 'pl-6 pr-3' : f.suffix ? 'pl-3 pr-6' : 'px-3'}`}
                     />
                     {f.suffix && <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs">{f.suffix}</span>}
                   </div>
@@ -270,7 +270,7 @@ export default function WebsiteMetricsSection() {
               ))}
             </div>
             <button onClick={save} disabled={saving}
-              className="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
               {saving ? 'Saving…' : saved ? '✓ Saved — AI updated' : 'Save & Sync to AI'}
             </button>
           </div>
@@ -293,7 +293,7 @@ export default function WebsiteMetricsSection() {
             {/* Response format */}
             <div className="mt-4">
               <p className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold mb-2">Response</p>
-              <pre className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-xs text-emerald-400 font-mono">{`{
+              <pre className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-xs text-blue-400 font-mono">{`{
   "ok": true,
   "message": "Metrics saved. Your AI will use this data for goals and insights.",
   "received": { "paying_customers": 150, "mrr": 12500, ... }
@@ -309,12 +309,12 @@ export default function WebsiteMetricsSection() {
             <div className="mt-2 grid grid-cols-2 gap-1">
               {FIELD_META.map(f => (
                 <div key={f.key} className="text-[10px]">
-                  <code className="text-violet-400">{f.key}</code>
+                  <code className="text-blue-400">{f.key}</code>
                   <span className="text-slate-600 ml-1">— {f.hint}</span>
                 </div>
               ))}
               <div className="text-[10px]">
-                <code className="text-violet-400">custom</code>
+                <code className="text-blue-400">custom</code>
                 <span className="text-slate-600 ml-1">— &#123; key: number | string &#125; any extra metrics</span>
               </div>
             </div>

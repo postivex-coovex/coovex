@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef } from 'react'
 
@@ -103,7 +103,7 @@ export default function PersonaPage() {
           <button
             onClick={generate}
             disabled={generating}
-            className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             {generating
               ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Building persona…</>
@@ -119,7 +119,7 @@ export default function PersonaPage() {
                 <button onClick={copyText} className="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition-colors">
                   {copied ? '✓ Copied' : '📋 Copy JSON'}
                 </button>
-                <button onClick={() => setExportHtml(buildExportHtml(persona))} className="text-xs bg-violet-600 hover:bg-violet-500 text-white px-3 py-1.5 rounded-lg transition-colors">
+                <button onClick={() => setExportHtml(buildExportHtml(persona))} className="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition-colors">
                   📄 Export PDF
                 </button>
               </div>
@@ -128,7 +128,7 @@ export default function PersonaPage() {
             {/* Header card */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-4">
               <div className="flex items-center gap-4 flex-wrap">
-                <div className="w-14 h-14 rounded-full bg-violet-600/30 border border-violet-500/30 flex items-center justify-center text-2xl flex-shrink-0">
+                <div className="w-14 h-14 rounded-full bg-blue-600/30 border border-blue-500/30 flex items-center justify-center text-2xl flex-shrink-0">
                   👤
                 </div>
                 <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-1">
@@ -151,9 +151,9 @@ export default function PersonaPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               {[
-                { label: 'Goals', icon: '🎯', items: persona.goals, color: 'text-emerald-400', dot: 'bg-emerald-500' },
+                { label: 'Goals', icon: '🎯', items: persona.goals, color: 'text-blue-400', dot: 'bg-blue-600' },
                 { label: 'Pain Points', icon: '😤', items: persona.pain_points, color: 'text-red-400', dot: 'bg-red-500' },
-                { label: 'Motivations', icon: '💡', items: persona.motivations, color: 'text-amber-400', dot: 'bg-amber-500' },
+                { label: 'Motivations', icon: '💡', items: persona.motivations, color: 'text-slate-500', dot: 'bg-slate-600' },
                 { label: 'Preferred Channels', icon: '📡', items: persona.preferred_channels, color: 'text-blue-400', dot: 'bg-blue-500' },
               ].map(s => (
                 <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
@@ -191,12 +191,12 @@ export default function PersonaPage() {
               <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
                 <div className="flex items-center gap-1.5 mb-3">
                   <span>⚡</span>
-                  <h3 className="text-xs font-semibold text-violet-300">Buying Triggers</h3>
+                  <h3 className="text-xs font-semibold text-blue-300">Buying Triggers</h3>
                 </div>
                 <ul className="space-y-1.5">
                   {persona.buying_triggers.map((t, i) => (
                     <li key={i} className="flex gap-2 text-xs text-slate-300 leading-relaxed">
-                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500 flex-shrink-0 mt-1.5" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />
                       {t}
                     </li>
                   ))}
@@ -208,8 +208,8 @@ export default function PersonaPage() {
               </div>
             </div>
 
-            <div className="bg-violet-950/20 border border-violet-800/30 rounded-xl p-5">
-              <p className="text-violet-300 text-xs font-medium mb-2">🎯 Strategic Summary</p>
+            <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-5">
+              <p className="text-blue-300 text-xs font-medium mb-2">🎯 Strategic Summary</p>
               <p className="text-slate-200 text-sm leading-relaxed">{persona.summary}</p>
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function PersonaPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => iframeRef.current?.contentWindow?.print()}
-                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded-lg transition-colors"
               >
                 🖨️ Print / Save PDF
               </button>

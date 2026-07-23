@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -12,11 +12,11 @@ interface ActivityItem {
 }
 
 const CATEGORY_COLOR: Record<ActivityItem['category'], string> = {
-  insight:  'bg-violet-500/10 border-violet-500/20 text-violet-400',
+  insight:  'bg-blue-500/10 border-blue-500/20 text-blue-400',
   content:  'bg-blue-500/10 border-blue-500/20 text-blue-400',
-  lead:     'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-  audit:    'bg-amber-500/10 border-amber-500/20 text-amber-400',
-  campaign: 'bg-pink-500/10 border-pink-500/20 text-pink-400',
+  lead:     'bg-blue-600/10 border-blue-500/20 text-blue-400',
+  audit:    'bg-slate-600/10 border-slate-500/20 text-slate-500',
+  campaign: 'bg-blue-500/10 border-slate-500/20 text-slate-400',
 }
 
 export function AIActivityCard() {
@@ -62,8 +62,8 @@ export function AIActivityCard() {
         <div className="flex items-center gap-3">
           {/* Pulse dot */}
           <div className="relative flex-shrink-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 block" />
-            <span className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping opacity-50" />
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 block" />
+            <span className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping opacity-50" />
           </div>
           <div>
             <h3 className="text-white text-sm font-semibold">AI Agent — Last 7 Days</h3>
@@ -72,9 +72,9 @@ export function AIActivityCard() {
         </div>
         {/* Time saved badge */}
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1">
-            <span className="text-emerald-400 text-xs">⚡</span>
-            <span className="text-emerald-300 text-xs font-medium">{timeSaved} saved</span>
+          <div className="hidden sm:flex items-center gap-1.5 bg-blue-600/10 border border-blue-500/20 rounded-full px-3 py-1">
+            <span className="text-blue-400 text-xs">⚡</span>
+            <span className="text-blue-300 text-xs font-medium">{timeSaved} saved</span>
           </div>
         </div>
       </div>
@@ -112,8 +112,8 @@ export function AIActivityCard() {
         <p className="text-slate-600 text-xs">
           Your AI agent works automatically — no manual input needed
         </p>
-        <div className="sm:hidden flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
-          <span className="text-emerald-400 text-[10px]">⚡ {timeSaved} saved</span>
+        <div className="sm:hidden flex items-center gap-1.5 bg-blue-600/10 border border-blue-500/20 rounded-full px-2 py-0.5">
+          <span className="text-blue-400 text-[10px]">⚡ {timeSaved} saved</span>
         </div>
       </div>
     </div>

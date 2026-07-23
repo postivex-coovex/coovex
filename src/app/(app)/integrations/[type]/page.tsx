@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
@@ -35,7 +35,7 @@ interface IntegrationConfig {
 
 const CONFIGS: Record<string, IntegrationConfig> = {
   hubspot: {
-    name: 'HubSpot', icon: '🧲', color: 'bg-orange-900/30 border-orange-800/40',
+    name: 'HubSpot', icon: '🧲', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Sync contacts, deals, and pipeline data bidirectionally with HubSpot CRM.',
     docsUrl: 'https://developers.hubspot.com/docs/api/overview',
     authType: 'oauth',
@@ -57,7 +57,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   pipedrive: {
-    name: 'Pipedrive', icon: '🎯', color: 'bg-green-900/30 border-green-800/40',
+    name: 'Pipedrive', icon: '🎯', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Pull deals and contacts from Pipedrive into your CooVex pipeline.',
     docsUrl: 'https://developers.pipedrive.com/docs/api/v1',
     authType: 'api_key',
@@ -122,7 +122,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   mailchimp: {
-    name: 'Mailchimp', icon: '🐒', color: 'bg-yellow-900/30 border-yellow-800/40',
+    name: 'Mailchimp', icon: '🐒', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Add CooVex leads to Mailchimp audiences and sync campaign stats.',
     docsUrl: 'https://mailchimp.com/developer/',
     authType: 'api_key',
@@ -186,7 +186,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   klaviyo: {
-    name: 'Klaviyo', icon: '📬', color: 'bg-green-900/30 border-green-800/40',
+    name: 'Klaviyo', icon: '📬', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Sync leads to Klaviyo profiles and trigger automations from CooVex events.',
     docsUrl: 'https://developers.klaviyo.com/en',
     authType: 'api_key',
@@ -207,7 +207,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   brevo: {
-    name: 'Brevo', icon: '💌', color: 'bg-teal-900/30 border-teal-800/40',
+    name: 'Brevo', icon: '💌', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Formerly Sendinblue. Sync contacts and trigger transactional or marketing emails.',
     docsUrl: 'https://developers.brevo.com/docs',
     authType: 'api_key',
@@ -229,7 +229,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
 
   // ─── Finance / Accounting ─────────────────────────────────────────────────
   quickbooks: {
-    name: 'QuickBooks Online', icon: '💰', color: 'bg-green-900/30 border-green-800/40',
+    name: 'QuickBooks Online', icon: '💰', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Sync revenue data from QBO invoices and track financial KPIs in CooVex.',
     docsUrl: 'https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities/invoice',
     authType: 'oauth',
@@ -274,7 +274,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
 
   // ─── E-commerce ──────────────────────────────────────────────────────────
   shopify: {
-    name: 'Shopify', icon: '🛍️', color: 'bg-green-900/30 border-green-800/40',
+    name: 'Shopify', icon: '🛍️', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Pull orders, customers, and revenue data from your Shopify store.',
     docsUrl: 'https://shopify.dev/docs/api/admin-rest',
     authType: 'api_key',
@@ -296,7 +296,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   woocommerce: {
-    name: 'WooCommerce', icon: '🛒', color: 'bg-purple-900/30 border-purple-800/40',
+    name: 'WooCommerce', icon: '🛒', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Connect your WooCommerce store to track sales, orders, and customer signals.',
     docsUrl: 'https://woocommerce.github.io/woocommerce-rest-api-docs/',
     authType: 'api_key',
@@ -320,7 +320,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
 
   // ─── Review Platforms ────────────────────────────────────────────────────
   trustpilot: {
-    name: 'Trustpilot', icon: '⭐', color: 'bg-green-900/30 border-green-800/40',
+    name: 'Trustpilot', icon: '⭐', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Monitor and respond to Trustpilot reviews from inside CooVex.',
     docsUrl: 'https://documentation.trustpilot.com/consumer-api',
     authType: 'api_key',
@@ -431,7 +431,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   instagram: {
-    name: 'Instagram', icon: '📸', color: 'bg-pink-900/30 border-pink-800/40',
+    name: 'Instagram', icon: '📸', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Schedule Instagram posts, track engagement, and monitor mentions from CooVex.',
     docsUrl: 'https://developers.facebook.com/docs/instagram-api',
     authType: 'oauth',
@@ -455,7 +455,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
 
   // ─── Messaging / Comms ───────────────────────────────────────────────────
   whatsapp: {
-    name: 'WhatsApp Business', icon: '💬', color: 'bg-green-900/30 border-green-800/40',
+    name: 'WhatsApp Business', icon: '💬', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Send automated WhatsApp messages to leads and clients using the Business API.',
     docsUrl: 'https://developers.facebook.com/docs/whatsapp/cloud-api',
     authType: 'api_key',
@@ -499,7 +499,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   slack: {
-    name: 'Slack', icon: '💬', color: 'bg-purple-900/30 border-purple-800/40',
+    name: 'Slack', icon: '💬', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Get AI agent alerts, new lead notifications, and daily briefs delivered to Slack channels.',
     docsUrl: 'https://api.slack.com/apps',
     authType: 'oauth',
@@ -588,7 +588,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
 
   // ─── Google ──────────────────────────────────────────────────────────────
   google_ads: {
-    name: 'Google Ads', icon: '💸', color: 'bg-yellow-900/30 border-yellow-800/40',
+    name: 'Google Ads', icon: '💸', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Track campaign performance, ad spend, and conversions alongside your pipeline.',
     docsUrl: 'https://developers.google.com/google-ads/api/docs/start',
     authType: 'oauth',
@@ -610,7 +610,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   google_analytics: {
-    name: 'Google Analytics 4', icon: '📊', color: 'bg-orange-900/30 border-orange-800/40',
+    name: 'Google Analytics 4', icon: '📊', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Pull website traffic, conversions, and audience data into CooVex dashboards.',
     docsUrl: 'https://developers.google.com/analytics/devguides/reporting/data/v1',
     authType: 'oauth',
@@ -654,7 +654,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   google_search_console: {
-    name: 'Google Search Console', icon: '🔍', color: 'bg-green-900/30 border-green-800/40',
+    name: 'Google Search Console', icon: '🔍', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Track keyword rankings, impressions, and click-through rates from Google Search.',
     docsUrl: 'https://developers.google.com/webmaster-tools/v1/api_reference_index',
     authType: 'oauth',
@@ -678,7 +678,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
 
   // ─── ERP / Enterprise ───────────────────────────────────────────────────
   odoo: {
-    name: 'Odoo', icon: '🟣', color: 'bg-purple-900/30 border-purple-800/40',
+    name: 'Odoo', icon: '🟣', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Connect your Odoo CRM and ERP to sync leads, opportunities, and invoices.',
     docsUrl: 'https://www.odoo.com/documentation/17.0/developer/reference/external_api.html',
     authType: 'api_key',
@@ -773,7 +773,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
 
   // ─── Automation ──────────────────────────────────────────────────────────
   zapier: {
-    name: 'Zapier', icon: '⚡', color: 'bg-orange-900/30 border-orange-800/40',
+    name: 'Zapier', icon: '⚡', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Trigger Zaps from CooVex events (new lead, stage change, new signal) using outbound webhooks.',
     docsUrl: 'https://zapier.com/apps/webhook/integrations',
     authType: 'webhook',
@@ -793,7 +793,7 @@ const CONFIGS: Record<string, IntegrationConfig> = {
     ],
   },
   make: {
-    name: 'Make (Integromat)', icon: '🔗', color: 'bg-purple-900/30 border-purple-800/40',
+    name: 'Make (Integromat)', icon: '🔗', color: 'bg-slate-900/30 border-slate-700/40',
     description: 'Connect CooVex to 1,000+ apps via Make scenarios using outbound webhooks.',
     docsUrl: 'https://www.make.com/en/help/tools/webhooks',
     authType: 'webhook',
@@ -1032,7 +1032,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
     return (
       <div className="p-6 max-w-2xl mx-auto">
         <p className="text-slate-400">Integration &quot;{type}&quot; not configured yet.</p>
-        <Link href="/integrations" className="text-violet-400 text-sm mt-2 inline-block">← Back to Integrations</Link>
+        <Link href="/integrations" className="text-blue-400 text-sm mt-2 inline-block">← Back to Integrations</Link>
       </div>
     )
   }
@@ -1060,36 +1060,36 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
       </div>
 
       {/* ── Benefits — WHY connect ── */}
-      <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5 mb-5">
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5 mb-5">
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <p className="text-violet-300 text-xs font-bold uppercase tracking-widest mb-1">Why connect {cfg.name}?</p>
-            <p className="text-violet-200 text-sm font-medium">{cfg.benefit ?? cfg.description}</p>
+            <p className="text-blue-300 text-xs font-bold uppercase tracking-widest mb-1">Why connect {cfg.name}?</p>
+            <p className="text-blue-200 text-sm font-medium">{cfg.benefit ?? cfg.description}</p>
           </div>
           <Link
             href={askAiUrl}
-            className="flex-shrink-0 flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
+            className="flex-shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors whitespace-nowrap"
           >
             🤖 Ask AI to help
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-2">
           {cfg.syncOptions.map(opt => (
-            <div key={opt.key} className="flex items-start gap-2.5 bg-violet-950/30 border border-violet-800/20 rounded-xl p-3">
-              <span className="text-violet-400 mt-0.5 text-sm">✓</span>
+            <div key={opt.key} className="flex items-start gap-2.5 bg-slate-950/30 border border-slate-700/20 rounded-xl p-3">
+              <span className="text-blue-400 mt-0.5 text-sm">✓</span>
               <div>
-                <p className="text-violet-200 text-xs font-semibold">{opt.label}</p>
-                <p className="text-violet-400/70 text-xs mt-0.5">{opt.desc}</p>
+                <p className="text-blue-200 text-xs font-semibold">{opt.label}</p>
+                <p className="text-blue-400/70 text-xs mt-0.5">{opt.desc}</p>
               </div>
             </div>
           ))}
         </div>
         {cfg.data_unlocked && cfg.data_unlocked.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-violet-800/20">
-            <p className="text-violet-400/60 text-xs">Once connected, your AI agent can:</p>
+          <div className="mt-3 pt-3 border-t border-slate-700/20">
+            <p className="text-blue-400/60 text-xs">Once connected, your AI agent can:</p>
             <div className="flex flex-wrap gap-2 mt-2">
               {cfg.data_unlocked.map((item, i) => (
-                <span key={i} className="text-[11px] px-2.5 py-1 bg-violet-900/30 text-violet-300 border border-violet-700/30 rounded-full">
+                <span key={i} className="text-[11px] px-2.5 py-1 bg-slate-900/30 text-blue-300 border border-slate-700/30 rounded-full">
                   {item}
                 </span>
               ))}
@@ -1104,7 +1104,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
           <h2 className="text-white font-semibold text-sm">How to set up</h2>
           <Link
             href={askAiUrl}
-            className="flex items-center gap-1.5 text-violet-400 hover:text-violet-300 text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors"
           >
             🤖 Ask AI for help →
           </Link>
@@ -1112,7 +1112,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
         <div className="space-y-3">
           {cfg.setupSteps.map((step, i) => (
             <div key={i} className="flex gap-3">
-              <div className="w-6 h-6 rounded-full bg-violet-600/20 border border-violet-700/40 text-violet-400 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-full bg-blue-600/20 border border-slate-700/40 text-blue-400 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {i + 1}
               </div>
               <p className="text-slate-300 text-sm leading-relaxed">{step}</p>
@@ -1121,7 +1121,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
         </div>
         <div className="mt-4 p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
           <p className="text-slate-500 text-xs">
-            Stuck? <Link href={askAiUrl} className="text-violet-400 hover:text-violet-300 font-medium">Ask your AI agent</Link> — it can read the docs and walk you through each step based on your specific setup.
+            Stuck? <Link href={askAiUrl} className="text-blue-400 hover:text-blue-300 font-medium">Ask your AI agent</Link> — it can read the docs and walk you through each step based on your specific setup.
           </p>
         </div>
       </div>
@@ -1135,7 +1135,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
               <label className="block text-xs text-slate-400 mb-1.5">{f.label}</label>
               {f.type === 'select' ? (
                 <select value={fields[f.key] || ''} onChange={e => setFields(flds => ({ ...flds, [f.key]: e.target.value }))}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-violet-500 transition-colors appearance-none">
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors appearance-none">
                   <option value="">Select…</option>
                   {f.options?.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
@@ -1145,7 +1145,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
                   onChange={e => setFields(flds => ({ ...flds, [f.key]: e.target.value }))}
                   placeholder={f.placeholder}
                   rows={5}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors font-mono resize-y"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors font-mono resize-y"
                 />
               ) : (
                 <input
@@ -1153,7 +1153,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
                   value={fields[f.key] || ''}
                   onChange={e => setFields(flds => ({ ...flds, [f.key]: e.target.value }))}
                   placeholder={f.placeholder}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                 />
               )}
               {f.hint && <p className="text-slate-600 text-xs mt-1">{f.hint}</p>}
@@ -1162,7 +1162,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
         </div>
 
         {testResult && (
-          <div className={`mt-4 p-3 rounded-lg text-sm ${testResult.ok ? 'bg-emerald-900/30 border border-emerald-800/40 text-emerald-300' : 'bg-red-900/30 border border-red-800/40 text-red-300'}`}>
+          <div className={`mt-4 p-3 rounded-lg text-sm ${testResult.ok ? 'bg-slate-900/30 border border-slate-700/40 text-blue-300' : 'bg-red-900/30 border border-red-800/40 text-red-300'}`}>
             {testResult.ok ? '✓ ' : '✗ '}{testResult.msg}
           </div>
         )}
@@ -1173,7 +1173,7 @@ export default function IntegrationConfigPage({ params }: { params: Promise<{ ty
             {testing ? 'Testing…' : 'Test Connection'}
           </button>
           <button onClick={save} disabled={saving}
-            className="flex items-center gap-2 px-5 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors ml-auto">
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-colors ml-auto">
             {saved ? <><Check className="w-4 h-4" />Saved</> : saving ? 'Saving…' : 'Save'}
           </button>
         </div>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { ExternalLink, MessageSquare, Copy, Check, RefreshCw, Radio, Globe, Sparkles, ChevronDown, History, X, MapPin } from 'lucide-react'
@@ -101,8 +101,8 @@ function timeAgo(utc: number): string {
 }
 
 function qualityColor(q: number) {
-  if (q >= 8) return 'text-emerald-400 bg-emerald-950/40 border-emerald-800/40'
-  if (q >= 4) return 'text-amber-400 bg-amber-950/40 border-amber-800/40'
+  if (q >= 8) return 'text-blue-400 bg-slate-950/40 border-slate-700/40'
+  if (q >= 4) return 'text-slate-500 bg-slate-950/40 border-slate-700/40'
   return 'text-slate-400 bg-slate-800/60 border-slate-700'
 }
 
@@ -154,8 +154,8 @@ function LeadCard({ lead, product, businessName }: {
   }
 
   const platformIcon = lead.platform === 'reddit'
-    ? <span className="text-orange-400 font-bold text-[10px]">r/</span>
-    : <span className="text-orange-500 font-bold text-[10px]">Y</span>
+    ? <span className="text-slate-500 font-bold text-[10px]">r/</span>
+    : <span className="text-slate-600 font-bold text-[10px]">Y</span>
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-slate-700 transition-colors">
@@ -165,7 +165,7 @@ function LeadCard({ lead, product, businessName }: {
             {platformIcon} {lead.community}
           </span>
           {lead.kind === 'comment' && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400 border border-orange-500/25">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-600/15 text-slate-500 border border-slate-500/25">
               comment
             </span>
           )}
@@ -190,7 +190,7 @@ function LeadCard({ lead, product, businessName }: {
             <button
               onClick={generateReply}
               disabled={generating}
-              className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 border border-violet-700/40 text-violet-300 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-slate-700/40 text-blue-300 transition-colors disabled:opacity-50"
             >
               <MessageSquare className="w-3 h-3" />
               {generating ? 'Generating…' : 'AI Reply'}
@@ -210,11 +210,11 @@ function LeadCard({ lead, product, businessName }: {
       {replyOpen && (
         <div className="border-t border-slate-800 bg-slate-950/60 p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-violet-400">AI-Generated Reply</span>
+            <span className="text-xs font-semibold text-blue-400">AI-Generated Reply</span>
             <div className="flex gap-2">
               {reply && (
                 <button onClick={copy} className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white transition-colors">
-                  {copied ? <><Check className="w-3 h-3 text-emerald-400" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                  {copied ? <><Check className="w-3 h-3 text-blue-400" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
                 </button>
               )}
               <button onClick={() => setReplyOpen(false)} className="text-slate-600 hover:text-slate-400 text-xs">✕</button>
@@ -230,7 +230,7 @@ function LeadCard({ lead, product, businessName }: {
               value={reply}
               onChange={e => setReply(e.target.value)}
               rows={4}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-slate-200 text-xs leading-relaxed focus:outline-none focus:border-violet-500 resize-none transition-colors"
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-slate-200 text-xs leading-relaxed focus:outline-none focus:border-blue-500 resize-none transition-colors"
             />
           )}
           <p className="text-slate-600 text-[10px] mt-1.5">Edit before posting. Click View to open the thread.</p>
@@ -417,7 +417,7 @@ export default function CommunityLeadsPage() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2.5 mb-1">
-          <Radio className="w-5 h-5 text-violet-400" />
+          <Radio className="w-5 h-5 text-blue-400" />
           <h1 className="text-2xl font-bold text-white">Community Leads</h1>
         </div>
         <p className="text-slate-400 text-sm">
@@ -428,8 +428,8 @@ export default function CommunityLeadsPage() {
       {/* Platform tabs */}
       <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 mb-5 w-fit flex-wrap">
         {([
-          { id: 'reddit',     label: 'Reddit',      color: 'text-orange-400', live: true           },
-          { id: 'hackernews', label: 'Hacker News', color: 'text-orange-500', live: true           },
+          { id: 'reddit',     label: 'Reddit',      color: 'text-slate-500', live: true           },
+          { id: 'hackernews', label: 'Hacker News', color: 'text-slate-600', live: true           },
           { id: 'linkedin',   label: 'LinkedIn',    color: 'text-blue-400',   live: true           },
           { id: 'quora',      label: 'Quora',       color: 'text-red-400',    live: false          },
         ] as { id: Platform; label: string; color: string; live: boolean }[]).map(p => (
@@ -442,7 +442,7 @@ export default function CommunityLeadsPage() {
           >
             {p.label}
             {p.live
-              ? <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500 text-white">LIVE</span>
+              ? <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-600 text-white">LIVE</span>
               : <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-500 text-white">MANUAL</span>
             }
           </button>
@@ -456,7 +456,7 @@ export default function CommunityLeadsPage() {
           <select
             value={selectedProduct?.id ?? ''}
             onChange={e => handleProductChange(e.target.value)}
-            className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-violet-500 transition-colors w-full max-w-sm"
+            className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors w-full max-w-sm"
           >
             <option value="">Select a product…</option>
             {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -488,7 +488,7 @@ export default function CommunityLeadsPage() {
             onClick={() => setSelectedCountries([])}
             className={`text-xs px-3 py-1 rounded-full border transition-all font-medium ${
               selectedCountries.length === 0
-                ? 'bg-violet-600 border-violet-500 text-white'
+                ? 'bg-blue-600 border-blue-500 text-white'
                 : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300'
             }`}
           >
@@ -501,7 +501,7 @@ export default function CommunityLeadsPage() {
               onClick={() => toggleCountry(c.value)}
               className={`text-xs px-3 py-1 rounded-full border transition-all font-medium ${
                 selectedCountries.includes(c.value)
-                  ? 'bg-violet-600 border-violet-500 text-white'
+                  ? 'bg-blue-600 border-blue-500 text-white'
                   : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300'
               }`}
             >
@@ -525,13 +525,13 @@ export default function CommunityLeadsPage() {
           {generatingKeywords ? (
             <div className="flex items-center gap-2 text-slate-500 text-xs">
               <div className="w-3.5 h-3.5 border border-slate-600 border-t-violet-400 rounded-full animate-spin" />
-              <Sparkles className="w-3.5 h-3.5 text-violet-400 animate-pulse" />
+              <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
               AI is generating search keywords…
             </div>
           ) : suggestedKeywords.length > 0 ? (
             <div>
               <p className="text-xs text-slate-500 mb-2 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-violet-400" />
+                <Sparkles className="w-3 h-3 text-blue-400" />
                 AI-suggested keywords — click to search
               </p>
               <div className="flex flex-wrap gap-2">
@@ -542,8 +542,8 @@ export default function CommunityLeadsPage() {
                     disabled={loading}
                     className={`text-xs px-3 py-1.5 rounded-full border transition-all font-medium disabled:opacity-50 ${
                       activeKeyword === kw
-                        ? 'bg-violet-600 border-violet-500 text-white'
-                        : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-violet-700 hover:text-violet-300'
+                        ? 'bg-blue-600 border-blue-500 text-white'
+                        : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-700 hover:text-blue-300'
                     }`}
                   >
                     {loading && activeKeyword === kw
@@ -568,12 +568,12 @@ export default function CommunityLeadsPage() {
                     onChange={e => setCustomKeyword(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && searchWithKeyword(customKeyword.trim())}
                     placeholder="Type your own keyword…"
-                    className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
                   />
                   <button
                     onClick={() => searchWithKeyword(customKeyword.trim())}
                     disabled={loading || !customKeyword.trim()}
-                    className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
                   >
                     {loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : 'Search'}
                   </button>
@@ -656,7 +656,7 @@ export default function CommunityLeadsPage() {
               <div className="flex items-center justify-between mb-3">
                 <p className="text-slate-400 text-sm">
                   <span className="text-white font-semibold">{leads.length}</span> potential leads for{' '}
-                  <span className="text-violet-300">&ldquo;{activeKeyword}&rdquo;</span>
+                  <span className="text-blue-300">&ldquo;{activeKeyword}&rdquo;</span>
                   {selectedCountries.length > 0 && (
                     <span className="text-slate-500"> · {selectedCountries.join(', ')}</span>
                   )}
@@ -804,12 +804,12 @@ function LinkedInReplyHelper({
           value={topic}
           onChange={e => setTopic(e.target.value)}
           placeholder="Describe the post topic or question…"
-          className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors"
+          className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
         />
         <button
           onClick={generate}
           disabled={generating || !topic.trim()}
-          className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           {generating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <MessageSquare className="w-3.5 h-3.5" />}
           Generate
@@ -821,10 +821,10 @@ function LinkedInReplyHelper({
             value={reply}
             onChange={e => setReply(e.target.value)}
             rows={5}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-slate-200 text-sm leading-relaxed focus:outline-none focus:border-violet-500 resize-none transition-colors mb-2"
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-slate-200 text-sm leading-relaxed focus:outline-none focus:border-blue-500 resize-none transition-colors mb-2"
           />
           <button onClick={copy} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors">
-            {copied ? <><Check className="w-3 h-3 text-emerald-400" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy reply</>}
+            {copied ? <><Check className="w-3 h-3 text-blue-400" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy reply</>}
           </button>
         </div>
       )}

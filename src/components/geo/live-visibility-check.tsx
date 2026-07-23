@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import type { GeoIntelligence } from '@/types/geo'
@@ -14,15 +14,15 @@ export function LiveVisibilityCheck({
 }) {
   const [expanded, setExpanded] = useState<number | null>(null)
   const rate = visibility.visibility_rate
-  const rateColor = rate >= 60 ? 'text-emerald-400' : rate >= 30 ? 'text-amber-400' : 'text-red-400'
-  const rateRing  = rate >= 60 ? '#10b981'         : rate >= 30 ? '#f59e0b'         : '#ef4444'
+  const rateColor = rate >= 60 ? 'text-blue-400' : rate >= 30 ? 'text-slate-500' : 'text-red-400'
+  const rateRing  = rate >= 60 ? '#2563eb'         : rate >= 30 ? '#64748b'         : '#ef4444'
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-semibold text-white flex items-center gap-2">
           ✨ Live AI Visibility Check
-          <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 border border-violet-500/25">
+          <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/25">
             Gemini Search
           </span>
         </h3>
@@ -95,10 +95,10 @@ export function LiveVisibilityCheck({
               {steps.map((s, i) => (
                 <div key={s.id} className="flex items-start gap-3">
                   <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5 ${
-                    s.urgent ? 'bg-violet-600 text-white' : 'bg-slate-700 text-slate-300'
+                    s.urgent ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'
                   }`}>{i + 1}</span>
                   <div>
-                    <p className={`text-xs font-semibold mb-0.5 ${s.urgent ? 'text-violet-300' : 'text-slate-300'}`}>{s.title}</p>
+                    <p className={`text-xs font-semibold mb-0.5 ${s.urgent ? 'text-blue-300' : 'text-slate-300'}`}>{s.title}</p>
                     <p className="text-[11px] text-slate-500 leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
@@ -114,19 +114,19 @@ export function LiveVisibilityCheck({
       <div className="space-y-2">
         {visibility.checks.map((check, i) => (
           <div key={i} className={`rounded-xl border transition-colors ${
-            check.found ? 'bg-emerald-950/15 border-emerald-800/30' : 'bg-slate-800/40 border-slate-700/50'
+            check.found ? 'bg-slate-950/15 border-slate-700/30' : 'bg-slate-800/40 border-slate-700/50'
           }`}>
             <button
               className="w-full flex items-start gap-3 p-3.5 text-left"
               onClick={() => setExpanded(expanded === i ? null : i)}
             >
-              <span className={`flex-shrink-0 mt-0.5 text-base ${check.found ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className={`flex-shrink-0 mt-0.5 text-base ${check.found ? 'text-blue-400' : 'text-red-400'}`}>
                 {check.found ? '✅' : '❌'}
               </span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-slate-400 mb-0.5">Searched in Gemini:</p>
                 <p className="text-sm text-slate-100 font-medium leading-snug truncate">&ldquo;{check.query}&rdquo;</p>
-                <p className={`text-[11px] mt-1 font-semibold ${check.found ? 'text-emerald-400' : 'text-red-400'}`}>
+                <p className={`text-[11px] mt-1 font-semibold ${check.found ? 'text-blue-400' : 'text-red-400'}`}>
                   {check.found ? 'Your business was mentioned' : 'Not mentioned in response'}
                 </p>
               </div>
@@ -161,7 +161,7 @@ export function LiveVisibilityCheck({
                     <div className="space-y-1">
                       {check.sources.map((src, j) => (
                         <a key={j} href={src} target="_blank" rel="noopener noreferrer"
-                          className="block text-[11px] text-violet-400 hover:text-violet-300 truncate transition-colors">
+                          className="block text-[11px] text-blue-400 hover:text-blue-300 truncate transition-colors">
                           {src}
                         </a>
                       ))}

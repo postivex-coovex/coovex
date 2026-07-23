@@ -65,7 +65,7 @@ export default function DataImportSection({ webhookUrl }: DataImportSectionProps
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="text-white font-medium">Custom CRM / Webhook</h3>
-              <span className="text-[10px] px-1.5 py-0.5 bg-violet-950/50 text-violet-400 border border-violet-800/40 rounded-full">Live</span>
+              <span className="text-[10px] px-1.5 py-0.5 bg-slate-950/50 text-blue-400 border border-slate-700/40 rounded-full">Live</span>
             </div>
             <p className="text-slate-500 text-sm mt-0.5">Send deals from any CRM or in-house system to this URL. No SDK required.</p>
           </div>
@@ -74,12 +74,12 @@ export default function DataImportSection({ webhookUrl }: DataImportSectionProps
           <div>
             <p className="text-slate-400 text-xs font-medium mb-1.5">Your Webhook URL</p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-violet-300 text-xs font-mono truncate">
+              <code className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-blue-300 text-xs font-mono truncate">
                 {webhookUrl}
               </code>
               <button onClick={copyWebhook}
                 className={`text-xs px-3 py-2.5 rounded-lg border transition-colors shrink-0 ${
-                  copied ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                  copied ? 'bg-slate-950/40 text-blue-400 border-slate-700/40' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                 }`}>
                 {copied ? '✓ Copied' : 'Copy'}
               </button>
@@ -140,7 +140,7 @@ Header: x-coovex-token: <your_token_from_URL>
                 ['status', 'open / won / lost'],
               ].map(([col, alt]) => (
                 <div key={col} className="flex items-center gap-1.5">
-                  <code className="text-violet-400 text-[10px]">{col}</code>
+                  <code className="text-blue-400 text-[10px]">{col}</code>
                   <span className="text-slate-700 text-[10px]">or {alt}</span>
                 </div>
               ))}
@@ -149,11 +149,11 @@ Header: x-coovex-token: <your_token_from_URL>
 
           {importResult && (
             <div className={`p-3 rounded-xl border text-xs ${
-              importResult.imported > 0 ? 'bg-emerald-950/20 border-emerald-800/30 text-emerald-300' : 'bg-amber-950/20 border-amber-800/30 text-amber-300'
+              importResult.imported > 0 ? 'bg-slate-950/20 border-slate-700/30 text-blue-300' : 'bg-slate-950/20 border-slate-700/30 text-slate-400'
             }`}>
               <p className="font-medium">Import complete: {importResult.imported} deals imported, {importResult.skipped} skipped</p>
               {importResult.errors.length > 0 && (
-                <ul className="mt-1 space-y-0.5 text-[10px] text-amber-400/70">
+                <ul className="mt-1 space-y-0.5 text-[10px] text-slate-500/70">
                   {importResult.errors.map((e, i) => <li key={i}>• {e}</li>)}
                 </ul>
               )}
@@ -168,7 +168,7 @@ Header: x-coovex-token: <your_token_from_URL>
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="text-sm px-4 py-2 bg-violet-700 hover:bg-violet-600 disabled:opacity-50 text-white rounded-lg transition-colors font-medium"
+              className="text-sm px-4 py-2 bg-blue-700 hover:bg-blue-600 disabled:opacity-50 text-white rounded-lg transition-colors font-medium"
             >
               {uploading ? 'Importing…' : '↑ Upload CSV'}
             </button>
@@ -187,12 +187,12 @@ Header: x-coovex-token: <your_token_from_URL>
                 onChange={e => setCsvText(e.target.value)}
                 placeholder={CSV_TEMPLATE}
                 rows={6}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-slate-300 text-xs font-mono placeholder-slate-700 focus:outline-none focus:border-violet-500 resize-none"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2.5 text-slate-300 text-xs font-mono placeholder-slate-700 focus:outline-none focus:border-blue-500 resize-none"
               />
               <button
                 onClick={() => importCSV(csvText)}
                 disabled={uploading || !csvText.trim()}
-                className="text-sm px-4 py-2 bg-violet-700 hover:bg-violet-600 disabled:opacity-40 text-white rounded-lg transition-colors font-medium"
+                className="text-sm px-4 py-2 bg-blue-700 hover:bg-blue-600 disabled:opacity-40 text-white rounded-lg transition-colors font-medium"
               >
                 {uploading ? 'Importing…' : 'Import Pasted Data'}
               </button>

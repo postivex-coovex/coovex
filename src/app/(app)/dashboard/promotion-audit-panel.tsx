@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Rocket, Copy, Check, ChevronDown, ChevronUp, Globe, Loader2 } from 'lucide-react'
@@ -23,7 +23,7 @@ function CopyButton({ text, label = 'Copy' }: { text: string; label?: string }) 
   return (
     <button onClick={copy}
       className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">
-      {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+      {copied ? <Check className="w-3 h-3 text-blue-400" /> : <Copy className="w-3 h-3" />}
       {copied ? 'Copied!' : label}
     </button>
   )
@@ -70,15 +70,15 @@ export function PromotionAuditPanel() {
   }
 
   return (
-    <div className="bg-gradient-to-r from-violet-950/30 to-slate-900 border border-violet-800/40 rounded-2xl overflow-hidden">
+    <div className="bg-gradient-to-r from-slate-950/30 to-slate-900 border border-slate-700/40 rounded-2xl overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between p-5 text-left hover:bg-violet-950/10 transition-colors"
+        className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-950/10 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-700/40 flex items-center justify-center flex-shrink-0">
-            <Rocket className="w-4 h-4 text-violet-400" />
+          <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-slate-700/40 flex items-center justify-center flex-shrink-0">
+            <Rocket className="w-4 h-4 text-blue-400" />
           </div>
           <div>
             <p className="text-sm font-semibold text-white">Promotion Audit Tool</p>
@@ -89,7 +89,7 @@ export function PromotionAuditPanel() {
       </button>
 
       {open && (
-        <div className="px-5 pb-6 space-y-5 border-t border-violet-800/30 pt-5">
+        <div className="px-5 pb-6 space-y-5 border-t border-slate-700/30 pt-5">
 
           {/* Input form */}
           <div className="space-y-3">
@@ -100,7 +100,7 @@ export function PromotionAuditPanel() {
                 placeholder="https://theirproduct.com"
                 value={url}
                 onChange={e => setUrl(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-600 transition-colors"
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600 transition-colors"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -111,7 +111,7 @@ export function PromotionAuditPanel() {
                   placeholder="Alex"
                   value={prospectName}
                   onChange={e => setProspectName(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-600 transition-colors"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600 transition-colors"
                 />
               </div>
               <div>
@@ -121,7 +121,7 @@ export function PromotionAuditPanel() {
                   placeholder="alex@theirproduct.com"
                   value={prospectEmail}
                   onChange={e => setProspectEmail(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-600 transition-colors"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-600 transition-colors"
                 />
               </div>
             </div>
@@ -130,7 +130,7 @@ export function PromotionAuditPanel() {
           <button
             onClick={run}
             disabled={loading || !url.trim()}
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
             {loading ? 'Analyzing website…' : 'Run Promotion Audit'}
@@ -144,9 +144,9 @@ export function PromotionAuditPanel() {
 
               {/* Public report URL */}
               {reportUrl && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-950/20 border border-emerald-800/30">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-slate-950/20 border border-slate-700/30">
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wide mb-0.5">Public Report URL — send this to the prospect</p>
+                    <p className="text-[11px] font-semibold text-blue-400 uppercase tracking-wide mb-0.5">Public Report URL — send this to the prospect</p>
                     <p className="text-sm text-slate-300 truncate font-mono">{reportUrl}</p>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
@@ -161,11 +161,11 @@ export function PromotionAuditPanel() {
 
               {/* Header row */}
               <div className="flex items-center gap-2 pb-2 border-b border-slate-800">
-                <Globe className="w-4 h-4 text-violet-400" />
+                <Globe className="w-4 h-4 text-blue-400" />
                 <span className="text-sm font-semibold text-white">{domain}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">{intel.industry}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">{intel.stage}</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${geo.geo_score >= 65 ? 'bg-emerald-950/30 text-emerald-400 border-emerald-800/30' : geo.geo_score >= 35 ? 'bg-amber-950/30 text-amber-400 border-amber-800/30' : 'bg-red-950/30 text-red-400 border-red-800/30'}`}>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${geo.geo_score >= 65 ? 'bg-slate-950/30 text-blue-400 border-slate-700/30' : geo.geo_score >= 35 ? 'bg-slate-950/30 text-slate-500 border-slate-700/30' : 'bg-red-950/30 text-red-400 border-red-800/30'}`}>
                   GEO {geo.geo_score}/100
                 </span>
               </div>
@@ -175,7 +175,7 @@ export function PromotionAuditPanel() {
                 <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-2">AI Discoverability Checklist</p>
                 <div className="grid grid-cols-3 gap-1.5">
                   {geo.checklist.map((item, i) => (
-                    <div key={i} className={`flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-lg ${item.passed ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <div key={i} className={`flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-lg ${item.passed ? 'text-blue-400' : 'text-red-400'}`}>
                       <span>{item.passed ? '✅' : '❌'}</span>
                       <span>{item.label}</span>
                     </div>

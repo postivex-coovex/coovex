@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
@@ -48,8 +48,8 @@ type Scenario = 'conservative' | 'realistic' | 'optimistic'
 
 const SCENARIOS: { key: Scenario; label: string; color: string; track: string; text: string }[] = [
   { key: 'conservative', label: 'Conservative', color: '#64748b', track: 'bg-slate-500', text: 'text-slate-400' },
-  { key: 'realistic',    label: 'Realistic',    color: '#8b5cf6', track: 'bg-violet-500', text: 'text-violet-400' },
-  { key: 'optimistic',   label: 'Optimistic',   color: '#10b981', track: 'bg-emerald-500', text: 'text-emerald-400' },
+  { key: 'realistic',    label: 'Realistic',    color: '#3b82f6', track: 'bg-blue-500', text: 'text-blue-400' },
+  { key: 'optimistic',   label: 'Optimistic',   color: '#2563eb', track: 'bg-blue-600', text: 'text-blue-400' },
 ]
 
 const STAGE_LABELS: Record<string, string> = {
@@ -223,7 +223,7 @@ export default function ForecastPage() {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {!data?.has_real_data && (
-            <Link href="/leads" className="text-xs text-amber-400 border border-amber-800/40 bg-amber-950/20 px-3 py-1.5 rounded-lg hover:bg-amber-950/40 transition-colors">
+            <Link href="/leads" className="text-xs text-slate-500 border border-slate-700/40 bg-slate-950/20 px-3 py-1.5 rounded-lg hover:bg-slate-950/40 transition-colors">
               + Add deal values
             </Link>
           )}
@@ -240,7 +240,7 @@ export default function ForecastPage() {
 
       {scanMsg && (
         <div className={`mb-4 p-3 rounded-xl border text-sm flex items-center gap-2 ${
-          scanMsg.includes('issue') ? 'bg-amber-950/20 border-amber-800/30 text-amber-300' : 'bg-emerald-950/20 border-emerald-800/30 text-emerald-300'
+          scanMsg.includes('issue') ? 'bg-slate-950/20 border-slate-700/30 text-slate-400' : 'bg-slate-950/20 border-slate-700/30 text-blue-300'
         }`}>
           {scanMsg.includes('issue') ? '⚠️' : '✅'} {scanMsg}
         </div>
@@ -255,7 +255,7 @@ export default function ForecastPage() {
           <div className="text-5xl mb-4">📈</div>
           <p className="text-white font-semibold text-lg">No pipeline data yet</p>
           <p className="text-slate-400 text-sm mt-2 mb-6">Add leads and move them through stages to generate your forecast.</p>
-          <Link href="/leads" className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+          <Link href="/leads" className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
             Go to Leads
           </Link>
         </div>
@@ -268,9 +268,9 @@ export default function ForecastPage() {
                 <span className="text-white font-semibold text-sm">Monthly Revenue Goal</span>
                 {goal > 0 && (
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                    goalPct >= 100 ? 'bg-emerald-950/40 text-emerald-400' :
-                    goalPct >= 60  ? 'bg-violet-950/40 text-violet-400' :
-                    'bg-amber-950/40 text-amber-400'
+                    goalPct >= 100 ? 'bg-slate-950/40 text-blue-400' :
+                    goalPct >= 60  ? 'bg-slate-950/40 text-blue-400' :
+                    'bg-slate-950/40 text-slate-500'
                   }`}>
                     {goalPct}% on track
                   </span>
@@ -284,10 +284,10 @@ export default function ForecastPage() {
                     value={goalInput}
                     onChange={e => setGoalInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && saveGoal()}
-                    className="w-28 bg-slate-800 border border-violet-700 text-white text-sm px-2 py-1 rounded-lg outline-none"
+                    className="w-28 bg-slate-800 border border-slate-700 text-white text-sm px-2 py-1 rounded-lg outline-none"
                     placeholder="e.g. 10000"
                   />
-                  <button onClick={saveGoal} className="text-xs text-violet-400 hover:text-violet-300 font-medium">Save</button>
+                  <button onClick={saveGoal} className="text-xs text-blue-400 hover:text-blue-300 font-medium">Save</button>
                   <button onClick={() => setEditGoal(false)} className="text-xs text-slate-500 hover:text-slate-300">Cancel</button>
                 </div>
               ) : (
@@ -307,7 +307,7 @@ export default function ForecastPage() {
                 </div>
                 <div className="w-full bg-slate-800 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full transition-all ${goalPct >= 100 ? 'bg-emerald-500' : goalPct >= 60 ? 'bg-violet-500' : 'bg-amber-500'}`}
+                    className={`h-2 rounded-full transition-all ${goalPct >= 100 ? 'bg-blue-600' : goalPct >= 60 ? 'bg-blue-500' : 'bg-slate-600'}`}
                     style={{ width: `${goalPct}%` }}
                   />
                 </div>
@@ -326,8 +326,8 @@ export default function ForecastPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             {[
               { label: 'Pipeline Value',    val: fmt(data.pipeline_value), sub: 'Total open deals',        color: 'text-white' },
-              { label: 'Weighted Pipeline', val: fmt(data.weighted_value), sub: 'Probability-adjusted',    color: 'text-violet-400' },
-              { label: 'Win Rate',          val: `${Math.round(data.win_rate * 100)}%`, sub: 'Historical', color: 'text-emerald-400' },
+              { label: 'Weighted Pipeline', val: fmt(data.weighted_value), sub: 'Probability-adjusted',    color: 'text-blue-400' },
+              { label: 'Win Rate',          val: `${Math.round(data.win_rate * 100)}%`, sub: 'Historical', color: 'text-blue-400' },
               { label: 'Avg Close Time',    val: `${data.avg_close_days}d`,             sub: 'Lead to close', color: 'text-white' },
             ].map(k => (
               <div key={k.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
@@ -340,13 +340,13 @@ export default function ForecastPage() {
 
           {/* Stale warning */}
           {data.stale_count > 0 && (
-            <div className="bg-amber-950/20 border border-amber-800/30 rounded-xl p-3 mb-5 flex items-center gap-3">
+            <div className="bg-slate-950/20 border border-slate-700/30 rounded-xl p-3 mb-5 flex items-center gap-3">
               <span className="text-lg">⚠️</span>
               <div className="flex-1">
-                <p className="text-amber-300 text-sm font-medium">{data.stale_count} deal{data.stale_count > 1 ? 's' : ''} stalled 14+ days</p>
-                <p className="text-amber-400/70 text-xs">Deals that stop moving rarely close. Follow up now or mark lost.</p>
+                <p className="text-slate-400 text-sm font-medium">{data.stale_count} deal{data.stale_count > 1 ? 's' : ''} stalled 14+ days</p>
+                <p className="text-slate-500/70 text-xs">Deals that stop moving rarely close. Follow up now or mark lost.</p>
               </div>
-              <Link href="/leads" className="text-xs text-amber-400 border border-amber-800/60 px-3 py-1.5 rounded-lg hover:bg-amber-950/40 transition-colors whitespace-nowrap">
+              <Link href="/leads" className="text-xs text-slate-500 border border-slate-700/60 px-3 py-1.5 rounded-lg hover:bg-slate-950/40 transition-colors whitespace-nowrap">
                 View leads →
               </Link>
             </div>
@@ -409,7 +409,7 @@ export default function ForecastPage() {
                     const pct = Math.round(s.prob * 100)
                     const weighted = Math.round(s.value * s.prob)
                     const barColor =
-                      s.stage === 'negotiation' ? '#8b5cf6' :
+                      s.stage === 'negotiation' ? '#3b82f6' :
                       s.stage === 'proposal'    ? '#6366f1' :
                       s.stage === 'qualified'   ? '#3b82f6' :
                       s.stage === 'contacted'   ? '#0ea5e9' : '#64748b'
@@ -434,7 +434,7 @@ export default function ForecastPage() {
                   })}
                   <div className="border-t border-slate-800 pt-3 flex justify-between">
                     <span className="text-slate-500 text-xs">Total weighted</span>
-                    <span className="text-violet-400 text-xs font-semibold">{fmt(data.weighted_value)}</span>
+                    <span className="text-blue-400 text-xs font-semibold">{fmt(data.weighted_value)}</span>
                   </div>
                 </div>
               )}
@@ -461,12 +461,12 @@ export default function ForecastPage() {
                           {' · '}{d.probability}% likely
                         </p>
                       </div>
-                      <span className="text-emerald-400 text-sm font-semibold shrink-0">{fmt(d.value)}</span>
+                      <span className="text-blue-400 text-sm font-semibold shrink-0">{fmt(d.value)}</span>
                     </div>
                   ))}
                   <div className="text-right pt-1">
                     <span className="text-slate-500 text-xs">Expected close value: </span>
-                    <span className="text-emerald-400 text-xs font-medium">
+                    <span className="text-blue-400 text-xs font-medium">
                       {fmt(data.closing_this_month.reduce((s, d) => s + d.value * (d.probability / 100), 0))}
                     </span>
                   </div>
@@ -474,7 +474,7 @@ export default function ForecastPage() {
               ) : (
                 <div className="py-6 text-center">
                   <p className="text-slate-700 text-xs">Add close dates to your open deals to track upcoming closures.</p>
-                  <Link href="/leads" className="text-violet-500 text-xs mt-2 inline-block hover:text-violet-400">
+                  <Link href="/leads" className="text-blue-500 text-xs mt-2 inline-block hover:text-blue-400">
                     Go to Leads →
                   </Link>
                 </div>
@@ -483,8 +483,8 @@ export default function ForecastPage() {
           </div>
 
           {/* AI Insight + Actions */}
-          <div className="bg-violet-950/20 border border-violet-800/30 rounded-2xl p-5 mb-5">
-            <p className="text-violet-400 text-xs font-semibold mb-2">🤖 AI Pipeline Analysis</p>
+          <div className="bg-slate-950/20 border border-slate-700/30 rounded-2xl p-5 mb-5">
+            <p className="text-blue-400 text-xs font-semibold mb-2">🤖 AI Pipeline Analysis</p>
             <p className="text-slate-200 text-sm leading-relaxed mb-4">{data.insight}</p>
             {data.actions.length > 0 && (
               <>
@@ -492,7 +492,7 @@ export default function ForecastPage() {
                 <ul className="space-y-2">
                   {data.actions.map((a, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-violet-500 mt-0.5 shrink-0">→</span>
+                      <span className="text-blue-500 mt-0.5 shrink-0">→</span>
                       <span className="text-slate-300 text-sm">{a}</span>
                     </li>
                   ))}

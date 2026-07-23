@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -28,14 +28,14 @@ interface ContextDB {
 
 const PRIORITY_META = {
   critical: { label: 'Critical',  cls: 'text-red-400 bg-red-950/40 border-red-800/50' },
-  high:     { label: 'High',      cls: 'text-amber-400 bg-amber-950/40 border-amber-800/50' },
+  high:     { label: 'High',      cls: 'text-slate-500 bg-slate-950/40 border-slate-700/50' },
   medium:   { label: 'Medium',    cls: 'text-blue-400 bg-blue-950/40 border-blue-800/50' },
-  low:      { label: 'Connected', cls: 'text-emerald-400 bg-emerald-950/40 border-emerald-800/50' },
+  low:      { label: 'Connected', cls: 'text-blue-400 bg-slate-950/40 border-slate-700/50' },
 }
 
 function ConnectedDot({ connected }: { connected: boolean }) {
   return (
-    <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${connected ? 'bg-emerald-400' : 'bg-slate-700'}`} />
+    <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${connected ? 'bg-blue-500' : 'bg-slate-700'}`} />
   )
 }
 
@@ -128,12 +128,12 @@ export function SmartActionsPanel() {
                                 <div className="grid grid-cols-2 gap-1">
                                   {action.data_unlocked.map((item, i) => (
                                     <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-300">
-                                      <span className="text-violet-400">✓</span> {item}
+                                      <span className="text-blue-400">✓</span> {item}
                                     </div>
                                   ))}
                                 </div>
                               </div>
-                              <p className="text-emerald-400 text-xs">{action.benefit}</p>
+                              <p className="text-blue-400 text-xs">{action.benefit}</p>
                             </div>
                           )}
 
@@ -143,7 +143,7 @@ export function SmartActionsPanel() {
                               {isOpen ? '↑ Less' : '↓ Why this matters'}
                             </button>
                             <Link href={action.link}
-                              className="text-[11px] font-medium text-violet-400 hover:text-violet-300 transition-colors">
+                              className="text-[11px] font-medium text-blue-400 hover:text-blue-300 transition-colors">
                               Connect →
                             </Link>
                           </div>
@@ -181,7 +181,7 @@ export function SmartActionsPanel() {
             <p className="text-slate-500 text-xs mt-0.5">What your AI agent knows about your business</p>
           </div>
           {connected.length > 0 && (
-            <span className="text-emerald-400 text-xs">{connected.length} connected</span>
+            <span className="text-blue-400 text-xs">{connected.length} connected</span>
           )}
         </div>
 
@@ -251,11 +251,11 @@ export function SmartActionsPanel() {
         </div>
 
         {!contextDB?.website_metrics && !contextDB?.crm && (
-          <div className="mt-3 p-3 bg-amber-950/20 border border-amber-800/30 rounded-lg">
-            <p className="text-amber-400 text-xs font-medium mb-0.5">⚠️ AI is working with limited data</p>
+          <div className="mt-3 p-3 bg-slate-950/20 border border-slate-700/30 rounded-lg">
+            <p className="text-slate-500 text-xs font-medium mb-0.5">⚠️ AI is working with limited data</p>
             <p className="text-slate-500 text-xs">
               Connect your website backend or CRM so AI uses your real numbers — not estimates.
-              <Link href="/settings/integrations" className="text-violet-400 hover:underline ml-1">Set up now →</Link>
+              <Link href="/settings/integrations" className="text-blue-400 hover:underline ml-1">Set up now →</Link>
             </p>
           </div>
         )}

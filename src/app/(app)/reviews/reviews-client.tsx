@@ -32,7 +32,7 @@ const PLATFORM_META: Record<ReviewPlatform, { label: string; icon: string }> = {
 
 function StarRating({ rating }: { rating: number }) {
   return (
-    <span className="text-amber-400 text-sm tracking-wider">
+    <span className="text-slate-500 text-sm tracking-wider">
       {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
     </span>
   )
@@ -103,7 +103,7 @@ function AIResponseModal({ review, onClose, onSaved }: { review: Review; onClose
               <button
                 onClick={generate}
                 disabled={isGenerating}
-                className="text-xs bg-violet-600/20 hover:bg-violet-600/40 border border-violet-500/30 text-violet-300 px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
+                className="text-xs bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-300 px-3 py-1 rounded-lg transition-colors disabled:opacity-50"
               >
                 {isGenerating ? '⏳ Generating…' : '✨ AI Draft'}
               </button>
@@ -113,7 +113,7 @@ function AIResponseModal({ review, onClose, onSaved }: { review: Review; onClose
               onChange={e => setDraft(e.target.value)}
               rows={6}
               placeholder="Write your response, or click 'AI Draft' to generate one…"
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors resize-none"
             />
             <div className="flex justify-end mt-1">
               <span className="text-slate-600 text-xs">{draft.length} chars</span>
@@ -126,7 +126,7 @@ function AIResponseModal({ review, onClose, onSaved }: { review: Review; onClose
           <button
             onClick={save}
             disabled={isSaving || !draft.trim()}
-            className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
           >
             {isSaving ? 'Saving…' : 'Save Response'}
           </button>
@@ -169,7 +169,7 @@ function AddReviewModal({ onClose, onAdded }: { onClose: () => void; onAdded: (r
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5">Platform</label>
               <select value={form.platform} onChange={e => set('platform', e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:outline-none focus:border-violet-500">
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:outline-none focus:border-blue-500">
                 {(Object.keys(PLATFORM_META) as ReviewPlatform[]).map(p => (
                   <option key={p} value={p}>{PLATFORM_META[p].icon} {PLATFORM_META[p].label}</option>
                 ))}
@@ -178,7 +178,7 @@ function AddReviewModal({ onClose, onAdded }: { onClose: () => void; onAdded: (r
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5">Rating</label>
               <select value={form.rating} onChange={e => set('rating', Number(e.target.value))}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:outline-none focus:border-violet-500">
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm appearance-none focus:outline-none focus:border-blue-500">
                 {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{'★'.repeat(n)} {n} star{n !== 1 ? 's' : ''}</option>)}
               </select>
             </div>
@@ -187,19 +187,19 @@ function AddReviewModal({ onClose, onAdded }: { onClose: () => void; onAdded: (r
             <label className="block text-xs font-medium text-slate-400 mb-1.5">Reviewer Name <span className="text-red-400">*</span></label>
             <input type="text" value={form.reviewer_name} onChange={e => set('reviewer_name', e.target.value)}
               placeholder="e.g. John Smith"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-violet-500" />
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500" />
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1.5">Review Text <span className="text-slate-600 font-normal">(optional)</span></label>
             <textarea value={form.body} onChange={e => set('body', e.target.value)} rows={3}
               placeholder="What did they say?"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-violet-500 resize-none" />
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 resize-none" />
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-3 pt-1">
             <button type="button" onClick={onClose} className="text-slate-400 hover:text-white text-sm transition-colors">Cancel</button>
             <button type="submit" disabled={saving}
-              className="bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors">
+              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors">
               {saving ? 'Saving…' : 'Add Review'}
             </button>
           </div>
@@ -287,7 +287,7 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
           <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
             + Add Manually
           </button>
-          <Link href="/integrations" className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+          <Link href="/integrations" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
             + Connect Platform
           </Link>
         </div>
@@ -296,8 +296,8 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
       {/* Sync status message */}
       {syncMsg && (
         <div className={`mb-5 px-4 py-3 rounded-xl text-sm border ${
-          syncMsg.type === 'ok'   ? 'bg-emerald-950/20 border-emerald-800/30 text-emerald-400' :
-          syncMsg.type === 'warn' ? 'bg-amber-950/20 border-amber-800/30 text-amber-400' :
+          syncMsg.type === 'ok'   ? 'bg-slate-950/20 border-slate-700/30 text-blue-400' :
+          syncMsg.type === 'warn' ? 'bg-slate-950/20 border-slate-700/30 text-slate-500' :
                                     'bg-red-950/20 border-red-800/30 text-red-400'
         }`}>
           {syncMsg.text}
@@ -318,7 +318,7 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
             </div>
           </div>
           <Link href="/integrations/google_mybusiness"
-            className="flex-shrink-0 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            className="flex-shrink-0 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
             Connect →
           </Link>
         </div>
@@ -349,7 +349,7 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
           <p className="text-slate-400 text-sm max-w-sm mx-auto mb-6">
             Connect Google Business Profile, Trustpilot, or other review platforms to see and respond to reviews here.
           </p>
-          <Link href="/integrations" className="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
+          <Link href="/integrations" className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition-colors">
             Connect Review Platform
           </Link>
         </div>
@@ -360,7 +360,7 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 mb-4">
               <div className="text-center mb-4">
                 <div className="text-5xl font-bold text-white">{avgRating}</div>
-                <div className="text-amber-400 text-lg mt-1">
+                <div className="text-slate-500 text-lg mt-1">
                   {'★'.repeat(Math.round(Number(avgRating)))}{'☆'.repeat(5 - Math.round(Number(avgRating)))}
                 </div>
                 <div className="text-slate-500 text-xs mt-1">{reviews.length} reviews</div>
@@ -368,9 +368,9 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
               <div className="space-y-2">
                 {dist.map(d => (
                   <div key={d.stars} className="flex items-center gap-2">
-                    <span className="text-amber-400 text-xs w-4">{d.stars}★</span>
+                    <span className="text-slate-500 text-xs w-4">{d.stars}★</span>
                     <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-amber-400 rounded-full" style={{ width: `${d.pct}%` }} />
+                      <div className="h-full bg-slate-500 rounded-full" style={{ width: `${d.pct}%` }} />
                     </div>
                     <span className="text-slate-500 text-xs w-5 text-right">{d.count}</span>
                   </div>
@@ -431,12 +431,12 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
                         <span className="text-xs bg-red-900/20 text-red-400 border border-red-900/40 px-2 py-0.5 rounded-full">Needs response</span>
                       )}
                       {review.status === 'responded' && (
-                        <span className="text-xs bg-emerald-900/20 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-full">Responded</span>
+                        <span className="text-xs bg-slate-900/20 text-blue-400 border border-slate-800/40 px-2 py-0.5 rounded-full">Responded</span>
                       )}
                     </div>
                     {review.body && <p className="text-slate-400 text-sm leading-relaxed">{review.body}</p>}
                     {review.response && (
-                      <div className="mt-3 pl-3 border-l-2 border-violet-800/60">
+                      <div className="mt-3 pl-3 border-l-2 border-slate-700/60">
                         <p className="text-slate-500 text-xs mb-1">Your response:</p>
                         <p className="text-slate-300 text-sm">{review.response}</p>
                       </div>
@@ -447,7 +447,7 @@ export default function ReviewsClient({ reviews: initialReviews, gmbConfigured =
                     className={`flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors border ${
                       review.status === 'responded'
                         ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
-                        : 'bg-violet-600/20 border-violet-500/30 text-violet-300 hover:bg-violet-600 hover:text-white'
+                        : 'bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600 hover:text-white'
                     }`}
                   >
                     {review.status === 'responded' ? 'Edit' : '✨ Respond'}

@@ -110,7 +110,7 @@ export function IntegrationsClient({ businessName, webhookUrl, appUrl, facebookC
             onClick={() => setActiveTab(tab.id)}
             className={`text-left p-4 rounded-xl border transition-colors ${
               activeTab === tab.id
-                ? 'border-violet-500/50 bg-violet-950/20 text-white'
+                ? 'border-blue-500/50 bg-slate-950/20 text-white'
                 : 'border-slate-700 hover:border-slate-600 bg-slate-900 text-slate-300'
             }`}
           >
@@ -142,7 +142,7 @@ export function IntegrationsClient({ businessName, webhookUrl, appUrl, facebookC
               <li>In Zapier/Make, add a <strong className="text-slate-200">Webhook action</strong> step</li>
               <li>Set method to <code className="bg-slate-800 px-2 py-0.5 rounded text-sm text-slate-300 font-mono">POST</code>, paste the URL above</li>
               <li>Map your fields: <code className="bg-slate-800 px-2 py-0.5 rounded text-sm text-slate-300 font-mono">name</code>, <code className="bg-slate-800 px-2 py-0.5 rounded text-sm text-slate-300 font-mono">email</code>, <code className="bg-slate-800 px-2 py-0.5 rounded text-sm text-slate-300 font-mono">phone</code>, <code className="bg-slate-800 px-2 py-0.5 rounded text-sm text-slate-300 font-mono">company</code>, <code className="bg-slate-800 px-2 py-0.5 rounded text-sm text-slate-300 font-mono">message</code></li>
-              <li>Test — lead should appear in <Link href="/leads" className="text-violet-600 hover:text-violet-500">your pipeline</Link></li>
+              <li>Test — lead should appear in <Link href="/leads" className="text-blue-600 hover:text-blue-500">your pipeline</Link></li>
             </ol>
           </div>
 
@@ -185,7 +185,7 @@ Content-Type: application/json
                 </div>
               </div>
               {facebookConnected ? (
-                <span className="text-xs bg-emerald-950/50 text-emerald-400 border border-emerald-800/40 px-3 py-1 rounded-full font-medium">Connected</span>
+                <span className="text-xs bg-slate-950/50 text-blue-400 border border-slate-700/40 px-3 py-1 rounded-full font-medium">Connected</span>
               ) : (
                 <span className="text-xs bg-slate-800 text-slate-500 border border-slate-700 px-3 py-1 rounded-full">Not connected</span>
               )}
@@ -194,7 +194,7 @@ Content-Type: application/json
             {!facebookConnected ? (
               <div className="bg-slate-950 border border-slate-700 rounded-xl p-4 flex items-center justify-between">
                 <p className="text-sm text-slate-400">Connect your Facebook account first to enable Lead Ads sync.</p>
-                <Link href="/settings/integrations#social" className="ml-4 flex-shrink-0 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                <Link href="/settings/integrations#social" className="ml-4 flex-shrink-0 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
                   Connect Facebook →
                 </Link>
               </div>
@@ -202,7 +202,7 @@ Content-Type: application/json
               <div className="space-y-4">
                 <p className="text-sm text-slate-400">
                   Facebook is connected. Add this webhook in your{' '}
-                  <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300">
+                  <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
                     Facebook App dashboard
                   </a>{' '}
                   under <strong className="text-slate-300">Webhooks → Page → leadgen</strong>.
@@ -228,10 +228,10 @@ Content-Type: application/json
                   </div>
                 </div>
 
-                <div className="bg-violet-950/20 border border-violet-900/30 rounded-xl p-4 text-sm text-slate-400 space-y-1">
-                  <p className="text-violet-300 font-medium mb-2">Setup steps</p>
+                <div className="bg-slate-950/20 border border-slate-800/30 rounded-xl p-4 text-sm text-slate-400 space-y-1">
+                  <p className="text-blue-300 font-medium mb-2">Setup steps</p>
                   <ol className="list-decimal list-inside space-y-1.5">
-                    <li>Go to <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:underline">developers.facebook.com/apps</a> → your app</li>
+                    <li>Go to <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">developers.facebook.com/apps</a> → your app</li>
                     <li>Open <strong className="text-slate-300">Webhooks</strong>, choose <strong className="text-slate-300">Page</strong> object</li>
                     <li>Click <strong className="text-slate-300">Subscribe to this object</strong>, paste the callback URL and verify token above</li>
                     <li>After subscribing, check the <strong className="text-slate-300">leadgen</strong> checkbox for your page</li>
@@ -273,7 +273,7 @@ Content-Type: application/json
 
             {/* File picker */}
             <div
-              className="border-2 border-dashed border-slate-700 rounded-xl p-10 text-center cursor-pointer hover:border-violet-600 transition-colors"
+              className="border-2 border-dashed border-slate-700 rounded-xl p-10 text-center cursor-pointer hover:border-blue-600 transition-colors"
               onClick={() => fileRef.current?.click()}
             >
               <input
@@ -299,7 +299,7 @@ Content-Type: application/json
             <button
               onClick={handleCSV}
               disabled={!csvFile || importing}
-              className="w-full mt-3 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+              className="w-full mt-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
             >
               {importing ? (
                 <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Importing…</>
@@ -310,7 +310,7 @@ Content-Type: application/json
               <div className={`mt-3 p-3 rounded-xl text-sm text-center ${
                 importResult.error
                   ? 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/30'
-                  : 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/30'
+                  : 'bg-blue-50 dark:bg-slate-950/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-slate-700/30'
               }`}>
                 {importResult.error
                   ? `Error: ${importResult.error}`
@@ -333,7 +333,7 @@ Content-Type: application/json
                 a.download = 'coovex-leads-template.csv'
                 a.click()
               }}
-              className="text-sm text-violet-600 hover:text-violet-500 font-medium"
+              className="text-sm text-blue-600 hover:text-blue-500 font-medium"
             >
               ⬇ Download CSV Template
             </button>
@@ -357,9 +357,9 @@ Content-Type: application/json
               <CopyButton text={embedCode} />
             </div>
 
-            <div className="mt-4 bg-amber-50 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-800/30 rounded-xl p-3">
-              <p className="text-xs text-amber-700 dark:text-amber-400">
-                <strong>Note:</strong> The embed widget is deployed as <code className="bg-amber-100 dark:bg-amber-900/30 px-1 rounded">/public/widget/lead-form.js</code>.
+            <div className="mt-4 bg-slate-100 dark:bg-slate-950/10 border border-slate-300 dark:border-slate-700/30 rounded-xl p-3">
+              <p className="text-xs text-slate-700 dark:text-slate-500">
+                <strong>Note:</strong> The embed widget is deployed as <code className="bg-slate-100 dark:bg-slate-900/30 px-1 rounded">/public/widget/lead-form.js</code>.
                 Works on any HTML website — WordPress, Webflow, Squarespace.
               </p>
             </div>
@@ -381,7 +381,7 @@ Content-Type: application/json
                 <label className="text-xs text-slate-600 dark:text-slate-400 mb-1 block">Message</label>
                 <div className="h-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg" />
               </div>
-              <div className="h-9 bg-violet-600 rounded-lg flex items-center justify-center">
+              <div className="h-9 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white text-sm font-medium">Send Message</span>
               </div>
             </div>
@@ -401,7 +401,7 @@ Content-Type: application/json
 
       {/* All leads link */}
       <div className="mt-6 text-center">
-        <Link href="/leads" className="text-violet-600 hover:text-violet-500 text-sm font-medium">
+        <Link href="/leads" className="text-blue-600 hover:text-blue-500 text-sm font-medium">
           View All Leads →
         </Link>
       </div>

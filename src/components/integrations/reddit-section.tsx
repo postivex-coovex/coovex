@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 
@@ -91,7 +91,7 @@ export default function RedditSection() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-orange-950/40 border border-orange-800/30 flex items-center justify-center text-2xl flex-shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-slate-950/40 border border-slate-700/30 flex items-center justify-center text-2xl flex-shrink-0">
             🤖
           </div>
           <div>
@@ -116,7 +116,7 @@ export default function RedditSection() {
       {toast && (
         <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm border ${
           toast.type === 'success'
-            ? 'bg-emerald-950/30 border-emerald-800/40 text-emerald-300'
+            ? 'bg-slate-950/30 border-slate-700/40 text-blue-300'
             : 'bg-red-950/30 border-red-800/40 text-red-300'
         }`}>
           {toast.type === 'success' ? '✓' : '✗'} {toast.msg}
@@ -148,7 +148,7 @@ export default function RedditSection() {
             </div>
             <div className="flex flex-wrap gap-2">
               {settings.subreddits.map(s => (
-                <span key={s} className="flex items-center gap-1.5 bg-orange-950/30 border border-orange-800/30 text-orange-300 text-xs px-2.5 py-1 rounded-full">
+                <span key={s} className="flex items-center gap-1.5 bg-slate-950/30 border border-slate-700/30 text-slate-400 text-xs px-2.5 py-1 rounded-full">
                   r/{s}
                   <button onClick={() => removeItem('subreddits', s)} className="hover:text-red-400 transition-colors">×</button>
                 </span>
@@ -216,7 +216,7 @@ export default function RedditSection() {
             </div>
             <div className="flex flex-wrap gap-2">
               {settings.brand_keywords.map(k => (
-                <span key={k} className="flex items-center gap-1.5 bg-violet-950/30 border border-violet-800/30 text-violet-300 text-xs px-2.5 py-1 rounded-full">
+                <span key={k} className="flex items-center gap-1.5 bg-slate-950/30 border border-slate-700/30 text-blue-300 text-xs px-2.5 py-1 rounded-full">
                   {k}
                   <button onClick={() => removeItem('brand_keywords', k)} className="hover:text-red-400 transition-colors">×</button>
                 </span>

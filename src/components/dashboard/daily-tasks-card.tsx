@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -19,8 +19,8 @@ interface Task {
 
 const SOURCE_META = {
   audit:   { label: '🔍 Audit',   color: 'text-blue-400 bg-blue-950/40 border-blue-800/40',   defaultTool: 'Website Audit' },
-  gtm:     { label: '🚀 GTM',     color: 'text-violet-400 bg-violet-950/40 border-violet-800/40', defaultTool: 'GTM Autopilot' },
-  content: { label: '✍️ Content', color: 'text-amber-400 bg-amber-950/40 border-amber-800/40',  defaultTool: 'Content' },
+  gtm:     { label: '🚀 GTM',     color: 'text-blue-400 bg-slate-950/40 border-slate-700/40', defaultTool: 'GTM Autopilot' },
+  content: { label: '✍️ Content', color: 'text-slate-500 bg-slate-950/40 border-slate-700/40',  defaultTool: 'Content' },
 }
 
 const STREAK_LABEL = (n: number) => {
@@ -95,12 +95,12 @@ export function DailyTasksCard({ tasks, businessId, initialStreak = 0 }: DailyTa
   return (
     <div className={cn(
       'rounded-2xl border overflow-hidden transition-all duration-500',
-      allDone ? 'bg-emerald-950/20 border-emerald-700/30' : 'bg-slate-900 border-slate-800'
+      allDone ? 'bg-slate-950/20 border-slate-700/30' : 'bg-slate-900 border-slate-800'
     )}>
       {/* Colored progress strip */}
       <div className="h-1 w-full bg-slate-800">
         <div
-          className={cn('h-full transition-all duration-700 rounded-full', allDone ? 'bg-emerald-500' : 'bg-blue-500')}
+          className={cn('h-full transition-all duration-700 rounded-full', allDone ? 'bg-blue-600' : 'bg-blue-500')}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -114,13 +114,13 @@ export function DailyTasksCard({ tasks, businessId, initialStreak = 0 }: DailyTa
           </div>
           <div className="flex items-center gap-2">
             {streak > 0 && (
-              <span className="flex items-center gap-1 text-[11px] font-semibold text-orange-400">
+              <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-500">
                 <Flame className="w-3.5 h-3.5" />
                 {streak}
               </span>
             )}
             {total > 0 && (
-              <span className={cn('text-sm font-bold tabular-nums', allDone ? 'text-emerald-400' : 'text-slate-400')}>
+              <span className={cn('text-sm font-bold tabular-nums', allDone ? 'text-blue-400' : 'text-slate-400')}>
                 {completed}/{total}
               </span>
             )}
@@ -164,7 +164,7 @@ export function DailyTasksCard({ tasks, businessId, initialStreak = 0 }: DailyTa
                   className={cn(
                     'rounded-xl border transition-all',
                     task.completed
-                      ? 'border-slate-800 bg-emerald-950/10 opacity-60'
+                      ? 'border-slate-800 bg-slate-950/10 opacity-60'
                       : 'border-slate-800 bg-slate-800/30'
                   )}
                 >
@@ -178,7 +178,7 @@ export function DailyTasksCard({ tasks, businessId, initialStreak = 0 }: DailyTa
                       {savingId === task.id ? (
                         <span className="w-4 h-4 block border-2 border-slate-600 border-t-blue-400 rounded-full animate-spin" />
                       ) : task.completed ? (
-                        <span className="w-4 h-4 flex items-center justify-center rounded-full bg-emerald-500 text-white text-[10px]">✓</span>
+                        <span className="w-4 h-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[10px]">✓</span>
                       ) : (
                         <span className="w-4 h-4 block rounded-full border-2 border-slate-600 hover:border-slate-400 transition-colors" />
                       )}
@@ -201,7 +201,7 @@ export function DailyTasksCard({ tasks, businessId, initialStreak = 0 }: DailyTa
                     <div className="px-3 pb-2.5 pl-10">
                       <Link
                         href={link}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-violet-600 text-slate-300 hover:text-white text-[11px] font-semibold transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-blue-600 text-slate-300 hover:text-white text-[11px] font-semibold transition-colors"
                       >
                         ⚡ {toolName} →
                       </Link>
@@ -217,14 +217,14 @@ export function DailyTasksCard({ tasks, businessId, initialStreak = 0 }: DailyTa
         {total > 0 && (
           <div className={cn(
             'mt-3 pt-3 border-t text-center text-xs',
-            allDone ? 'border-emerald-800/40 text-emerald-400' : 'border-slate-800 text-slate-600'
+            allDone ? 'border-slate-700/40 text-blue-400' : 'border-slate-800 text-slate-600'
           )}>
             {allDone ? (
               <div className="space-y-0.5">
                 <p className="font-semibold">🎉 All done! Come back tomorrow.</p>
-                {streak > 0 && <p className="text-orange-400 font-medium">{STREAK_LABEL(streak)}</p>}
+                {streak > 0 && <p className="text-slate-500 font-medium">{STREAK_LABEL(streak)}</p>}
                 {justFinished && streak >= 7 && (
-                  <p className="text-emerald-400 text-[10px]">You&apos;re building a real habit 💪</p>
+                  <p className="text-blue-400 text-[10px]">You&apos;re building a real habit 💪</p>
                 )}
               </div>
             ) : (

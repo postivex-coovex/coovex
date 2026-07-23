@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { TrendingUp, TrendingDown, Minus, RefreshCw } from 'lucide-react'
@@ -29,11 +29,11 @@ function fmtMoney(n: number) {
 }
 
 const METRICS: { key: Metric; label: string; color: string; fmt: (v: number) => string; isFloat?: boolean }[] = [
-  { key: 'total_leads',       label: 'Total Leads',    color: '#8b5cf6', fmt: v => String(Math.round(v)) },
-  { key: 'won_leads',         label: 'Won Leads',      color: '#10b981', fmt: v => String(Math.round(v)) },
-  { key: 'avg_review_rating', label: 'Avg Rating',     color: '#f59e0b', fmt: v => v.toFixed(1) + '★', isFloat: true },
+  { key: 'total_leads',       label: 'Total Leads',    color: '#3b82f6', fmt: v => String(Math.round(v)) },
+  { key: 'won_leads',         label: 'Won Leads',      color: '#2563eb', fmt: v => String(Math.round(v)) },
+  { key: 'avg_review_rating', label: 'Avg Rating',     color: '#64748b', fmt: v => v.toFixed(1) + '★', isFloat: true },
   { key: 'total_reviews',     label: 'Total Reviews',  color: '#3b82f6', fmt: v => String(Math.round(v)) },
-  { key: 'total_signals',     label: 'AI Signals',     color: '#ec4899', fmt: v => String(Math.round(v)) },
+  { key: 'total_signals',     label: 'AI Signals',     color: '#94a3b8', fmt: v => String(Math.round(v)) },
 ]
 
 const RANGES = [
@@ -139,7 +139,7 @@ export default function MetricsPage() {
           <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
             {RANGES.map(r => (
               <button key={r.days} onClick={() => setRange(r.days)}
-                className={`px-3 py-1.5 text-sm font-medium transition-colors ${range === r.days ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${range === r.days ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}>
                 {r.label}
               </button>
             ))}
@@ -160,9 +160,9 @@ export default function MetricsPage() {
           {live && (
             <div className="grid grid-cols-3 gap-3 mb-5">
               {[
-                { label: 'Open Pipeline',  value: fmtMoney(live.pipeline_value), color: 'text-violet-400', sub: 'from open deals' },
-                { label: 'Won Revenue',    value: fmtMoney(live.won_revenue),    color: 'text-emerald-400', sub: 'closed won' },
-                { label: 'Win Rate',       value: `${live.win_rate}%`,           color: live.win_rate >= 30 ? 'text-emerald-400' : 'text-amber-400', sub: 'based on closed deals' },
+                { label: 'Open Pipeline',  value: fmtMoney(live.pipeline_value), color: 'text-blue-400', sub: 'from open deals' },
+                { label: 'Won Revenue',    value: fmtMoney(live.won_revenue),    color: 'text-blue-400', sub: 'closed won' },
+                { label: 'Win Rate',       value: `${live.win_rate}%`,           color: live.win_rate >= 30 ? 'text-blue-400' : 'text-slate-500', sub: 'based on closed deals' },
               ].map(s => (
                 <div key={s.label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
                   <p className="text-slate-500 text-xs mb-1">{s.label}</p>
@@ -180,16 +180,16 @@ export default function MetricsPage() {
               const d   = deltaVal(m.key)
               return (
                 <button key={m.key} onClick={() => setActive(m.key)}
-                  className={`text-left bg-slate-900 border rounded-xl p-4 transition-all ${active === m.key ? 'border-violet-500/50 bg-violet-950/20' : 'border-slate-800 hover:border-slate-700'}`}>
+                  className={`text-left bg-slate-900 border rounded-xl p-4 transition-all ${active === m.key ? 'border-blue-500/50 bg-slate-950/20' : 'border-slate-800 hover:border-slate-700'}`}>
                   <p className="text-slate-500 text-xs mb-2">{m.label}</p>
                   <p className="text-white text-xl font-bold mb-1">{val}</p>
                   <div className="flex items-center gap-1">
                     {d === null ? <Minus className="w-3.5 h-3.5 text-slate-500" />
-                      : d > 0 ? <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                      : d > 0 ? <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
                       : d < 0 ? <TrendingDown className="w-3.5 h-3.5 text-red-400" />
                       : <Minus className="w-3.5 h-3.5 text-slate-500" />}
                     {d !== null && d !== 0 ? (
-                      <span className={`text-xs ${d > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      <span className={`text-xs ${d > 0 ? 'text-blue-400' : 'text-red-400'}`}>
                         {d > 0 ? '+' : ''}{m.isFloat ? d.toFixed(1) : Math.round(d)}
                       </span>
                     ) : (
@@ -280,7 +280,7 @@ export default function MetricsPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-slate-500 text-xs mb-1">{m.label}</p>
                     <p className="text-white text-lg font-semibold">{m.fmt(latest2)}</p>
-                    <p className={`text-xs mt-0.5 ${d > 0 ? 'text-emerald-400' : d < 0 ? 'text-red-400' : 'text-slate-600'}`}>
+                    <p className={`text-xs mt-0.5 ${d > 0 ? 'text-blue-400' : d < 0 ? 'text-red-400' : 'text-slate-600'}`}>
                       {d > 0 ? '↑ ' : d < 0 ? '↓ ' : ''}{d !== 0 ? (m.isFloat ? Math.abs(d).toFixed(1) : Math.round(Math.abs(d))) : 'no change'}
                     </p>
                   </div>
@@ -320,7 +320,7 @@ export default function MetricsPage() {
                               <td key={m.key} className="px-4 py-2 text-right text-xs">
                                 <span className="text-white">{m.fmt(val)}</span>
                                 {diff !== 0 && prev && (
-                                  <span className={`ml-1 ${diff > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                  <span className={`ml-1 ${diff > 0 ? 'text-blue-500' : 'text-red-500'}`}>
                                     {diff > 0 ? '+' : ''}{m.isFloat ? diff.toFixed(1) : Math.round(diff)}
                                   </span>
                                 )}

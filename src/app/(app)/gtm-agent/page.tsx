@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
@@ -40,13 +40,13 @@ export default async function GtmAgentPage() {
         <p className="text-slate-400 text-sm mb-8">
           Your AI go-to-market agent — runs your full GTM in one click and tells you exactly what to do.
         </p>
-        <div className="bg-slate-900 border border-amber-700/40 rounded-2xl p-8 text-center">
+        <div className="bg-slate-900 border border-slate-600/40 rounded-2xl p-8 text-center">
           <div className="text-4xl mb-4">🔍</div>
           <h2 className="text-lg font-semibold text-white mb-2">Run Website Audit First</h2>
           <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">
             GTM Autopilot reads your website audit as step 1. Run it once to unlock.
           </p>
-          <Link href="/audit" className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-colors">
+          <Link href="/audit" className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors">
             🔍 Run Website Audit →
           </Link>
         </div>

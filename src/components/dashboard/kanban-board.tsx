@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
@@ -26,11 +26,11 @@ interface KanbanTask {
 
 const CAT = {
   audit:   { label: '🔍 Audit',   color: 'text-blue-400 bg-blue-950/40 border-blue-800/40' },
-  gtm:     { label: '🚀 GTM',     color: 'text-violet-400 bg-violet-950/40 border-violet-800/40' },
-  content: { label: '✍️ Content', color: 'text-amber-400 bg-amber-950/40 border-amber-800/40' },
-  geo:     { label: '🌐 GEO',     color: 'text-emerald-400 bg-emerald-950/40 border-emerald-800/40' },
-  social:  { label: '📱 Social',  color: 'text-pink-400 bg-pink-950/40 border-pink-800/40' },
-  setup:   { label: '⚙️ Setup',   color: 'text-orange-400 bg-orange-950/40 border-orange-800/40' },
+  gtm:     { label: '🚀 GTM',     color: 'text-blue-400 bg-slate-950/40 border-slate-700/40' },
+  content: { label: '✍️ Content', color: 'text-slate-500 bg-slate-950/40 border-slate-700/40' },
+  geo:     { label: '🌐 GEO',     color: 'text-blue-400 bg-slate-950/40 border-slate-700/40' },
+  social:  { label: '📱 Social',  color: 'text-slate-400 bg-slate-950/40 border-slate-700/40' },
+  setup:   { label: '⚙️ Setup',   color: 'text-slate-500 bg-slate-950/40 border-slate-700/40' },
   general: { label: '📋 Task',    color: 'text-slate-400 bg-slate-800/40 border-slate-700/40' },
 } as const
 
@@ -108,9 +108,9 @@ function ProofModal({ task, onSubmit, onClose }: {
         {tab === 'url' && (
           <>
             <input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..."
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500" />
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500" />
             <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Add a note (optional)" rows={2}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none" />
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none" />
           </>
         )}
         {tab === 'screenshot' && (
@@ -118,13 +118,13 @@ function ProofModal({ task, onSubmit, onClose }: {
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
             {imgData ? (
               <div className="flex items-center gap-2 p-3 bg-slate-800 rounded-lg border border-slate-700">
-                <span className="text-emerald-400 text-xs">✓</span>
+                <span className="text-blue-400 text-xs">✓</span>
                 <span className="text-slate-300 text-xs flex-1 truncate">{imgData.name}</span>
                 <button onClick={() => setImg(null)} className="text-slate-600 hover:text-red-400"><X className="w-3.5 h-3.5" /></button>
               </div>
             ) : (
               <button onClick={() => fileRef.current?.click()}
-                className="w-full border-2 border-dashed border-slate-700 hover:border-violet-600 rounded-xl p-6 text-center transition-colors">
+                className="w-full border-2 border-dashed border-slate-700 hover:border-blue-600 rounded-xl p-6 text-center transition-colors">
                 <Upload className="w-5 h-5 text-slate-600 mx-auto mb-2" />
                 <p className="text-slate-500 text-xs">Click to upload screenshot</p>
                 <p className="text-slate-600 text-[10px] mt-0.5">AI extracts and saves proof text</p>
@@ -134,13 +134,13 @@ function ProofModal({ task, onSubmit, onClose }: {
         )}
         {tab === 'note' && (
           <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="What did you accomplish?" rows={3}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none" />
+            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none" />
         )}
 
         <div className="flex gap-2 pt-1">
           <button onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-400 text-xs font-medium hover:bg-slate-800 transition-colors">Cancel</button>
           <button onClick={submit} disabled={required ? !canSubmit : false}
-            className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
+            className="flex-1 py-2 rounded-lg bg-blue-600 hover:bg-blue-600 disabled:opacity-40 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
             <Check className="w-3.5 h-3.5" /> Mark Done
           </button>
         </div>
@@ -185,7 +185,7 @@ function TaskCard({ task, isDragging, onDragStart, onDragEnd, onMove, onDelete, 
         className={cn(
           'rounded-xl border transition-all duration-200 cursor-grab active:cursor-grabbing select-none',
           isDragging ? 'opacity-40 scale-[0.98]' : '',
-          task.status === 'done' ? 'border-emerald-800/30 bg-emerald-950/10' : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:shadow-md hover:shadow-black/20',
+          task.status === 'done' ? 'border-slate-700/30 bg-slate-950/10' : 'border-slate-800 bg-slate-900 hover:border-slate-700 hover:shadow-md hover:shadow-black/20',
         )}
       >
         {/* Card header */}
@@ -208,11 +208,11 @@ function TaskCard({ task, isDragging, onDragStart, onDragEnd, onMove, onDelete, 
           </div>
 
           {task.status === 'done' && (task.proof_value || task.proof_summary) && (
-            <div className="mt-2 p-2 bg-emerald-950/30 border border-emerald-800/30 rounded-lg">
-              <p className="text-[9px] text-emerald-600 font-semibold uppercase tracking-wider mb-0.5">Proof</p>
+            <div className="mt-2 p-2 bg-slate-950/30 border border-slate-700/30 rounded-lg">
+              <p className="text-[9px] text-blue-600 font-semibold uppercase tracking-wider mb-0.5">Proof</p>
               {task.proof_value?.startsWith('http') ? (
                 <a href={task.proof_value} target="_blank" rel="noopener noreferrer"
-                  className="text-[10px] text-emerald-400 hover:underline flex items-center gap-1 truncate">
+                  className="text-[10px] text-blue-400 hover:underline flex items-center gap-1 truncate">
                   <ExternalLink className="w-2.5 h-2.5 shrink-0" />{task.proof_value}
                 </a>
               ) : (
@@ -229,14 +229,14 @@ function TaskCard({ task, isDragging, onDragStart, onDragEnd, onMove, onDelete, 
               <p className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider mb-1">Notes</p>
               <textarea value={notes} onChange={e => { setNotes(e.target.value); setDirty(true) }} onBlur={saveNotes}
                 placeholder="Add a note..." rows={2}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-[11px] text-white placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none" />
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-2 text-[11px] text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none" />
               {notesDirty && (
-                <button onClick={saveNotes} className="text-[10px] text-violet-400 hover:text-violet-300 mt-0.5 transition-colors">Save note →</button>
+                <button onClick={saveNotes} className="text-[10px] text-blue-400 hover:text-blue-300 mt-0.5 transition-colors">Save note →</button>
               )}
             </div>
             {task.href && task.status !== 'done' && (
               <Link href={task.href}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-violet-600 border border-slate-700 hover:border-violet-500 rounded-lg text-slate-300 hover:text-white text-[11px] font-semibold transition-colors">
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-blue-600 border border-slate-700 hover:border-blue-500 rounded-lg text-slate-300 hover:text-white text-[11px] font-semibold transition-colors">
                 ⚡ {task.cta ?? 'Open'} <ArrowRight className="w-2.5 h-2.5" />
               </Link>
             )}
@@ -256,7 +256,7 @@ function TaskCard({ task, isDragging, onDragStart, onDragEnd, onMove, onDelete, 
                 </button>
                 {task.href && !expanded && (
                   <Link href={task.href}
-                    className="py-1.5 px-2.5 text-[10px] font-medium text-violet-400 hover:text-violet-300 rounded-lg border border-slate-800 transition-colors flex items-center gap-1">
+                    className="py-1.5 px-2.5 text-[10px] font-medium text-blue-400 hover:text-blue-300 rounded-lg border border-slate-800 transition-colors flex items-center gap-1">
                     Open <ArrowRight className="w-2.5 h-2.5" />
                   </Link>
                 )}
@@ -267,7 +267,7 @@ function TaskCard({ task, isDragging, onDragStart, onDragEnd, onMove, onDelete, 
                 <button onClick={() => onMove(task.id, 'todo')}
                   className="py-1.5 px-2 text-[10px] font-medium text-slate-600 hover:text-slate-400 rounded-lg border border-slate-800 transition-colors">← Back</button>
                 <button onClick={() => setShowProof(true)}
-                  className="flex-1 py-1.5 text-[10px] font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors flex items-center justify-center gap-1">
+                  className="flex-1 py-1.5 text-[10px] font-semibold text-white bg-blue-600 hover:bg-blue-600 rounded-lg transition-colors flex items-center justify-center gap-1">
                   <Check className="w-3 h-3" /> Done
                 </button>
               </>
@@ -306,11 +306,11 @@ function AddTaskForm({ onAdd, onClose }: { onAdd: (t: Partial<KanbanTask>) => vo
   }
 
   return (
-    <div className="rounded-xl border border-violet-700/50 bg-violet-950/20 p-3 space-y-2">
+    <div className="rounded-xl border border-slate-700/50 bg-slate-950/20 p-3 space-y-2">
       <input ref={inputRef} value={title} onChange={e => setTitle(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') onClose() }}
         placeholder="Task title..."
-        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-violet-500" />
+        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500" />
       <div className="flex gap-2">
         <select value={cat} onChange={e => setCat(e.target.value)}
           className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:outline-none">
@@ -322,7 +322,7 @@ function AddTaskForm({ onAdd, onClose }: { onAdd: (t: Partial<KanbanTask>) => vo
       <div className="flex gap-2">
         <button onClick={onClose} className="flex-1 py-1.5 rounded-lg border border-slate-700 text-slate-500 text-xs hover:bg-slate-800 transition-colors">Cancel</button>
         <button onClick={submit} disabled={!title.trim() || saving}
-          className="flex-1 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-xs font-semibold transition-colors">
+          className="flex-1 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-xs font-semibold transition-colors">
           {saving ? 'Adding…' : 'Add Task'}
         </button>
       </div>
@@ -345,7 +345,7 @@ function DropColumn({ title, icon, colStatus, tasks, dragOverCol, onDragOver, on
 
   return (
     <div
-      className={cn('flex flex-col min-w-[280px] flex-1 rounded-xl p-3 transition-colors', isOver ? 'bg-violet-950/20 ring-1 ring-violet-700/50' : 'bg-slate-800/20')}
+      className={cn('flex flex-col min-w-[280px] flex-1 rounded-xl p-3 transition-colors', isOver ? 'bg-slate-950/20 ring-1 ring-blue-700/50' : 'bg-slate-800/20')}
       onDragOver={e => { e.preventDefault(); onDragOver(colStatus) }}
       onDragLeave={onDragLeave}
       onDrop={e => { e.preventDefault(); onDrop(colStatus) }}
@@ -354,7 +354,7 @@ function DropColumn({ title, icon, colStatus, tasks, dragOverCol, onDragOver, on
         <span className="text-base">{icon}</span>
         <span className="text-xs font-semibold text-slate-300">{title}</span>
         <span className="text-[10px] text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded-full border border-slate-700">{tasks.length}</span>
-        {isOver && <span className="text-[9px] text-violet-400 ml-auto">Drop here</span>}
+        {isOver && <span className="text-[9px] text-blue-400 ml-auto">Drop here</span>}
       </div>
       <div className="flex-1 space-y-2">
         {tasks.length === 0 && !isOver && (
@@ -516,8 +516,8 @@ export function KanbanBoard() {
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
               Task Board
               {generating && (
-                <span className="flex items-center gap-1 text-[10px] font-normal text-violet-400">
-                  <span className="w-3 h-3 border border-violet-500 border-t-transparent rounded-full animate-spin inline-block" />
+                <span className="flex items-center gap-1 text-[10px] font-normal text-blue-400">
+                  <span className="w-3 h-3 border border-blue-500 border-t-transparent rounded-full animate-spin inline-block" />
                   AI generating tasks…
                 </span>
               )}
@@ -533,7 +533,7 @@ export function KanbanBoard() {
               <RefreshCw className={cn('w-3.5 h-3.5', refreshing && 'animate-spin')} />
             </button>
             <button onClick={() => setAdding(true)}
-              className="flex items-center gap-1 px-2.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold rounded-lg transition-colors">
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold rounded-lg transition-colors">
               <Plus className="w-3 h-3" /> Add Task
             </button>
           </div>
