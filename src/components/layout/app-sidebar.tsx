@@ -81,20 +81,6 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: 'social',
-    label: 'Social Autopilot',
-    icon: Share2,
-    badge: 'new',
-    items: [
-      { label: 'Overview',    href: '/social' },
-      { label: 'LinkedIn',    href: '/social/linkedin' },
-      { label: 'Facebook',    href: '/social/facebook' },
-      { label: 'Reddit',      href: '/social/reddit' },
-      { label: 'X (Twitter)', href: '/social/x' },
-      { label: 'YouTube',     href: '/social/youtube' },
-    ],
-  },
-  {
     id: 'content',
     label: 'Content Autopilot',
     icon: Calendar,
@@ -138,6 +124,20 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Email Configurations',href: '/settings/email' },
       { label: 'Email Campaigns',     href: '/campaigns' },
       { label: 'Leads Funnel',        href: '/leads/funnel' },
+    ],
+  },
+  {
+    id: 'social',
+    label: 'Social Autopilot',
+    icon: Share2,
+    badge: 'new',
+    items: [
+      { label: 'Overview',    href: '/social' },
+      { label: 'LinkedIn',    href: '/social/linkedin' },
+      { label: 'Facebook',    href: '/social/facebook' },
+      { label: 'Reddit',      href: '/social/reddit' },
+      { label: 'X (Twitter)', href: '/social/x' },
+      { label: 'YouTube',     href: '/social/youtube' },
     ],
   },
   {
