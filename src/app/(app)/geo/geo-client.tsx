@@ -186,21 +186,21 @@ function ScoreRing({ score, size = 140, label = '/ 100' }: { score: number; size
   )
 }
 
-function LikelihoodBadge({ v }: { v: 'high' | 'medium' | 'low' }) {
-  const meta = {
+function LikelihoodBadge({ v }: { v: string }) {
+  const meta = ({
     high:   { cls: 'bg-blue-600/15 text-blue-400 border border-blue-500/25', label: 'High' },
     medium: { cls: 'bg-slate-600/15 text-slate-500 border border-slate-500/25',     label: 'Medium' },
     low:    { cls: 'bg-slate-700 text-slate-400 border border-slate-600',             label: 'Low' },
-  }[v]
+  } as Record<string, { cls: string; label: string }>)[v] ?? { cls: 'bg-slate-700 text-slate-400 border border-slate-600', label: v ?? '—' }
   return <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${meta.cls}`}>{meta.label}</span>
 }
 
-function ImpactBadge({ v }: { v: 'high' | 'medium' | 'low' }) {
-  const meta = {
+function ImpactBadge({ v }: { v: string }) {
+  const meta = ({
     high:   { cls: 'bg-red-500/15 text-red-400 border border-red-500/25',          label: 'High impact' },
     medium: { cls: 'bg-slate-600/15 text-slate-500 border border-slate-500/25',     label: 'Medium impact' },
     low:    { cls: 'bg-slate-700 text-slate-400 border border-slate-600',            label: 'Low impact' },
-  }[v]
+  } as Record<string, { cls: string; label: string }>)[v] ?? { cls: 'bg-slate-700 text-slate-400 border border-slate-600', label: v ?? '—' }
   return <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${meta.cls}`}>{meta.label}</span>
 }
 
@@ -638,7 +638,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
         </p>
         <div className="space-y-3">
           {topicClusters.map((cluster, i) => {
-            const m = coverageMeta[cluster.coverage]
+            const m = coverageMeta[cluster.coverage] ?? coverageMeta.missing
             const isClusterDone = !!clusterDone[i]
             const isClusterGenerating = !!clusterGenerating[i]
             const needsContent = cluster.coverage !== 'strong'
@@ -681,7 +681,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {cluster.subtopics.map((s, j) => (
+                  {(cluster.subtopics ?? []).map((s, j) => (
                     <span key={j} className="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
                       {s}
                     </span>
