@@ -493,10 +493,14 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
     )
   }
 
-  const aisPresent = [...new Set(intelligence.prompt_examples.map(p => p.ai))]
+  const promptExamples = intelligence.prompt_examples ?? []
+  const contentGaps    = intelligence.content_gaps    ?? []
+  const topicClusters  = intelligence.topic_clusters  ?? []
+
+  const aisPresent = [...new Set(promptExamples.map(p => p.ai))]
   const filteredPrompts = promptFilter === 'all'
-    ? intelligence.prompt_examples
-    : intelligence.prompt_examples.filter(p => p.ai === promptFilter)
+    ? promptExamples
+    : promptExamples.filter(p => p.ai === promptFilter)
 
   const coverageMeta = {
     strong:  { icon: '✅', cls: 'text-blue-400', bg: 'bg-slate-950/20 border-slate-700/30' },
@@ -505,7 +509,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
   }
 
   const gapImpactOrder = { high: 0, medium: 1, low: 2 }
-  const sortedGaps = [...intelligence.content_gaps].sort((a, b) => gapImpactOrder[a.impact] - gapImpactOrder[b.impact])
+  const sortedGaps = [...contentGaps].sort((a, b) => gapImpactOrder[a.impact] - gapImpactOrder[b.impact])
 
   return (
     <div className="space-y-5 pb-10">
@@ -584,7 +588,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-white">🎯 Test Prompts</h3>
-          <span className="text-xs text-slate-500">{intelligence.prompt_examples.length} prompts</span>
+          <span className="text-xs text-slate-500">{promptExamples.length} prompts</span>
         </div>
         <p className="text-xs text-slate-500 mb-4">Real prompts users type in AI assistants that should surface your business. Copy and test them yourself.</p>
 
@@ -594,7 +598,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
             onClick={() => setPromptFilter('all')}
             className={`text-xs px-3 py-1 rounded-lg border transition-colors ${promptFilter === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'}`}
           >
-            All ({intelligence.prompt_examples.length})
+            All ({promptExamples.length})
           </button>
           {aisPresent.map(ai => (
             <button
@@ -633,7 +637,7 @@ function IntelligenceTab({ intelligence, onGenerate, generating, error, logs, on
           Topics where AI needs to know about your business. <span className="text-blue-400">Not covered</span> or <span className="text-slate-500">Weak</span> = create a page on your website for that topic — CooVex can write it for you.
         </p>
         <div className="space-y-3">
-          {intelligence.topic_clusters.map((cluster, i) => {
+          {topicClusters.map((cluster, i) => {
             const m = coverageMeta[cluster.coverage]
             const isClusterDone = !!clusterDone[i]
             const isClusterGenerating = !!clusterGenerating[i]
@@ -1131,17 +1135,17 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
                     )}
 
                     {/* Content to Create — top 3 high-impact */}
-                    {intelligence.content_gaps.length > 0 && (
+                    {contentGaps.length > 0 && (
                       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm font-semibold text-white">✍️ Content to Create</p>
                           <button onClick={() => setActiveTab('intelligence')}
                             className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
-                            See all {intelligence.content_gaps.length} →
+                            See all {contentGaps.length} →
                           </button>
                         </div>
                         <div className="space-y-2">
-                          {[...intelligence.content_gaps]
+                          {[...contentGaps]
                             .sort((a, b) => ({ high: 0, medium: 1, low: 2 }[a.impact] - { high: 0, medium: 1, low: 2 }[b.impact]))
                             .slice(0, 3)
                             .map((gap, i) => (
@@ -1243,7 +1247,7 @@ export default function GeoClient({ geo, intel, websiteUrl, businessName, lastSc
 
         {/* ── AI Intelligence ── */}
         {activeTab === 'intelligence' && (
-          <IntelligenceBoundary onReset={handleGenerateIntelligence}>
+          <IntelligenceBoundary onReset={() => { setIntelligence(null); handleGenerateIntelligence() }}>
             <IntelligenceTab
               intelligence={intelligence}
               onGenerate={handleGenerateIntelligence}
