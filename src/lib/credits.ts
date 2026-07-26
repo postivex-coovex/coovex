@@ -157,6 +157,9 @@ export const CREDIT_COSTS = {
   pitch_deck:            40,
   business_plan:         50,  // real ~$0.08, charged $0.50
   gtm_autopilot:         30,  // full GTM run: leads + content + geo + AI plan
+
+  // ── CooVex Dev (WordPress AI agent) ─────────────
+  wp_dev_command:        15,  // per command — reads context, generates + applies code changes
 } as const
 
 export type FeatureKey = keyof typeof CREDIT_COSTS
@@ -216,6 +219,41 @@ export async function checkCredits(workspaceId: string, cost: number): Promise<C
     return { ok: false, balance, error: `Insufficient credits. Need ${cost}, have ${balance}.` }
   }
   return { ok: true, balance }
+}
+
+/** Deduct a dynamic credit amount (for pay-per-use features like CooVex Dev).
+ *  cost = Math.ceil(llmCostUsd * 1.25 * 100) since 100 credits = $1 */
+export async function deductCreditsAmount(
+  workspaceId: string,
+  cost: number,
+  description: string,
+): Promise<CreditResult> {
+  if (cost <= 0) return { ok: true, balance: 0 }
+  const service = createServiceClient()
+
+  const { data, error } = await service.rpc('deduct_ai_credits', {
+    p_workspace_id: workspaceId,
+    p_amount:       cost,
+    p_feature:      'wp_dev_command',
+    p_description:  description,
+  })
+
+  if (!error) {
+    if (data === -1) return { ok: false, balance: 0, error: 'Insufficient credits. Top up in Settings → Billing.' }
+    return { ok: true, balance: data as number }
+  }
+
+  // Fallback: direct deduction
+  const { data: ws } = await service.from('workspaces').select('ai_credits_balance').eq('id', workspaceId).single()
+  const balance = ws?.ai_credits_balance ?? 0
+  if (balance < cost) return { ok: false, balance, error: 'Insufficient credits. Top up in Settings → Billing.' }
+  const newBalance = balance - cost
+  await service.from('workspaces').update({ ai_credits_balance: newBalance }).eq('id', workspaceId)
+  await service.from('credit_transactions').insert({
+    workspace_id: workspaceId, amount: -cost, type: 'usage',
+    feature: 'wp_dev_command', description, balance_after: newBalance,
+  })
+  return { ok: true, balance: newBalance }
 }
 
 /** Atomically deduct credits using the DB function.

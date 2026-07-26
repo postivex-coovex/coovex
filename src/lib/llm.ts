@@ -137,6 +137,97 @@ export async function llmChat(
   return res.content[0].type === 'text' ? res.content[0].text : ''
 }
 
+// ── Token-aware chat (returns usage for billing) ───────────────────────────
+export interface LLMUsage {
+  input_tokens: number
+  output_tokens: number
+  model: string
+  provider: LLMProvider
+}
+
+// Approximate USD cost per 1M tokens (mid-2025 pricing)
+const TOKEN_PRICE: Record<string, { input: number; output: number }> = {
+  'claude-sonnet-4-6':      { input: 3.00,  output: 15.00 },
+  'claude-opus-4':          { input: 15.00, output: 75.00 },
+  'claude-haiku-4-5':       { input: 0.80,  output: 4.00  },
+  'gpt-4o':                 { input: 5.00,  output: 15.00 },
+  'gpt-4o-mini':            { input: 0.15,  output: 0.60  },
+  'gemini-1.5-pro':         { input: 3.50,  output: 10.50 },
+  'gemini-1.5-flash':       { input: 0.075, output: 0.30  },
+}
+
+export function calcLLMCostUsd(usage: LLMUsage): number {
+  const price = TOKEN_PRICE[usage.model] ?? { input: 5.0, output: 15.0 }
+  return (usage.input_tokens / 1_000_000) * price.input
+       + (usage.output_tokens / 1_000_000) * price.output
+}
+
+export async function llmChatWithUsage(
+  messages: LLMMessage[],
+  system?: string,
+  opts?: { maxTokens?: number; temperature?: number }
+): Promise<{ text: string; usage: LLMUsage }> {
+  const settings = await getSettings()
+  const { provider } = settings
+  const maxTokens = opts?.maxTokens ?? 2048
+
+  if (provider === 'openai') {
+    if (!settings.openai_api_key) throw new Error('OpenAI API key not configured')
+    const { default: OpenAI } = await import('openai')
+    const client = new OpenAI({ apiKey: settings.openai_api_key })
+    const model = settings.openai_model ?? 'gpt-4o'
+    const res = await client.chat.completions.create({
+      model,
+      max_tokens: maxTokens,
+      messages: [
+        ...(system ? [{ role: 'system' as const, content: system }] : []),
+        ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      ],
+    })
+    return {
+      text: res.choices[0]?.message?.content ?? '',
+      usage: { input_tokens: res.usage?.prompt_tokens ?? 0, output_tokens: res.usage?.completion_tokens ?? 0, model, provider },
+    }
+  }
+
+  if (provider === 'gemini') {
+    if (!settings.gemini_api_key) throw new Error('Gemini API key not configured')
+    const { GoogleGenerativeAI } = await import('@google/generative-ai')
+    const genai = new GoogleGenerativeAI(settings.gemini_api_key)
+    const model = settings.gemini_model ?? 'gemini-1.5-pro'
+    const gmodel = genai.getGenerativeModel({ model, systemInstruction: system })
+    const history = messages.slice(0, -1).map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))
+    const lastMessage = messages.at(-1)?.content ?? ''
+    const chat = gmodel.startChat({ history })
+    const res = await chat.sendMessage(lastMessage)
+    const meta = res.response.usageMetadata
+    return {
+      text: res.response.text(),
+      usage: {
+        input_tokens:  meta?.promptTokenCount ?? 0,
+        output_tokens: meta?.candidatesTokenCount ?? 0,
+        model, provider,
+      },
+    }
+  }
+
+  // Default: Claude
+  if (!settings.claude_api_key) throw new Error('Claude API key not configured')
+  const { default: Anthropic } = await import('@anthropic-ai/sdk')
+  const client = new Anthropic({ apiKey: settings.claude_api_key })
+  const model = settings.claude_model ?? 'claude-sonnet-4-6'
+  const res = await client.messages.create({
+    model,
+    max_tokens: maxTokens,
+    system,
+    messages: messages.map(m => ({ role: m.role, content: m.content })),
+  })
+  return {
+    text: res.content[0].type === 'text' ? res.content[0].text : '',
+    usage: { input_tokens: res.usage.input_tokens, output_tokens: res.usage.output_tokens, model, provider },
+  }
+}
+
 /** Get current provider name for display */
 export async function getCurrentProvider(): Promise<LLMProvider> {
   const s = await getSettings()
