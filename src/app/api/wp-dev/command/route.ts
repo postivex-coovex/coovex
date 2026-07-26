@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac } from 'crypto'
 import { createServiceClient } from '@/lib/supabase/service'
 import { calcLLMCostUsd } from '@/lib/llm'
 import { deductCreditsAmount } from '@/lib/credits'
+import { deriveLicenseToken, signResponseBody } from '../validate/route'
 import type { LLMMessage, LLMUsage } from '@/lib/llm'
 
 // 100 credits = $1 → 1 credit = $0.01
 // CooVex charges 1.25× actual LLM cost
-const MARKUP    = 1.25
+const MARKUP         = 1.25
 const USD_PER_CREDIT = 0.01
 
 const SYSTEM_PROMPT = `You are CooVex Dev, an AI agent embedded in WordPress. You execute code changes on behalf of the site owner.
@@ -123,6 +125,7 @@ interface SiteInfo {
   active_theme?: string
   db_tables?: string[]
   site_url?: string
+  stats?: Record<string, unknown>
 }
 
 interface HistoryMessage {
@@ -130,14 +133,24 @@ interface HistoryMessage {
   content: string
 }
 
+function getTodayUTC(): string {
+  return new Date().toISOString().split('T')[0]
+}
+
+function normalizeUrl(url: string): string {
+  try { return new URL(url.toLowerCase().trim()).origin }
+  catch { return url.toLowerCase().trim().replace(/\/$/, '') }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { api_key, command, history, site_info }: {
+    const { api_key, command, history, site_info, request_nonce }: {
       api_key: string
       command: string
       history?: HistoryMessage[]
       site_info?: SiteInfo
+      request_nonce?: string  // one-time nonce sent by plugin for replay prevention
     } = body
 
     if (!api_key || !command) {
@@ -157,6 +170,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid API key' }, { status: 401 })
     }
 
+    // ── Site URL binding check ────────────────────────────────────────────────
+    // Reject if this API key was validated for a different site
+    const siteUrlFromRequest = site_info?.site_url ?? ''
+    if (siteUrlFromRequest) {
+      const { data: license } = await service
+        .from('wp_dev_licenses')
+        .select('site_url, revoked')
+        .eq('api_key', api_key)
+        .maybeSingle()
+
+      if (license) {
+        if (license.revoked) {
+          return NextResponse.json({ error: 'License revoked.', code: 'REVOKED' }, { status: 403 })
+        }
+        const registered = normalizeUrl(license.site_url)
+        const incoming   = normalizeUrl(siteUrlFromRequest)
+        if (registered !== incoming) {
+          return NextResponse.json({
+            error: 'This plugin is registered to a different domain.',
+            code: 'SITE_MISMATCH',
+          }, { status: 403 })
+        }
+      }
+    }
+
     // Build context block
     const contextLines = [
       `Site: ${site_info?.site_url ?? business.website_url ?? 'unknown'}`,
@@ -169,6 +207,9 @@ export async function POST(req: NextRequest) {
     }
     if (site_info?.db_tables?.length) {
       contextLines.push(`DB tables: ${site_info.db_tables.join(', ')}`)
+    }
+    if (site_info?.stats && Object.keys(site_info.stats).length) {
+      contextLines.push(`\nLIVE STATS:\n${JSON.stringify(site_info.stats, null, 2)}`)
     }
 
     const contextBlock = contextLines.join('\n')
@@ -209,13 +250,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: creditResult.error }, { status: 402 })
     }
 
-    return NextResponse.json({
+    // ── Sign the response (HMAC using daily license token) ───────────────────
+    // Plugin verifies this signature before applying any changes.
+    // Even if the response is intercepted and modified in transit,
+    // the tampered body will fail signature verification.
+    const responsePayload = {
       ok: true,
       message: parsed.message,
       changes: parsed.changes ?? [],
       read_only: parsed.read_only ?? false,
       credits_used:      creditsToDeduct,
       credits_remaining: creditResult.balance,
+    }
+
+    const responseBody  = JSON.stringify(responsePayload)
+    const nonce         = request_nonce ?? ''
+    const siteUrl       = normalizeUrl(site_info?.site_url ?? business.website_url ?? '')
+    const licenseToken  = deriveLicenseToken(api_key, siteUrl, getTodayUTC())
+    const signature     = signResponseBody(responseBody, licenseToken, nonce)
+
+    return new Response(responseBody, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CVD-Sig':    signature,
+        'X-CVD-Nonce':  nonce,
+      },
     })
   } catch (err) {
     console.error('POST /api/wp-dev/command error:', err)

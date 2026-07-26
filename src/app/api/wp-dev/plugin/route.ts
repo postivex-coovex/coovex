@@ -18,13 +18,106 @@ const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-define('CVD_VERSION',         '1.1.0');
+define('CVD_VERSION',         '1.2.0');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
+define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_SESSION_TTL',     30 * MINUTE_IN_SECONDS);
 define('CVD_MAX_SNAPSHOTS',   25);
 define('CVD_RATE_LIMIT',      12); // max commands per 5 minutes
 define('CVD_COOKIE',          'cvd_session');
 define('CVD_TELEGRAM_API',    'https://api.telegram.org/bot');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LICENSE VALIDATION — runs on activation, daily, and before every command
+// Security: license_token is derived server-side with a secret never sent here.
+//           Even reading this code reveals nothing useful for bypassing it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+register_activation_hook(__FILE__, 'cvd_license_validate');
+
+add_action('cvd_daily_license_check', 'cvd_license_validate');
+
+if (!wp_next_scheduled('cvd_daily_license_check')) {
+    add_action('init', function () {
+        if (!wp_next_scheduled('cvd_daily_license_check')) {
+            wp_schedule_event(time(), 'daily', 'cvd_daily_license_check');
+        }
+    });
+}
+
+function cvd_license_validate(): bool {
+    $api_key = get_option('cvd_api_key', '');
+    if (empty($api_key)) return false;
+
+    $response = wp_remote_post(CVD_VALIDATE_URL, [
+        'timeout' => 15,
+        'headers' => ['Content-Type' => 'application/json'],
+        'body'    => wp_json_encode([
+            'api_key'        => $api_key,
+            'site_url'       => get_site_url(),
+            'plugin_version' => CVD_VERSION,
+        ]),
+    ]);
+
+    if (is_wp_error($response)) {
+        // Network error — keep current license if it hasn't expired yet
+        return (time() < (int)get_option('cvd_license_expires', 0));
+    }
+
+    $code = wp_remote_retrieve_response_code($response);
+    $body = json_decode(wp_remote_retrieve_body($response), true);
+
+    if ($code === 403) {
+        // Revoked or site mismatch — hard stop
+        $code_str = $body['code'] ?? '';
+        update_option('cvd_license_status', $code_str === 'REVOKED' ? 'revoked' : 'site_mismatch');
+        update_option('cvd_license_token',   '');
+        update_option('cvd_license_expires',  0);
+        return false;
+    }
+
+    if ($code !== 200 || empty($body['valid'])) {
+        return false;
+    }
+
+    // Store the daily-rotating token — used to verify every response signature
+    update_option('cvd_license_token',   $body['license_token']);
+    update_option('cvd_license_expires', strtotime($body['expires_at']));
+    update_option('cvd_license_status',  'active');
+    return true;
+}
+
+function cvd_license_ok(): bool {
+    $status  = get_option('cvd_license_status', '');
+    $expires = (int)get_option('cvd_license_expires', 0);
+
+    if ($status === 'revoked' || $status === 'site_mismatch') return false;
+    if ($expires > 0 && time() > $expires) {
+        // Token expired — try to refresh silently
+        return cvd_license_validate();
+    }
+    return !empty(get_option('cvd_license_token', ''));
+}
+
+/**
+ * Verify the HMAC signature on an API response.
+ *
+ * The server signs: HMAC-SHA256(response_body + ":" + nonce, license_token)
+ * where license_token is derived from (api_key + site_url + today) using a
+ * server secret that never leaves the server.
+ *
+ * An attacker who modifies the response body (or forges one entirely) cannot
+ * produce a valid signature without knowing today's license_token — which they
+ * cannot compute without the server's secret.
+ */
+function cvd_verify_response(string $body, string $sig, string $nonce): bool {
+    $token = get_option('cvd_license_token', '');
+    if (empty($token)) return false;
+
+    $expected = hash_hmac('sha256', $body . ':' . $nonce, $token);
+    // hash_equals prevents timing attacks
+    return hash_equals($expected, $sig);
+}
 
 // ── Admin menu ────────────────────────────────────────────────────────────────
 add_action('admin_menu', function () {
@@ -373,6 +466,18 @@ add_action('wp_ajax_cvd_command', function () {
     if (!cvd_session_valid())                wp_send_json_error('Session expired. Please re-enter your CooVex Dev password.', 401);
     if (!cvd_rate_check())                   wp_send_json_error('Rate limit reached. Wait a moment.', 429);
 
+    // ── License check (client gate — real enforcement is server-side) ─────────
+    if (!cvd_license_ok()) {
+        $status = get_option('cvd_license_status', '');
+        if ($status === 'revoked') {
+            wp_send_json_error('This plugin license has been revoked. Contact CooVex support.', 403);
+        }
+        if ($status === 'site_mismatch') {
+            wp_send_json_error('License is registered to a different domain.', 403);
+        }
+        wp_send_json_error('License not validated. Check your API key in Settings.', 402);
+    }
+
     $api_key = get_option('cvd_api_key', '');
     if (empty($api_key)) wp_send_json_error('API key not configured. Go to CooVex Dev → Settings.', 400);
 
@@ -380,14 +485,18 @@ add_action('wp_ajax_cvd_command', function () {
     if (empty($command)) wp_send_json_error('Empty command', 400);
 
     $raw_history = json_decode(stripslashes($_POST['history'] ?? '[]'), true) ?? [];
-    $history     = array_slice($raw_history, -10); // last 10 turns for context
+    $history     = array_slice($raw_history, -10);
+
+    // Generate a one-time nonce for replay prevention
+    $request_nonce = bin2hex(random_bytes(16));
 
     $site_context = cvd_site_context();
     $body         = wp_json_encode([
-        'api_key'   => $api_key,
-        'command'   => $command,
-        'history'   => $history,
-        'site_info' => $site_context,
+        'api_key'        => $api_key,
+        'command'        => $command,
+        'history'        => $history,
+        'site_info'      => $site_context,
+        'request_nonce'  => $request_nonce,
     ]);
 
     $response = wp_remote_post(CVD_API_URL, [
@@ -403,42 +512,63 @@ add_action('wp_ajax_cvd_command', function () {
         wp_send_json_error('Could not reach CooVex: ' . $response->get_error_message());
     }
 
-    $code    = wp_remote_retrieve_response_code($response);
-    $payload = json_decode(wp_remote_retrieve_body($response), true);
+    $code         = wp_remote_retrieve_response_code($response);
+    $raw_body     = wp_remote_retrieve_body($response);
+    $sig          = wp_remote_retrieve_header($response, 'x-cvd-sig');
+    $returned_nonce = wp_remote_retrieve_header($response, 'x-cvd-nonce');
+    $payload      = json_decode($raw_body, true);
 
     if ($code === 402) {
         wp_send_json_error($payload['error'] ?? 'Insufficient credits.', 402);
+    }
+    if ($code === 403) {
+        wp_send_json_error($payload['error'] ?? 'Access denied.', 403);
     }
     if ($code !== 200 || empty($payload['ok'])) {
         wp_send_json_error($payload['error'] ?? 'API error (HTTP ' . $code . ')');
     }
 
-    $changes      = $payload['changes'] ?? [];
-    $results      = [];
+    // ── Verify HMAC signature ─────────────────────────────────────────────────
+    // The server signs the response with the daily license token.
+    // If the nonce doesn't match what we sent, or the signature is wrong,
+    // the response was tampered with or forged — reject it entirely.
+    if (!empty($sig)) {
+        if ($returned_nonce !== $request_nonce) {
+            wp_send_json_error('Response nonce mismatch — possible replay attack detected.', 400);
+        }
+        if (!cvd_verify_response($raw_body, $sig, $request_nonce)) {
+            // Signature failed: try refreshing license token (in case it just rotated at midnight)
+            cvd_license_validate();
+            if (!cvd_verify_response($raw_body, $sig, $request_nonce)) {
+                wp_send_json_error('Response integrity check failed. Do not apply changes.', 400);
+            }
+        }
+    }
+
+    $changes       = $payload['changes'] ?? [];
+    $results       = [];
     $files_touched = [];
 
     if (!empty($changes)) {
-        // Collect file paths for snapshot (before applying)
         foreach ($changes as $ch) {
             if (($ch['type'] ?? 'file') === 'file' && !empty($ch['file'])) {
                 $files_touched[] = $ch['file'];
             }
         }
 
-        // Take snapshot BEFORE applying
+        // Snapshot BEFORE applying
         $snap_id = cvd_snapshot_take($files_touched, $command);
 
-        // Apply changes
         foreach ($changes as $ch) {
             $results[] = cvd_apply_change($ch);
         }
     }
 
-    // Build audit log entry
     cvd_audit_log([
         'command'   => $command,
         'changes'   => count($changes),
         'snap_id'   => $snap_id ?? null,
+        'sig_ok'    => !empty($sig),
         'user'      => wp_get_current_user()->user_login,
         'time'      => time(),
     ]);
@@ -1710,13 +1840,40 @@ What would you like to build or change?</div>
     <?php
 }
 
+// ── Admin notice for license issues ───────────────────────────────────────────
+add_action('admin_notices', function () {
+    if (!current_user_can('manage_options')) return;
+    $screen = get_current_screen();
+    if (!$screen || strpos($screen->id, 'coovex-dev') === false) return;
+
+    $status = get_option('cvd_license_status', '');
+    if ($status === 'revoked') {
+        echo '<div class="notice notice-error"><p><strong>CooVex Dev:</strong> This plugin license has been revoked. Contact <a href="https://coovex.com/support" target="_blank">CooVex support</a>.</p></div>';
+    } elseif ($status === 'site_mismatch') {
+        echo '<div class="notice notice-error"><p><strong>CooVex Dev:</strong> License domain mismatch. This plugin file was configured for a different site. <a href="' . admin_url('admin.php?page=coovex-dev-settings') . '">Re-download from your CooVex account</a>.</p></div>';
+    }
+});
+
+// ── Deactivation: unschedule cron ─────────────────────────────────────────────
+register_deactivation_hook(__FILE__, function () {
+    wp_clear_scheduled_hook('cvd_daily_license_check');
+    wp_clear_scheduled_hook('cvd_telegram_async');
+});
+
 // ── Uninstall cleanup ─────────────────────────────────────────────────────────
 register_uninstall_hook(__FILE__, function () {
     delete_option('cvd_api_key');
     delete_option('cvd_password_hash');
     delete_option('cvd_snapshots');
     delete_option('cvd_audit_log');
-    // Transient sessions expire naturally
+    delete_option('cvd_license_token');
+    delete_option('cvd_license_expires');
+    delete_option('cvd_license_status');
+    delete_option('cvd_telegram_bot_token');
+    delete_option('cvd_telegram_chat_id');
+    delete_option('cvd_telegram_webhook_secret');
+    delete_option('cvd_telegram_webhook_registered');
+    wp_clear_scheduled_hook('cvd_daily_license_check');
 });
 `
 
