@@ -18,12 +18,13 @@ const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-define('CVD_VERSION',         '1.0.0');
+define('CVD_VERSION',         '1.1.0');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
-define('CVD_SESSION_TTL',     30 * MINUTE_IN_SECONDS); // 30 minutes
+define('CVD_SESSION_TTL',     30 * MINUTE_IN_SECONDS);
 define('CVD_MAX_SNAPSHOTS',   25);
 define('CVD_RATE_LIMIT',      12); // max commands per 5 minutes
 define('CVD_COOKIE',          'cvd_session');
+define('CVD_TELEGRAM_API',    'https://api.telegram.org/bot');
 
 // ── Admin menu ────────────────────────────────────────────────────────────────
 add_action('admin_menu', function () {
@@ -43,9 +44,11 @@ add_action('admin_menu', function () {
 
 // ── Settings registration ─────────────────────────────────────────────────────
 add_action('admin_init', function () {
-    register_setting('cvd_options', 'cvd_api_key',        ['sanitize_callback' => 'sanitize_text_field']);
-    register_setting('cvd_options', 'cvd_workspace_id',   ['sanitize_callback' => 'sanitize_text_field']);
-    register_setting('cvd_options', 'cvd_password_hash',  ['sanitize_callback' => 'sanitize_text_field']);
+    register_setting('cvd_options', 'cvd_api_key',              ['sanitize_callback' => 'sanitize_text_field']);
+    register_setting('cvd_options', 'cvd_workspace_id',         ['sanitize_callback' => 'sanitize_text_field']);
+    register_setting('cvd_options', 'cvd_password_hash',        ['sanitize_callback' => 'sanitize_text_field']);
+    register_setting('cvd_options', 'cvd_telegram_bot_token',   ['sanitize_callback' => 'sanitize_text_field']);
+    register_setting('cvd_options', 'cvd_telegram_chat_id',     ['sanitize_callback' => 'sanitize_text_field']);
 });
 
 // ── Session helpers ───────────────────────────────────────────────────────────
@@ -253,7 +256,92 @@ function cvd_site_context(): array {
         'active_theme' => wp_get_theme()->get('Name') . ' ' . wp_get_theme()->get('Version'),
         'plugins'      => $plugin_names,
         'db_tables'    => $tables,
+        'stats'        => cvd_gather_stats($plugin_names),
     ];
+}
+
+// ── Gather live site statistics for AI context ─────────────────────────────────
+function cvd_gather_stats(array $plugin_names = []): array {
+    global $wpdb;
+    $stats = [];
+    $today = date('Y-m-d');
+    $month = date('Y-m');
+
+    // ── Core WP stats ──────────────────────────────────────────────────────────
+    $post_counts = wp_count_posts();
+    $stats['posts_published']   = (int)($post_counts->publish ?? 0);
+    $stats['posts_draft']       = (int)($post_counts->draft ?? 0);
+    $stats['pages_published']   = (int)(wp_count_posts('page')->publish ?? 0);
+    $stats['total_comments']    = (int)(wp_count_comments()->total_comments ?? 0);
+    $stats['registered_users']  = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->users}");
+
+    // ── WooCommerce ────────────────────────────────────────────────────────────
+    if (class_exists('WooCommerce')) {
+        $stats['woocommerce'] = true;
+        $stats['wc_orders_today'] = (int)$wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts}
+             WHERE post_type = 'shop_order'
+               AND post_status IN ('wc-completed','wc-processing','wc-on-hold')
+               AND DATE(post_date) = %s", $today
+        ));
+        $stats['wc_orders_month'] = (int)$wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts}
+             WHERE post_type = 'shop_order'
+               AND post_status IN ('wc-completed','wc-processing')
+               AND DATE_FORMAT(post_date,'%%Y-%%m') = %s", $month
+        ));
+        $stats['wc_revenue_month'] = (float)$wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(pm.meta_value) FROM {$wpdb->posts} p
+             JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = '_order_total'
+             WHERE p.post_type = 'shop_order'
+               AND p.post_status IN ('wc-completed','wc-processing')
+               AND DATE_FORMAT(p.post_date,'%%Y-%%m') = %s", $month
+        ));
+        $stats['wc_products'] = (int)(wp_count_posts('product')->publish ?? 0);
+    }
+
+    // ── WP-Statistics ──────────────────────────────────────────────────────────
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}statistics_visit'")) {
+        $stats['wp_statistics'] = true;
+        $stats['visitors_today'] = (int)$wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(visit) FROM {$wpdb->prefix}statistics_visit WHERE last_counter = %s", $today
+        ));
+        $stats['visitors_yesterday'] = (int)$wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(visit) FROM {$wpdb->prefix}statistics_visit WHERE last_counter = %s",
+            date('Y-m-d', strtotime('-1 day'))
+        ));
+        $stats['visitors_month'] = (int)$wpdb->get_var($wpdb->prepare(
+            "SELECT SUM(visit) FROM {$wpdb->prefix}statistics_visit WHERE DATE_FORMAT(last_counter,'%%Y-%%m') = %s", $month
+        ));
+    }
+
+    // ── Jetpack Stats ──────────────────────────────────────────────────────────
+    if (function_exists('stats_get_csv')) {
+        $jetpack_today = stats_get_csv('postviews', ['days' => 1, 'limit' => 1]);
+        if ($jetpack_today !== false) {
+            $stats['jetpack_stats'] = true;
+            $stats['visitors_today'] = $stats['visitors_today'] ?? array_sum(array_column((array)$jetpack_today, 'views'));
+        }
+    }
+
+    // ── MonsterInsights / GADWP ────────────────────────────────────────────────
+    if (in_array('Google Analytics by MonsterInsights', $plugin_names) ||
+        in_array('Google Analytics Dashboard Plugin for WordPress by ExactMetrics', $plugin_names)) {
+        $stats['monsterinsights'] = true;
+        // Data is in Google Analytics — not directly queryable from WP
+    }
+
+    // ── Contact Form 7 submissions ─────────────────────────────────────────────
+    if (in_array('Contact Form 7', $plugin_names)) {
+        $stats['cf7_active'] = true;
+    }
+
+    // ── No analytics detected ──────────────────────────────────────────────────
+    if (!isset($stats['wp_statistics']) && !isset($stats['jetpack_stats']) && !isset($stats['monsterinsights'])) {
+        $stats['no_visitor_tracking'] = true;
+    }
+
+    return $stats;
 }
 
 // ── AJAX: authenticate ────────────────────────────────────────────────────────
@@ -439,6 +527,160 @@ function cvd_audit_log(array $entry): void {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// TELEGRAM INTEGRATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+function cvd_telegram_send(string $token, $chat_id, string $text, ?int $reply_to = null): void {
+    $params = ['chat_id' => $chat_id, 'text' => $text, 'parse_mode' => 'Markdown'];
+    if ($reply_to) $params['reply_to_message_id'] = $reply_to;
+    wp_remote_post(CVD_TELEGRAM_API . $token . '/sendMessage', [
+        'timeout'  => 10,
+        'blocking' => false,
+        'headers'  => ['Content-Type' => 'application/json'],
+        'body'     => wp_json_encode($params),
+    ]);
+}
+
+function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0): void {
+    $token   = get_option('cvd_telegram_bot_token', '');
+    $api_key = get_option('cvd_api_key', '');
+    if (empty($token) || empty($api_key)) {
+        cvd_telegram_send($token, $chat_id, '⚠️ CooVex Dev is not configured. Check plugin settings.', $reply_to ?: null);
+        return;
+    }
+
+    $response = wp_remote_post(CVD_API_URL, [
+        'timeout' => 120,
+        'headers' => ['Content-Type' => 'application/json', 'User-Agent' => 'CooVex-Dev-Telegram/' . CVD_VERSION],
+        'body'    => wp_json_encode(['api_key' => $api_key, 'command' => $command, 'site_info' => cvd_site_context()]),
+    ]);
+
+    if (is_wp_error($response)) {
+        cvd_telegram_send($token, $chat_id, '❌ ' . $response->get_error_message(), $reply_to ?: null);
+        return;
+    }
+
+    $code    = wp_remote_retrieve_response_code($response);
+    $payload = json_decode(wp_remote_retrieve_body($response), true);
+
+    if ($code === 402) { cvd_telegram_send($token, $chat_id, '⚠️ ' . ($payload['error'] ?? 'Insufficient credits.'), $reply_to ?: null); return; }
+    if ($code !== 200 || empty($payload['ok'])) { cvd_telegram_send($token, $chat_id, '❌ ' . ($payload['error'] ?? 'Error'), $reply_to ?: null); return; }
+
+    $changes = $payload['changes'] ?? [];
+    $snap_id = null;
+    $applied = [];
+
+    if (!empty($changes)) {
+        $files   = array_values(array_filter(array_map(fn($c) => ($c['type'] ?? 'file') === 'file' ? ($c['file'] ?? '') : '', $changes)));
+        $snap_id = cvd_snapshot_take($files, $command);
+        foreach ($changes as $ch) $applied[] = cvd_apply_change($ch);
+    }
+
+    $msg   = $payload['message'] ?? 'Done.';
+    $ok    = count(array_filter($applied, fn($r) => $r['ok'] ?? false));
+    $fail  = count($applied) - $ok;
+
+    if (!empty($applied)) {
+        $msg .= "\n\n✅ {$ok} change(s) applied.";
+        if ($fail) $msg .= " ⚠️ {$fail} failed.";
+        if ($snap_id) $msg .= "\n_Commit \`{$snap_id}\` — rollback in WP admin._";
+    }
+    if ($payload['credits_used'] ?? null) $msg .= "\n_Credits used: " . $payload['credits_used'] . "_";
+
+    cvd_audit_log(['command' => $command, 'source' => 'telegram', 'chat_id' => $chat_id, 'time' => time()]);
+
+    if (mb_strlen($msg) > 4000) $msg = mb_substr($msg, 0, 4000) . '…';
+    cvd_telegram_send($token, $chat_id, $msg, $reply_to ?: null);
+}
+
+add_action('rest_api_init', function () {
+    register_rest_route('coovex-dev/v1', '/telegram', [
+        'methods'             => 'POST',
+        'callback'            => 'cvd_telegram_webhook_handler',
+        'permission_callback' => '__return_true',
+    ]);
+});
+
+function cvd_telegram_webhook_handler(WP_REST_Request $request): WP_REST_Response {
+    $token        = get_option('cvd_telegram_bot_token', '');
+    $allowed_chat = (string)get_option('cvd_telegram_chat_id', '');
+    $stored_secret= get_option('cvd_telegram_webhook_secret', '');
+
+    $secret = $request->get_header('X-Telegram-Bot-Api-Secret-Token') ?? '';
+    if (!empty($stored_secret) && !hash_equals($stored_secret, $secret)) {
+        return new WP_REST_Response(['ok' => true]);
+    }
+
+    $update  = $request->get_json_params();
+    $message = $update['message'] ?? $update['edited_message'] ?? null;
+    if (!$message) return new WP_REST_Response(['ok' => true]);
+
+    $chat_id = (string)($message['chat']['id'] ?? '');
+    $text    = trim($message['text'] ?? '');
+    $msg_id  = (int)($message['message_id'] ?? 0);
+
+    if (!empty($allowed_chat) && $chat_id !== $allowed_chat) {
+        cvd_telegram_send($token, $chat_id, '⛔ Unauthorized.', $msg_id);
+        return new WP_REST_Response(['ok' => true]);
+    }
+    if (empty($text)) return new WP_REST_Response(['ok' => true]);
+
+    if ($text === '/start') {
+        cvd_telegram_send($token, $chat_id,
+            "👋 *CooVex Dev* connected!\n\nSend me tasks in plain language and I'll execute them on your WordPress site.\n\n*Examples:*\n• _How many visitors today?_\n• _Add a Buy Now button next to Add to Cart_\n• _Create a login activity log plugin_\n• _Show WooCommerce sales this month_",
+        $msg_id);
+        return new WP_REST_Response(['ok' => true]);
+    }
+
+    // Acknowledge immediately, process in background
+    cvd_telegram_send($token, $chat_id, '⚡ *Working on it...*', $msg_id);
+    cvd_telegram_run_command($text, $chat_id, $msg_id);
+
+    return new WP_REST_Response(['ok' => true]);
+}
+
+add_action('cvd_telegram_async', 'cvd_telegram_run_command', 10, 3);
+
+add_action('wp_ajax_cvd_telegram_register', function () {
+    check_ajax_referer('cvd_nonce', 'nonce');
+    if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
+    $token = get_option('cvd_telegram_bot_token', '');
+    if (empty($token)) wp_send_json_error('Save your bot token first.');
+
+    $secret = wp_generate_password(32, false, false);
+    update_option('cvd_telegram_webhook_secret', $secret);
+
+    $res = wp_remote_post(CVD_TELEGRAM_API . $token . '/setWebhook', [
+        'timeout' => 15,
+        'headers' => ['Content-Type' => 'application/json'],
+        'body'    => wp_json_encode([
+            'url'             => rest_url('coovex-dev/v1/telegram'),
+            'secret_token'    => $secret,
+            'allowed_updates' => ['message', 'edited_message'],
+        ]),
+    ]);
+
+    if (is_wp_error($res)) wp_send_json_error($res->get_error_message());
+    $body = json_decode(wp_remote_retrieve_body($res), true);
+    if ($body['ok'] ?? false) {
+        update_option('cvd_telegram_webhook_registered', true);
+        wp_send_json_success(['url' => rest_url('coovex-dev/v1/telegram'), 'desc' => $body['description'] ?? '']);
+    } else {
+        wp_send_json_error($body['description'] ?? 'Telegram error');
+    }
+});
+
+add_action('wp_ajax_cvd_telegram_unregister', function () {
+    check_ajax_referer('cvd_nonce', 'nonce');
+    if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
+    $token = get_option('cvd_telegram_bot_token', '');
+    if ($token) wp_remote_post(CVD_TELEGRAM_API . $token . '/deleteWebhook', ['timeout' => 10, 'headers' => ['Content-Type' => 'application/json'], 'body' => wp_json_encode([])]);
+    delete_option('cvd_telegram_webhook_registered');
+    delete_option('cvd_telegram_webhook_secret');
+    wp_send_json_success();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ADMIN PAGES
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -530,6 +772,104 @@ function cvd_page_settings() {
             Dev password not set — set a password to enable the agent.
         </div>
         <?php endif; ?>
+
+        <hr style="margin:32px 0;" />
+
+        <h2>Telegram Integration</h2>
+        <p style="color:#64748b;">
+            Connect a Telegram bot to control CooVex Dev directly from Telegram.
+            <a href="https://t.me/BotFather" target="_blank">Create a bot with @BotFather</a> to get a token.
+        </p>
+
+        <form method="post" action="options.php">
+            <?php settings_fields('cvd_options'); ?>
+            <table class="form-table">
+                <tr>
+                    <th><label for="cvd_telegram_bot_token">Bot Token</label></th>
+                    <td>
+                        <input type="password" id="cvd_telegram_bot_token" name="cvd_telegram_bot_token"
+                            value="<?php echo esc_attr(get_option('cvd_telegram_bot_token','')); ?>"
+                            class="regular-text" autocomplete="new-password" />
+                        <p class="description">From @BotFather: <code>/newbot</code> → copy the token.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="cvd_telegram_chat_id">Allowed Chat ID</label></th>
+                    <td>
+                        <input type="text" id="cvd_telegram_chat_id" name="cvd_telegram_chat_id"
+                            value="<?php echo esc_attr(get_option('cvd_telegram_chat_id','')); ?>"
+                            class="regular-text" placeholder="e.g. 123456789" />
+                        <p class="description">
+                            Your personal Telegram numeric ID. Only this chat can send commands.
+                            Get it from <a href="https://t.me/userinfobot" target="_blank">@userinfobot</a>.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+            <?php submit_button('Save Telegram Settings'); ?>
+        </form>
+
+        <?php
+        $tg_token      = get_option('cvd_telegram_bot_token', '');
+        $tg_registered = get_option('cvd_telegram_webhook_registered', false);
+        $tg_nonce      = wp_create_nonce('cvd_nonce');
+        ?>
+        <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <?php if ($tg_token): ?>
+            <button id="cvd-tg-register" class="button button-primary">
+                <?php echo $tg_registered ? '↻ Re-register Webhook' : '⚡ Register Telegram Webhook'; ?>
+            </button>
+            <?php if ($tg_registered): ?>
+            <button id="cvd-tg-unregister" class="button button-secondary">Remove Webhook</button>
+            <?php endif; ?>
+            <?php else: ?>
+            <p style="color:#92400e;background:#fef3c7;padding:8px 12px;border-radius:6px;margin:0;">
+                Save your bot token first to register the webhook.
+            </p>
+            <?php endif; ?>
+            <span id="cvd-tg-status" style="color:#64748b;font-size:13px;"></span>
+        </div>
+
+        <?php if ($tg_registered): ?>
+        <div style="margin-top:16px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;color:#166534;">
+            ✓ Telegram webhook active.
+            Webhook URL: <code><?php echo esc_html(rest_url('coovex-dev/v1/telegram')); ?></code>
+        </div>
+        <?php endif; ?>
+
+        <script>
+        (function(){
+            var nonce = <?php echo json_encode($tg_nonce); ?>;
+
+            var regBtn = document.getElementById('cvd-tg-register');
+            if (regBtn) regBtn.addEventListener('click', function() {
+                var status = document.getElementById('cvd-tg-status');
+                regBtn.disabled = true; status.textContent = 'Registering...';
+                fetch(ajaxurl, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                    body:'action=cvd_telegram_register&nonce=' + encodeURIComponent(nonce)})
+                .then(r => r.json()).then(function(d) {
+                    if (d.success) {
+                        status.textContent = '✓ Webhook registered! Send /start to your bot.';
+                        status.style.color = 'green';
+                        location.reload();
+                    } else {
+                        status.textContent = '✗ ' + (d.data || 'Error');
+                        status.style.color = 'red';
+                        regBtn.disabled = false;
+                    }
+                });
+            });
+
+            var unregBtn = document.getElementById('cvd-tg-unregister');
+            if (unregBtn) unregBtn.addEventListener('click', function() {
+                if (!confirm('Remove Telegram webhook?')) return;
+                unregBtn.disabled = true;
+                fetch(ajaxurl, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                    body:'action=cvd_telegram_unregister&nonce=' + encodeURIComponent(nonce)})
+                .then(r => r.json()).then(function() { location.reload(); });
+            });
+        })();
+        </script>
     </div>
     <?php
 }
@@ -1380,13 +1720,60 @@ register_uninstall_hook(__FILE__, function () {
 });
 `
 
-export async function GET() {
-  return new NextResponse(COOVEX_DEV_PHP, {
+export async function GET(_req: Request) {
+  // Require authentication — the plugin is only available to CooVex users
+  const { createClient } = await import('@/lib/supabase/server')
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return new NextResponse(
+      JSON.stringify({ error: 'Sign in to your CooVex account to download the plugin.' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // Fetch the user's API key to pre-fill in the plugin
+  const { createServiceClient } = await import('@/lib/supabase/service')
+  const service = createServiceClient()
+  const { data: profile } = await service
+    .from('profiles')
+    .select('current_workspace_id')
+    .eq('id', user.id)
+    .single()
+
+  let prefillApiKey = ''
+  if (profile?.current_workspace_id) {
+    const { data: business } = await service
+      .from('businesses')
+      .select('api_key')
+      .eq('workspace_id', profile.current_workspace_id)
+      .maybeSingle()
+    prefillApiKey = business?.api_key ?? ''
+  }
+
+  // Embed the user's API key directly in the plugin
+  // This ties the plugin to their account and makes sharing useless
+  let pluginCode = COOVEX_DEV_PHP
+  if (prefillApiKey) {
+    pluginCode = pluginCode.replace(
+      "define('CVD_VERSION',",
+      `// Pre-configured for account: ${user.email}\ndefine('CVD_PREFILL_KEY', '${prefillApiKey}');\ndefine('CVD_VERSION',`
+    )
+    // Auto-install the API key on first activation
+    pluginCode = pluginCode.replace(
+      "if (!defined('ABSPATH')) exit;",
+      `if (!defined('ABSPATH')) exit;\n\n// Auto-configure on first install\nregister_activation_hook(__FILE__, function() {\n    if (defined('CVD_PREFILL_KEY') && !get_option('cvd_api_key')) {\n        update_option('cvd_api_key', CVD_PREFILL_KEY);\n    }\n});`
+    )
+  }
+
+  return new NextResponse(pluginCode, {
     status: 200,
     headers: {
       'Content-Type': 'application/octet-stream',
       'Content-Disposition': 'attachment; filename="coovex-dev.php"',
-      'Cache-Control': 'no-store',
+      'Cache-Control': 'no-store, no-cache, private',
+      'X-Content-Type-Options': 'nosniff',
     },
   })
 }

@@ -45,7 +45,24 @@ RULES — strictly enforced:
 - When modifying a theme: prefer child theme unless user explicitly says to modify parent
 - Always validate and sanitize all user-facing input in generated code
 - Return complete file contents (not diffs) — the agent replaces the whole file
-- If a request is impossible, ambiguous, or would cause damage: explain in "message" and return changes: []`
+- If a request is impossible, ambiguous, or would cause damage: explain in "message" and return changes: []
+
+## DATA QUERY BEHAVIOR (critical)
+
+When the user asks about statistics or data (visitors, sales, orders, users, etc.):
+
+1. CHECK site_info.stats first. If the data is there → report it clearly in "message", return changes: [], read_only: true.
+   Example: if stats.visitors_today = 142, say "Today you had 142 visitors."
+
+2. If the data exists in DB tables (site_info.db_tables) but no query was run → generate a db READ query (type: "db", action: "query") with a safe SELECT and explain what was found.
+
+3. If NO analytics system exists (stats.no_visitor_tracking = true) → acknowledge the gap and offer to build it:
+   message: "You don't have a visitor tracking system yet. I can install WP-Statistics (free plugin) or build a lightweight custom tracker for you. Want me to set it up?"
+   Return changes: [], read_only: true.
+
+4. If the user then confirms ("yes", "do it", "install it") → build the solution (changes with actual file/db changes).
+
+This offer-and-confirm pattern applies to any missing feature the user asks about.`
 
 async function callWithAutoSwitch(
   messages: LLMMessage[],
