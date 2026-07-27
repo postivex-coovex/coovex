@@ -2028,6 +2028,322 @@ add_action('wp_ajax_cvd_ping', function () {
     wp_send_json(['authenticated' => cvd_session_valid()]);
 });
 
+// ── Floating AI Widget ────────────────────────────────────────────────────────
+function cvd_render_floating_widget(): void {
+    $nonce = wp_create_nonce('cvd_nonce');
+    $ajax  = admin_url('admin-ajax.php');
+    ?>
+<style id="cvd-float-css">
+#cvd-w,#cvd-w *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+#cvd-w{position:fixed;bottom:24px;right:24px;z-index:2147483647}
+#cvd-wb{width:54px;height:54px;border-radius:50%;background:#2563eb;border:none;cursor:pointer;
+  box-shadow:0 4px 24px rgba(37,99,235,.55);display:flex;align-items:center;justify-content:center;
+  padding:0;transition:transform .18s,box-shadow .18s}
+#cvd-wb:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(37,99,235,.7)}
+#cvd-wb svg{width:26px;height:26px}
+#cvd-wp{position:absolute;bottom:66px;right:0;width:360px;background:#fff;border-radius:16px;
+  box-shadow:0 12px 60px rgba(0,0,0,.18);display:none;flex-direction:column;
+  overflow:hidden;max-height:530px;border:1px solid rgba(0,0,0,.07)}
+#cvd-wh{background:#2563eb;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#cvd-whl{display:flex;align-items:center;gap:8px;color:#fff;font-size:14px;font-weight:600}
+#cvd-wdot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:cvdp 2s infinite}
+@keyframes cvdp{0%,100%{opacity:1}50%{opacity:.35}}
+#cvd-wcls{background:none;border:none;color:rgba(255,255,255,.65);cursor:pointer;font-size:20px;
+  padding:0;line-height:1;transition:color .12s;display:flex;align-items:center}
+#cvd-wcls:hover{color:#fff}
+#cvd-wctx{background:#1d4ed8;padding:5px 14px;font-size:11px;color:rgba(255,255,255,.7);
+  flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cvd-wm{flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:10px;min-height:60px}
+#cvd-wm::-webkit-scrollbar{width:3px}
+#cvd-wm::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:2px}
+.cvd-msg{max-width:88%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.55;word-break:break-word}
+.cvd-u{align-self:flex-end;background:#2563eb;color:#fff;border-bottom-right-radius:3px}
+.cvd-a{align-self:flex-start;background:#f1f5f9;color:#1e293b;border-bottom-left-radius:3px;white-space:pre-wrap}
+.cvd-err{background:#fef2f2!important;color:#991b1b!important}
+.cvd-thumb{max-width:100%;border-radius:8px;margin-bottom:6px;display:block}
+#cvd-wprv{padding:8px 14px;border-top:1px solid #f8fafc;display:none;align-items:center;gap:10px;flex-shrink:0}
+#cvd-wpi{height:44px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0}
+#cvd-wprv span{font-size:12px;color:#64748b;flex:1}
+#cvd-wrm{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;padding:2px;
+  line-height:1;transition:color .12s;display:flex}
+#cvd-wrm:hover{color:#ef4444}
+#cvd-wi{border-top:1px solid #f1f5f9;padding:10px 12px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
+#cvd-wtx{flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:9px 11px;font-size:13px;
+  resize:none;outline:none;font-family:inherit;line-height:1.45;max-height:96px;overflow-y:auto;
+  color:#1e293b;background:#fff;transition:border-color .15s}
+#cvd-wtx:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+#cvd-wtx::placeholder{color:#94a3b8}
+#cvd-wil{cursor:pointer;color:#94a3b8;display:flex;align-items:center;transition:color .12s;padding:4px}
+#cvd-wil:hover{color:#2563eb}
+#cvd-wil svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#cvd-wsd{background:#2563eb;border:none;border-radius:9px;width:36px;height:36px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+#cvd-wsd:hover:not(:disabled){background:#1d4ed8}
+#cvd-wsd:disabled{background:#bfdbfe;cursor:not-allowed}
+#cvd-wsd svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cvd-typing span{display:inline-block;width:6px;height:6px;background:#94a3b8;border-radius:50%;
+  margin:0 2px;animation:cvdt .9s infinite both}
+.cvd-typing span:nth-child(2){animation-delay:.15s}
+.cvd-typing span:nth-child(3){animation-delay:.3s}
+@keyframes cvdt{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+</style>
+<div id="cvd-w">
+  <div id="cvd-wp">
+    <div id="cvd-wh">
+      <div id="cvd-whl"><div id="cvd-wdot"></div>CooVex AI</div>
+      <button id="cvd-wcls" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="cvd-wctx">Loading…</div>
+    <div id="cvd-wm">
+      <div class="cvd-msg cvd-a">Hi! I can see your WordPress site. Type a command or paste a screenshot (Ctrl+V).</div>
+    </div>
+    <div id="cvd-wprv">
+      <img id="cvd-wpi" src="" alt="screenshot">
+      <span>Screenshot attached</span>
+      <button id="cvd-wrm" aria-label="Remove screenshot">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="cvd-wi">
+      <textarea id="cvd-wtx" rows="1" placeholder="Ask anything… (Ctrl+V to attach screenshot)"></textarea>
+      <label id="cvd-wil" title="Attach screenshot">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <input type="file" id="cvd-wf" accept="image/*" style="display:none">
+      </label>
+      <button id="cvd-wsd" disabled aria-label="Send">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+  <button id="cvd-wb" aria-label="CooVex AI Agent">
+    <svg viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="8" width="18" height="13" rx="3" fill="white" opacity=".9"/>
+      <circle cx="8.5" cy="14" r="1.5" fill="#2563eb"/>
+      <circle cx="15.5" cy="14" r="1.5" fill="#2563eb"/>
+      <path d="M9 17.5s1.2 1 3 1 3-1 3-1" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <path d="M8 8V6a4 4 0 018 0v2" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <circle cx="12" cy="4.5" r="1" fill="white"/>
+    </svg>
+  </button>
+</div>
+<script>
+(function(){
+  'use strict';
+  var AJAX='<?php echo esc_js($ajax); ?>';
+  var NONCE='<?php echo esc_js($nonce); ?>';
+  var isAdmin=<?php echo is_admin() ? 'true' : 'false'; ?>;
+  var screenshot=null, open=false;
+
+  var $=function(id){return document.getElementById(id);};
+  var root=$('cvd-w'), panel=$('cvd-wp'), btn=$('cvd-wb'), cls=$('cvd-wcls');
+  var msgs=$('cvd-wm'), txt=$('cvd-wtx'), snd=$('cvd-wsd');
+  var prv=$('cvd-wprv'), pi=$('cvd-wpi'), rm=$('cvd-wrm');
+  var file=$('cvd-wf'), ctx=$('cvd-wctx');
+
+  // Screen context
+  var screenCtx=(isAdmin?'WP Admin — ':'')+document.title.replace(' ‹ '+document.title.split(' ‹ ').pop(),'');
+  ctx.textContent=screenCtx; ctx.title=screenCtx;
+
+  function toggle(){
+    open=!open;
+    panel.style.display=open?'flex':'none';
+    if(open) setTimeout(function(){txt.focus();},80);
+  }
+  btn.addEventListener('click',toggle);
+  cls.addEventListener('click',function(){open=false;panel.style.display='none';});
+
+  // Auto-resize textarea
+  txt.addEventListener('input',function(){
+    this.style.height='auto';
+    this.style.height=Math.min(this.scrollHeight,96)+'px';
+    snd.disabled=!(this.value.trim()||screenshot);
+  });
+  txt.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!snd.disabled)send();}
+  });
+
+  // Compress + set screenshot
+  function setShot(dataUrl){
+    var img=new Image();
+    img.onload=function(){
+      var mw=1280,mh=900,w=img.width,h=img.height;
+      if(w>mw){h=h*mw/w;w=mw;}
+      if(h>mh){w=w*mh/h;h=mh;}
+      var c=document.createElement('canvas');
+      c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      var out=c.toDataURL('image/jpeg',0.82);
+      screenshot=out; pi.src=out;
+      prv.style.display='flex';
+      snd.disabled=!(txt.value.trim()||screenshot);
+    };
+    img.src=dataUrl;
+  }
+
+  file.addEventListener('change',function(){
+    if(!this.files[0])return;
+    var r=new FileReader();
+    r.onload=function(e){setShot(e.target.result);};
+    r.readAsDataURL(this.files[0]);
+    this.value='';
+  });
+
+  rm.addEventListener('click',function(){
+    screenshot=null;pi.src='';prv.style.display='none';
+    snd.disabled=!txt.value.trim();
+  });
+
+  // Paste image
+  document.addEventListener('paste',function(e){
+    if(!open)return;
+    var items=(e.clipboardData||window.clipboardData||{}).items||[];
+    for(var i=0;i<items.length;i++){
+      if(items[i].type.indexOf('image')!==-1){
+        var r=new FileReader();
+        r.onload=function(ev){setShot(ev.target.result);};
+        r.readAsDataURL(items[i].getAsFile());
+        e.preventDefault(); break;
+      }
+    }
+  });
+
+  function addMsg(html,cls,thumb){
+    var d=document.createElement('div');
+    d.className='cvd-msg '+cls;
+    if(thumb){var im=document.createElement('img');im.className='cvd-thumb';im.src=thumb;d.appendChild(im);}
+    if(cls==='cvd-a'&&html==='…'){
+      var t=document.createElement('div');t.className='cvd-typing';
+      t.innerHTML='<span></span><span></span><span></span>';d.appendChild(t);
+    } else {
+      d.appendChild(document.createTextNode(html));
+    }
+    msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;
+  }
+
+  function send(){
+    var cmd=txt.value.trim();
+    if(!cmd&&!screenshot)return;
+    addMsg(cmd||(screenshot?'[screenshot]':''),'cvd-u',screenshot||null);
+    txt.value='';txt.style.height='auto';
+    var shot=screenshot; screenshot=null; pi.src=''; prv.style.display='none';
+    snd.disabled=true;
+    var typing=addMsg('…','cvd-a');
+
+    var p=new URLSearchParams();
+    p.append('action','cvd_float_command');
+    p.append('nonce',NONCE);
+    p.append('command',cmd||'Analyze this screenshot and tell me what you see or suggest what I should do.');
+    p.append('screen_context',screenCtx);
+    p.append('current_url',location.href);
+    if(shot)p.append('screenshot',shot);
+
+    fetch(AJAX,{method:'POST',body:p})
+      .then(function(r){return r.json();})
+      .then(function(res){
+        msgs.removeChild(typing);
+        if(res.success){
+          var msg=res.data&&res.data.message?res.data.message:'Done.';
+          addMsg(msg,'cvd-a');
+          var app=res.data&&res.data.applied?res.data.applied.filter(function(c){return c.ok;}).length:0;
+          if(app) addMsg('✓ '+app+' change'+(app>1?'s':'')+' applied successfully.','cvd-a');
+        } else {
+          addMsg(res.data||'Something went wrong.','cvd-a cvd-err');
+        }
+        snd.disabled=!txt.value.trim();
+      })
+      .catch(function(){
+        msgs.removeChild(typing);
+        addMsg('Network error — please try again.','cvd-a cvd-err');
+        snd.disabled=!txt.value.trim();
+      });
+  }
+  snd.addEventListener('click',send);
+})();
+</script>
+    <?php
+}
+
+// Inject widget on ALL admin pages (except the main CooVex Dev page to avoid duplicates)
+add_action('admin_footer', function () {
+    if (!cvd_license_ok()) return;
+    $screen = get_current_screen();
+    if ($screen && strpos($screen->id, 'coovex-dev') !== false) return;
+    cvd_render_floating_widget();
+});
+
+// Inject widget on the FRONTEND when an admin is logged in
+add_action('wp_footer', function () {
+    if (!is_user_logged_in() || !current_user_can('manage_options')) return;
+    if (!cvd_license_ok()) return;
+    cvd_render_floating_widget();
+});
+
+// ── AJAX: floating widget command (no CVD session required — WP admin cap is enough) ──
+add_action('wp_ajax_cvd_float_command', function () {
+    check_ajax_referer('cvd_nonce', 'nonce');
+    if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
+    if (!cvd_license_ok())                  wp_send_json_error('License not active. Open CooVex Dev to configure.', 402);
+    if (!cvd_rate_check())                  wp_send_json_error('Rate limit reached. Wait a moment.', 429);
+
+    $command    = sanitize_textarea_field(wp_unslash($_POST['command'] ?? ''));
+    $screen_ctx = sanitize_text_field(wp_unslash($_POST['screen_context'] ?? ''));
+    $curr_url   = esc_url_raw(wp_unslash($_POST['current_url'] ?? ''));
+    $screenshot = wp_unslash($_POST['screenshot'] ?? '');
+
+    // Validate screenshot — must be image data URL, max 3 MB base64
+    if ($screenshot && !preg_match('/^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+\/=\r\n]+$/', trim($screenshot))) {
+        $screenshot = '';
+    }
+    if (strlen($screenshot) > 3 * 1024 * 1024) $screenshot = '';
+
+    if (empty($command)) $command = 'Analyze this screenshot and describe what you see on my WordPress site. Suggest what I can ask you to do.';
+
+    $api_key = get_option('cvd_api_key', '');
+    if (empty($api_key)) wp_send_json_error('API key not configured. Open CooVex Dev to set it up.', 400);
+
+    $site_info = cvd_site_context($command);
+    if ($screen_ctx) $site_info['current_screen'] = $screen_ctx;
+    if ($curr_url)   $site_info['current_url']    = $curr_url;
+
+    $payload = wp_json_encode([
+        'api_key'        => $api_key,
+        'command'        => $command,
+        'history'        => [],
+        'site_info'      => $site_info,
+        'screenshot'     => $screenshot,
+        'request_nonce'  => bin2hex(random_bytes(16)),
+    ]);
+
+    $response = wp_remote_post(CVD_API_URL, [
+        'timeout' => 90,
+        'headers' => ['Content-Type' => 'application/json', 'User-Agent' => 'CooVex-Dev-Float/' . CVD_VERSION],
+        'body'    => $payload,
+    ]);
+
+    if (is_wp_error($response)) wp_send_json_error('Could not reach CooVex: ' . $response->get_error_message());
+
+    $code     = wp_remote_retrieve_response_code($response);
+    $raw_body = wp_remote_retrieve_body($response);
+    $data     = json_decode($raw_body, true);
+
+    if ($code === 402) wp_send_json_error($data['error'] ?? 'Insufficient credits.', 402);
+    if ($code !== 200) wp_send_json_error($data['error'] ?? 'Server error ('.$code.').', $code);
+
+    // Apply any changes the AI requested
+    $changes = $data['changes'] ?? [];
+    $applied = [];
+    if (!empty($changes) && !($data['read_only'] ?? false)) {
+        foreach ($changes as $change) {
+            $result    = cvd_apply_change($change);
+            $applied[] = array_merge($change, ['ok' => ($result['ok'] ?? false), 'result' => $result]);
+        }
+    }
+
+    wp_send_json_success(['message' => $data['message'] ?? '', 'applied' => $applied]);
+});
+
 // ── AJAX: get file tree ───────────────────────────────────────────────────────
 add_action('wp_ajax_cvd_file_tree', function () {
     check_ajax_referer('cvd_nonce', 'nonce');

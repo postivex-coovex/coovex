@@ -259,8 +259,32 @@ This offer-and-confirm pattern applies to any missing feature the user asks abou
 async function callWithAutoSwitch(
   messages: LLMMessage[],
   system: string,
+  screenshot?: string,  // base64 data URL — attached to the last user message as vision
 ): Promise<{ text: string; usage: LLMUsage }> {
   const { llmChatWithUsage } = await import('@/lib/llm')
+
+  // If screenshot present, build vision content for the last user message
+  type ContentBlock =
+    | { type: 'text'; text: string }
+    | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+
+  function buildMsgContent(msg: LLMMessage, isLast: boolean): string | ContentBlock[] {
+    if (!isLast || !screenshot || !/^data:image\/(png|jpeg|gif|webp);base64,/.test(screenshot)) {
+      return msg.content
+    }
+    const mimeMatch = screenshot.match(/^data:(image\/[^;]+)/)
+    return [
+      {
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: mimeMatch ? mimeMatch[1] : 'image/jpeg',
+          data: screenshot.replace(/^data:image\/[^;]+;base64,/, ''),
+        },
+      },
+      { type: 'text', text: msg.content },
+    ]
+  }
 
   // Try Claude Sonnet first (default)
   try {
@@ -269,12 +293,12 @@ async function callWithAutoSwitch(
     if (!apiKey) throw new Error('No Claude API key')
     const client = new Anthropic({ apiKey })
     const model = 'claude-sonnet-4-6'
-    const res = await client.messages.create({
-      model,
-      max_tokens: 8192,
-      system,
-      messages: messages.map(m => ({ role: m.role, content: m.content })),
-    })
+    const claudeMsgs = messages.map((m, i) => ({
+      role: m.role as 'user' | 'assistant',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      content: buildMsgContent(m, i === messages.length - 1) as any,
+    }))
+    const res = await client.messages.create({ model, max_tokens: 8192, system, messages: claudeMsgs })
     return {
       text: res.content[0].type === 'text' ? res.content[0].text : '',
       usage: { input_tokens: res.usage.input_tokens, output_tokens: res.usage.output_tokens, model, provider: 'claude' },
@@ -283,20 +307,21 @@ async function callWithAutoSwitch(
     console.warn('[wp-dev] Claude Sonnet failed, switching to OpenAI:', (claudeErr as Error).message)
   }
 
-  // Auto-fallback: OpenAI GPT-4o
+  // Auto-fallback: OpenAI GPT-4o-vision
   const { default: OpenAI } = await import('openai')
   const openaiKey = process.env.OPENAI_API_KEY
   if (!openaiKey) throw new Error('Both Claude and OpenAI unavailable')
   const client = new OpenAI({ apiKey: openaiKey })
   const model = 'gpt-4o'
-  const res = await client.chat.completions.create({
-    model,
-    max_tokens: 8192,
-    messages: [
-      { role: 'system', content: system },
-      ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-    ],
-  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const oaiMsgs: any[] = [
+    { role: 'system', content: system },
+    ...messages.map((m, i) => ({
+      role: m.role,
+      content: buildMsgContent(m, i === messages.length - 1),
+    })),
+  ]
+  const res = await client.chat.completions.create({ model, max_tokens: 8192, messages: oaiMsgs })
   return {
     text: res.choices[0]?.message?.content ?? '',
     usage: {
@@ -335,12 +360,13 @@ function normalizeUrl(url: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { api_key, command, history, site_info, request_nonce }: {
+    const { api_key, command, history, site_info, request_nonce, screenshot }: {
       api_key: string
       command: string
       history?: HistoryMessage[]
       site_info?: SiteInfo
-      request_nonce?: string  // one-time nonce sent by plugin for replay prevention
+      request_nonce?: string
+      screenshot?: string   // base64 data URL — from floating widget paste/upload
     } = body
 
     if (!api_key || !command) {
@@ -414,7 +440,7 @@ export async function POST(req: NextRequest) {
       : [{ role: 'user', content: `SITE CONTEXT:\n${contextBlock}\n\n---\nCOMMAND: ${command}` }]
 
     // Call AI with auto-switch (Claude Sonnet → OpenAI fallback)
-    const { text: raw, usage } = await callWithAutoSwitch(messages, SYSTEM_PROMPT)
+    const { text: raw, usage } = await callWithAutoSwitch(messages, SYSTEM_PROMPT, screenshot)
 
     // Parse JSON response
     let parsed: { message: string; changes: unknown[]; read_only?: boolean }
