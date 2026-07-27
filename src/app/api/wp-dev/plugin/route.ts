@@ -970,21 +970,261 @@ function cvd_apply_wp_action(array $change): array {
         }
 
         // ── WooCommerce ───────────────────────────────────────────────────────
+        // ── Theme Installer ───────────────────────────────────────────────────────
+        case 'theme_install': {
+            $slug   = sanitize_key($data['slug'] ?? '');
+            if (!$slug) return ['ok' => false, 'error' => 'theme_install requires data.slug (e.g. "storefront", "astra")'];
+            require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+            require_once ABSPATH . 'wp-admin/includes/theme.php';
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/misc.php';
+
+            // Check if already installed
+            $themes = wp_get_themes();
+            if (isset($themes[$slug])) {
+                if (!empty($data['activate'])) {
+                    switch_theme($slug);
+                    return ['ok' => true, 'action' => 'theme_activated', 'slug' => $slug, 'note' => 'Theme was already installed; activated now.'];
+                }
+                return ['ok' => true, 'action' => 'theme_already_installed', 'slug' => $slug];
+            }
+
+            $api = themes_api('theme_information', ['slug' => $slug, 'fields' => ['sections' => false]]);
+            if (is_wp_error($api)) return ['ok' => false, 'error' => "Theme '$slug' not found on wordpress.org: " . $api->get_error_message()];
+
+            class CVD_Theme_Skin extends WP_Upgrader_Skin {
+                public function feedback($string, ...$args) {}
+                public function header() {}
+                public function footer() {}
+                public function error($errors) {}
+            }
+            $upgrader = new Theme_Upgrader(new CVD_Theme_Skin());
+            $result   = $upgrader->install($api->download_link);
+            if (is_wp_error($result)) return ['ok' => false, 'error' => $result->get_error_message()];
+            if (!$result) return ['ok' => false, 'error' => "Theme installation failed for '$slug'"];
+
+            if (!empty($data['activate'])) switch_theme($slug);
+            return ['ok' => true, 'action' => 'theme_installed', 'slug' => $slug, 'name' => $api->name, 'version' => $api->version, 'activated' => !empty($data['activate'])];
+        }
+
+        // ── WooCommerce Global Configuration ─────────────────────────────────────
+        case 'wc_configure': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $updated = [];
+
+            if (!empty($data['currency']))        { update_option('woocommerce_currency', strtoupper(sanitize_key($data['currency']))); $updated[] = 'currency'; }
+            if (!empty($data['currency_pos']))    { update_option('woocommerce_currency_pos', sanitize_key($data['currency_pos'])); $updated[] = 'currency_pos'; }
+            if (!empty($data['price_decimals']))  { update_option('woocommerce_price_num_decimals', (int)$data['price_decimals']); $updated[] = 'price_decimals'; }
+            if (isset($data['tax_enabled']))      { update_option('woocommerce_calc_taxes', $data['tax_enabled'] ? 'yes' : 'no'); $updated[] = 'tax_enabled'; }
+            if (isset($data['prices_include_tax'])) { update_option('woocommerce_prices_include_tax', $data['prices_include_tax'] ? 'yes' : 'no'); $updated[] = 'prices_include_tax'; }
+            if (!empty($data['weight_unit']))     { update_option('woocommerce_weight_unit', sanitize_text_field($data['weight_unit'])); $updated[] = 'weight_unit'; }
+            if (!empty($data['dimension_unit']))  { update_option('woocommerce_dimension_unit', sanitize_text_field($data['dimension_unit'])); $updated[] = 'dimension_unit'; }
+            if (!empty($data['store_address']))   { update_option('woocommerce_store_address', sanitize_text_field($data['store_address'])); $updated[] = 'store_address'; }
+            if (!empty($data['store_city']))      { update_option('woocommerce_store_city', sanitize_text_field($data['store_city'])); $updated[] = 'store_city'; }
+            if (!empty($data['store_country']))   { update_option('woocommerce_default_country', sanitize_text_field($data['store_country'])); $updated[] = 'store_country'; }
+            if (!empty($data['store_postcode']))  { update_option('woocommerce_store_postcode', sanitize_text_field($data['store_postcode'])); $updated[] = 'store_postcode'; }
+
+            // Assign WooCommerce pages (shop, cart, checkout, my-account)
+            foreach (['shop','cart','checkout','myaccount'] as $page_key) {
+                if (!empty($data[$page_key . '_page_id'])) {
+                    update_option('woocommerce_' . $page_key . '_page_id', (int)$data[$page_key . '_page_id']);
+                    $updated[] = $page_key . '_page_id';
+                }
+            }
+
+            // Enable/disable guest checkout
+            if (isset($data['enable_guest_checkout'])) { update_option('woocommerce_enable_guest_checkout', $data['enable_guest_checkout'] ? 'yes' : 'no'); $updated[] = 'guest_checkout'; }
+
+            // Auto-create standard WC pages if requested
+            if (!empty($data['create_pages'])) {
+                WC_Install::create_pages();
+                $updated[] = 'pages_created';
+            }
+
+            return ['ok' => true, 'action' => 'wc_configured', 'updated' => $updated];
+        }
+
+        // ── WooCommerce Shipping ──────────────────────────────────────────────────
+        case 'wc_add_shipping_zone': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $zone = new WC_Shipping_Zone();
+            $zone->set_zone_name(sanitize_text_field($data['name'] ?? 'Zone'));
+            $zone->set_zone_order((int)($data['order'] ?? 0));
+            $zone->save();
+
+            // Add region locations
+            if (!empty($data['regions'])) {
+                foreach ((array)$data['regions'] as $region) {
+                    $zone->add_location(sanitize_text_field($region['code']), sanitize_text_field($region['type'] ?? 'country'));
+                }
+            }
+
+            // Add shipping methods
+            $methods_added = [];
+            foreach ((array)($data['methods'] ?? []) as $method) {
+                $type = sanitize_key($method['type'] ?? 'flat_rate');
+                $instance_id = $zone->add_shipping_method($type);
+                if ($instance_id) {
+                    $wc_method = WC_Shipping_Zones::get_shipping_method($instance_id);
+                    if ($wc_method) {
+                        $post_data = [];
+                        if (isset($method['cost']))  $post_data['woocommerce_flat_rate_cost'] = (string)$method['cost'];
+                        if (isset($method['title'])) $post_data['woocommerce_' . $type . '_title'] = sanitize_text_field($method['title']);
+                        if ($post_data) { $_POST = array_merge($_POST, $post_data); $wc_method->process_admin_options(); }
+                    }
+                    $methods_added[] = ['type' => $type, 'instance_id' => $instance_id];
+                }
+            }
+
+            $zone->save();
+            return ['ok' => true, 'action' => 'shipping_zone_added', 'zone_id' => $zone->get_id(), 'name' => $zone->get_zone_name(), 'methods' => $methods_added];
+        }
+
+        case 'wc_list_shipping_zones': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $zones = WC_Shipping_Zones::get_zones();
+            $out   = [];
+            foreach ($zones as $z) {
+                $zone  = new WC_Shipping_Zone($z['zone_id']);
+                $out[] = ['zone_id' => $z['zone_id'], 'name' => $z['zone_name'], 'locations' => $z['zone_locations'], 'methods' => array_map(fn($m) => ['type' => $m->id, 'title' => $m->get_title(), 'enabled' => $m->is_enabled()], $zone->get_shipping_methods())];
+            }
+            return ['ok' => true, 'action' => 'shipping_zones', 'zones' => $out];
+        }
+
+        case 'wc_enable_payment': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $gateway_id = sanitize_key($data['gateway'] ?? '');
+            if (!$gateway_id) return ['ok' => false, 'error' => 'wc_enable_payment requires data.gateway (e.g. "bacs", "cheque", "cod")'];
+            $gateways = WC()->payment_gateways->payment_gateways();
+            if (!isset($gateways[$gateway_id])) return ['ok' => false, 'error' => "Gateway '$gateway_id' not found. Available: " . implode(', ', array_keys($gateways))];
+            $settings = get_option('woocommerce_' . $gateway_id . '_settings', []);
+            $settings['enabled'] = $data['enabled'] ?? true ? 'yes' : 'no';
+            if (!empty($data['title']))       $settings['title']       = sanitize_text_field($data['title']);
+            if (!empty($data['description'])) $settings['description'] = sanitize_text_field($data['description']);
+            update_option('woocommerce_' . $gateway_id . '_settings', $settings);
+            return ['ok' => true, 'action' => 'payment_configured', 'gateway' => $gateway_id, 'enabled' => $settings['enabled']];
+        }
+
+        // ── WooCommerce Product Attributes & Variations ───────────────────────────
+        case 'create_product_attribute': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $name   = sanitize_text_field($data['name'] ?? '');
+            $slug   = sanitize_key($data['slug'] ?? $name);
+            if (!$slug) return ['ok' => false, 'error' => 'create_product_attribute requires data.name'];
+            $existing = wc_get_attribute_taxonomies();
+            foreach ($existing as $attr) { if ($attr->attribute_name === $slug) return ['ok' => true, 'action' => 'attribute_exists', 'id' => $attr->attribute_id, 'slug' => $slug]; }
+            $result = wc_create_attribute(['name' => $name, 'slug' => $slug, 'type' => 'select', 'order_by' => 'menu_order', 'has_archives' => false]);
+            if (is_wp_error($result)) return ['ok' => false, 'error' => $result->get_error_message()];
+            // Register taxonomy immediately so terms can be added right away
+            $tax = wc_attribute_taxonomy_name($slug);
+            if (!taxonomy_exists($tax)) register_taxonomy($tax, 'product');
+            return ['ok' => true, 'action' => 'attribute_created', 'id' => $result, 'slug' => $slug, 'taxonomy' => $tax];
+        }
+
+        case 'add_product_variation': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $parent_id = (int)($data['product_id'] ?? 0);
+            if (!$parent_id) return ['ok' => false, 'error' => 'add_product_variation requires data.product_id'];
+            $parent = wc_get_product($parent_id);
+            if (!$parent || $parent->get_type() !== 'variable') return ['ok' => false, 'error' => 'Product must be a variable product'];
+
+            $variation = new WC_Product_Variation();
+            $variation->set_parent_id($parent_id);
+            if (isset($data['regular_price']))  $variation->set_regular_price((string)$data['regular_price']);
+            if (isset($data['sale_price']))     $variation->set_sale_price((string)$data['sale_price']);
+            if (!empty($data['sku']))           $variation->set_sku(sanitize_text_field($data['sku']));
+            if (isset($data['stock_quantity'])) { $variation->set_manage_stock(true); $variation->set_stock_quantity((int)$data['stock_quantity']); }
+            if (isset($data['weight']))         $variation->set_weight((string)$data['weight']);
+            if (!empty($data['description']))   $variation->set_description($data['description']);
+
+            // Set attributes: { "pa_brand": "Toyota", "pa_type": "OEM" }
+            if (!empty($data['attributes'])) {
+                $attrs = [];
+                foreach ((array)$data['attributes'] as $tax => $val) {
+                    $tax = wc_attribute_taxonomy_name(str_replace('pa_', '', sanitize_key($tax)));
+                    $term = get_term_by('name', $val, $tax) ?: wp_insert_term($val, $tax);
+                    if (!is_wp_error($term)) {
+                        $slug = is_array($term) ? get_term($term['term_id'], $tax)->slug : $term->slug;
+                        $attrs[$tax] = $slug;
+                    }
+                }
+                $variation->set_attributes($attrs);
+            }
+
+            $vid = $variation->save();
+
+            // Sync parent attributes so variations show on product page
+            WC_Product_Variable::sync($parent_id);
+            return ['ok' => true, 'action' => 'variation_added', 'variation_id' => $vid, 'parent_id' => $parent_id];
+        }
+
+        case 'wc_create_category': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $name        = sanitize_text_field($data['name'] ?? '');
+            $description = sanitize_textarea_field($data['description'] ?? '');
+            $parent      = (int)($data['parent_id'] ?? 0);
+            if (!$name) return ['ok' => false, 'error' => 'wc_create_category requires data.name'];
+            $existing = get_term_by('name', $name, 'product_cat');
+            if ($existing) return ['ok' => true, 'action' => 'category_exists', 'term_id' => $existing->term_id, 'slug' => $existing->slug];
+            $result = wp_insert_term($name, 'product_cat', ['description' => $description, 'parent' => $parent]);
+            if (is_wp_error($result)) return ['ok' => false, 'error' => $result->get_error_message()];
+            return ['ok' => true, 'action' => 'category_created', 'term_id' => $result['term_id'], 'name' => $name];
+        }
+
+        // ── create_product (enhanced with variable product + attributes) ───────────
         case 'create_product': {
             if (!class_exists('WC_Product_Simple')) return ['ok' => false, 'error' => 'WooCommerce not active'];
             $type    = $data['type'] ?? 'simple';
             $product = $type === 'variable' ? new WC_Product_Variable() : new WC_Product_Simple();
-            if (!empty($data['name']))             $product->set_name($data['name']);
-            if (isset($data['regular_price']))     $product->set_regular_price((string)$data['regular_price']);
-            if (isset($data['sale_price']))        $product->set_sale_price((string)$data['sale_price']);
-            if (!empty($data['description']))      $product->set_description($data['description']);
-            if (!empty($data['short_description']))$product->set_short_description($data['short_description']);
-            if (!empty($data['sku']))              $product->set_sku(sanitize_text_field($data['sku']));
-            if (isset($data['stock_quantity']))    { $product->set_manage_stock(true); $product->set_stock_quantity((int)$data['stock_quantity']); }
-            if (!empty($data['categories']))       $product->set_category_ids((array)$data['categories']);
-            if (!empty($data['tags']))             $product->set_tag_ids((array)$data['tags']);
+            if (!empty($data['name']))              $product->set_name($data['name']);
+            if (isset($data['regular_price']))      $product->set_regular_price((string)$data['regular_price']);
+            if (isset($data['sale_price']))         $product->set_sale_price((string)$data['sale_price']);
+            if (!empty($data['description']))       $product->set_description($data['description']);
+            if (!empty($data['short_description'])) $product->set_short_description($data['short_description']);
+            if (!empty($data['sku']))               $product->set_sku(sanitize_text_field($data['sku']));
+            if (isset($data['stock_quantity']))     { $product->set_manage_stock(true); $product->set_stock_quantity((int)$data['stock_quantity']); }
+            if (!empty($data['categories']))        $product->set_category_ids((array)$data['categories']);
+            if (!empty($data['tags']))              $product->set_tag_ids((array)$data['tags']);
+            if (isset($data['weight']))             $product->set_weight((string)$data['weight']);
+            if (!empty($data['length']))            $product->set_length((string)$data['length']);
+            if (!empty($data['width']))             $product->set_width((string)$data['width']);
+            if (!empty($data['height']))            $product->set_height((string)$data['height']);
             $product->set_status($data['status'] ?? 'publish');
+
+            // Set global attributes for variable products
+            if (!empty($data['attributes']) && $type === 'variable') {
+                $product_attrs = [];
+                foreach ((array)$data['attributes'] as $attr_name => $attr_values) {
+                    $tax   = wc_attribute_taxonomy_name(str_replace('pa_', '', sanitize_key($attr_name)));
+                    $terms = [];
+                    foreach ((array)$attr_values as $val) {
+                        if (!taxonomy_exists($tax)) register_taxonomy($tax, 'product');
+                        $term = get_term_by('name', $val, $tax);
+                        if (!$term) { $r = wp_insert_term($val, $tax); $term = !is_wp_error($r) ? get_term($r['term_id'], $tax) : null; }
+                        if ($term) { $terms[] = $term->term_id; }
+                    }
+                    if ($terms) wp_set_object_terms($product->get_id() ?: 0, $terms, $tax, true);
+                    $product_attrs[$tax] = ['name' => $tax, 'value' => '', 'position' => 0, 'is_visible' => 1, 'is_variation' => 1, 'is_taxonomy' => 1];
+                }
+                $product->set_attributes($product_attrs);
+            }
+
             $id = $product->save();
+
+            // Re-set terms after save (ID now known)
+            if (!empty($data['attributes']) && $type === 'variable') {
+                foreach ((array)$data['attributes'] as $attr_name => $attr_values) {
+                    $tax = wc_attribute_taxonomy_name(str_replace('pa_', '', sanitize_key($attr_name)));
+                    $terms = [];
+                    foreach ((array)$attr_values as $val) {
+                        $term = get_term_by('name', $val, $tax);
+                        if ($term) $terms[] = $term->term_id;
+                    }
+                    if ($terms) wp_set_object_terms($id, $terms, $tax, false);
+                }
+                WC_Product_Variable::sync($id);
+            }
+
             return ['ok' => true, 'action' => 'product_created', 'product_id' => $id, 'url' => get_permalink($id)];
         }
 

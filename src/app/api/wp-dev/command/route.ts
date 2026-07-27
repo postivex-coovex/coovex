@@ -103,8 +103,33 @@ CRON MANAGER:
 { "type": "wp_action", "action": "add_cron_job", "data": { "hook": "my_hook", "schedule": "daily" } }
 { "type": "wp_action", "action": "clear_cron", "data": { "hook": "my_hook" } }
 
+THEME INSTALLATION:
+{ "type": "wp_action", "action": "theme_install", "data": { "slug": "storefront", "activate": true } }
+  → Installs any theme from wordpress.org by slug and optionally activates it.
+  → For WooCommerce stores always recommend "storefront" (official WC theme) or "astra".
+  → Chain with wc_configure in the same response.
+
+WOOCOMMERCE SETUP PATTERN (user asks to build a WooCommerce store from scratch):
+1. plugin_install WooCommerce (slug: "woocommerce", activate: true)
+2. theme_install with "storefront" or "astra" (activate: true)
+3. wc_configure — set currency, tax, create_pages: true
+4. wc_add_shipping_zone — at least one zone with flat_rate method
+5. wc_enable_payment — enable "cod" (cash on delivery) at minimum; mention Stripe/PayPal need manual API keys
+6. wc_create_category — create product categories
+7. create_product — add sample products (simple or variable)
+8. create_post type page — home page with hero content
+9. update_seo on all created pages
+
 WOOCOMMERCE (only if WooCommerce is active — check site_info.plugins):
-{ "type": "wp_action", "action": "create_product", "data": { "name": "T-Shirt", "regular_price": "29.99", "sale_price": "19.99", "description": "...", "stock_quantity": 50, "sku": "TSHIRT-L", "status": "publish" } }
+{ "type": "wp_action", "action": "wc_configure", "data": { "currency": "USD", "tax_enabled": false, "create_pages": true, "store_country": "US:NY", "enable_guest_checkout": true } }
+{ "type": "wp_action", "action": "wc_add_shipping_zone", "data": { "name": "Domestic", "regions": [{"code": "US", "type": "country"}], "methods": [{"type": "flat_rate", "title": "Standard Shipping", "cost": "9.99"}] } }
+{ "type": "wp_action", "action": "wc_enable_payment", "data": { "gateway": "cod", "title": "Cash on Delivery", "enabled": true } }
+{ "type": "wp_action", "action": "wc_list_shipping_zones", "data": {} }
+{ "type": "wp_action", "action": "wc_create_category", "data": { "name": "Engine Parts", "description": "OEM and aftermarket engine components" } }
+{ "type": "wp_action", "action": "create_product_attribute", "data": { "name": "Brand", "slug": "brand" } }
+{ "type": "wp_action", "action": "create_product", "data": { "name": "T-Shirt", "type": "simple", "regular_price": "29.99", "sale_price": "19.99", "description": "...", "stock_quantity": 50, "sku": "TSHIRT-L", "status": "publish" } }
+{ "type": "wp_action", "action": "create_product", "data": { "name": "Car Brake Pad Set", "type": "variable", "description": "...", "categories": [5], "attributes": { "pa_brand": ["Toyota","Honda","Universal"], "pa_type": ["OEM","Aftermarket"] } } }
+{ "type": "wp_action", "action": "add_product_variation", "data": { "product_id": 123, "regular_price": "45.00", "sku": "BP-TOY-OEM", "stock_quantity": 20, "attributes": { "pa_brand": "Toyota", "pa_type": "OEM" } } }
 { "type": "wp_action", "action": "update_product", "data": { "product_id": 456, "regular_price": "34.99", "stock_quantity": 25 } }
 { "type": "wp_action", "action": "delete_product", "data": { "product_id": 456, "force": false } }
 { "type": "wp_action", "action": "create_coupon", "data": { "code": "SUMMER20", "type": "percent", "amount": 20, "expiry_date": "2026-12-31", "usage_limit": 100 } }
