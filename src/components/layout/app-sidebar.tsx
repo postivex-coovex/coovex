@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Lightbulb, Package, Inbox,
   ClipboardCheck, Zap, Globe2, Users,
   Target, TrendingUp, Calendar, Share2,
-  Settings, ChevronDown, Search, LogOut,
+  Settings, ChevronDown, Search, LogOut, Plug,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BrandLogo } from './brand-logo'
@@ -138,6 +138,16 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Reddit',      href: '/social/reddit' },
       { label: 'X (Twitter)', href: '/social/x' },
       { label: 'YouTube',     href: '/social/youtube' },
+    ],
+  },
+  {
+    id: 'wp-dev',
+    label: 'WordPress Dev',
+    icon: Plug,
+    badge: 'new',
+    items: [
+      { label: 'Overview & Setup',   href: '/dev-agent' },
+      { label: 'Connected Sites',    href: '/dev-agent/sites' },
     ],
   },
   {
