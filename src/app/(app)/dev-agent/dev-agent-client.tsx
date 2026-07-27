@@ -42,7 +42,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
       const json = await res.json()
       if (json.api_key) {
         setCurrentKey(json.api_key)
-        toast.success('API key regenerated â€” update it in your WordPress plugin settings')
+        toast.success('API key regenerated — update it in your WordPress plugin settings')
       }
     } catch {
       toast.error('Failed to regenerate key')
@@ -75,10 +75,10 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
         )}
       </div>
 
-      {/* Setup steps â€” shown only when not connected */}
+      {/* Setup steps — shown only when not connected */}
       {!isConnected && (
         <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Quick Setup â€” 3 steps</h2>
+          <h2 className=”text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4”>Quick Setup — 3 steps</h2>
           <ol className="space-y-4">
             {[
               {
@@ -89,12 +89,12 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
               {
                 n: 2,
                 title: 'Install on WordPress',
-                body: 'Go to WP Admin â†’ Plugins â†’ Add New â†’ Upload Plugin â†’ select the ZIP â†’ Install Now â†’ Activate.',
+                body: ‘Go to WP Admin → Plugins → Add New → Upload Plugin → select the ZIP → Install Now → Activate.’,
               },
               {
                 n: 3,
                 title: 'Paste your API key',
-                body: 'In WP Admin â†’ CooVex Dev, paste your API key below and click Connect. The AI agent will be ready instantly.',
+                body: ‘In WP Admin → CooVex Dev, paste your API key below and click Connect. The AI agent will be ready instantly.’,
               },
             ].map(step => (
               <li key={step.n} className="flex gap-3">
@@ -129,7 +129,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
         </div>
         <div className="flex items-center gap-2">
           <code className="flex-1 px-3 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm font-mono text-slate-700 dark:text-slate-300 truncate border border-slate-200 dark:border-slate-700">
-            {currentKey || 'Generatingâ€¦'}
+            {currentKey || 'Generating…'}
           </code>
           <button
             onClick={copyKey}
@@ -138,7 +138,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
           </button>
         </div>
-        <p className="mt-2 text-xs text-slate-400">Paste this key in WP Admin â†’ CooVex Dev â†’ Connect.</p>
+        <p className="mt-2 text-xs text-slate-400">Paste this key in WP Admin → CooVex Dev → Connect.</p>
       </div>
 
       {/* Download button */}
@@ -146,7 +146,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">CooVex Dev Plugin</p>
-            <p className="text-xs text-slate-400 mt-0.5">Version 1.4.4 Â· WordPress 5.9+ Â· PHP 7.4+</p>
+            <p className="text-xs text-slate-400 mt-0.5">Version 1.4.4 · WordPress 5.9+ · PHP 7.4+</p>
           </div>
           <a
             href={downloadUrl}
@@ -196,7 +196,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
                     </a>
                   </td>
                   <td className="px-5 py-3 text-slate-500 dark:text-slate-400">
-                    {lic.plugin_version ? `v${lic.plugin_version}` : 'â€”'}
+                    {lic.plugin_version ? `v${lic.plugin_version}` : '—'}
                   </td>
                   <td className="px-5 py-3 text-slate-500 dark:text-slate-400">
                     <span className="flex items-center gap-1">
