@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import {
@@ -75,10 +75,10 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
         )}
       </div>
 
-      {/* Setup steps — shown only when not connected */}
+      {/* Setup steps - shown only when not connected */}
       {!isConnected && (
         <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
-          <h2 className=”text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4”>Quick Setup — 3 steps</h2>
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Quick Setup &mdash; 3 steps</h2>
           <ol className="space-y-4">
             {[
               {
@@ -89,12 +89,12 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
               {
                 n: 2,
                 title: 'Install on WordPress',
-                body: ‘Go to WP Admin → Plugins → Add New → Upload Plugin → select the ZIP → Install Now → Activate.’,
+                body: 'Go to WP Admin &rarr; Plugins &rarr; Add New &rarr; Upload Plugin &rarr; select the ZIP &rarr; Install Now &rarr; Activate.',
               },
               {
                 n: 3,
                 title: 'Paste your API key',
-                body: ‘In WP Admin → CooVex Dev, paste your API key below and click Connect. The AI agent will be ready instantly.’,
+                body: 'In WP Admin &rarr; CooVex Dev &rarr; Settings, paste your API key and save. Done.',
               },
             ].map(step => (
               <li key={step.n} className="flex gap-3">
@@ -103,7 +103,10 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
                 </span>
                 <div>
                   <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{step.title}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{step.body}</p>
+                  <p
+                    className="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
+                    dangerouslySetInnerHTML={{ __html: step.body }}
+                  />
                 </div>
               </li>
             ))}
@@ -129,7 +132,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
         </div>
         <div className="flex items-center gap-2">
           <code className="flex-1 px-3 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm font-mono text-slate-700 dark:text-slate-300 truncate border border-slate-200 dark:border-slate-700">
-            {currentKey || 'Generating…'}
+            {currentKey || 'Generating...'}
           </code>
           <button
             onClick={copyKey}
@@ -138,7 +141,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
           </button>
         </div>
-        <p className="mt-2 text-xs text-slate-400">Paste this key in WP Admin → CooVex Dev → Connect.</p>
+        <p className="mt-2 text-xs text-slate-400">Paste this key in WP Admin &rarr; CooVex Dev &rarr; Settings.</p>
       </div>
 
       {/* Download button */}
@@ -146,7 +149,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">CooVex Dev Plugin</p>
-            <p className="text-xs text-slate-400 mt-0.5">Version 1.4.4 · WordPress 5.9+ · PHP 7.4+</p>
+            <p className="text-xs text-slate-400 mt-0.5">Version 1.4.5 &middot; WordPress 5.9+ &middot; PHP 7.4+</p>
           </div>
           <a
             href={downloadUrl}
@@ -196,7 +199,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
                     </a>
                   </td>
                   <td className="px-5 py-3 text-slate-500 dark:text-slate-400">
-                    {lic.plugin_version ? `v${lic.plugin_version}` : '—'}
+                    {lic.plugin_version ? `v${lic.plugin_version}` : '-'}
                   </td>
                   <td className="px-5 py-3 text-slate-500 dark:text-slate-400">
                     <span className="flex items-center gap-1">
@@ -259,5 +262,3 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
     </div>
   )
 }
-
-

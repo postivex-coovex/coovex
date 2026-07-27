@@ -8,7 +8,7 @@ export const COOVEX_DEV_PHP = `<?php
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
  * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language â€” CooVex Dev delivers working code.
- * Version:     1.4.4
+ * Version:     1.4.5
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -19,7 +19,7 @@ export const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-define('CVD_VERSION',         '1.4.4');
+define('CVD_VERSION',         '1.4.5');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
@@ -136,7 +136,7 @@ function cvd_license_validate(): bool {
     ]);
 
     if (is_wp_error($response)) {
-        // Network error â€” keep current license if it hasn't expired yet
+        update_option('cvd_validate_error', 'Network error: ' . $response->get_error_message());
         return (time() < (int)get_option('cvd_license_expires', 0));
     }
 
@@ -144,19 +144,20 @@ function cvd_license_validate(): bool {
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
     if ($code === 403) {
-        // Revoked or site mismatch â€” hard stop
         $code_str = $body['code'] ?? '';
         update_option('cvd_license_status', $code_str === 'REVOKED' ? 'revoked' : 'site_mismatch');
         update_option('cvd_license_token',   '');
         update_option('cvd_license_expires',  0);
+        update_option('cvd_validate_error', 'Rejected (' . $code_str . '): ' . ($body['error'] ?? 'unknown'));
         return false;
     }
 
     if ($code !== 200 || empty($body['valid'])) {
+        update_option('cvd_validate_error', 'HTTP ' . $code . ': ' . ($body['error'] ?? wp_remote_retrieve_body($response)));
         return false;
     }
 
-    // Store the daily-rotating token â€” used to verify every response signature
+    delete_option('cvd_validate_error');
     update_option('cvd_license_token',   $body['license_token']);
     update_option('cvd_license_expires', strtotime($body['expires_at']));
     update_option('cvd_license_status',  'active');
@@ -379,11 +380,22 @@ add_action('admin_init', function () {
     register_setting('cvd_options', 'cvd_password_hash',        ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_telegram_bot_token',   ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_telegram_chat_id',     ['sanitize_callback' => 'sanitize_text_field']);
-    // Auto-validate on first admin page load after install (avoids HTTP requests during activation)
+    // Auto-validate when token is missing (runs on every admin page load until it succeeds)
     if (!empty(get_option('cvd_api_key', '')) && empty(get_option('cvd_license_token', ''))) {
         cvd_license_validate();
     }
 });
+
+// Re-validate immediately whenever the API key is changed via Settings
+add_action('update_option_cvd_api_key', function ($old, $new) {
+    if ($old !== $new) {
+        delete_option('cvd_license_token');
+        delete_option('cvd_license_expires');
+        delete_option('cvd_license_status');
+        delete_option('cvd_validate_error');
+        cvd_license_validate();
+    }
+}, 10, 2);
 
 // â”€â”€ Session helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_session_key(string $token): string {
@@ -2886,6 +2898,23 @@ function cvd_page_settings() {
             <?php submit_button('Save Settings'); ?>
         </form>
 
+        <?php
+        $validate_err = get_option('cvd_validate_error', '');
+        $license_ok   = !empty(get_option('cvd_license_token', ''));
+        if ($license_ok): ?>
+        <div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;color:#166534;font-size:13px;">
+            License active — connected to CooVex.
+        </div>
+        <?php elseif ($validate_err): ?>
+        <div style="margin-top:12px;padding:10px 14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;color:#991b1b;font-size:13px;">
+            <strong>Validation failed:</strong> <?php echo esc_html($validate_err); ?>
+        </div>
+        <?php elseif (!empty(get_option('cvd_api_key', ''))): ?>
+        <div style="margin-top:12px;padding:10px 14px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;color:#92400e;font-size:13px;">
+            Validating license with CooVex server...
+        </div>
+        <?php endif; ?>
+
         <hr style="margin:32px 0;" />
 
         <h2>Dev Password</h2>
@@ -3953,7 +3982,7 @@ export async function GET(_req: Request) {
     // Auto-install the API key on first activation
     pluginCode = pluginCode.replace(
       "if (!defined('ABSPATH')) exit;",
-      `if (!defined('ABSPATH')) exit;\n\n// Auto-configure on first install\nregister_activation_hook(__FILE__, function() {\n    if (defined('CVD_PREFILL_KEY') && !get_option('cvd_api_key')) {\n        update_option('cvd_api_key', CVD_PREFILL_KEY);\n    }\n});`
+      `if (!defined('ABSPATH')) exit;\n\n// Auto-configure on install (always overwrite so reinstalls use the correct key)\nregister_activation_hook(__FILE__, function() {\n    if (defined('CVD_PREFILL_KEY')) {\n        update_option('cvd_api_key', CVD_PREFILL_KEY);\n        delete_option('cvd_license_token');\n        delete_option('cvd_license_expires');\n        delete_option('cvd_license_status');\n        delete_option('cvd_validate_error');\n    }\n});`
     )
   }
 
@@ -3974,5 +4003,6 @@ export async function GET(_req: Request) {
     },
   })
 }
+
 
 
