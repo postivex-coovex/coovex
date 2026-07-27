@@ -8,7 +8,7 @@ export const COOVEX_DEV_PHP = `<?php
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
  * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language â€” CooVex Dev delivers working code.
- * Version:     1.4.3
+ * Version:     1.4.4
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -19,7 +19,7 @@ export const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-define('CVD_VERSION',         '1.4.3');
+define('CVD_VERSION',         '1.4.4');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
@@ -1438,7 +1438,7 @@ function cvd_apply_wp_action(array $change): array {
             $posts    = get_posts(['numberposts' => $limit, 'post_status' => 'publish', 'post_type' => ['post','page']]);
             $broken   = [];
             foreach ($posts as $post) {
-                preg_match_all('/<a[^>]+href=["\']([^"\'#][^"\']*)["\'][^>]*>/i', $post->post_content, $m);
+                preg_match_all('/<a[^>]+href=["\\\']([^"\\\' #][^"\\\']*)["\\\'][^>]*>/i', $post->post_content, $m);
                 foreach ($m[1] as $link) {
                     if (strpos($link, 'mailto:') === 0 || strpos($link, 'tel:') === 0) continue;
                     $full = strpos($link, 'http') === 0 ? $link : $site_url . '/' . ltrim($link, '/');
@@ -2523,7 +2523,7 @@ function cvd_security_scan(): array {
         '/eval\s*\(\s*gzinflate/i'                            => 'eval+gzinflate (compressed payload)',
         '/eval\s*\(\s*str_rot13/i'                            => 'eval+str_rot13 (obfuscation)',
         '/assert\s*\(\s*\$_(GET|POST|REQUEST|COOKIE)/i'       => 'assert() with user input (code injection)',
-        '/preg_replace\s*\([\'"].*\/e[\'"\s,)]/i'             => 'preg_replace /e flag (RCE)',
+        '/preg_replace\s*\([\\\'""].*\/e[\\\'""\s,)]/i'       => 'preg_replace /e flag (RCE)',
         '/file_get_contents\s*\(\s*\$_(GET|POST|REQUEST)/i'   => 'file_get_contents with user input (LFI)',
         '/\bpassthru\s*\(\s*\$_(GET|POST|REQUEST|COOKIE)/i'   => 'passthru() with user input (RCE)',
         '/\bsystem\s*\(\s*\$_(GET|POST|REQUEST|COOKIE)/i'     => 'system() with user input (RCE)',
@@ -3974,4 +3974,5 @@ export async function GET(_req: Request) {
     },
   })
 }
+
 
