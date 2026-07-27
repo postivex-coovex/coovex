@@ -8,7 +8,7 @@ export const COOVEX_DEV_PHP = `<?php
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
  * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language â€” CooVex Dev delivers working code.
- * Version:     1.4.5
+ * Version:     1.5.0
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -3026,10 +3026,10 @@ function cvd_page_settings() {
         </form>
 
         <?php
-        $api_key = get_option(‘cvd_api_key’, ‘’);
+        $api_key = get_option('cvd_api_key', '');
         if ($api_key): ?>
         <div style=”margin-top:24px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;color:#166534;”>
-            API key saved. <a href=”<?php echo admin_url(‘admin.php?page=coovex-dev’); ?>”>Open Dev Agent &rarr;</a>
+            API key saved. <a href=”<?php echo admin_url('admin.php?page=coovex-dev'); ?>”>Open Dev Agent &rarr;</a>
         </div>
         <?php else: ?>
         <div style=”margin-top:24px;padding:12px 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#991b1b;”>
