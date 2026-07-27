@@ -2,7 +2,7 @@
 
 // â”€â”€ Bump this when releasing a new plugin version â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Also update CVD_VERSION constant in plugin/route.ts (must match).
-export const CVD_CURRENT_VERSION    = '1.4.5'
+export const CVD_CURRENT_VERSION    = '1.4.6'
 export const CVD_REQUIRES_WP        = '5.9'
 export const CVD_TESTED_WP          = '6.8'
 export const CVD_REQUIRES_PHP       = '7.4'

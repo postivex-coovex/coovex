@@ -19,7 +19,7 @@ export const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-define('CVD_VERSION',         '1.4.5');
+define('CVD_VERSION',         '1.4.6');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
@@ -1893,7 +1893,6 @@ add_action('wp_ajax_cvd_logout', function () {
 add_action('wp_ajax_cvd_command', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
-    if (!cvd_session_valid())                wp_send_json_error('Session expired. Please re-enter your CooVex Dev password.', 401);
     if (!cvd_rate_check())                   wp_send_json_error('Rate limit reached. Wait a moment.', 429);
 
     // â”€â”€ License check (client gate â€” real enforcement is server-side) â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -2027,7 +2026,6 @@ add_action('wp_ajax_cvd_command', function () {
 add_action('wp_ajax_cvd_rollback', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
-    if (!cvd_session_valid())                wp_send_json_error('Session expired.', 401);
 
     $snap_id = sanitize_text_field($_POST['snap_id'] ?? '');
     $result  = cvd_snapshot_rollback($snap_id);
@@ -2042,7 +2040,7 @@ add_action('wp_ajax_cvd_rollback', function () {
 
 // â”€â”€ AJAX: session check (heartbeat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_ping', function () {
-    wp_send_json(['authenticated' => cvd_session_valid()]);
+    wp_send_json(['authenticated' => current_user_can('manage_options')]);
 });
 
 // â”€â”€ Floating AI Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -2474,7 +2472,6 @@ add_action('wp_ajax_cvd_float_command', function () {
 add_action('wp_ajax_cvd_file_tree', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
-    if (!cvd_session_valid())                wp_send_json_error('Session expired.', 401);
 
     $base = sanitize_text_field($_POST['base'] ?? 'plugins');
     $root = ($base === 'themes') ? get_theme_root() : WP_PLUGIN_DIR;
@@ -2502,7 +2499,6 @@ add_action('wp_ajax_cvd_file_tree', function () {
 add_action('wp_ajax_cvd_read_file', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
-    if (!cvd_session_valid())                wp_send_json_error('Session expired.', 401);
 
     $rel = sanitize_text_field($_POST['file'] ?? '');
     $abs = cvd_resolve_path($rel);
@@ -2940,19 +2936,14 @@ function cvd_page_settings() {
         </form>
 
         <?php
-        $api_key = get_option('cvd_api_key', '');
-        $has_pw  = !empty(get_option('cvd_password_hash', ''));
-        if ($api_key && $has_pw): ?>
-        <div style="margin-top:24px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;color:#166534;">
-            âœ“ CooVex Dev is configured. <a href="<?php echo admin_url('admin.php?page=coovex-dev'); ?>">Open Dev Agent â†’</a>
+        $api_key = get_option(‘cvd_api_key’, ‘’);
+        if ($api_key): ?>
+        <div style=”margin-top:24px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;color:#166534;”>
+            API key saved. <a href=”<?php echo admin_url(‘admin.php?page=coovex-dev’); ?>”>Open Dev Agent &rarr;</a>
         </div>
-        <?php elseif (!$api_key): ?>
-        <div style="margin-top:24px;padding:12px 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#991b1b;">
-            API key not set â€” the agent cannot connect to CooVex.
-        </div>
-        <?php elseif (!$has_pw): ?>
-        <div style="margin-top:24px;padding:12px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#9a3412;">
-            Dev password not set â€” set a password to enable the agent.
+        <?php else: ?>
+        <div style=”margin-top:24px;padding:12px 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#991b1b;”>
+            API key not set &mdash; the agent cannot connect to CooVex.
         </div>
         <?php endif; ?>
 
@@ -3143,19 +3134,17 @@ function cvd_page_agent() {
     if (!current_user_can('manage_options')) return;
 
     $api_key = get_option('cvd_api_key', '');
-    $has_pw  = !empty(get_option('cvd_password_hash', ''));
 
-    if (!$api_key || !$has_pw) {
-        echo '<div class="wrap"><div style="margin-top:48px;max-width:480px;">';
-        echo '<h2>CooVex Dev â€” Setup Required</h2>';
-        if (!$api_key) echo '<p>Add your <strong>CooVex API key</strong> in <a href="' . admin_url('admin.php?page=coovex-dev-settings') . '">Settings</a>.</p>';
-        if (!$has_pw)  echo '<p>Set a <strong>dev password</strong> in <a href="' . admin_url('admin.php?page=coovex-dev-settings') . '">Settings</a>.</p>';
+    if (!$api_key) {
+        echo '<div class=”wrap”><div style=”margin-top:48px;max-width:480px;”>';
+        echo '<h2>CooVex Dev &mdash; Setup Required</h2>';
+        echo '<p>Add your <strong>CooVex API key</strong> in <a href=”' . admin_url('admin.php?page=coovex-dev-settings') . '”>Settings</a>.</p>';
         echo '</div></div>';
         return;
     }
 
-    $nonce           = wp_create_nonce('cvd_nonce');
-    $already_authed  = cvd_session_valid() ? 'true' : 'false';
+    $nonce          = wp_create_nonce('cvd_nonce');
+    $already_authed = 'true';
     $session_ttl_min = CVD_SESSION_TTL / 60;
     ?>
     <style>
