@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server'
+import { buildZip } from '@/lib/zip'
 
 /* eslint-disable no-useless-escape */
 
-const COOVEX_DEV_PHP = `<?php
+export const COOVEX_DEV_PHP = `<?php
 /**
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
  * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language — CooVex Dev delivers working code.
- * Version:     1.0.0
+ * Version:     1.4.0
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -18,14 +19,92 @@ const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-define('CVD_VERSION',         '1.2.0');
+define('CVD_VERSION',         '1.4.0');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
+define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
+define('CVD_DOWNLOAD_URL',    'https://app.coovex.com/api/wp-dev/download');
 define('CVD_SESSION_TTL',     30 * MINUTE_IN_SECONDS);
 define('CVD_MAX_SNAPSHOTS',   25);
 define('CVD_RATE_LIMIT',      12); // max commands per 5 minutes
 define('CVD_COOKIE',          'cvd_session');
 define('CVD_TELEGRAM_API',    'https://api.telegram.org/bot');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTO-UPDATE — hooks into WordPress built-in plugin updater
+// When CooVex releases a new version, WP admin shows the standard update notice
+// and handles download + installation automatically.
+// ─────────────────────────────────────────────────────────────────────────────
+
+add_filter('pre_set_site_transient_update_plugins', function ($transient) {
+    if (empty($transient->checked)) return $transient;
+
+    $cached = get_transient('cvd_update_info');
+    if ($cached === false) {
+        $res    = wp_remote_get(CVD_UPDATE_URL, ['timeout' => 10, 'sslverify' => true]);
+        $cached = (!is_wp_error($res) && wp_remote_retrieve_response_code($res) === 200)
+                    ? (json_decode(wp_remote_retrieve_body($res), true) ?? [])
+                    : [];
+        set_transient('cvd_update_info', $cached, 12 * HOUR_IN_SECONDS);
+    }
+
+    $remote_ver = $cached['version'] ?? '';
+    if (!$remote_ver || !version_compare($remote_ver, CVD_VERSION, '>')) return $transient;
+
+    $plugin_file       = plugin_basename(__FILE__);
+    $api_key           = get_option('cvd_api_key', '');
+    $obj               = new stdClass();
+    $obj->id           = $plugin_file;
+    $obj->slug         = 'coovex-dev';
+    $obj->plugin       = $plugin_file;
+    $obj->new_version  = $remote_ver;
+    $obj->url          = 'https://coovex.com/dev';
+    $obj->package      = CVD_DOWNLOAD_URL . '?api_key=' . urlencode($api_key) . '&v=' . urlencode($remote_ver);
+    $obj->tested       = $cached['tested']       ?? '6.8';
+    $obj->requires     = $cached['requires']     ?? '5.9';
+    $obj->requires_php = $cached['requires_php'] ?? '7.4';
+    $obj->icons        = ['default' => 'https://app.coovex.com/icon-128.png'];
+
+    $transient->response[$plugin_file] = $obj;
+    return $transient;
+});
+
+// "View version X.X details" popup in WP admin → Plugins
+add_filter('plugins_api', function ($result, $action, $args) {
+    if ($action !== 'plugin_information' || ($args->slug ?? '') !== 'coovex-dev') return $result;
+
+    $cached              = get_transient('cvd_update_info') ?: [];
+    $api_key             = get_option('cvd_api_key', '');
+    $info                = new stdClass();
+    $info->name          = 'CooVex Dev';
+    $info->slug          = 'coovex-dev';
+    $info->version       = $cached['version']     ?? CVD_VERSION;
+    $info->author        = '<a href="https://coovex.com">CooVex</a>';
+    $info->requires      = $cached['requires']     ?? '5.9';
+    $info->tested        = $cached['tested']       ?? '6.8';
+    $info->requires_php  = $cached['requires_php'] ?? '7.4';
+    $info->download_link = CVD_DOWNLOAD_URL . '?api_key=' . urlencode($api_key);
+    $info->sections      = [
+        'description' => '<p>AI agent that writes, edits, and manages your WordPress site via plain language commands. Supports file editing, DB queries, plugin installation, security scanning, and Telegram integration.</p>',
+        'changelog'   => wpautop(esc_html($cached['changelog'] ?? '')),
+    ];
+    return $info;
+}, 10, 3);
+
+// Post-update: clear cached version info and re-validate license with new version
+add_action('upgrader_process_complete', function ($upgrader, $options) {
+    if (($options['type'] ?? '') !== 'plugin' || empty($options['plugins'])) return;
+    foreach ((array)$options['plugins'] as $p) {
+        if (strpos($p, 'coovex-dev') !== false) {
+            delete_transient('cvd_update_info');
+            delete_option('cvd_license_token');
+            delete_option('cvd_license_expires');
+            // Re-validate shortly after update completes
+            wp_schedule_single_event(time() + 10, 'cvd_daily_license_check');
+            break;
+        }
+    }
+}, 10, 2);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LICENSE VALIDATION — runs on activation, daily, and before every command
@@ -118,6 +197,165 @@ function cvd_verify_response(string $body, string $sig, string $nonce): bool {
     // hash_equals prevents timing attacks
     return hash_equals($expected, $sig);
 }
+
+// ── Redirect Handler ─────────────────────────────────────────────────────────
+add_action('template_redirect', function () {
+    $redirects = get_option('cvd_redirects', []);
+    if (empty($redirects)) return;
+    $path = '/' . ltrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '', '/');
+    if (isset($redirects[$path])) {
+        $r = $redirects[$path];
+        wp_redirect(esc_url_raw($r['to']), (int)($r['code'] ?? 301));
+        exit;
+    }
+});
+
+// ── Maintenance Mode ──────────────────────────────────────────────────────────
+add_action('wp', function () {
+    if (!get_option('cvd_maintenance_enabled')) return;
+    if (current_user_can('manage_options')) return;
+    $allowed_ips = (array)get_option('cvd_maintenance_allowed_ips', []);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    if ($allowed_ips && in_array($ip, $allowed_ips)) return;
+    $msg = esc_html(get_option('cvd_maintenance_message', "We'll be back shortly. Thank you for your patience."));
+    status_header(503);
+    header('Retry-After: 3600');
+    ?><!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Maintenance</title>
+<style>body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f5f5f5}
+.box{text-align:center;padding:40px;background:#fff;border-radius:8px;box-shadow:0 2px 16px rgba(0,0,0,.08);max-width:400px}
+h1{font-size:1.4em;color:#111;margin:0 0 12px}p{color:#555;margin:0}</style></head>
+<body><div class="box"><h1>Under Maintenance</h1><p><?php echo $msg; ?></p></div></body></html>
+<?php
+    exit;
+});
+
+// ── Login Activity Log ────────────────────────────────────────────────────────
+add_action('wp_login', function (string $user_login, WP_User $user) {
+    $log   = array_slice((array)get_option('cvd_login_log', []), 0, 499);
+    array_unshift($log, [
+        'type'     => 'success',
+        'user'     => $user_login,
+        'roles'    => $user->roles,
+        'ip'       => $_SERVER['REMOTE_ADDR'] ?? '',
+        'ua'       => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 120),
+        'time'     => time(),
+    ]);
+    update_option('cvd_login_log', $log);
+}, 10, 2);
+
+add_action('wp_login_failed', function (string $user_login) {
+    $log   = array_slice((array)get_option('cvd_login_log', []), 0, 499);
+    array_unshift($log, [
+        'type'  => 'failed',
+        'user'  => $user_login,
+        'ip'    => $_SERVER['REMOTE_ADDR'] ?? '',
+        'ua'    => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 120),
+        'time'  => time(),
+    ]);
+    update_option('cvd_login_log', $log);
+});
+
+// ── Webhook Dispatcher ────────────────────────────────────────────────────────
+function cvd_fire_webhook(string $event, array $payload): void {
+    $webhooks = get_option('cvd_webhooks', []);
+    if (empty($webhooks)) return;
+    foreach ($webhooks as $id => $wh) {
+        $ev = $wh['event'] ?? '*';
+        if ($ev !== '*' && $ev !== $event) continue;
+        $body   = json_encode(['event' => $event, 'webhook_id' => $id, 'payload' => $payload, 'timestamp' => time()]);
+        $sig    = isset($wh['secret']) ? hash_hmac('sha256', $body, $wh['secret']) : '';
+        wp_remote_post(esc_url_raw($wh['url']), [
+            'timeout'     => 5,
+            'blocking'    => false,
+            'body'        => $body,
+            'headers'     => ['Content-Type' => 'application/json', 'X-CVD-Signature' => $sig, 'X-CVD-Event' => $event],
+        ]);
+    }
+}
+
+add_action('publish_post', function (int $post_id) {
+    $post = get_post($post_id);
+    if (!$post || $post->post_status !== 'publish') return;
+    cvd_fire_webhook('post.published', ['post_id' => $post_id, 'title' => $post->post_title, 'url' => get_permalink($post_id)]);
+});
+
+add_action('publish_page', function (int $post_id) {
+    $post = get_post($post_id);
+    if (!$post) return;
+    cvd_fire_webhook('page.published', ['post_id' => $post_id, 'title' => $post->post_title, 'url' => get_permalink($post_id)]);
+});
+
+add_action('wp_login', function (string $user_login, WP_User $user) {
+    cvd_fire_webhook('user.login', ['user' => $user_login, 'roles' => $user->roles, 'ip' => $_SERVER['REMOTE_ADDR'] ?? '']);
+}, 20, 2);
+
+add_action('user_register', function (int $user_id) {
+    $user = get_userdata($user_id);
+    cvd_fire_webhook('user.registered', ['user_id' => $user_id, 'email' => $user ? $user->user_email : '']);
+});
+
+// WooCommerce-specific webhooks (only if WC active)
+add_action('woocommerce_order_status_changed', function (int $order_id, string $old, string $new_status) {
+    if (!class_exists('WooCommerce')) return;
+    $order = wc_get_order($order_id);
+    if (!$order) return;
+    cvd_fire_webhook('order.status_changed', ['order_id' => $order_id, 'from' => $old, 'to' => $new_status, 'total' => $order->get_total()]);
+}, 10, 3);
+
+// ── CSV Export Auto-Cleanup (removes exports older than 24h) ─────────────────
+add_action('cvd_cleanup_exports', function () {
+    $uploads = wp_upload_dir();
+    $pattern = $uploads['basedir'] . '/cvd-export-*.csv';
+    foreach (glob($pattern) ?: [] as $file) {
+        if (filemtime($file) < time() - DAY_IN_SECONDS) @unlink($file);
+    }
+});
+if (!wp_next_scheduled('cvd_cleanup_exports')) {
+    wp_schedule_event(time(), 'daily', 'cvd_cleanup_exports');
+}
+
+// ── Admin Dashboard Widget ────────────────────────────────────────────────────
+add_action('wp_dashboard_setup', function () {
+    wp_add_dashboard_widget('cvd_site_health', 'CooVex Dev — Site Health', function () {
+        global $wpdb;
+        $maintenance = get_option('cvd_maintenance_enabled') ? '<span style="color:#d63638">ON</span>' : '<span style="color:#00a32a">OFF</span>';
+        $redirects   = count(get_option('cvd_redirects', []));
+        $webhooks    = count(get_option('cvd_webhooks', []));
+        $log         = get_option('cvd_login_log', []);
+        $failed      = count(array_filter($log, fn($e) => ($e['type'] ?? '') === 'failed'));
+        $revisions   = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='revision'");
+        $update_p    = get_site_transient('update_plugins');
+        $updates     = !empty($update_p->response) ? count($update_p->response) : 0;
+        $db_size     = (float)$wpdb->get_var("SELECT SUM(data_length+index_length) FROM information_schema.tables WHERE table_schema=DATABASE()");
+        $db_mb       = round($db_size / 1024 / 1024, 1);
+        $ssl         = is_ssl() ? '<span style="color:#00a32a">Yes</span>' : '<span style="color:#d63638">No</span>';
+        $agent_url   = admin_url('admin.php?page=coovex-dev');
+        ?>
+        <style>
+        .cvd-widget table{width:100%;border-collapse:collapse;font-size:13px}
+        .cvd-widget td{padding:5px 4px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+        .cvd-widget td:first-child{color:#666;width:55%}
+        .cvd-widget td:last-child{font-weight:600;text-align:right}
+        .cvd-widget .cvd-warn{color:#d63638}
+        .cvd-widget .cvd-btn{display:inline-block;margin-top:10px;padding:6px 12px;background:#2271b1;color:#fff;text-decoration:none;border-radius:3px;font-size:12px}
+        </style>
+        <div class="cvd-widget">
+        <table>
+            <tr><td>Maintenance Mode</td><td><?php echo $maintenance; ?></td></tr>
+            <tr><td>SSL Active</td><td><?php echo $ssl; ?></td></tr>
+            <tr><td>DB Size</td><td><?php echo $db_mb; ?> MB</td></tr>
+            <tr><td>Plugin Updates Available</td><td class="<?php echo $updates > 0 ? 'cvd-warn' : ''; ?>"><?php echo $updates; ?></td></tr>
+            <tr><td>Post Revisions (cleanup recommended)</td><td class="<?php echo $revisions > 200 ? 'cvd-warn' : ''; ?>"><?php echo number_format($revisions); ?></td></tr>
+            <tr><td>Active Redirects</td><td><?php echo $redirects; ?></td></tr>
+            <tr><td>Active Webhooks</td><td><?php echo $webhooks; ?></td></tr>
+            <tr><td>Failed Logins (all time)</td><td class="<?php echo $failed > 10 ? 'cvd-warn' : ''; ?>"><?php echo $failed; ?></td></tr>
+        </table>
+        <a href="<?php echo esc_url($agent_url); ?>" class="cvd-btn">Open AI Agent</a>
+        </div>
+        <?php
+    });
+});
 
 // ── Admin menu ────────────────────────────────────────────────────────────────
 add_action('admin_menu', function () {
@@ -286,6 +524,10 @@ function cvd_apply_change(array $change): array {
 
     $type = $change['type'] ?? 'file';
 
+    if ($type === 'wp_action') {
+        return cvd_apply_wp_action($change);
+    }
+
     if ($type === 'db') {
         $sql = str_replace('{prefix}', $wpdb->prefix, $change['sql'] ?? '');
         // Block dangerous patterns
@@ -299,6 +541,82 @@ function cvd_apply_change(array $change): array {
         $result = $wpdb->query($sql);
         if ($result === false) return ['ok' => false, 'error' => $wpdb->last_error];
         return ['ok' => true, 'rows_affected' => $result];
+    }
+
+    if ($type === 'plugin_install') {
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+        $slug         = sanitize_key($change['slug'] ?? '');
+        $download_url = esc_url_raw($change['download_url'] ?? '');
+        $do_activate  = ($change['activate'] ?? true) !== false;
+
+        if (empty($slug) && empty($download_url)) {
+            return ['ok' => false, 'error' => 'plugin_install requires slug or download_url'];
+        }
+
+        // Check if already installed
+        if ($slug) {
+            $all = get_plugins();
+            foreach (array_keys($all) as $path) {
+                if (strpos($path, $slug . '/') === 0 || $path === $slug . '.php') {
+                    if ($do_activate && !is_plugin_active($path)) {
+                        $activate = activate_plugin($path);
+                        if (is_wp_error($activate)) {
+                            return ['ok' => false, 'plugin' => $slug, 'error' => 'Already installed but could not activate: ' . $activate->get_error_message()];
+                        }
+                    }
+                    return ['ok' => true, 'plugin' => $slug, 'note' => 'already_installed', 'activated' => $do_activate];
+                }
+            }
+        }
+
+        // Resolve download URL from wordpress.org if only slug provided
+        if (empty($download_url) && $slug) {
+            $api = plugins_api('plugin_information', ['slug' => $slug, 'fields' => ['downloadlink' => true, 'short_description' => false, 'sections' => false, 'tags' => false]]);
+            if (is_wp_error($api)) {
+                return ['ok' => false, 'plugin' => $slug, 'error' => 'Could not find plugin on wordpress.org: ' . $api->get_error_message()];
+            }
+            $download_url = $api->download_link;
+        }
+
+        // Silent upgrader skin — suppresses all output
+        if (!class_exists('CVD_Silent_Skin')) {
+            class CVD_Silent_Skin extends WP_Upgrader_Skin {
+                public function feedback($string, ...$args) {}
+                public function header() {}
+                public function footer() {}
+                public function before() {}
+                public function after() {}
+                public function error($errors) {}
+            }
+        }
+
+        $upgrader = new Plugin_Upgrader(new CVD_Silent_Skin());
+        $result   = $upgrader->install($download_url);
+
+        if (is_wp_error($result)) {
+            return ['ok' => false, 'plugin' => $slug, 'error' => $result->get_error_message()];
+        }
+        if ($result === false || $result === null) {
+            return ['ok' => false, 'plugin' => $slug, 'error' => 'Installation failed (no result). Check server permissions on wp-content/plugins/.'];
+        }
+
+        $plugin_file = $upgrader->plugin_info();
+        if (!$plugin_file) {
+            return ['ok' => true, 'plugin' => $slug, 'installed' => true, 'activated' => false, 'note' => 'Installed but could not determine main plugin file for activation.'];
+        }
+
+        if ($do_activate) {
+            $activate = activate_plugin($plugin_file);
+            if (is_wp_error($activate)) {
+                return ['ok' => true, 'plugin' => $slug, 'installed' => true, 'activated' => false, 'activate_error' => $activate->get_error_message()];
+            }
+        }
+
+        return ['ok' => true, 'plugin' => $slug, 'installed' => true, 'activated' => $do_activate, 'plugin_file' => $plugin_file];
     }
 
     // File change
@@ -329,28 +647,883 @@ function cvd_apply_change(array $change): array {
     return ['ok' => true, 'file' => $file, 'action' => $action];
 }
 
-// ── Collect site context ──────────────────────────────────────────────────────
-function cvd_site_context(): array {
-    global $wpdb;
+// ─────────────────────────────────────────────────────────────────────────────
+// WP DIRECT ACTIONS
+// type: "wp_action" — create/update posts, upload images, SEO, menus, options
+// ─────────────────────────────────────────────────────────────────────────────
 
-    $active_plugins = get_option('active_plugins', []);
-    $plugin_names   = [];
-    foreach ($active_plugins as $p) {
-        $data = get_plugin_data(WP_PLUGIN_DIR . '/' . $p, false, false);
+function cvd_apply_wp_action(array $change): array {
+    $action = $change['action'] ?? '';
+    $data   = $change['data']   ?? [];
+
+    switch ($action) {
+
+        // ── Post / Page CRUD ───────────────────────────────────────────────────
+        case 'create_post':
+        case 'create_page': {
+            $args = array_merge([
+                'post_status' => 'draft',
+                'post_type'   => ($action === 'create_page') ? 'page' : 'post',
+                'post_author' => get_current_user_id() ?: 1,
+            ], $data);
+            unset($args['ID']); // never allow accidental update path
+            $id = wp_insert_post(wp_slash($args), true);
+            if (is_wp_error($id)) return ['ok' => false, 'error' => $id->get_error_message()];
+            return ['ok' => true, 'action' => 'created', 'post_id' => $id, 'post_type' => $args['post_type'], 'url' => get_permalink($id)];
+        }
+
+        case 'update_post': {
+            if (empty($data['ID'])) return ['ok' => false, 'error' => 'update_post requires data.ID'];
+            $id = wp_update_post(wp_slash($data), true);
+            if (is_wp_error($id)) return ['ok' => false, 'error' => $id->get_error_message()];
+            return ['ok' => true, 'action' => 'updated', 'post_id' => $id, 'url' => get_permalink($id)];
+        }
+
+        case 'delete_post': {
+            $post_id = (int)($data['post_id'] ?? 0);
+            $force   = (bool)($data['force'] ?? false);
+            if (!$post_id) return ['ok' => false, 'error' => 'delete_post requires data.post_id'];
+            $result = wp_delete_post($post_id, $force);
+            return $result ? ['ok' => true, 'action' => 'deleted', 'post_id' => $post_id] : ['ok' => false, 'error' => 'Could not delete post'];
+        }
+
+        // ── Post meta (single or bulk) ─────────────────────────────────────────
+        case 'update_post_meta': {
+            $post_id = (int)($data['post_id'] ?? 0);
+            $key     = sanitize_key($data['meta_key'] ?? '');
+            $val     = $data['meta_value'] ?? '';
+            if (!$post_id || !$key) return ['ok' => false, 'error' => 'update_post_meta requires data.post_id and data.meta_key'];
+            update_post_meta($post_id, $key, $val);
+            return ['ok' => true, 'action' => 'meta_updated', 'post_id' => $post_id, 'key' => $key];
+        }
+
+        case 'bulk_update_meta': {
+            $post_id = (int)($data['post_id'] ?? 0);
+            $meta    = (array)($data['meta'] ?? []);
+            if (!$post_id || empty($meta)) return ['ok' => false, 'error' => 'bulk_update_meta requires post_id and meta'];
+            foreach ($meta as $k => $v) update_post_meta($post_id, sanitize_key($k), $v);
+            return ['ok' => true, 'action' => 'bulk_meta_updated', 'post_id' => $post_id, 'count' => count($meta)];
+        }
+
+        // ── SEO (auto-detects Yoast / RankMath / SEOPress / AIOSEO) ───────────
+        case 'update_seo': {
+            $post_id  = (int)($data['post_id'] ?? 0);
+            $title    = $data['title']       ?? '';
+            $desc     = $data['description'] ?? '';
+            $kw       = $data['keywords']    ?? '';
+            $og_image = $data['og_image_url'] ?? '';
+            if (!$post_id) return ['ok' => false, 'error' => 'update_seo requires data.post_id'];
+
+            $installed = implode(' ', get_option('active_plugins', []));
+
+            if (strpos($installed, 'wordpress-seo') !== false) {
+                // Yoast SEO
+                if ($title) update_post_meta($post_id, '_yoast_wpseo_title', $title);
+                if ($desc)  update_post_meta($post_id, '_yoast_wpseo_metadesc', $desc);
+                if ($kw)    update_post_meta($post_id, '_yoast_wpseo_focuskw', $kw);
+                $detected = 'yoast';
+            } elseif (strpos($installed, 'seo-by-rank-math') !== false) {
+                // RankMath
+                if ($title) update_post_meta($post_id, 'rank_math_title', $title);
+                if ($desc)  update_post_meta($post_id, 'rank_math_description', $desc);
+                if ($kw)    update_post_meta($post_id, 'rank_math_focus_keyword', $kw);
+                $detected = 'rankmath';
+            } elseif (strpos($installed, 'seopress') !== false) {
+                // SEOPress
+                if ($title) update_post_meta($post_id, '_seopress_titles_title', $title);
+                if ($desc)  update_post_meta($post_id, '_seopress_titles_desc', $desc);
+                $detected = 'seopress';
+            } elseif (strpos($installed, 'all-in-one-seo') !== false) {
+                // AIOSEO
+                if ($title) update_post_meta($post_id, '_aioseo_title', $title);
+                if ($desc)  update_post_meta($post_id, '_aioseo_description', $desc);
+                if ($kw)    update_post_meta($post_id, '_aioseo_keywords', $kw);
+                $detected = 'aioseo';
+            } else {
+                // No SEO plugin — write to native meta + generic keys
+                if ($title) update_post_meta($post_id, '_seo_title', $title);
+                if ($desc)  update_post_meta($post_id, '_seo_description', $desc);
+                if ($desc)  update_post_meta($post_id, '_meta_description', $desc);
+                $detected = 'native';
+            }
+            if ($og_image) update_post_meta($post_id, '_og_image', $og_image);
+            return ['ok' => true, 'action' => 'seo_updated', 'post_id' => $post_id, 'seo_plugin' => $detected];
+        }
+
+        // ── Taxonomy: set categories / tags ────────────────────────────────────
+        case 'set_categories': {
+            $post_id = (int)($data['post_id'] ?? 0);
+            $cats    = (array)($data['categories'] ?? []);
+            if (!$post_id) return ['ok' => false, 'error' => 'set_categories requires data.post_id'];
+            wp_set_post_categories($post_id, $cats);
+            return ['ok' => true, 'action' => 'categories_set', 'post_id' => $post_id];
+        }
+
+        case 'set_tags': {
+            $post_id = (int)($data['post_id'] ?? 0);
+            $tags    = (array)($data['tags'] ?? []);
+            if (!$post_id) return ['ok' => false, 'error' => 'set_tags requires data.post_id'];
+            wp_set_post_tags($post_id, $tags);
+            return ['ok' => true, 'action' => 'tags_set', 'post_id' => $post_id];
+        }
+
+        // ── Media ──────────────────────────────────────────────────────────────
+        case 'sideload_image': {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+
+            $url          = esc_url_raw($data['url'] ?? '');
+            $post_id      = (int)($data['post_id'] ?? 0);
+            $title        = sanitize_text_field($data['title'] ?? '');
+            $alt          = sanitize_text_field($data['alt'] ?? $title);
+            $set_featured = !empty($data['set_as_featured']);
+
+            if (empty($url)) return ['ok' => false, 'error' => 'sideload_image requires data.url'];
+
+            $att_id = media_sideload_image($url, $post_id, $title, 'id');
+            if (is_wp_error($att_id)) return ['ok' => false, 'error' => $att_id->get_error_message()];
+
+            if ($alt) update_post_meta($att_id, '_wp_attachment_image_alt', $alt);
+            if ($set_featured && $post_id) set_post_thumbnail($post_id, $att_id);
+
+            return [
+                'ok'           => true,
+                'action'       => 'image_sideloaded',
+                'attachment_id'=> $att_id,
+                'url'          => wp_get_attachment_url($att_id),
+                'set_featured' => $set_featured && $post_id,
+            ];
+        }
+
+        case 'set_featured_image': {
+            $post_id = (int)($data['post_id'] ?? 0);
+            $att_id  = (int)($data['attachment_id'] ?? 0);
+            if (!$post_id || !$att_id) return ['ok' => false, 'error' => 'set_featured_image requires post_id and attachment_id'];
+            set_post_thumbnail($post_id, $att_id);
+            return ['ok' => true, 'action' => 'featured_image_set', 'post_id' => $post_id, 'attachment_id' => $att_id];
+        }
+
+        // ── Theme mods & options ───────────────────────────────────────────────
+        case 'set_theme_mod': {
+            $mod = sanitize_key($data['mod'] ?? '');
+            $val = $data['value'] ?? '';
+            if (!$mod) return ['ok' => false, 'error' => 'set_theme_mod requires data.mod'];
+            set_theme_mod($mod, $val);
+            return ['ok' => true, 'action' => 'theme_mod_set', 'mod' => $mod];
+        }
+
+        case 'update_option': {
+            $option = sanitize_key($data['option'] ?? '');
+            $val    = $data['value'] ?? '';
+            if (!$option) return ['ok' => false, 'error' => 'update_option requires data.option'];
+            // Block sensitive options that could break the site
+            $blocked = ['siteurl', 'home', 'admin_email', 'blogadmin', 'default_role', 'active_plugins'];
+            if (in_array($option, $blocked)) return ['ok' => false, 'error' => "Blocked: '$option' cannot be changed via agent for safety"];
+            update_option($option, $val);
+            return ['ok' => true, 'action' => 'option_updated', 'option' => $option];
+        }
+
+        // ── Navigation menus ───────────────────────────────────────────────────
+        case 'add_menu_item': {
+            $location   = sanitize_text_field($data['menu_location'] ?? '');
+            $item       = $data['item'] ?? [];
+            $locations  = get_nav_menu_locations();
+            $menu_id    = $locations[$location] ?? 0;
+            if (!$menu_id) return ['ok' => false, 'error' => "No menu assigned to location '$location'"];
+            $item_id = wp_update_nav_menu_item($menu_id, 0, [
+                'menu-item-title'     => sanitize_text_field($item['title'] ?? ''),
+                'menu-item-url'       => esc_url_raw($item['url'] ?? ''),
+                'menu-item-type'      => $item['type'] ?? 'custom',
+                'menu-item-status'    => 'publish',
+                'menu-item-parent-id' => (int)($item['parent'] ?? 0),
+            ]);
+            if (is_wp_error($item_id)) return ['ok' => false, 'error' => $item_id->get_error_message()];
+            return ['ok' => true, 'action' => 'menu_item_added', 'item_id' => $item_id, 'location' => $location];
+        }
+
+        case 'remove_menu_item': {
+            $item_id = (int)($data['item_id'] ?? 0);
+            if (!$item_id) return ['ok' => false, 'error' => 'remove_menu_item requires data.item_id'];
+            wp_delete_post($item_id, true);
+            return ['ok' => true, 'action' => 'menu_item_removed', 'item_id' => $item_id];
+        }
+
+        // ── DB Cleanup & Optimization ──────────────────────────────────────────
+        case 'db_cleanup': {
+            global $wpdb;
+            $types   = (array)($data['types'] ?? ['revisions','spam','transients','trashed','orphaned_meta']);
+            $results = [];
+            if (in_array('revisions', $types)) {
+                $results['revisions_deleted'] = (int)$wpdb->query("DELETE FROM {$wpdb->posts} WHERE post_type = 'revision'");
+            }
+            if (in_array('spam', $types)) {
+                $results['spam_deleted'] = (int)$wpdb->query("DELETE FROM {$wpdb->comments} WHERE comment_approved = 'spam'");
+            }
+            if (in_array('trashed', $types)) {
+                $trashed_ids = $wpdb->get_col("SELECT ID FROM {$wpdb->posts} WHERE post_status = 'trash'");
+                foreach ($trashed_ids as $tid) { wp_delete_post((int)$tid, true); }
+                $results['trashed_deleted'] = count($trashed_ids);
+            }
+            if (in_array('transients', $types)) {
+                $results['transients_deleted'] = (int)$wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%' OR option_name LIKE '\_site\_transient\_%'");
+            }
+            if (in_array('orphaned_meta', $types)) {
+                $results['orphaned_postmeta'] = (int)$wpdb->query("DELETE pm FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE p.ID IS NULL");
+                $results['orphaned_usermeta'] = (int)$wpdb->query("DELETE um FROM {$wpdb->usermeta} um LEFT JOIN {$wpdb->users} u ON u.ID = um.user_id WHERE u.ID IS NULL");
+            }
+            if (in_array('optimize_tables', $types)) {
+                $tbls = $wpdb->get_col('SHOW TABLES');
+                foreach ($tbls as $t) $wpdb->query("OPTIMIZE TABLE \`{$t}\`");
+                $results['tables_optimized'] = count($tbls);
+            }
+            return ['ok' => true, 'action' => 'db_cleaned', 'results' => $results];
+        }
+
+        // ── Site Audit ─────────────────────────────────────────────────────────
+        case 'site_audit': {
+            global $wpdb;
+            $audit = [];
+            $audit['wp_version']    = get_bloginfo('version');
+            $audit['php_version']   = PHP_VERSION;
+            $audit['php_ok']        = version_compare(PHP_VERSION, '8.0', '>=');
+            $mem = wp_convert_hr_to_bytes(ini_get('memory_limit'));
+            $audit['memory_limit']  = ini_get('memory_limit');
+            $audit['memory_ok']     = $mem >= 64 * MB_IN_BYTES;
+            $audit['debug_mode']    = defined('WP_DEBUG') && WP_DEBUG;
+            $audit['ssl']           = is_ssl();
+            $audit['siteurl_https'] = strpos(get_option('siteurl'), 'https') === 0;
+            $audit['wp_config_writable'] = is_writable(ABSPATH . 'wp-config.php');
+            $audit['uploads_writable']   = is_writable(wp_upload_dir()['basedir']);
+            $audit['post_revisions']= (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='revision'");
+            $audit['spam_comments'] = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_approved='spam'");
+            $audit['transients']    = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_%'");
+            $db_size = (float)$wpdb->get_var("SELECT SUM(data_length+index_length) FROM information_schema.tables WHERE table_schema=DATABASE()");
+            $audit['db_size_mb']    = round($db_size / 1024 / 1024, 2);
+            $audit['active_plugins']   = count(get_option('active_plugins', []));
+            $all_plugins = get_plugins();
+            $audit['inactive_plugins'] = count(array_diff(array_keys($all_plugins), get_option('active_plugins', [])));
+            $update_p = get_site_transient('update_plugins');
+            $update_t = get_site_transient('update_themes');
+            $audit['plugin_updates'] = !empty($update_p->response) ? count($update_p->response) : 0;
+            $audit['theme_updates']  = !empty($update_t->response) ? count($update_t->response) : 0;
+            return ['ok' => true, 'action' => 'site_audited', 'audit' => $audit];
+        }
+
+        // ── Error Log ─────────────────────────────────────────────────────────
+        case 'read_error_log': {
+            $log_path = $data['path'] ?? (ini_get('error_log') ?: WP_CONTENT_DIR . '/debug.log');
+            $lines    = min((int)($data['lines'] ?? 100), 500);
+            if (!file_exists($log_path))  return ['ok' => false, 'error' => "Log not found: $log_path"];
+            if (!is_readable($log_path))  return ['ok' => false, 'error' => 'Log not readable (check permissions)'];
+            $size = filesize($log_path);
+            $handle = fopen($log_path, 'r');
+            fseek($handle, -min($size, $lines * 250), SEEK_END);
+            $content = fread($handle, min($size, $lines * 250));
+            fclose($handle);
+            $log_lines = array_slice(array_filter(explode("\n", $content)), -$lines);
+            return ['ok' => true, 'action' => 'error_log_read', 'path' => $log_path, 'size_kb' => round($size / 1024, 1), 'lines' => array_values($log_lines)];
+        }
+
+        case 'clear_error_log': {
+            $log_path = $data['path'] ?? (ini_get('error_log') ?: WP_CONTENT_DIR . '/debug.log');
+            if (!file_exists($log_path)) return ['ok' => false, 'error' => "Log not found: $log_path"];
+            file_put_contents($log_path, '');
+            return ['ok' => true, 'action' => 'error_log_cleared', 'path' => $log_path];
+        }
+
+        // ── Cron Manager ──────────────────────────────────────────────────────
+        case 'list_cron_jobs': {
+            $crons = _get_cron_array() ?: [];
+            $jobs  = [];
+            foreach ($crons as $timestamp => $hooks) {
+                foreach ($hooks as $hook => $events) {
+                    foreach ($events as $event) {
+                        $jobs[] = [
+                            'hook'     => $hook,
+                            'next_run' => date('Y-m-d H:i:s', (int)$timestamp),
+                            'schedule' => $event['schedule'] ?? 'once',
+                            'interval' => $event['interval'] ?? null,
+                            'args'     => $event['args'] ?? [],
+                        ];
+                    }
+                }
+            }
+            usort($jobs, fn($a, $b) => $a['next_run'] <=> $b['next_run']);
+            return ['ok' => true, 'action' => 'cron_listed', 'count' => count($jobs), 'jobs' => $jobs];
+        }
+
+        case 'clear_cron': {
+            $hook = sanitize_key($data['hook'] ?? '');
+            if (!$hook) return ['ok' => false, 'error' => 'clear_cron requires data.hook'];
+            wp_clear_scheduled_hook($hook);
+            return ['ok' => true, 'action' => 'cron_cleared', 'hook' => $hook];
+        }
+
+        case 'add_cron_job': {
+            $hook     = sanitize_key($data['hook'] ?? '');
+            $schedule = sanitize_key($data['schedule'] ?? 'daily');
+            $start    = isset($data['start_time']) ? (int)$data['start_time'] : time();
+            if (!$hook) return ['ok' => false, 'error' => 'add_cron_job requires data.hook'];
+            if (!wp_next_scheduled($hook)) wp_schedule_event($start, $schedule, $hook);
+            return ['ok' => true, 'action' => 'cron_added', 'hook' => $hook, 'schedule' => $schedule, 'next_run' => date('Y-m-d H:i:s', (int)wp_next_scheduled($hook))];
+        }
+
+        // ── WooCommerce ───────────────────────────────────────────────────────
+        case 'create_product': {
+            if (!class_exists('WC_Product_Simple')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $type    = $data['type'] ?? 'simple';
+            $product = $type === 'variable' ? new WC_Product_Variable() : new WC_Product_Simple();
+            if (!empty($data['name']))             $product->set_name($data['name']);
+            if (isset($data['regular_price']))     $product->set_regular_price((string)$data['regular_price']);
+            if (isset($data['sale_price']))        $product->set_sale_price((string)$data['sale_price']);
+            if (!empty($data['description']))      $product->set_description($data['description']);
+            if (!empty($data['short_description']))$product->set_short_description($data['short_description']);
+            if (!empty($data['sku']))              $product->set_sku(sanitize_text_field($data['sku']));
+            if (isset($data['stock_quantity']))    { $product->set_manage_stock(true); $product->set_stock_quantity((int)$data['stock_quantity']); }
+            if (!empty($data['categories']))       $product->set_category_ids((array)$data['categories']);
+            if (!empty($data['tags']))             $product->set_tag_ids((array)$data['tags']);
+            $product->set_status($data['status'] ?? 'publish');
+            $id = $product->save();
+            return ['ok' => true, 'action' => 'product_created', 'product_id' => $id, 'url' => get_permalink($id)];
+        }
+
+        case 'update_product': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $pid = (int)($data['product_id'] ?? 0);
+            if (!$pid) return ['ok' => false, 'error' => 'update_product requires data.product_id'];
+            $product = wc_get_product($pid);
+            if (!$product) return ['ok' => false, 'error' => 'Product not found'];
+            if (!empty($data['name']))           $product->set_name($data['name']);
+            if (isset($data['regular_price']))   $product->set_regular_price((string)$data['regular_price']);
+            if (isset($data['sale_price']))      $product->set_sale_price((string)$data['sale_price']);
+            if (isset($data['stock_quantity']))  { $product->set_manage_stock(true); $product->set_stock_quantity((int)$data['stock_quantity']); }
+            if (!empty($data['description']))    $product->set_description($data['description']);
+            if (!empty($data['status']))         $product->set_status($data['status']);
+            if (isset($data['featured']))        $product->set_featured((bool)$data['featured']);
+            $product->save();
+            return ['ok' => true, 'action' => 'product_updated', 'product_id' => $pid];
+        }
+
+        case 'delete_product': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $pid = (int)($data['product_id'] ?? 0);
+            if (!$pid) return ['ok' => false, 'error' => 'delete_product requires data.product_id'];
+            $product = wc_get_product($pid);
+            if (!$product) return ['ok' => false, 'error' => 'Product not found'];
+            $product->delete((bool)($data['force'] ?? false));
+            return ['ok' => true, 'action' => 'product_deleted', 'product_id' => $pid];
+        }
+
+        case 'create_coupon': {
+            if (!class_exists('WC_Coupon')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $coupon = new WC_Coupon();
+            $coupon->set_code(strtolower(sanitize_text_field($data['code'] ?? wp_generate_password(8, false))));
+            $coupon->set_discount_type($data['type'] ?? 'percent');
+            $coupon->set_amount((float)($data['amount'] ?? 10));
+            if (!empty($data['expiry_date']))    $coupon->set_date_expires(strtotime($data['expiry_date']));
+            if (isset($data['usage_limit']))     $coupon->set_usage_limit((int)$data['usage_limit']);
+            if (isset($data['minimum_amount']))  $coupon->set_minimum_amount((string)$data['minimum_amount']);
+            if (!empty($data['description']))    $coupon->set_description($data['description']);
+            if (!empty($data['email_restrictions'])) $coupon->set_email_restrictions((array)$data['email_restrictions']);
+            $id = $coupon->save();
+            return ['ok' => true, 'action' => 'coupon_created', 'coupon_id' => $id, 'code' => $coupon->get_code(), 'type' => $coupon->get_discount_type(), 'amount' => $coupon->get_amount()];
+        }
+
+        case 'update_order': {
+            if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+            $oid = (int)($data['order_id'] ?? 0);
+            if (!$oid) return ['ok' => false, 'error' => 'update_order requires data.order_id'];
+            $order = wc_get_order($oid);
+            if (!$order) return ['ok' => false, 'error' => 'Order not found'];
+            if (!empty($data['status'])) $order->update_status(sanitize_key($data['status']), $data['note'] ?? '', true);
+            elseif (!empty($data['note'])) $order->add_order_note(sanitize_textarea_field($data['note']));
+            $order->save();
+            return ['ok' => true, 'action' => 'order_updated', 'order_id' => $oid, 'status' => $order->get_status()];
+        }
+
+        // ── User Management ───────────────────────────────────────────────────
+        case 'create_user': {
+            $username = sanitize_user($data['username'] ?? '');
+            $email    = sanitize_email($data['email'] ?? '');
+            $password = $data['password'] ?? wp_generate_password(14);
+            $role     = sanitize_key($data['role'] ?? 'subscriber');
+            if (!$username || !$email) return ['ok' => false, 'error' => 'create_user requires username and email'];
+            $uid = wp_create_user($username, $password, $email);
+            if (is_wp_error($uid)) return ['ok' => false, 'error' => $uid->get_error_message()];
+            $user = new WP_User($uid);
+            $user->set_role($role);
+            if (!empty($data['first_name'])) update_user_meta($uid, 'first_name', sanitize_text_field($data['first_name']));
+            if (!empty($data['last_name']))  update_user_meta($uid, 'last_name',  sanitize_text_field($data['last_name']));
+            if (!empty($data['display_name'])) wp_update_user(['ID' => $uid, 'display_name' => sanitize_text_field($data['display_name'])]);
+            return ['ok' => true, 'action' => 'user_created', 'user_id' => $uid, 'username' => $username, 'email' => $email, 'role' => $role, 'password_generated' => !isset($data['password'])];
+        }
+
+        case 'update_user': {
+            $uid = (int)($data['user_id'] ?? 0);
+            if (!$uid) return ['ok' => false, 'error' => 'update_user requires data.user_id'];
+            $args = ['ID' => $uid];
+            if (!empty($data['email']))        $args['user_email']    = sanitize_email($data['email']);
+            if (!empty($data['display_name'])) $args['display_name']  = sanitize_text_field($data['display_name']);
+            if (!empty($data['first_name']))   $args['first_name']    = sanitize_text_field($data['first_name']);
+            if (!empty($data['last_name']))    $args['last_name']     = sanitize_text_field($data['last_name']);
+            if (!empty($data['url']))          $args['user_url']      = esc_url_raw($data['url']);
+            $result = wp_update_user($args);
+            if (is_wp_error($result)) return ['ok' => false, 'error' => $result->get_error_message()];
+            if (!empty($data['role'])) { $user = new WP_User($uid); $user->set_role(sanitize_key($data['role'])); }
+            return ['ok' => true, 'action' => 'user_updated', 'user_id' => $uid];
+        }
+
+        case 'delete_user': {
+            $uid      = (int)($data['user_id'] ?? 0);
+            $reassign = isset($data['reassign']) ? (int)$data['reassign'] : null;
+            if (!$uid) return ['ok' => false, 'error' => 'delete_user requires data.user_id'];
+            require_once ABSPATH . 'wp-admin/includes/user.php';
+            $ok = wp_delete_user($uid, $reassign);
+            return $ok ? ['ok' => true, 'action' => 'user_deleted', 'user_id' => $uid] : ['ok' => false, 'error' => 'Could not delete user'];
+        }
+
+        case 'reset_user_password': {
+            $uid      = (int)($data['user_id'] ?? 0);
+            if (!$uid) return ['ok' => false, 'error' => 'reset_user_password requires data.user_id'];
+            $new_pass = $data['password'] ?? wp_generate_password(14);
+            wp_set_password($new_pass, $uid);
+            $generated = !isset($data['password']);
+            return ['ok' => true, 'action' => 'password_reset', 'user_id' => $uid, 'password_generated' => $generated, 'new_password' => $generated ? $new_pass : '(set by request)'];
+        }
+
+        case 'get_login_log': {
+            $limit = min((int)($data['limit'] ?? 50), 200);
+            $log   = array_slice(get_option('cvd_login_log', []), 0, $limit);
+            foreach ($log as &$e) if (!empty($e['time'])) $e['time'] = date('Y-m-d H:i:s', (int)$e['time']);
+            return ['ok' => true, 'action' => 'login_log', 'count' => count($log), 'log' => array_values($log)];
+        }
+
+        // ── Redirect Manager ──────────────────────────────────────────────────
+        case 'add_redirect': {
+            $from = '/' . ltrim(sanitize_text_field($data['from'] ?? ''), '/');
+            $to   = esc_url_raw($data['to'] ?? '');
+            $code = in_array((int)($data['code'] ?? 301), [301, 302, 307]) ? (int)$data['code'] : 301;
+            if (!$from || !$to) return ['ok' => false, 'error' => 'add_redirect requires data.from and data.to'];
+            $redirects = get_option('cvd_redirects', []);
+            $redirects[$from] = ['to' => $to, 'code' => $code, 'created' => date('Y-m-d')];
+            update_option('cvd_redirects', $redirects);
+            return ['ok' => true, 'action' => 'redirect_added', 'from' => $from, 'to' => $to, 'code' => $code];
+        }
+
+        case 'remove_redirect': {
+            $from = '/' . ltrim(sanitize_text_field($data['from'] ?? ''), '/');
+            $redirects = get_option('cvd_redirects', []);
+            $existed = isset($redirects[$from]);
+            unset($redirects[$from]);
+            update_option('cvd_redirects', $redirects);
+            return ['ok' => true, 'action' => 'redirect_removed', 'from' => $from, 'existed' => $existed];
+        }
+
+        case 'list_redirects': {
+            return ['ok' => true, 'action' => 'redirects_listed', 'redirects' => get_option('cvd_redirects', []), 'count' => count(get_option('cvd_redirects', []))];
+        }
+
+        // ── Maintenance Mode ──────────────────────────────────────────────────
+        case 'set_maintenance_mode': {
+            $enabled = (bool)($data['enabled'] ?? false);
+            $message = sanitize_textarea_field($data['message'] ?? "We'll be back shortly. Thank you for your patience.");
+            $allowed = array_map('sanitize_text_field', (array)($data['allowed_ips'] ?? []));
+            update_option('cvd_maintenance_enabled', $enabled);
+            update_option('cvd_maintenance_message', $message);
+            update_option('cvd_maintenance_allowed_ips', $allowed);
+            return ['ok' => true, 'action' => 'maintenance_' . ($enabled ? 'enabled' : 'disabled'), 'message' => $message];
+        }
+
+        // ── SSL / HTTPS Fixer ─────────────────────────────────────────────────
+        case 'fix_https_urls': {
+            global $wpdb;
+            $old = untrailingslashit(get_option('siteurl'));
+            $new = str_replace('http://', 'https://', $old);
+            if ($old === $new) return ['ok' => false, 'error' => 'Site is already on HTTPS or URL does not start with http://'];
+            update_option('siteurl', $new);
+            update_option('home', str_replace('http://', 'https://', get_option('home')));
+            $posts = (int)$wpdb->query($wpdb->prepare("UPDATE {$wpdb->posts} SET post_content = REPLACE(post_content, %s, %s), guid = REPLACE(guid, %s, %s)", $old, $new, $old, $new));
+            $meta  = (int)$wpdb->query($wpdb->prepare("UPDATE {$wpdb->postmeta} SET meta_value = REPLACE(meta_value, %s, %s) WHERE meta_value LIKE %s", $old, $new, '%' . $old . '%'));
+            $opts  = (int)$wpdb->query($wpdb->prepare("UPDATE {$wpdb->options} SET option_value = REPLACE(option_value, %s, %s) WHERE option_value LIKE %s AND option_name NOT IN ('siteurl','home','cron')", $old, $new, '%' . $old . '%'));
+            return ['ok' => true, 'action' => 'https_fixed', 'old_url' => $old, 'new_url' => $new, 'posts_updated' => $posts, 'meta_updated' => $meta, 'options_updated' => $opts];
+        }
+
+        // ── Image Tools ───────────────────────────────────────────────────────
+        case 'regenerate_thumbnails': {
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+            $limit   = min((int)($data['limit'] ?? 50), 500);
+            $images  = get_posts(['post_type' => 'attachment', 'post_mime_type' => 'image', 'numberposts' => $limit, 'post_status' => 'inherit']);
+            $success = 0; $failed = 0;
+            foreach ($images as $img) {
+                $file = get_attached_file($img->ID);
+                if (!$file || !file_exists($file)) { $failed++; continue; }
+                $meta = wp_generate_attachment_metadata($img->ID, $file);
+                if ($meta) { wp_update_attachment_metadata($img->ID, $meta); $success++; } else $failed++;
+            }
+            return ['ok' => true, 'action' => 'thumbnails_regenerated', 'success' => $success, 'failed' => $failed, 'total' => count($images)];
+        }
+
+        case 'convert_to_webp': {
+            if (!function_exists('imagewebp')) return ['ok' => false, 'error' => 'WebP not supported on this server (GD extension required)'];
+            $limit     = min((int)($data['limit'] ?? 20), 100);
+            $quality   = min(max((int)($data['quality'] ?? 80), 1), 100);
+            $images    = get_posts(['post_type' => 'attachment', 'post_mime_type' => ['image/jpeg','image/png'], 'numberposts' => $limit, 'post_status' => 'inherit']);
+            $converted = 0; $skipped = 0; $failed = 0;
+            foreach ($images as $img) {
+                $file = get_attached_file($img->ID);
+                if (!$file || !file_exists($file)) { $failed++; continue; }
+                $info     = pathinfo($file);
+                $webp_out = $info['dirname'] . '/' . $info['filename'] . '.webp';
+                if (file_exists($webp_out)) { $skipped++; continue; }
+                $mime = mime_content_type($file);
+                $src  = $mime === 'image/jpeg' ? @imagecreatefromjpeg($file) : ($mime === 'image/png' ? @imagecreatefrompng($file) : false);
+                if (!$src) { $failed++; continue; }
+                $ok = imagewebp($src, $webp_out, $quality);
+                imagedestroy($src);
+                if ($ok) $converted++; else $failed++;
+            }
+            return ['ok' => true, 'action' => 'webp_converted', 'converted' => $converted, 'skipped' => $skipped, 'failed' => $failed, 'total' => count($images)];
+        }
+
+        // ── Broken Link Scanner ───────────────────────────────────────────────
+        case 'scan_broken_links': {
+            $limit    = min((int)($data['limit'] ?? 30), 100);
+            $site_url = get_site_url();
+            $posts    = get_posts(['numberposts' => $limit, 'post_status' => 'publish', 'post_type' => ['post','page']]);
+            $broken   = [];
+            foreach ($posts as $post) {
+                preg_match_all('/<a[^>]+href=["\']([^"\'#][^"\']*)["\'][^>]*>/i', $post->post_content, $m);
+                foreach ($m[1] as $link) {
+                    if (strpos($link, 'mailto:') === 0 || strpos($link, 'tel:') === 0) continue;
+                    $full = strpos($link, 'http') === 0 ? $link : $site_url . '/' . ltrim($link, '/');
+                    if (strpos($full, $site_url) !== 0) continue; // external only if you want
+                    $res  = wp_remote_head($full, ['timeout' => 5, 'redirection' => 2]);
+                    $code = is_wp_error($res) ? 0 : (int)wp_remote_retrieve_response_code($res);
+                    if ($code === 404 || $code === 0 || $code >= 500) {
+                        $broken[] = ['post_id' => $post->ID, 'post_title' => $post->post_title, 'broken_url' => $link, 'status' => $code];
+                        if (count($broken) >= 30) break 2;
+                    }
+                }
+            }
+            return ['ok' => true, 'action' => 'broken_links_scanned', 'posts_checked' => count($posts), 'broken_count' => count($broken), 'broken_links' => $broken];
+        }
+
+        // ── Data Export ───────────────────────────────────────────────────────
+        case 'export_csv': {
+            global $wpdb;
+            $type   = sanitize_key($data['type'] ?? 'posts');
+            $limit  = min((int)($data['limit'] ?? 500), 2000);
+            $rows   = []; $headers = [];
+
+            switch ($type) {
+                case 'posts': case 'pages':
+                    $pt = $type === 'pages' ? 'page' : 'post';
+                    $r  = $wpdb->get_results("SELECT ID,post_title,post_status,post_date,post_author,guid FROM {$wpdb->posts} WHERE post_type='$pt' AND post_status!='auto-draft' LIMIT $limit", ARRAY_A);
+                    $headers = ['ID','Title','Status','Date','Author','URL'];
+                    foreach ($r as $p) $rows[] = [$p['ID'],$p['post_title'],$p['post_status'],$p['post_date'],get_the_author_meta('display_name',(int)$p['post_author']),get_permalink((int)$p['ID'])];
+                    break;
+                case 'users':
+                    $r = $wpdb->get_results("SELECT ID,user_login,user_email,user_registered,display_name FROM {$wpdb->users} LIMIT $limit", ARRAY_A);
+                    $headers = ['ID','Username','Email','Registered','Display Name'];
+                    foreach ($r as $u) $rows[] = [$u['ID'],$u['user_login'],$u['user_email'],$u['user_registered'],$u['display_name']];
+                    break;
+                case 'orders':
+                    if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+                    $orders = wc_get_orders(['limit' => $limit]);
+                    $headers = ['Order ID','Status','Customer','Email','Total','Date'];
+                    foreach ($orders as $o) $rows[] = [$o->get_id(),$o->get_status(),$o->get_formatted_billing_full_name(),$o->get_billing_email(),$o->get_total(),$o->get_date_created()->date('Y-m-d H:i:s')];
+                    break;
+                case 'products':
+                    if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
+                    $products = wc_get_products(['limit' => $limit]);
+                    $headers = ['ID','Name','Status','Regular Price','Stock','SKU'];
+                    foreach ($products as $p) $rows[] = [$p->get_id(),$p->get_name(),$p->get_status(),$p->get_regular_price(),$p->get_stock_quantity(),$p->get_sku()];
+                    break;
+                default:
+                    return ['ok' => false, 'error' => "Unknown export type '$type'. Use: posts, pages, users, orders, products"];
+            }
+
+            ob_start();
+            $f = fopen('php://output', 'w');
+            fputcsv($f, $headers);
+            foreach ($rows as $row) fputcsv($f, $row);
+            fclose($f);
+            $csv = ob_get_clean();
+
+            $uploads  = wp_upload_dir();
+            $filename = 'cvd-export-' . $type . '-' . date('Y-m-d-His') . '.csv';
+            $filepath = $uploads['basedir'] . '/' . $filename;
+            file_put_contents($filepath, $csv);
+
+            return ['ok' => true, 'action' => 'csv_exported', 'type' => $type, 'rows' => count($rows), 'download_url' => $uploads['baseurl'] . '/' . $filename];
+        }
+
+        // ── Webhooks ──────────────────────────────────────────────────────────
+        case 'add_webhook': {
+            $url    = esc_url_raw($data['url'] ?? '');
+            $event  = sanitize_text_field($data['event'] ?? '*');
+            $secret = sanitize_text_field($data['secret'] ?? wp_generate_password(24, false));
+            if (!$url) return ['ok' => false, 'error' => 'add_webhook requires data.url'];
+            $webhooks = get_option('cvd_webhooks', []);
+            $id = 'wh_' . substr(uniqid('', true), -8);
+            $webhooks[$id] = ['url' => $url, 'event' => $event, 'secret' => $secret, 'created' => date('Y-m-d')];
+            update_option('cvd_webhooks', $webhooks);
+            return ['ok' => true, 'action' => 'webhook_added', 'webhook_id' => $id, 'event' => $event, 'url' => $url, 'secret' => $secret];
+        }
+
+        case 'remove_webhook': {
+            $id = sanitize_key($data['webhook_id'] ?? '');
+            $webhooks = get_option('cvd_webhooks', []);
+            $existed  = isset($webhooks[$id]);
+            unset($webhooks[$id]);
+            update_option('cvd_webhooks', $webhooks);
+            return ['ok' => true, 'action' => 'webhook_removed', 'webhook_id' => $id, 'existed' => $existed];
+        }
+
+        case 'list_webhooks': {
+            $wh = get_option('cvd_webhooks', []);
+            return ['ok' => true, 'action' => 'webhooks_listed', 'count' => count($wh), 'webhooks' => $wh];
+        }
+
+        // ── Scheduled Publish ─────────────────────────────────────────────────
+        case 'schedule_publish': {
+            $pid  = (int)($data['post_id'] ?? 0);
+            $date = sanitize_text_field($data['date'] ?? '');
+            if (!$pid || !$date) return ['ok' => false, 'error' => 'schedule_publish requires data.post_id and data.date (Y-m-d H:i:s)'];
+            $result = wp_update_post(['ID' => $pid, 'post_status' => 'future', 'post_date' => $date, 'post_date_gmt' => get_gmt_from_date($date)], true);
+            if (is_wp_error($result)) return ['ok' => false, 'error' => $result->get_error_message()];
+            return ['ok' => true, 'action' => 'post_scheduled', 'post_id' => $pid, 'publish_at' => $date];
+        }
+
+        default:
+            return ['ok' => false, 'error' => "Unknown wp_action: '$action'"];
+    }
+}
+
+// ── Collect site context ──────────────────────────────────────────────────────
+function cvd_site_context(string $command = ''): array {
+    global $wpdb;
+    $cmd = strtolower($command);
+
+    // ── Plugins ────────────────────────────────────────────────────────────────
+    $active_plugin_files = get_option('active_plugins', []);
+    $plugin_names        = [];
+    foreach ($active_plugin_files as $p) {
+        $data           = get_plugin_data(WP_PLUGIN_DIR . '/' . $p, false, false);
         $plugin_names[] = $data['Name'] ?: $p;
     }
 
-    $tables = $wpdb->get_col("SHOW TABLES");
-
-    return [
-        'wp_version'   => get_bloginfo('version'),
-        'php_version'  => PHP_VERSION,
-        'site_url'     => get_site_url(),
-        'active_theme' => wp_get_theme()->get('Name') . ' ' . wp_get_theme()->get('Version'),
-        'plugins'      => $plugin_names,
-        'db_tables'    => $tables,
-        'stats'        => cvd_gather_stats($plugin_names),
+    // ── Theme ──────────────────────────────────────────────────────────────────
+    $theme     = wp_get_theme();
+    $theme_dir = get_stylesheet_directory();
+    $theme_info = [
+        'name'       => $theme->get('Name'),
+        'version'    => $theme->get('Version'),
+        'template'   => $theme->get_template(),   // parent theme slug (if child)
+        'stylesheet' => $theme->get_stylesheet(), // active theme slug
+        'child'      => $theme->get('Template') !== '',
     ];
+
+    // ── DB tables ──────────────────────────────────────────────────────────────
+    $tables = $wpdb->get_col('SHOW TABLES');
+
+    // ── Core WP settings ──────────────────────────────────────────────────────
+    $settings = [
+        'site_title'         => get_bloginfo('name'),
+        'tagline'            => get_bloginfo('description'),
+        'language'           => get_locale(),
+        'timezone'           => get_option('timezone_string') ?: get_option('gmt_offset') . ' UTC',
+        'permalink_structure'=> get_option('permalink_structure') ?: 'plain',
+        'date_format'        => get_option('date_format'),
+        'uploads_url'        => wp_upload_dir()['baseurl'],
+    ];
+
+    // ── Custom post types ──────────────────────────────────────────────────────
+    $cpts = [];
+    foreach (get_post_types(['_builtin' => false], 'objects') as $cpt) {
+        $cpts[$cpt->name] = [
+            'label'        => $cpt->label,
+            'public'       => $cpt->public,
+            'count'        => (int)(wp_count_posts($cpt->name)->publish ?? 0),
+            'supports'     => get_all_post_type_supports($cpt->name),
+            'taxonomies'   => get_object_taxonomies($cpt->name),
+        ];
+    }
+
+    // ── Content summary ────────────────────────────────────────────────────────
+    $content = [
+        'posts'    => (int)($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='post' AND post_status='publish'")),
+        'pages'    => (int)($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='page' AND post_status='publish'")),
+        'comments' => (int)(wp_count_comments()->total_comments ?? 0),
+        'users'    => (int)($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->users}")),
+        'media'    => (int)($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='attachment'")),
+    ];
+
+    // ── Registered nav menus ───────────────────────────────────────────────────
+    $menus = [];
+    foreach (get_registered_nav_menus() as $location => $description) {
+        $assigned = get_nav_menu_locations();
+        $menu_obj = isset($assigned[$location]) ? wp_get_nav_menu_object($assigned[$location]) : null;
+        $menus[$location] = [
+            'description' => $description,
+            'menu_name'   => $menu_obj ? $menu_obj->name : null,
+            'item_count'  => $menu_obj ? $menu_obj->count : 0,
+        ];
+    }
+
+    // ── Widget areas ──────────────────────────────────────────────────────────
+    global $wp_registered_sidebars;
+    $widget_areas = [];
+    foreach (($wp_registered_sidebars ?? []) as $id => $sidebar) {
+        $widgets = wp_get_sidebars_widgets();
+        $widget_areas[$id] = [
+            'name'         => $sidebar['name'],
+            'widget_count' => count($widgets[$id] ?? []),
+        ];
+    }
+
+    // ── Base context (always sent) ─────────────────────────────────────────────
+    $ctx = [
+        'wp_version'    => get_bloginfo('version'),
+        'php_version'   => PHP_VERSION,
+        'site_url'      => get_site_url(),
+        'theme'         => $theme_info,
+        'plugins'       => $plugin_names,
+        'db_tables'     => $tables,
+        'settings'      => $settings,
+        'custom_post_types' => $cpts,
+        'content'       => $content,
+        'nav_menus'     => $menus,
+        'widget_areas'  => $widget_areas,
+        'stats'         => cvd_gather_stats($plugin_names),
+    ];
+
+    // ── Selective deep context (based on command keywords) ────────────────────
+    // Theme files — sent when working on theme/templates/design
+    $theme_keywords = ['theme', 'template', 'design', 'layout', 'header', 'footer', 'sidebar', 'style', 'css', 'page builder', 'elementor', 'divi'];
+    foreach ($theme_keywords as $kw) {
+        if (strpos($cmd, $kw) !== false) {
+            $ctx['theme_files'] = cvd_list_theme_files($theme_dir);
+            break;
+        }
+    }
+
+    // Recent content — sent when working on posts/pages/content
+    $content_keywords = ['post', 'page', 'content', 'article', 'blog', 'published', 'draft', 'category', 'tag'];
+    foreach ($content_keywords as $kw) {
+        if (strpos($cmd, $kw) !== false) {
+            $ctx['recent_posts']  = cvd_recent_content('post', 8);
+            $ctx['recent_pages']  = cvd_recent_content('page', 8);
+            $ctx['categories']    = cvd_get_taxonomy_summary('category');
+            $ctx['tags']          = cvd_get_taxonomy_summary('post_tag');
+            break;
+        }
+    }
+
+    // DB schema — sent when working on database/tables
+    $db_keywords = ['database', 'table', 'query', 'sql', 'column', 'schema', 'migration', 'row', 'data'];
+    foreach ($db_keywords as $kw) {
+        if (strpos($cmd, $kw) !== false) {
+            $ctx['db_schema'] = cvd_get_db_schema($tables);
+            break;
+        }
+    }
+
+    // Menu items — sent when working on navigation
+    $menu_keywords = ['menu', 'navigation', 'nav', 'link'];
+    foreach ($menu_keywords as $kw) {
+        if (strpos($cmd, $kw) !== false) {
+            $ctx['menu_items'] = cvd_get_menu_items();
+            break;
+        }
+    }
+
+    return $ctx;
+}
+
+// ── List theme files (paths only, not contents) ───────────────────────────────
+function cvd_list_theme_files(string $dir): array {
+    $files = [];
+    if (!is_dir($dir)) return $files;
+    $iter = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS)
+    );
+    foreach ($iter as $f) {
+        if (!$f->isFile()) continue;
+        $ext = strtolower($f->getExtension());
+        if (!in_array($ext, ['php', 'css', 'js', 'json', 'twig', 'html'])) continue;
+        $files[] = str_replace($dir . DIRECTORY_SEPARATOR, '', $f->getPathname());
+        if (count($files) >= 150) break;
+    }
+    sort($files);
+    return $files;
+}
+
+// ── Recent posts/pages summary ────────────────────────────────────────────────
+function cvd_recent_content(string $post_type, int $limit = 8): array {
+    $posts = get_posts([
+        'post_type'      => $post_type,
+        'post_status'    => ['publish', 'draft'],
+        'numberposts'    => $limit,
+        'orderby'        => 'modified',
+        'order'          => 'DESC',
+    ]);
+    $result = [];
+    foreach ($posts as $p) {
+        $result[] = [
+            'id'       => $p->ID,
+            'title'    => $p->post_title,
+            'slug'     => $p->post_name,
+            'status'   => $p->post_status,
+            'modified' => $p->post_modified,
+            'url'      => get_permalink($p->ID),
+            'template' => get_page_template_slug($p->ID) ?: 'default',
+        ];
+    }
+    return $result;
+}
+
+// ── Taxonomy summary ──────────────────────────────────────────────────────────
+function cvd_get_taxonomy_summary(string $taxonomy): array {
+    $terms = get_terms(['taxonomy' => $taxonomy, 'hide_empty' => false, 'number' => 30]);
+    if (is_wp_error($terms)) return [];
+    $result = [];
+    foreach ($terms as $t) {
+        $result[] = ['id' => $t->term_id, 'name' => $t->name, 'slug' => $t->slug, 'count' => $t->count];
+    }
+    return $result;
+}
+
+// ── DB schema (column names for all tables) ───────────────────────────────────
+function cvd_get_db_schema(array $tables): array {
+    global $wpdb;
+    $schema = [];
+    foreach ($tables as $table) {
+        $cols = $wpdb->get_col("DESCRIBE \`{$table}\`");
+        $schema[$table] = $cols;
+        if (count($schema) >= 40) break; // cap at 40 tables
+    }
+    return $schema;
+}
+
+// ── Full menu items ───────────────────────────────────────────────────────────
+function cvd_get_menu_items(): array {
+    $locations = get_nav_menu_locations();
+    $result    = [];
+    foreach ($locations as $location => $menu_id) {
+        if (!$menu_id) continue;
+        $items = wp_get_nav_menu_items($menu_id);
+        if (!$items) continue;
+        $result[$location] = array_map(fn($i) => [
+            'id'     => $i->ID,
+            'title'  => $i->title,
+            'url'    => $i->url,
+            'type'   => $i->object,
+            'parent' => $i->menu_item_parent ?: null,
+        ], $items);
+    }
+    return $result;
 }
 
 // ── Gather live site statistics for AI context ─────────────────────────────────
@@ -490,7 +1663,17 @@ add_action('wp_ajax_cvd_command', function () {
     // Generate a one-time nonce for replay prevention
     $request_nonce = bin2hex(random_bytes(16));
 
-    $site_context = cvd_site_context();
+    $site_context = cvd_site_context($command);
+
+    // If command is security-related, run scan and include results in context
+    $sec_keywords = ['security', 'malware', 'hack', 'hacked', 'scan', 'inject', 'suspicious', 'virus', 'infected', 'clean my', 'vulnerability', 'vulnerab'];
+    $cmd_lower    = strtolower($command);
+    foreach ($sec_keywords as $kw) {
+        if (strpos($cmd_lower, $kw) !== false) {
+            $site_context['security_scan'] = cvd_security_scan();
+            break;
+        }
+    }
     $body         = wp_json_encode([
         'api_key'        => $api_key,
         'command'        => $command,
@@ -656,6 +1839,167 @@ function cvd_audit_log(array $entry): void {
     update_option('cvd_audit_log', array_slice($log, 0, 200), false);
 }
 
+// ── Security & malware scanner ────────────────────────────────────────────────
+function cvd_security_scan(): array {
+    global $wpdb;
+
+    $findings = [];
+    $clean    = true;
+    $scanned  = 0;
+
+    // 1. PHP malware pattern scan across plugins + themes
+    $patterns = [
+        '/eval\s*\(\s*base64_decode/i'                        => 'eval+base64_decode (obfuscated payload)',
+        '/eval\s*\(\s*gzinflate/i'                            => 'eval+gzinflate (compressed payload)',
+        '/eval\s*\(\s*str_rot13/i'                            => 'eval+str_rot13 (obfuscation)',
+        '/assert\s*\(\s*\$_(GET|POST|REQUEST|COOKIE)/i'       => 'assert() with user input (code injection)',
+        '/preg_replace\s*\([\'"].*\/e[\'"\s,)]/i'             => 'preg_replace /e flag (RCE)',
+        '/file_get_contents\s*\(\s*\$_(GET|POST|REQUEST)/i'   => 'file_get_contents with user input (LFI)',
+        '/\bpassthru\s*\(\s*\$_(GET|POST|REQUEST|COOKIE)/i'   => 'passthru() with user input (RCE)',
+        '/\bsystem\s*\(\s*\$_(GET|POST|REQUEST|COOKIE)/i'     => 'system() with user input (RCE)',
+    ];
+
+    $scan_dirs    = [WP_PLUGIN_DIR, get_theme_root()];
+    $infected     = [];
+
+    foreach ($scan_dirs as $dir) {
+        if (!is_dir($dir)) continue;
+        $iter = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($iter as $f) {
+            if (!$f->isFile() || strtolower($f->getExtension()) !== 'php') continue;
+            if ($f->getSize() > 512 * 1024) continue;
+            if (++$scanned > 3000) break 2;
+
+            $src = @file_get_contents($f->getPathname());
+            if (!$src) continue;
+
+            foreach ($patterns as $regex => $label) {
+                if (preg_match($regex, $src)) {
+                    $rel       = str_replace(
+                        [WP_PLUGIN_DIR . DIRECTORY_SEPARATOR, get_theme_root() . DIRECTORY_SEPARATOR],
+                        ['plugins/', 'themes/'],
+                        $f->getPathname()
+                    );
+                    $infected[] = ['file' => $rel, 'pattern' => $label];
+                    $clean      = false;
+                    break;
+                }
+            }
+        }
+    }
+    if (!empty($infected)) {
+        $findings[] = ['severity' => 'critical', 'type' => 'malware_detected', 'items' => array_slice($infected, 0, 20)];
+    }
+
+    // 2. Known-malicious file names (webshells left behind)
+    $bad_names  = ['wp-feed.php', 'wp-tmp.php', 'wp-options.php', 'wp-xmlrpc.php', 'wp-cache.php'];
+    $found_bad  = [];
+    $check_dirs = array_merge($scan_dirs, [wp_upload_dir()['basedir']]);
+    foreach ($check_dirs as $dir) {
+        foreach ($bad_names as $name) {
+            $p = $dir . DIRECTORY_SEPARATOR . $name;
+            if (file_exists($p)) {
+                $rel       = str_replace(
+                    [WP_PLUGIN_DIR . DIRECTORY_SEPARATOR, get_theme_root() . DIRECTORY_SEPARATOR, wp_upload_dir()['basedir'] . DIRECTORY_SEPARATOR],
+                    ['plugins/', 'themes/', 'uploads/'],
+                    $p
+                );
+                $found_bad[] = $rel;
+                $clean = false;
+            }
+        }
+    }
+    if (!empty($found_bad)) {
+        $findings[] = ['severity' => 'critical', 'type' => 'suspicious_files', 'files' => $found_bad];
+    }
+
+    // 3. Recently modified PHP files in plugins/themes (last 72 h)
+    $recent = [];
+    foreach ($scan_dirs as $dir) {
+        if (!is_dir($dir)) continue;
+        $iter = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($iter as $f) {
+            if (!$f->isFile() || strtolower($f->getExtension()) !== 'php') continue;
+            if ((time() - $f->getMTime()) < 72 * 3600) {
+                $rel     = str_replace(
+                    [WP_PLUGIN_DIR . DIRECTORY_SEPARATOR, get_theme_root() . DIRECTORY_SEPARATOR],
+                    ['plugins/', 'themes/'],
+                    $f->getPathname()
+                );
+                $recent[] = ['file' => $rel, 'modified' => date('Y-m-d H:i:s', $f->getMTime())];
+            }
+        }
+    }
+    if (!empty($recent)) {
+        $findings[] = ['severity' => 'info', 'type' => 'recently_modified', 'count' => count($recent), 'files' => array_slice($recent, 0, 15)];
+    }
+
+    // 4. New admin accounts (registered in last 7 days)
+    $new_admins = $wpdb->get_results($wpdb->prepare(
+        "SELECT u.ID, u.user_login, u.user_email, u.user_registered
+         FROM {$wpdb->users} u
+         JOIN {$wpdb->usermeta} um ON um.user_id = u.ID
+         WHERE um.meta_key = %s AND um.meta_value LIKE %s
+           AND u.user_registered > DATE_SUB(NOW(), INTERVAL 7 DAY)",
+        $wpdb->prefix . 'capabilities', '%administrator%'
+    ), ARRAY_A);
+    if (!empty($new_admins)) {
+        $findings[] = ['severity' => 'warning', 'type' => 'new_admin_accounts', 'accounts' => $new_admins];
+        $clean = false;
+    }
+
+    // 5. DB option injection (siteurl/home/blogdescription)
+    $injected_opts = [];
+    foreach (['siteurl', 'home', 'blogdescription', 'blogname'] as $opt) {
+        $val = get_option($opt, '');
+        if (preg_match('/<script|javascript:|data:text\/html/i', $val)) {
+            $injected_opts[] = $opt;
+            $clean = false;
+        }
+    }
+    if (!empty($injected_opts)) {
+        $findings[] = ['severity' => 'critical', 'type' => 'option_injection', 'options' => $injected_opts];
+    }
+
+    // 6. Published posts with suspicious JS/PHP injection
+    $bad_posts = (int)$wpdb->get_var(
+        "SELECT COUNT(*) FROM {$wpdb->posts}
+         WHERE post_status = 'publish'
+           AND (post_content LIKE '%eval(%' OR post_content LIKE '%base64_decode%'
+                OR (post_content LIKE '%<script%' AND post_content LIKE '%document.write%'))"
+    );
+    if ($bad_posts > 0) {
+        $findings[] = ['severity' => 'critical', 'type' => 'post_injection', 'affected_posts' => $bad_posts];
+        $clean = false;
+    }
+
+    // 7. wp-config.php permissions (should not be world-readable)
+    $wp_config = ABSPATH . 'wp-config.php';
+    if (file_exists($wp_config)) {
+        $perms = fileperms($wp_config) & 0777;
+        if ($perms > 0640) {
+            $findings[] = ['severity' => 'warning', 'type' => 'wp_config_permissions', 'current' => decoct($perms), 'recommended' => '640'];
+            $clean = false;
+        }
+    }
+
+    // 8. Debug mode on in production
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        $findings[] = ['severity' => 'warning', 'type' => 'debug_mode_on'];
+    }
+
+    return [
+        'clean'       => $clean,
+        'scanned_php' => $scanned,
+        'findings'    => $findings,
+        'scan_time'   => date('c'),
+    ];
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // TELEGRAM INTEGRATION
 // ─────────────────────────────────────────────────────────────────────────────
@@ -679,10 +2023,20 @@ function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0):
         return;
     }
 
+    $tg_context      = cvd_site_context($command);
+    $tg_sec_keywords = ['security', 'malware', 'hack', 'hacked', 'scan', 'inject', 'suspicious', 'virus', 'infected', 'vulnerability'];
+    $tg_cmd_lower    = strtolower($command);
+    foreach ($tg_sec_keywords as $kw) {
+        if (strpos($tg_cmd_lower, $kw) !== false) {
+            $tg_context['security_scan'] = cvd_security_scan();
+            break;
+        }
+    }
+
     $response = wp_remote_post(CVD_API_URL, [
         'timeout' => 120,
         'headers' => ['Content-Type' => 'application/json', 'User-Agent' => 'CooVex-Dev-Telegram/' . CVD_VERSION],
-        'body'    => wp_json_encode(['api_key' => $api_key, 'command' => $command, 'site_info' => cvd_site_context()]),
+        'body'    => wp_json_encode(['api_key' => $api_key, 'command' => $command, 'site_info' => $tg_context]),
     ]);
 
     if (is_wp_error($response)) {
@@ -1924,11 +3278,18 @@ export async function GET(_req: Request) {
     )
   }
 
-  return new NextResponse(pluginCode, {
+  // Serve as a ZIP so WordPress installs it in the correct folder structure:
+  // wp-content/plugins/coovex-dev/coovex-dev.php
+  // This is required for auto-updates to work (folder slug must match plugin slug).
+  const zip = buildZip([
+    { name: 'coovex-dev/coovex-dev.php', data: Buffer.from(pluginCode, 'utf8') },
+  ])
+
+  return new Response(zip, {
     status: 200,
     headers: {
-      'Content-Type': 'application/octet-stream',
-      'Content-Disposition': 'attachment; filename="coovex-dev.php"',
+      'Content-Type': 'application/zip',
+      'Content-Disposition': 'attachment; filename="coovex-dev.zip"',
       'Cache-Control': 'no-store, no-cache, private',
       'X-Content-Type-Options': 'nosniff',
     },
