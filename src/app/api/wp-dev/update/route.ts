@@ -1,18 +1,17 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 
-// ── Bump this when releasing a new plugin version ─────────────────────────────
+// â”€â”€ Bump this when releasing a new plugin version â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Also update CVD_VERSION constant in plugin/route.ts (must match).
-export const CVD_CURRENT_VERSION    = '1.4.2'
+export const CVD_CURRENT_VERSION    = '1.4.3'
 export const CVD_REQUIRES_WP        = '5.9'
 export const CVD_TESTED_WP          = '6.8'
 export const CVD_REQUIRES_PHP       = '7.4'
 
 const CHANGELOG = `\
-= 1.4.2 - 2026-07-27 =
-* Fix: fatal error on activation — moved cron scheduling into init hook (top-level wp_schedule_event during sandbox check was problematic)
-* Fix: uninstall hook now uses a named function (PHP cannot serialise closures to DB)
-* Fix: class_exists guard on CVD_Theme_Skin to prevent redeclaration errors
-* Fix: deactivation hook now correctly unschedules all cron events
+= 1.4.3 - 2026-07-27 =
+* Fix: removed HTTP request from activation hook — license now validates on first admin page load instead
+* Fix: eliminated top-level wp_next_scheduled() call that ran before init during activation sandbox check
+* Fix: all cron scheduling consolidated into init hook (no top-level WP function calls remain)
 
 = 1.4.0 - 2026-07-27 =
 * WooCommerce: create/update/delete products, create coupons, update order status
@@ -60,3 +59,4 @@ export async function GET() {
     }
   )
 }
+

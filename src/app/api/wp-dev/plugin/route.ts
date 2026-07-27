@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { buildZip } from '@/lib/zip'
 
 /* eslint-disable no-useless-escape */
@@ -7,8 +7,8 @@ export const COOVEX_DEV_PHP = `<?php
 /**
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
- * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language — CooVex Dev delivers working code.
- * Version:     1.4.2
+ * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language â€” CooVex Dev delivers working code.
+ * Version:     1.4.3
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -18,8 +18,8 @@ export const COOVEX_DEV_PHP = `<?php
 
 if (!defined('ABSPATH')) exit;
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-define('CVD_VERSION',         '1.4.2');
+// â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+define('CVD_VERSION',         '1.4.3');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
@@ -30,11 +30,11 @@ define('CVD_RATE_LIMIT',      12); // max commands per 5 minutes
 define('CVD_COOKIE',          'cvd_session');
 define('CVD_TELEGRAM_API',    'https://api.telegram.org/bot');
 
-// ─────────────────────────────────────────────────────────────────────────────
-// AUTO-UPDATE — hooks into WordPress built-in plugin updater
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// AUTO-UPDATE â€” hooks into WordPress built-in plugin updater
 // When CooVex releases a new version, WP admin shows the standard update notice
 // and handles download + installation automatically.
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 add_filter('pre_set_site_transient_update_plugins', function ($transient) {
     if (empty($transient->checked)) return $transient;
@@ -69,7 +69,7 @@ add_filter('pre_set_site_transient_update_plugins', function ($transient) {
     return $transient;
 });
 
-// "View version X.X details" popup in WP admin → Plugins
+// "View version X.X details" popup in WP admin â†’ Plugins
 add_filter('plugins_api', function ($result, $action, $args) {
     if ($action !== 'plugin_information' || ($args->slug ?? '') !== 'coovex-dev') return $result;
 
@@ -106,23 +106,20 @@ add_action('upgrader_process_complete', function ($upgrader, $options) {
     }
 }, 10, 2);
 
-// ─────────────────────────────────────────────────────────────────────────────
-// LICENSE VALIDATION — runs on activation, daily, and before every command
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// LICENSE VALIDATION â€” runs on activation, daily, and before every command
 // Security: license_token is derived server-side with a secret never sent here.
 //           Even reading this code reveals nothing useful for bypassing it.
-// ─────────────────────────────────────────────────────────────────────────────
-
-register_activation_hook(__FILE__, 'cvd_license_validate');
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 add_action('cvd_daily_license_check', 'cvd_license_validate');
 
-if (!wp_next_scheduled('cvd_daily_license_check')) {
-    add_action('init', function () {
-        if (!wp_next_scheduled('cvd_daily_license_check')) {
-            wp_schedule_event(time(), 'daily', 'cvd_daily_license_check');
-        }
-    });
-}
+// Schedule daily license check via init hook (safe to call after WP is loaded)
+add_action('init', function () {
+    if (!wp_next_scheduled('cvd_daily_license_check')) {
+        wp_schedule_event(time(), 'daily', 'cvd_daily_license_check');
+    }
+});
 
 function cvd_license_validate(): bool {
     $api_key = get_option('cvd_api_key', '');
@@ -139,7 +136,7 @@ function cvd_license_validate(): bool {
     ]);
 
     if (is_wp_error($response)) {
-        // Network error — keep current license if it hasn't expired yet
+        // Network error â€” keep current license if it hasn't expired yet
         return (time() < (int)get_option('cvd_license_expires', 0));
     }
 
@@ -147,7 +144,7 @@ function cvd_license_validate(): bool {
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
     if ($code === 403) {
-        // Revoked or site mismatch — hard stop
+        // Revoked or site mismatch â€” hard stop
         $code_str = $body['code'] ?? '';
         update_option('cvd_license_status', $code_str === 'REVOKED' ? 'revoked' : 'site_mismatch');
         update_option('cvd_license_token',   '');
@@ -159,7 +156,7 @@ function cvd_license_validate(): bool {
         return false;
     }
 
-    // Store the daily-rotating token — used to verify every response signature
+    // Store the daily-rotating token â€” used to verify every response signature
     update_option('cvd_license_token',   $body['license_token']);
     update_option('cvd_license_expires', strtotime($body['expires_at']));
     update_option('cvd_license_status',  'active');
@@ -172,7 +169,7 @@ function cvd_license_ok(): bool {
 
     if ($status === 'revoked' || $status === 'site_mismatch') return false;
     if ($expires > 0 && time() > $expires) {
-        // Token expired — try to refresh silently
+        // Token expired â€” try to refresh silently
         return cvd_license_validate();
     }
     return !empty(get_option('cvd_license_token', ''));
@@ -186,7 +183,7 @@ function cvd_license_ok(): bool {
  * server secret that never leaves the server.
  *
  * An attacker who modifies the response body (or forges one entirely) cannot
- * produce a valid signature without knowing today's license_token — which they
+ * produce a valid signature without knowing today's license_token â€” which they
  * cannot compute without the server's secret.
  */
 function cvd_verify_response(string $body, string $sig, string $nonce): bool {
@@ -198,7 +195,7 @@ function cvd_verify_response(string $body, string $sig, string $nonce): bool {
     return hash_equals($expected, $sig);
 }
 
-// ── Redirect Handler ─────────────────────────────────────────────────────────
+// â”€â”€ Redirect Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('template_redirect', function () {
     $redirects = get_option('cvd_redirects', []);
     if (empty($redirects)) return;
@@ -210,7 +207,7 @@ add_action('template_redirect', function () {
     }
 });
 
-// ── Maintenance Mode ──────────────────────────────────────────────────────────
+// â”€â”€ Maintenance Mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp', function () {
     if (!get_option('cvd_maintenance_enabled')) return;
     if (current_user_can('manage_options')) return;
@@ -230,7 +227,7 @@ h1{font-size:1.4em;color:#111;margin:0 0 12px}p{color:#555;margin:0}</style></he
     exit;
 });
 
-// ── Login Activity Log ────────────────────────────────────────────────────────
+// â”€â”€ Login Activity Log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_login', function (string $user_login, WP_User $user) {
     $log   = array_slice((array)get_option('cvd_login_log', []), 0, 499);
     array_unshift($log, [
@@ -256,7 +253,7 @@ add_action('wp_login_failed', function (string $user_login) {
     update_option('cvd_login_log', $log);
 });
 
-// ── Webhook Dispatcher ────────────────────────────────────────────────────────
+// â”€â”€ Webhook Dispatcher â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_fire_webhook(string $event, array $payload): void {
     $webhooks = get_option('cvd_webhooks', []);
     if (empty($webhooks)) return;
@@ -303,7 +300,7 @@ add_action('woocommerce_order_status_changed', function (int $order_id, string $
     cvd_fire_webhook('order.status_changed', ['order_id' => $order_id, 'from' => $old, 'to' => $new_status, 'total' => $order->get_total()]);
 }, 10, 3);
 
-// ── CSV Export Auto-Cleanup (removes exports older than 24h) ─────────────────
+// â”€â”€ CSV Export Auto-Cleanup (removes exports older than 24h) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('cvd_cleanup_exports', function () {
     $uploads = wp_upload_dir();
     $pattern = $uploads['basedir'] . '/cvd-export-*.csv';
@@ -317,9 +314,9 @@ add_action('init', function () {
     }
 });
 
-// ── Admin Dashboard Widget ────────────────────────────────────────────────────
+// â”€â”€ Admin Dashboard Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_dashboard_setup', function () {
-    wp_add_dashboard_widget('cvd_site_health', 'CooVex Dev — Site Health', function () {
+    wp_add_dashboard_widget('cvd_site_health', 'CooVex Dev â€” Site Health', function () {
         global $wpdb;
         $maintenance = get_option('cvd_maintenance_enabled') ? '<span style="color:#d63638">ON</span>' : '<span style="color:#00a32a">OFF</span>';
         $redirects   = count(get_option('cvd_redirects', []));
@@ -359,7 +356,7 @@ add_action('wp_dashboard_setup', function () {
     });
 });
 
-// ── Admin menu ────────────────────────────────────────────────────────────────
+// â”€â”€ Admin menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('admin_menu', function () {
     add_menu_page(
         'CooVex Dev',
@@ -375,16 +372,20 @@ add_action('admin_menu', function () {
     add_submenu_page('coovex-dev', 'Settings',        'Settings',        'manage_options', 'coovex-dev-settings', 'cvd_page_settings');
 });
 
-// ── Settings registration ─────────────────────────────────────────────────────
+// â”€â”€ Settings registration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('admin_init', function () {
     register_setting('cvd_options', 'cvd_api_key',              ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_workspace_id',         ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_password_hash',        ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_telegram_bot_token',   ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_telegram_chat_id',     ['sanitize_callback' => 'sanitize_text_field']);
+    // Auto-validate on first admin page load after install (avoids HTTP requests during activation)
+    if (!empty(get_option('cvd_api_key', '')) && empty(get_option('cvd_license_token', ''))) {
+        cvd_license_validate();
+    }
 });
 
-// ── Session helpers ───────────────────────────────────────────────────────────
+// â”€â”€ Session helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_session_key(string $token): string {
     return 'cvd_sess_' . substr(hash('sha256', $token), 0, 20);
 }
@@ -429,7 +430,7 @@ function cvd_session_destroy(): void {
     setcookie(CVD_COOKIE, '', time() - 3600, '/wp-admin/');
 }
 
-// ── Rate limiting ─────────────────────────────────────────────────────────────
+// â”€â”€ Rate limiting â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_rate_check(): bool {
     $key   = 'cvd_rate_' . get_current_user_id();
     $count = (int) get_transient($key);
@@ -438,7 +439,7 @@ function cvd_rate_check(): bool {
     return true;
 }
 
-// ── Snapshot system ───────────────────────────────────────────────────────────
+// â”€â”€ Snapshot system â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_snapshot_take(array $files_changed, string $label): string {
     $snaps = get_option('cvd_snapshots', []);
     $snap  = [
@@ -485,7 +486,7 @@ function cvd_snapshot_rollback(string $snap_id): array {
     return ['ok' => true, 'restored' => $restored, 'label' => $snap['label']];
 }
 
-// ── File resolution (path security) ──────────────────────────────────────────
+// â”€â”€ File resolution (path security) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_resolve_path(string $rel_path): ?string {
     $rel = ltrim(str_replace('..', '', $rel_path), '/');
 
@@ -509,7 +510,7 @@ function cvd_resolve_path(string $rel_path): ?string {
             if ($realBase && $realDir && strpos($realDir, $realBase) === 0) {
                 return $target;
             }
-            // Directory doesn't exist yet — validate parent chain
+            // Directory doesn't exist yet â€” validate parent chain
             if (strpos(dirname($target), realpath($base) ?: $base) === 0) {
                 return $target;
             }
@@ -518,7 +519,7 @@ function cvd_resolve_path(string $rel_path): ?string {
     return null;
 }
 
-// ── Apply a single change ─────────────────────────────────────────────────────
+// â”€â”€ Apply a single change â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_apply_change(array $change): array {
     require_once ABSPATH . 'wp-admin/includes/file.php';
     WP_Filesystem();
@@ -584,7 +585,7 @@ function cvd_apply_change(array $change): array {
             $download_url = $api->download_link;
         }
 
-        // Silent upgrader skin — suppresses all output
+        // Silent upgrader skin â€” suppresses all output
         if (!class_exists('CVD_Silent_Skin')) {
             class CVD_Silent_Skin extends WP_Upgrader_Skin {
                 public function feedback($string, ...$args) {}
@@ -649,10 +650,10 @@ function cvd_apply_change(array $change): array {
     return ['ok' => true, 'file' => $file, 'action' => $action];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // WP DIRECT ACTIONS
-// type: "wp_action" — create/update posts, upload images, SEO, menus, options
-// ─────────────────────────────────────────────────────────────────────────────
+// type: "wp_action" â€” create/update posts, upload images, SEO, menus, options
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function cvd_apply_wp_action(array $change): array {
     $action = $change['action'] ?? '';
@@ -660,7 +661,7 @@ function cvd_apply_wp_action(array $change): array {
 
     switch ($action) {
 
-        // ── Post / Page CRUD ───────────────────────────────────────────────────
+        // â”€â”€ Post / Page CRUD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'create_post':
         case 'create_page': {
             $args = array_merge([
@@ -689,7 +690,7 @@ function cvd_apply_wp_action(array $change): array {
             return $result ? ['ok' => true, 'action' => 'deleted', 'post_id' => $post_id] : ['ok' => false, 'error' => 'Could not delete post'];
         }
 
-        // ── Post meta (single or bulk) ─────────────────────────────────────────
+        // â”€â”€ Post meta (single or bulk) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'update_post_meta': {
             $post_id = (int)($data['post_id'] ?? 0);
             $key     = sanitize_key($data['meta_key'] ?? '');
@@ -707,7 +708,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'bulk_meta_updated', 'post_id' => $post_id, 'count' => count($meta)];
         }
 
-        // ── SEO (auto-detects Yoast / RankMath / SEOPress / AIOSEO) ───────────
+        // â”€â”€ SEO (auto-detects Yoast / RankMath / SEOPress / AIOSEO) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'update_seo': {
             $post_id  = (int)($data['post_id'] ?? 0);
             $title    = $data['title']       ?? '';
@@ -742,7 +743,7 @@ function cvd_apply_wp_action(array $change): array {
                 if ($kw)    update_post_meta($post_id, '_aioseo_keywords', $kw);
                 $detected = 'aioseo';
             } else {
-                // No SEO plugin — write to native meta + generic keys
+                // No SEO plugin â€” write to native meta + generic keys
                 if ($title) update_post_meta($post_id, '_seo_title', $title);
                 if ($desc)  update_post_meta($post_id, '_seo_description', $desc);
                 if ($desc)  update_post_meta($post_id, '_meta_description', $desc);
@@ -752,7 +753,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'seo_updated', 'post_id' => $post_id, 'seo_plugin' => $detected];
         }
 
-        // ── Taxonomy: set categories / tags ────────────────────────────────────
+        // â”€â”€ Taxonomy: set categories / tags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'set_categories': {
             $post_id = (int)($data['post_id'] ?? 0);
             $cats    = (array)($data['categories'] ?? []);
@@ -769,7 +770,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'tags_set', 'post_id' => $post_id];
         }
 
-        // ── Media ──────────────────────────────────────────────────────────────
+        // â”€â”€ Media â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'sideload_image': {
             require_once ABSPATH . 'wp-admin/includes/file.php';
             require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -806,7 +807,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'featured_image_set', 'post_id' => $post_id, 'attachment_id' => $att_id];
         }
 
-        // ── Theme mods & options ───────────────────────────────────────────────
+        // â”€â”€ Theme mods & options â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'set_theme_mod': {
             $mod = sanitize_key($data['mod'] ?? '');
             $val = $data['value'] ?? '';
@@ -826,7 +827,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'option_updated', 'option' => $option];
         }
 
-        // ── Navigation menus ───────────────────────────────────────────────────
+        // â”€â”€ Navigation menus â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'add_menu_item': {
             $location   = sanitize_text_field($data['menu_location'] ?? '');
             $item       = $data['item'] ?? [];
@@ -851,7 +852,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'menu_item_removed', 'item_id' => $item_id];
         }
 
-        // ── DB Cleanup & Optimization ──────────────────────────────────────────
+        // â”€â”€ DB Cleanup & Optimization â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'db_cleanup': {
             global $wpdb;
             $types   = (array)($data['types'] ?? ['revisions','spam','transients','trashed','orphaned_meta']);
@@ -882,7 +883,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'db_cleaned', 'results' => $results];
         }
 
-        // ── Site Audit ─────────────────────────────────────────────────────────
+        // â”€â”€ Site Audit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'site_audit': {
             global $wpdb;
             $audit = [];
@@ -912,7 +913,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'site_audited', 'audit' => $audit];
         }
 
-        // ── Error Log ─────────────────────────────────────────────────────────
+        // â”€â”€ Error Log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'read_error_log': {
             $log_path = $data['path'] ?? (ini_get('error_log') ?: WP_CONTENT_DIR . '/debug.log');
             $lines    = min((int)($data['lines'] ?? 100), 500);
@@ -934,7 +935,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'error_log_cleared', 'path' => $log_path];
         }
 
-        // ── Cron Manager ──────────────────────────────────────────────────────
+        // â”€â”€ Cron Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'list_cron_jobs': {
             $crons = _get_cron_array() ?: [];
             $jobs  = [];
@@ -971,8 +972,8 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'cron_added', 'hook' => $hook, 'schedule' => $schedule, 'next_run' => date('Y-m-d H:i:s', (int)wp_next_scheduled($hook))];
         }
 
-        // ── WooCommerce ───────────────────────────────────────────────────────
-        // ── Theme Installer ───────────────────────────────────────────────────────
+        // â”€â”€ WooCommerce â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // â”€â”€ Theme Installer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'theme_install': {
             $slug   = sanitize_key($data['slug'] ?? '');
             if (!$slug) return ['ok' => false, 'error' => 'theme_install requires data.slug (e.g. "storefront", "astra")'];
@@ -1011,7 +1012,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'theme_installed', 'slug' => $slug, 'name' => $api->name, 'version' => $api->version, 'activated' => !empty($data['activate'])];
         }
 
-        // ── WooCommerce Global Configuration ─────────────────────────────────────
+        // â”€â”€ WooCommerce Global Configuration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'wc_configure': {
             if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
             $updated = [];
@@ -1048,7 +1049,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'wc_configured', 'updated' => $updated];
         }
 
-        // ── WooCommerce Shipping ──────────────────────────────────────────────────
+        // â”€â”€ WooCommerce Shipping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'wc_add_shipping_zone': {
             if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
             $zone = new WC_Shipping_Zone();
@@ -1109,7 +1110,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'payment_configured', 'gateway' => $gateway_id, 'enabled' => $settings['enabled']];
         }
 
-        // ── WooCommerce Product Attributes & Variations ───────────────────────────
+        // â”€â”€ WooCommerce Product Attributes & Variations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'create_product_attribute': {
             if (!class_exists('WooCommerce')) return ['ok' => false, 'error' => 'WooCommerce not active'];
             $name   = sanitize_text_field($data['name'] ?? '');
@@ -1175,7 +1176,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'category_created', 'term_id' => $result['term_id'], 'name' => $name];
         }
 
-        // ── create_product (enhanced with variable product + attributes) ───────────
+        // â”€â”€ create_product (enhanced with variable product + attributes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'create_product': {
             if (!class_exists('WC_Product_Simple')) return ['ok' => false, 'error' => 'WooCommerce not active'];
             $type    = $data['type'] ?? 'simple';
@@ -1286,7 +1287,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'order_updated', 'order_id' => $oid, 'status' => $order->get_status()];
         }
 
-        // ── User Management ───────────────────────────────────────────────────
+        // â”€â”€ User Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'create_user': {
             $username = sanitize_user($data['username'] ?? '');
             $email    = sanitize_email($data['email'] ?? '');
@@ -1343,7 +1344,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'login_log', 'count' => count($log), 'log' => array_values($log)];
         }
 
-        // ── Redirect Manager ──────────────────────────────────────────────────
+        // â”€â”€ Redirect Manager â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'add_redirect': {
             $from = '/' . ltrim(sanitize_text_field($data['from'] ?? ''), '/');
             $to   = esc_url_raw($data['to'] ?? '');
@@ -1368,7 +1369,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'redirects_listed', 'redirects' => get_option('cvd_redirects', []), 'count' => count(get_option('cvd_redirects', []))];
         }
 
-        // ── Maintenance Mode ──────────────────────────────────────────────────
+        // â”€â”€ Maintenance Mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'set_maintenance_mode': {
             $enabled = (bool)($data['enabled'] ?? false);
             $message = sanitize_textarea_field($data['message'] ?? "We'll be back shortly. Thank you for your patience.");
@@ -1379,7 +1380,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'maintenance_' . ($enabled ? 'enabled' : 'disabled'), 'message' => $message];
         }
 
-        // ── SSL / HTTPS Fixer ─────────────────────────────────────────────────
+        // â”€â”€ SSL / HTTPS Fixer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'fix_https_urls': {
             global $wpdb;
             $old = untrailingslashit(get_option('siteurl'));
@@ -1393,7 +1394,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'https_fixed', 'old_url' => $old, 'new_url' => $new, 'posts_updated' => $posts, 'meta_updated' => $meta, 'options_updated' => $opts];
         }
 
-        // ── Image Tools ───────────────────────────────────────────────────────
+        // â”€â”€ Image Tools â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'regenerate_thumbnails': {
             require_once ABSPATH . 'wp-admin/includes/image.php';
             $limit   = min((int)($data['limit'] ?? 50), 500);
@@ -1430,7 +1431,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'webp_converted', 'converted' => $converted, 'skipped' => $skipped, 'failed' => $failed, 'total' => count($images)];
         }
 
-        // ── Broken Link Scanner ───────────────────────────────────────────────
+        // â”€â”€ Broken Link Scanner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'scan_broken_links': {
             $limit    = min((int)($data['limit'] ?? 30), 100);
             $site_url = get_site_url();
@@ -1453,7 +1454,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'broken_links_scanned', 'posts_checked' => count($posts), 'broken_count' => count($broken), 'broken_links' => $broken];
         }
 
-        // ── Data Export ───────────────────────────────────────────────────────
+        // â”€â”€ Data Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'export_csv': {
             global $wpdb;
             $type   = sanitize_key($data['type'] ?? 'posts');
@@ -1503,7 +1504,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'csv_exported', 'type' => $type, 'rows' => count($rows), 'download_url' => $uploads['baseurl'] . '/' . $filename];
         }
 
-        // ── Webhooks ──────────────────────────────────────────────────────────
+        // â”€â”€ Webhooks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'add_webhook': {
             $url    = esc_url_raw($data['url'] ?? '');
             $event  = sanitize_text_field($data['event'] ?? '*');
@@ -1530,7 +1531,7 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'webhooks_listed', 'count' => count($wh), 'webhooks' => $wh];
         }
 
-        // ── Scheduled Publish ─────────────────────────────────────────────────
+        // â”€â”€ Scheduled Publish â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         case 'schedule_publish': {
             $pid  = (int)($data['post_id'] ?? 0);
             $date = sanitize_text_field($data['date'] ?? '');
@@ -1545,12 +1546,12 @@ function cvd_apply_wp_action(array $change): array {
     }
 }
 
-// ── Collect site context ──────────────────────────────────────────────────────
+// â”€â”€ Collect site context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_site_context(string $command = ''): array {
     global $wpdb;
     $cmd = strtolower($command);
 
-    // ── Plugins ────────────────────────────────────────────────────────────────
+    // â”€â”€ Plugins â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $active_plugin_files = get_option('active_plugins', []);
     $plugin_names        = [];
     foreach ($active_plugin_files as $p) {
@@ -1558,7 +1559,7 @@ function cvd_site_context(string $command = ''): array {
         $plugin_names[] = $data['Name'] ?: $p;
     }
 
-    // ── Theme ──────────────────────────────────────────────────────────────────
+    // â”€â”€ Theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $theme     = wp_get_theme();
     $theme_dir = get_stylesheet_directory();
     $theme_info = [
@@ -1569,10 +1570,10 @@ function cvd_site_context(string $command = ''): array {
         'child'      => $theme->get('Template') !== '',
     ];
 
-    // ── DB tables ──────────────────────────────────────────────────────────────
+    // â”€â”€ DB tables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $tables = $wpdb->get_col('SHOW TABLES');
 
-    // ── Core WP settings ──────────────────────────────────────────────────────
+    // â”€â”€ Core WP settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $settings = [
         'site_title'         => get_bloginfo('name'),
         'tagline'            => get_bloginfo('description'),
@@ -1583,7 +1584,7 @@ function cvd_site_context(string $command = ''): array {
         'uploads_url'        => wp_upload_dir()['baseurl'],
     ];
 
-    // ── Custom post types ──────────────────────────────────────────────────────
+    // â”€â”€ Custom post types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $cpts = [];
     foreach (get_post_types(['_builtin' => false], 'objects') as $cpt) {
         $cpts[$cpt->name] = [
@@ -1595,7 +1596,7 @@ function cvd_site_context(string $command = ''): array {
         ];
     }
 
-    // ── Content summary ────────────────────────────────────────────────────────
+    // â”€â”€ Content summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $content = [
         'posts'    => (int)($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='post' AND post_status='publish'")),
         'pages'    => (int)($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='page' AND post_status='publish'")),
@@ -1604,7 +1605,7 @@ function cvd_site_context(string $command = ''): array {
         'media'    => (int)($wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='attachment'")),
     ];
 
-    // ── Registered nav menus ───────────────────────────────────────────────────
+    // â”€â”€ Registered nav menus â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $menus = [];
     foreach (get_registered_nav_menus() as $location => $description) {
         $assigned = get_nav_menu_locations();
@@ -1616,7 +1617,7 @@ function cvd_site_context(string $command = ''): array {
         ];
     }
 
-    // ── Widget areas ──────────────────────────────────────────────────────────
+    // â”€â”€ Widget areas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     global $wp_registered_sidebars;
     $widget_areas = [];
     foreach (($wp_registered_sidebars ?? []) as $id => $sidebar) {
@@ -1627,7 +1628,7 @@ function cvd_site_context(string $command = ''): array {
         ];
     }
 
-    // ── Base context (always sent) ─────────────────────────────────────────────
+    // â”€â”€ Base context (always sent) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $ctx = [
         'wp_version'    => get_bloginfo('version'),
         'php_version'   => PHP_VERSION,
@@ -1643,8 +1644,8 @@ function cvd_site_context(string $command = ''): array {
         'stats'         => cvd_gather_stats($plugin_names),
     ];
 
-    // ── Selective deep context (based on command keywords) ────────────────────
-    // Theme files — sent when working on theme/templates/design
+    // â”€â”€ Selective deep context (based on command keywords) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Theme files â€” sent when working on theme/templates/design
     $theme_keywords = ['theme', 'template', 'design', 'layout', 'header', 'footer', 'sidebar', 'style', 'css', 'page builder', 'elementor', 'divi'];
     foreach ($theme_keywords as $kw) {
         if (strpos($cmd, $kw) !== false) {
@@ -1653,7 +1654,7 @@ function cvd_site_context(string $command = ''): array {
         }
     }
 
-    // Recent content — sent when working on posts/pages/content
+    // Recent content â€” sent when working on posts/pages/content
     $content_keywords = ['post', 'page', 'content', 'article', 'blog', 'published', 'draft', 'category', 'tag'];
     foreach ($content_keywords as $kw) {
         if (strpos($cmd, $kw) !== false) {
@@ -1665,7 +1666,7 @@ function cvd_site_context(string $command = ''): array {
         }
     }
 
-    // DB schema — sent when working on database/tables
+    // DB schema â€” sent when working on database/tables
     $db_keywords = ['database', 'table', 'query', 'sql', 'column', 'schema', 'migration', 'row', 'data'];
     foreach ($db_keywords as $kw) {
         if (strpos($cmd, $kw) !== false) {
@@ -1674,7 +1675,7 @@ function cvd_site_context(string $command = ''): array {
         }
     }
 
-    // Menu items — sent when working on navigation
+    // Menu items â€” sent when working on navigation
     $menu_keywords = ['menu', 'navigation', 'nav', 'link'];
     foreach ($menu_keywords as $kw) {
         if (strpos($cmd, $kw) !== false) {
@@ -1686,7 +1687,7 @@ function cvd_site_context(string $command = ''): array {
     return $ctx;
 }
 
-// ── List theme files (paths only, not contents) ───────────────────────────────
+// â”€â”€ List theme files (paths only, not contents) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_list_theme_files(string $dir): array {
     $files = [];
     if (!is_dir($dir)) return $files;
@@ -1704,7 +1705,7 @@ function cvd_list_theme_files(string $dir): array {
     return $files;
 }
 
-// ── Recent posts/pages summary ────────────────────────────────────────────────
+// â”€â”€ Recent posts/pages summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_recent_content(string $post_type, int $limit = 8): array {
     $posts = get_posts([
         'post_type'      => $post_type,
@@ -1728,7 +1729,7 @@ function cvd_recent_content(string $post_type, int $limit = 8): array {
     return $result;
 }
 
-// ── Taxonomy summary ──────────────────────────────────────────────────────────
+// â”€â”€ Taxonomy summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_get_taxonomy_summary(string $taxonomy): array {
     $terms = get_terms(['taxonomy' => $taxonomy, 'hide_empty' => false, 'number' => 30]);
     if (is_wp_error($terms)) return [];
@@ -1739,7 +1740,7 @@ function cvd_get_taxonomy_summary(string $taxonomy): array {
     return $result;
 }
 
-// ── DB schema (column names for all tables) ───────────────────────────────────
+// â”€â”€ DB schema (column names for all tables) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_get_db_schema(array $tables): array {
     global $wpdb;
     $schema = [];
@@ -1751,7 +1752,7 @@ function cvd_get_db_schema(array $tables): array {
     return $schema;
 }
 
-// ── Full menu items ───────────────────────────────────────────────────────────
+// â”€â”€ Full menu items â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_get_menu_items(): array {
     $locations = get_nav_menu_locations();
     $result    = [];
@@ -1770,14 +1771,14 @@ function cvd_get_menu_items(): array {
     return $result;
 }
 
-// ── Gather live site statistics for AI context ─────────────────────────────────
+// â”€â”€ Gather live site statistics for AI context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_gather_stats(array $plugin_names = []): array {
     global $wpdb;
     $stats = [];
     $today = date('Y-m-d');
     $month = date('Y-m');
 
-    // ── Core WP stats ──────────────────────────────────────────────────────────
+    // â”€â”€ Core WP stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     $post_counts = wp_count_posts();
     $stats['posts_published']   = (int)($post_counts->publish ?? 0);
     $stats['posts_draft']       = (int)($post_counts->draft ?? 0);
@@ -1785,7 +1786,7 @@ function cvd_gather_stats(array $plugin_names = []): array {
     $stats['total_comments']    = (int)(wp_count_comments()->total_comments ?? 0);
     $stats['registered_users']  = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->users}");
 
-    // ── WooCommerce ────────────────────────────────────────────────────────────
+    // â”€â”€ WooCommerce â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (class_exists('WooCommerce')) {
         $stats['woocommerce'] = true;
         $stats['wc_orders_today'] = (int)$wpdb->get_var($wpdb->prepare(
@@ -1810,7 +1811,7 @@ function cvd_gather_stats(array $plugin_names = []): array {
         $stats['wc_products'] = (int)(wp_count_posts('product')->publish ?? 0);
     }
 
-    // ── WP-Statistics ──────────────────────────────────────────────────────────
+    // â”€â”€ WP-Statistics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if ($wpdb->get_var("SHOW TABLES LIKE '{$wpdb->prefix}statistics_visit'")) {
         $stats['wp_statistics'] = true;
         $stats['visitors_today'] = (int)$wpdb->get_var($wpdb->prepare(
@@ -1825,7 +1826,7 @@ function cvd_gather_stats(array $plugin_names = []): array {
         ));
     }
 
-    // ── Jetpack Stats ──────────────────────────────────────────────────────────
+    // â”€â”€ Jetpack Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (function_exists('stats_get_csv')) {
         $jetpack_today = stats_get_csv('postviews', ['days' => 1, 'limit' => 1]);
         if ($jetpack_today !== false) {
@@ -1834,19 +1835,19 @@ function cvd_gather_stats(array $plugin_names = []): array {
         }
     }
 
-    // ── MonsterInsights / GADWP ────────────────────────────────────────────────
+    // â”€â”€ MonsterInsights / GADWP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (in_array('Google Analytics by MonsterInsights', $plugin_names) ||
         in_array('Google Analytics Dashboard Plugin for WordPress by ExactMetrics', $plugin_names)) {
         $stats['monsterinsights'] = true;
-        // Data is in Google Analytics — not directly queryable from WP
+        // Data is in Google Analytics â€” not directly queryable from WP
     }
 
-    // ── Contact Form 7 submissions ─────────────────────────────────────────────
+    // â”€â”€ Contact Form 7 submissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (in_array('Contact Form 7', $plugin_names)) {
         $stats['cf7_active'] = true;
     }
 
-    // ── No analytics detected ──────────────────────────────────────────────────
+    // â”€â”€ No analytics detected â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (!isset($stats['wp_statistics']) && !isset($stats['jetpack_stats']) && !isset($stats['monsterinsights'])) {
         $stats['no_visitor_tracking'] = true;
     }
@@ -1854,7 +1855,7 @@ function cvd_gather_stats(array $plugin_names = []): array {
     return $stats;
 }
 
-// ── AJAX: authenticate ────────────────────────────────────────────────────────
+// â”€â”€ AJAX: authenticate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_auth', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
@@ -1869,21 +1870,21 @@ add_action('wp_ajax_cvd_auth', function () {
     }
 });
 
-// ── AJAX: logout ──────────────────────────────────────────────────────────────
+// â”€â”€ AJAX: logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_logout', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     cvd_session_destroy();
     wp_send_json_success();
 });
 
-// ── AJAX: send command ────────────────────────────────────────────────────────
+// â”€â”€ AJAX: send command â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_command', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
     if (!cvd_session_valid())                wp_send_json_error('Session expired. Please re-enter your CooVex Dev password.', 401);
     if (!cvd_rate_check())                   wp_send_json_error('Rate limit reached. Wait a moment.', 429);
 
-    // ── License check (client gate — real enforcement is server-side) ─────────
+    // â”€â”€ License check (client gate â€” real enforcement is server-side) â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (!cvd_license_ok()) {
         $status = get_option('cvd_license_status', '');
         if ($status === 'revoked') {
@@ -1896,7 +1897,7 @@ add_action('wp_ajax_cvd_command', function () {
     }
 
     $api_key = get_option('cvd_api_key', '');
-    if (empty($api_key)) wp_send_json_error('API key not configured. Go to CooVex Dev → Settings.', 400);
+    if (empty($api_key)) wp_send_json_error('API key not configured. Go to CooVex Dev â†’ Settings.', 400);
 
     $command = sanitize_textarea_field($_POST['command'] ?? '');
     if (empty($command)) wp_send_json_error('Empty command', 400);
@@ -1955,13 +1956,13 @@ add_action('wp_ajax_cvd_command', function () {
         wp_send_json_error($payload['error'] ?? 'API error (HTTP ' . $code . ')');
     }
 
-    // ── Verify HMAC signature ─────────────────────────────────────────────────
+    // â”€â”€ Verify HMAC signature â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // The server signs the response with the daily license token.
     // If the nonce doesn't match what we sent, or the signature is wrong,
-    // the response was tampered with or forged — reject it entirely.
+    // the response was tampered with or forged â€” reject it entirely.
     if (!empty($sig)) {
         if ($returned_nonce !== $request_nonce) {
-            wp_send_json_error('Response nonce mismatch — possible replay attack detected.', 400);
+            wp_send_json_error('Response nonce mismatch â€” possible replay attack detected.', 400);
         }
         if (!cvd_verify_response($raw_body, $sig, $request_nonce)) {
             // Signature failed: try refreshing license token (in case it just rotated at midnight)
@@ -2010,7 +2011,7 @@ add_action('wp_ajax_cvd_command', function () {
     ]);
 });
 
-// ── AJAX: rollback ────────────────────────────────────────────────────────────
+// â”€â”€ AJAX: rollback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_rollback', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
@@ -2027,12 +2028,12 @@ add_action('wp_ajax_cvd_rollback', function () {
     }
 });
 
-// ── AJAX: session check (heartbeat) ──────────────────────────────────────────
+// â”€â”€ AJAX: session check (heartbeat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_ping', function () {
     wp_send_json(['authenticated' => cvd_session_valid()]);
 });
 
-// ── Floating AI Widget ────────────────────────────────────────────────────────
+// â”€â”€ Floating AI Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_render_floating_widget(): void {
     $nonce = wp_create_nonce('cvd_nonce');
     $ajax  = admin_url('admin-ajax.php');
@@ -2103,7 +2104,7 @@ function cvd_render_floating_widget(): void {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div id="cvd-wctx">Loading…</div>
+    <div id="cvd-wctx">Loadingâ€¦</div>
     <div id="cvd-wm">
       <div class="cvd-msg cvd-a">Hi! I can see your WordPress site. Type a command or paste a screenshot (Ctrl+V).</div>
     </div>
@@ -2116,7 +2117,7 @@ function cvd_render_floating_widget(): void {
       </button>
     </div>
     <div id="cvd-wi">
-      <textarea id="cvd-wtx" rows="1" placeholder="Ask anything… paste screenshot (Ctrl+V) or attach file"></textarea>
+      <textarea id="cvd-wtx" rows="1" placeholder="Ask anythingâ€¦ paste screenshot (Ctrl+V) or attach file"></textarea>
       <label id="cvd-wil" title="Attach file or screenshot">
         <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
         <input type="file" id="cvd-wf" accept="image/*,.csv,.txt,.json,.pdf,.doc,.docx,.xls,.xlsx,.md,.log,.tsv" style="display:none">
@@ -2152,7 +2153,7 @@ function cvd_render_floating_widget(): void {
   var fc=$('cvd-wfc'), fi=$('cvd-wfi'), fn=$('cvd-wfn'), fs=$('cvd-wfs'), fp=$('cvd-wpl');
   var file=$('cvd-wf'), ctx=$('cvd-wctx');
 
-  var screenCtx=(isAdmin?'WP Admin — ':'')+document.title.replace(' ‹ '+document.title.split(' ‹ ').pop(),'');
+  var screenCtx=(isAdmin?'WP Admin â€” ':'')+document.title.replace(' â€¹ '+document.title.split(' â€¹ ').pop(),'');
   ctx.textContent=screenCtx; ctx.title=screenCtx;
 
   function hasAttachment(){ return !!(screenshot||fileData); }
@@ -2174,20 +2175,20 @@ function cvd_render_floating_widget(): void {
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!snd.disabled)send();}
   });
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
+  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function fmtSize(b){
     if(b<1024)return b+' B';
     if(b<1048576)return (b/1024).toFixed(1)+' KB';
     return (b/1048576).toFixed(1)+' MB';
   }
   function fileIcon(type,name){
-    if(/pdf/i.test(type))return '📄';
-    if(/csv|tsv/i.test(type)||/\.(csv|tsv)$/i.test(name))return '📊';
-    if(/sheet|excel|xlsx|xls/i.test(type+name))return '📈';
-    if(/word|docx|doc/i.test(type+name))return '📝';
-    if(/json/i.test(type+name))return '🔧';
-    if(/xml/i.test(type+name))return '🗂';
-    return '📎';
+    if(/pdf/i.test(type))return 'ðŸ“„';
+    if(/csv|tsv/i.test(type)||/\.(csv|tsv)$/i.test(name))return 'ðŸ“Š';
+    if(/sheet|excel|xlsx|xls/i.test(type+name))return 'ðŸ“ˆ';
+    if(/word|docx|doc/i.test(type+name))return 'ðŸ“';
+    if(/json/i.test(type+name))return 'ðŸ”§';
+    if(/xml/i.test(type+name))return 'ðŸ—‚';
+    return 'ðŸ“Ž';
   }
 
   function clearAttachment(){
@@ -2217,7 +2218,7 @@ function cvd_render_floating_widget(): void {
     snd.disabled=!(txt.value.trim()||hasAttachment());
   }
 
-  // ── Screenshot compression ────────────────────────────────────────────────
+  // â”€â”€ Screenshot compression â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function setShot(dataUrl){
     var img=new Image();
     img.onload=function(){
@@ -2234,7 +2235,7 @@ function cvd_render_floating_widget(): void {
     img.src=dataUrl;
   }
 
-  // ── File handler: routes image vs text vs binary ──────────────────────────
+  // â”€â”€ File handler: routes image vs text vs binary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function handleFile(f){
     var MAX_TEXT=512*1024, MAX_BIN=10*1024*1024;
     var name=f.name, type=f.type||'', size=f.size;
@@ -2254,7 +2255,7 @@ function cvd_render_floating_widget(): void {
       };
       r.readAsText(f);return;
     }
-    // Binary (PDF, DOCX, XLSX, etc.) → base64
+    // Binary (PDF, DOCX, XLSX, etc.) â†’ base64
     var r=new FileReader();
     r.onload=function(e){
       var dataUrl=e.target.result;
@@ -2291,18 +2292,18 @@ function cvd_render_floating_widget(): void {
     if(f)handleFile(f);
   });
 
-  // ── Message rendering ─────────────────────────────────────────────────────
+  // â”€â”€ Message rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function addMsg(html,cls,thumb){
     var d=document.createElement('div');d.className='cvd-msg '+cls;
     if(thumb){var im=document.createElement('img');im.className='cvd-thumb';im.src=thumb;d.appendChild(im);}
-    if(cls==='cvd-a'&&html==='…'){
+    if(cls==='cvd-a'&&html==='â€¦'){
       var t=document.createElement('div');t.className='cvd-typing';
       t.innerHTML='<span></span><span></span><span></span>';d.appendChild(t);
     }else{d.appendChild(document.createTextNode(html));}
     msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;
   }
 
-  // ── Send ──────────────────────────────────────────────────────────────────
+  // â”€â”€ Send â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function send(){
     var cmd=txt.value.trim();
     if(!cmd&&!hasAttachment())return;
@@ -2312,7 +2313,7 @@ function cvd_render_floating_widget(): void {
     var shot=screenshot,fd=fileData;
     clearAttachment();
     snd.disabled=true;
-    var typing=addMsg('…','cvd-a');
+    var typing=addMsg('â€¦','cvd-a');
 
     var defaultCmd=shot
       ?'Analyze this screenshot and tell me what you see. Suggest what I can do or ask me for a specific task.'
@@ -2335,13 +2336,13 @@ function cvd_render_floating_widget(): void {
         if(res.success){
           addMsg((res.data&&res.data.message)||'Done.','cvd-a');
           var app=res.data&&res.data.applied?res.data.applied.filter(function(c){return c.ok;}).length:0;
-          if(app)addMsg('✓ '+app+' change'+(app>1?'s':'')+' applied.','cvd-a');
+          if(app)addMsg('âœ“ '+app+' change'+(app>1?'s':'')+' applied.','cvd-a');
         }else{addMsg(res.data||'Something went wrong.','cvd-a cvd-err');}
         snd.disabled=!txt.value.trim();
       })
       .catch(function(){
         msgs.removeChild(typing);
-        addMsg('Network error — please try again.','cvd-a cvd-err');
+        addMsg('Network error â€” please try again.','cvd-a cvd-err');
         snd.disabled=!txt.value.trim();
       });
   }
@@ -2366,7 +2367,7 @@ add_action('wp_footer', function () {
     cvd_render_floating_widget();
 });
 
-// ── AJAX: floating widget command (no CVD session required — WP admin cap is enough) ──
+// â”€â”€ AJAX: floating widget command (no CVD session required â€” WP admin cap is enough) â”€â”€
 add_action('wp_ajax_cvd_float_command', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
@@ -2457,7 +2458,7 @@ add_action('wp_ajax_cvd_float_command', function () {
     wp_send_json_success(['message' => $data['message'] ?? '', 'applied' => $applied]);
 });
 
-// ── AJAX: get file tree ───────────────────────────────────────────────────────
+// â”€â”€ AJAX: get file tree â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_file_tree', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
@@ -2485,7 +2486,7 @@ add_action('wp_ajax_cvd_file_tree', function () {
     wp_send_json_success(['items' => $items]);
 });
 
-// ── AJAX: read file ───────────────────────────────────────────────────────────
+// â”€â”€ AJAX: read file â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_read_file', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
@@ -2501,14 +2502,14 @@ add_action('wp_ajax_cvd_read_file', function () {
     wp_send_json_success(['content' => file_get_contents($abs), 'size' => $size]);
 });
 
-// ── Audit log ─────────────────────────────────────────────────────────────────
+// â”€â”€ Audit log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_audit_log(array $entry): void {
     $log   = get_option('cvd_audit_log', []);
     array_unshift($log, $entry);
     update_option('cvd_audit_log', array_slice($log, 0, 200), false);
 }
 
-// ── Security & malware scanner ────────────────────────────────────────────────
+// â”€â”€ Security & malware scanner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_security_scan(): array {
     global $wpdb;
 
@@ -2669,9 +2670,9 @@ function cvd_security_scan(): array {
     ];
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // TELEGRAM INTEGRATION
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function cvd_telegram_send(string $token, $chat_id, string $text, ?int $reply_to = null): void {
     $params = ['chat_id' => $chat_id, 'text' => $text, 'parse_mode' => 'Markdown'];
@@ -2688,7 +2689,7 @@ function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0):
     $token   = get_option('cvd_telegram_bot_token', '');
     $api_key = get_option('cvd_api_key', '');
     if (empty($token) || empty($api_key)) {
-        cvd_telegram_send($token, $chat_id, '⚠️ CooVex Dev is not configured. Check plugin settings.', $reply_to ?: null);
+        cvd_telegram_send($token, $chat_id, 'âš ï¸ CooVex Dev is not configured. Check plugin settings.', $reply_to ?: null);
         return;
     }
 
@@ -2709,15 +2710,15 @@ function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0):
     ]);
 
     if (is_wp_error($response)) {
-        cvd_telegram_send($token, $chat_id, '❌ ' . $response->get_error_message(), $reply_to ?: null);
+        cvd_telegram_send($token, $chat_id, 'âŒ ' . $response->get_error_message(), $reply_to ?: null);
         return;
     }
 
     $code    = wp_remote_retrieve_response_code($response);
     $payload = json_decode(wp_remote_retrieve_body($response), true);
 
-    if ($code === 402) { cvd_telegram_send($token, $chat_id, '⚠️ ' . ($payload['error'] ?? 'Insufficient credits.'), $reply_to ?: null); return; }
-    if ($code !== 200 || empty($payload['ok'])) { cvd_telegram_send($token, $chat_id, '❌ ' . ($payload['error'] ?? 'Error'), $reply_to ?: null); return; }
+    if ($code === 402) { cvd_telegram_send($token, $chat_id, 'âš ï¸ ' . ($payload['error'] ?? 'Insufficient credits.'), $reply_to ?: null); return; }
+    if ($code !== 200 || empty($payload['ok'])) { cvd_telegram_send($token, $chat_id, 'âŒ ' . ($payload['error'] ?? 'Error'), $reply_to ?: null); return; }
 
     $changes = $payload['changes'] ?? [];
     $snap_id = null;
@@ -2734,15 +2735,15 @@ function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0):
     $fail  = count($applied) - $ok;
 
     if (!empty($applied)) {
-        $msg .= "\n\n✅ {$ok} change(s) applied.";
-        if ($fail) $msg .= " ⚠️ {$fail} failed.";
-        if ($snap_id) $msg .= "\n_Commit \`{$snap_id}\` — rollback in WP admin._";
+        $msg .= "\n\nâœ… {$ok} change(s) applied.";
+        if ($fail) $msg .= " âš ï¸ {$fail} failed.";
+        if ($snap_id) $msg .= "\n_Commit \`{$snap_id}\` â€” rollback in WP admin._";
     }
     if ($payload['credits_used'] ?? null) $msg .= "\n_Credits used: " . $payload['credits_used'] . "_";
 
     cvd_audit_log(['command' => $command, 'source' => 'telegram', 'chat_id' => $chat_id, 'time' => time()]);
 
-    if (mb_strlen($msg) > 4000) $msg = mb_substr($msg, 0, 4000) . '…';
+    if (mb_strlen($msg) > 4000) $msg = mb_substr($msg, 0, 4000) . 'â€¦';
     cvd_telegram_send($token, $chat_id, $msg, $reply_to ?: null);
 }
 
@@ -2773,20 +2774,20 @@ function cvd_telegram_webhook_handler(WP_REST_Request $request): WP_REST_Respons
     $msg_id  = (int)($message['message_id'] ?? 0);
 
     if (!empty($allowed_chat) && $chat_id !== $allowed_chat) {
-        cvd_telegram_send($token, $chat_id, '⛔ Unauthorized.', $msg_id);
+        cvd_telegram_send($token, $chat_id, 'â›” Unauthorized.', $msg_id);
         return new WP_REST_Response(['ok' => true]);
     }
     if (empty($text)) return new WP_REST_Response(['ok' => true]);
 
     if ($text === '/start') {
         cvd_telegram_send($token, $chat_id,
-            "👋 *CooVex Dev* connected!\n\nSend me tasks in plain language and I'll execute them on your WordPress site.\n\n*Examples:*\n• _How many visitors today?_\n• _Add a Buy Now button next to Add to Cart_\n• _Create a login activity log plugin_\n• _Show WooCommerce sales this month_",
+            "ðŸ‘‹ *CooVex Dev* connected!\n\nSend me tasks in plain language and I'll execute them on your WordPress site.\n\n*Examples:*\nâ€¢ _How many visitors today?_\nâ€¢ _Add a Buy Now button next to Add to Cart_\nâ€¢ _Create a login activity log plugin_\nâ€¢ _Show WooCommerce sales this month_",
         $msg_id);
         return new WP_REST_Response(['ok' => true]);
     }
 
     // Acknowledge immediately, process in background
-    cvd_telegram_send($token, $chat_id, '⚡ *Working on it...*', $msg_id);
+    cvd_telegram_send($token, $chat_id, 'âš¡ *Working on it...*', $msg_id);
     cvd_telegram_run_command($text, $chat_id, $msg_id);
 
     return new WP_REST_Response(['ok' => true]);
@@ -2833,11 +2834,11 @@ add_action('wp_ajax_cvd_telegram_unregister', function () {
     wp_send_json_success();
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // ADMIN PAGES
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ── Settings page ─────────────────────────────────────────────────────────────
+// â”€â”€ Settings page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_page_settings() {
     if (!current_user_can('manage_options')) return;
 
@@ -2861,7 +2862,7 @@ function cvd_page_settings() {
     <div class="wrap">
         <h1 style="display:flex;align-items:center;gap:8px;">
             <span class="dashicons dashicons-editor-code" style="font-size:24px;color:#2563eb;"></span>
-            CooVex Dev — Settings
+            CooVex Dev â€” Settings
         </h1>
 
         <?php echo $pw_notice; ?>
@@ -2876,7 +2877,7 @@ function cvd_page_settings() {
                             value="<?php echo esc_attr(get_option('cvd_api_key','')); ?>"
                             class="regular-text" autocomplete="new-password" />
                         <p class="description">
-                            Find it in <a href="https://app.coovex.com/settings/integrations" target="_blank">CooVex → Settings → Integrations</a>.
+                            Find it in <a href="https://app.coovex.com/settings/integrations" target="_blank">CooVex â†’ Settings â†’ Integrations</a>.
                             Credits are deducted per command based on actual usage (100 credits = $1).
                         </p>
                     </td>
@@ -2914,15 +2915,15 @@ function cvd_page_settings() {
         $has_pw  = !empty(get_option('cvd_password_hash', ''));
         if ($api_key && $has_pw): ?>
         <div style="margin-top:24px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;color:#166534;">
-            ✓ CooVex Dev is configured. <a href="<?php echo admin_url('admin.php?page=coovex-dev'); ?>">Open Dev Agent →</a>
+            âœ“ CooVex Dev is configured. <a href="<?php echo admin_url('admin.php?page=coovex-dev'); ?>">Open Dev Agent â†’</a>
         </div>
         <?php elseif (!$api_key): ?>
         <div style="margin-top:24px;padding:12px 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#991b1b;">
-            API key not set — the agent cannot connect to CooVex.
+            API key not set â€” the agent cannot connect to CooVex.
         </div>
         <?php elseif (!$has_pw): ?>
         <div style="margin-top:24px;padding:12px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#9a3412;">
-            Dev password not set — set a password to enable the agent.
+            Dev password not set â€” set a password to enable the agent.
         </div>
         <?php endif; ?>
 
@@ -2943,7 +2944,7 @@ function cvd_page_settings() {
                         <input type="password" id="cvd_telegram_bot_token" name="cvd_telegram_bot_token"
                             value="<?php echo esc_attr(get_option('cvd_telegram_bot_token','')); ?>"
                             class="regular-text" autocomplete="new-password" />
-                        <p class="description">From @BotFather: <code>/newbot</code> → copy the token.</p>
+                        <p class="description">From @BotFather: <code>/newbot</code> â†’ copy the token.</p>
                     </td>
                 </tr>
                 <tr>
@@ -2970,7 +2971,7 @@ function cvd_page_settings() {
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <?php if ($tg_token): ?>
             <button id="cvd-tg-register" class="button button-primary">
-                <?php echo $tg_registered ? '↻ Re-register Webhook' : '⚡ Register Telegram Webhook'; ?>
+                <?php echo $tg_registered ? 'â†» Re-register Webhook' : 'âš¡ Register Telegram Webhook'; ?>
             </button>
             <?php if ($tg_registered): ?>
             <button id="cvd-tg-unregister" class="button button-secondary">Remove Webhook</button>
@@ -2985,7 +2986,7 @@ function cvd_page_settings() {
 
         <?php if ($tg_registered): ?>
         <div style="margin-top:16px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;color:#166534;">
-            ✓ Telegram webhook active.
+            âœ“ Telegram webhook active.
             Webhook URL: <code><?php echo esc_html(rest_url('coovex-dev/v1/telegram')); ?></code>
         </div>
         <?php endif; ?>
@@ -3002,11 +3003,11 @@ function cvd_page_settings() {
                     body:'action=cvd_telegram_register&nonce=' + encodeURIComponent(nonce)})
                 .then(r => r.json()).then(function(d) {
                     if (d.success) {
-                        status.textContent = '✓ Webhook registered! Send /start to your bot.';
+                        status.textContent = 'âœ“ Webhook registered! Send /start to your bot.';
                         status.style.color = 'green';
                         location.reload();
                     } else {
-                        status.textContent = '✗ ' + (d.data || 'Error');
+                        status.textContent = 'âœ— ' + (d.data || 'Error');
                         status.style.color = 'red';
                         regBtn.disabled = false;
                     }
@@ -3027,7 +3028,7 @@ function cvd_page_settings() {
     <?php
 }
 
-// ── Commit History page ───────────────────────────────────────────────────────
+// â”€â”€ Commit History page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_page_history() {
     if (!current_user_can('manage_options')) return;
     $snaps = get_option('cvd_snapshots', []);
@@ -3035,7 +3036,7 @@ function cvd_page_history() {
     <div class="wrap">
         <h1 style="display:flex;align-items:center;gap:8px;">
             <span class="dashicons dashicons-backup" style="font-size:24px;color:#2563eb;"></span>
-            CooVex Dev — Commit History
+            CooVex Dev â€” Commit History
         </h1>
         <p style="color:#64748b;">Every change made by CooVex Dev is snapshotted before applying. Roll back any commit instantly.</p>
         <?php if (empty($snaps)): ?>
@@ -3056,13 +3057,13 @@ function cvd_page_history() {
                 <tr>
                     <td><code><?php echo esc_html($s['id']); ?></code></td>
                     <td><?php echo esc_html(wp_date('Y-m-d H:i:s', $s['time'])); ?></td>
-                    <td><?php echo esc_html(wp_trim_words($s['label'], 12, '…')); ?></td>
+                    <td><?php echo esc_html(wp_trim_words($s['label'], 12, 'â€¦')); ?></td>
                     <td><?php echo count($s['files']); ?> file(s)</td>
                     <td>
                         <button class="button button-secondary cvd-rollback-btn"
                             data-snap="<?php echo esc_attr($s['id']); ?>"
                             data-label="<?php echo esc_attr($s['label']); ?>">
-                            ↩ Roll back
+                            â†© Roll back
                         </button>
                     </td>
                 </tr>
@@ -3082,7 +3083,7 @@ function cvd_page_history() {
                 if (!confirm('Roll back to commit ' + snap + '?\n\nThis will restore all files from before:\n"' + label + '"')) return;
 
                 btn.disabled = true;
-                btn.textContent = 'Rolling back…';
+                btn.textContent = 'Rolling backâ€¦';
 
                 fetch(ajaxurl, {
                     method: 'POST',
@@ -3092,11 +3093,11 @@ function cvd_page_history() {
                 .then(r => r.json())
                 .then(function(d) {
                     if (d.success) {
-                        btn.textContent = '✓ Rolled back';
+                        btn.textContent = 'âœ“ Rolled back';
                         btn.style.color = 'green';
                         alert('Restored ' + (d.data.restored || []).length + ' file(s) from commit ' + snap);
                     } else {
-                        btn.textContent = '↩ Roll back';
+                        btn.textContent = 'â†© Roll back';
                         btn.disabled = false;
                         alert('Rollback failed: ' + (d.data || 'Unknown error'));
                     }
@@ -3108,7 +3109,7 @@ function cvd_page_history() {
     <?php
 }
 
-// ── Dev Agent page (main chat) ────────────────────────────────────────────────
+// â”€â”€ Dev Agent page (main chat) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cvd_page_agent() {
     if (!current_user_can('manage_options')) return;
 
@@ -3117,7 +3118,7 @@ function cvd_page_agent() {
 
     if (!$api_key || !$has_pw) {
         echo '<div class="wrap"><div style="margin-top:48px;max-width:480px;">';
-        echo '<h2>CooVex Dev — Setup Required</h2>';
+        echo '<h2>CooVex Dev â€” Setup Required</h2>';
         if (!$api_key) echo '<p>Add your <strong>CooVex API key</strong> in <a href="' . admin_url('admin.php?page=coovex-dev-settings') . '">Settings</a>.</p>';
         if (!$has_pw)  echo '<p>Set a <strong>dev password</strong> in <a href="' . admin_url('admin.php?page=coovex-dev-settings') . '">Settings</a>.</p>';
         echo '</div></div>';
@@ -3138,7 +3139,7 @@ function cvd_page_agent() {
         background: #0f172a;
         color: #e2e8f0;
     }
-    /* ── Sidebar ── */
+    /* â”€â”€ Sidebar â”€â”€ */
     #cvd-sidebar {
         width: 260px;
         min-width: 260px;
@@ -3222,7 +3223,7 @@ function cvd_page_agent() {
         cursor: pointer;
     }
     #cvd-sidebar-footer button:hover { background: #1e293b; color: #e2e8f0; }
-    /* ── Main ── */
+    /* â”€â”€ Main â”€â”€ */
     #cvd-main {
         flex: 1;
         display: flex;
@@ -3251,7 +3252,7 @@ function cvd_page_agent() {
         color: #475569;
         font-family: monospace;
     }
-    /* ── Messages ── */
+    /* â”€â”€ Messages â”€â”€ */
     #cvd-messages {
         flex: 1;
         overflow-y: auto;
@@ -3288,7 +3289,7 @@ function cvd_page_agent() {
     .cvd-msg.user .bubble { background: #1e3a8a; color: #e0f2fe; border-bottom-right-radius: 4px; }
     .cvd-msg.agent .bubble { background: #1e293b; color: #e2e8f0; border-bottom-left-radius: 4px; }
     .cvd-msg.agent.error .bubble { background: #450a0a; color: #fca5a5; }
-    /* ── Changes block ── */
+    /* â”€â”€ Changes block â”€â”€ */
     .cvd-changes { margin-top: 8px; width: 100%; }
     .cvd-change-item {
         background: #0f2441;
@@ -3356,7 +3357,7 @@ function cvd_page_agent() {
         background: transparent;
     }
     .cvd-rollback-inline:hover { background: #1e293b; }
-    /* ── Typing indicator ── */
+    /* â”€â”€ Typing indicator â”€â”€ */
     .cvd-typing { display: flex; align-items: center; gap: 4px; padding: 8px 14px; }
     .cvd-typing span {
         width: 6px; height: 6px;
@@ -3367,7 +3368,7 @@ function cvd_page_agent() {
     .cvd-typing span:nth-child(2) { animation-delay: .15s; }
     .cvd-typing span:nth-child(3) { animation-delay: .3s; }
     @keyframes cvd-bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
-    /* ── Input ── */
+    /* â”€â”€ Input â”€â”€ */
     #cvd-input-area {
         padding: 16px 20px;
         border-top: 1px solid #1e293b;
@@ -3406,7 +3407,7 @@ function cvd_page_agent() {
     #cvd-send-btn:hover:not(:disabled) { background: #1d4ed8; }
     #cvd-send-btn:disabled { opacity: .4; cursor: not-allowed; }
     #cvd-input-hint { font-size: 11px; color: #334155; padding: 0 20px 8px; text-align: right; }
-    /* ── Auth overlay ── */
+    /* â”€â”€ Auth overlay â”€â”€ */
     #cvd-auth-overlay {
         position: absolute;
         inset: 0;
@@ -3468,14 +3469,14 @@ function cvd_page_agent() {
         <!-- Auth overlay -->
         <div id="cvd-auth-overlay" style="display: <?php echo $already_authed === 'true' ? 'none' : 'flex'; ?>;">
             <div id="cvd-auth-box">
-                <div class="icon">🔑</div>
+                <div class="icon">ðŸ”‘</div>
                 <h2>CooVex Dev</h2>
                 <p>Enter your dev password to start this session.<br>Sessions expire after <?php echo $session_ttl_min; ?> minutes of inactivity.</p>
                 <input type="password" id="cvd-auth-input" placeholder="Dev password" autocomplete="current-password" />
                 <button id="cvd-auth-btn">Unlock</button>
                 <div id="cvd-auth-error"></div>
                 <div id="cvd-auth-links">
-                    <a href="<?php echo admin_url('admin.php?page=coovex-dev-settings'); ?>">Forgot password? Reset in Settings →</a>
+                    <a href="<?php echo admin_url('admin.php?page=coovex-dev-settings'); ?>">Forgot password? Reset in Settings â†’</a>
                 </div>
             </div>
         </div>
@@ -3487,7 +3488,7 @@ function cvd_page_agent() {
                 <span class="cvd-logo">CooVex Dev</span>
                 <span class="cvd-version">v<?php echo CVD_VERSION; ?></span>
             </div>
-            <div id="cvd-credits-bar">Credits remaining: <span id="cvd-credits-val">—</span></div>
+            <div id="cvd-credits-bar">Credits remaining: <span id="cvd-credits-val">â€”</span></div>
             <div id="cvd-snap-list">
                 <?php
                 $snaps = get_option('cvd_snapshots', []);
@@ -3495,7 +3496,7 @@ function cvd_page_agent() {
                 ?>
                 <div class="snap-item" data-snap="<?php echo esc_attr($s['id']); ?>">
                     <div class="snap-id"># <?php echo esc_html($s['id']); ?></div>
-                    <div class="snap-label"><?php echo esc_html(wp_trim_words($s['label'], 8, '…')); ?></div>
+                    <div class="snap-label"><?php echo esc_html(wp_trim_words($s['label'], 8, 'â€¦')); ?></div>
                     <div class="snap-time"><?php echo esc_html(human_time_diff($s['time'])); ?> ago</div>
                 </div>
                 <?php endforeach; ?>
@@ -3517,7 +3518,7 @@ function cvd_page_agent() {
 
             <div id="cvd-messages">
                 <div class="cvd-msg agent">
-                    <div class="avatar">⚡</div>
+                    <div class="avatar">âš¡</div>
                     <div class="bubble">Welcome to CooVex Dev. I can write code, install plugins, edit themes, and modify your database.
 
 What would you like to build or change?</div>
@@ -3525,10 +3526,10 @@ What would you like to build or change?</div>
             </div>
 
             <div id="cvd-input-area">
-                <textarea id="cvd-textarea" rows="1" placeholder="Tell me what to build or change… (Ctrl+Enter to send)"></textarea>
+                <textarea id="cvd-textarea" rows="1" placeholder="Tell me what to build or changeâ€¦ (Ctrl+Enter to send)"></textarea>
                 <button id="cvd-send-btn">Send</button>
             </div>
-            <div id="cvd-input-hint">Ctrl+Enter to send · credits deducted per use</div>
+            <div id="cvd-input-hint">Ctrl+Enter to send Â· credits deducted per use</div>
         </div>
 
     </div>
@@ -3543,7 +3544,7 @@ What would you like to build or change?</div>
         var lastActivity = Date.now();
         var sessionStart = Date.now();
 
-        // ── Auth ──────────────────────────────────────────────────────────────
+        // â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         var authInput  = document.getElementById('cvd-auth-input');
         var authBtn    = document.getElementById('cvd-auth-btn');
         var authError  = document.getElementById('cvd-auth-error');
@@ -3553,7 +3554,7 @@ What would you like to build or change?</div>
             var pw = authInput.value;
             if (!pw) return;
             authBtn.disabled = true;
-            authBtn.textContent = 'Unlocking…';
+            authBtn.textContent = 'Unlockingâ€¦';
 
             ajax('cvd_auth', {password: pw})
             .then(function(r) {
@@ -3577,7 +3578,7 @@ What would you like to build or change?</div>
         authBtn.addEventListener('click', doAuth);
         authInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doAuth(); });
 
-        // ── Logout / lock ─────────────────────────────────────────────────────
+        // â”€â”€ Logout / lock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         document.getElementById('cvd-logout-btn').addEventListener('click', function() {
             ajax('cvd_logout', {}).then(function() {
                 authenticated = false;
@@ -3586,7 +3587,7 @@ What would you like to build or change?</div>
             });
         });
 
-        // ── Session timer ─────────────────────────────────────────────────────
+        // â”€â”€ Session timer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         var timerEl = document.getElementById('cvd-session-timer');
         setInterval(function() {
             if (!authenticated) return;
@@ -3604,7 +3605,7 @@ What would you like to build or change?</div>
             else timerEl.style.color = '';
         }, 1000);
 
-        // ── Send command ──────────────────────────────────────────────────────
+        // â”€â”€ Send command â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         var textarea  = document.getElementById('cvd-textarea');
         var sendBtn   = document.getElementById('cvd-send-btn');
         var messages  = document.getElementById('cvd-messages');
@@ -3677,7 +3678,7 @@ What would you like to build or change?</div>
 
             var avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.textContent = isUser ? wp_username_initial : '⚡';
+            avatar.textContent = isUser ? wp_username_initial : 'âš¡';
 
             var bubble = document.createElement('div');
             bubble.className = 'bubble';
@@ -3717,11 +3718,11 @@ What would you like to build or change?</div>
 
                     var filepath = document.createElement('span');
                     filepath.className = 'filepath';
-                    filepath.textContent = ok ? label : ('✗ ' + label + ' — ' + (ch.error || 'failed'));
+                    filepath.textContent = ok ? label : ('âœ— ' + label + ' â€” ' + (ch.error || 'failed'));
 
                     var toggleIcon = document.createElement('span');
                     toggleIcon.className = 'toggle-icon';
-                    toggleIcon.textContent = '▼';
+                    toggleIcon.textContent = 'â–¼';
 
                     header.appendChild(badge);
                     header.appendChild(filepath);
@@ -3737,13 +3738,13 @@ What would you like to build or change?</div>
                     } else if (type === 'db' && ch.rows_affected != null) {
                         var p = document.createElement('p');
                         p.style.cssText = 'margin:0;font-size:12px;color:#86efac;';
-                        p.textContent = 'Query OK — ' + ch.rows_affected + ' row(s) affected.';
+                        p.textContent = 'Query OK â€” ' + ch.rows_affected + ' row(s) affected.';
                         body.appendChild(p);
                     }
 
                     header.addEventListener('click', function() {
                         item.classList.toggle('open');
-                        toggleIcon.textContent = item.classList.contains('open') ? '▲' : '▼';
+                        toggleIcon.textContent = item.classList.contains('open') ? 'â–²' : 'â–¼';
                     });
 
                     item.appendChild(header);
@@ -3754,13 +3755,13 @@ What would you like to build or change?</div>
                 if (snap_id) {
                     var rbBtn = document.createElement('button');
                     rbBtn.className = 'cvd-rollback-inline';
-                    rbBtn.innerHTML = '↩ Roll back this change';
+                    rbBtn.innerHTML = 'â†© Roll back this change';
                     rbBtn.addEventListener('click', function() {
                         if (!confirm('Roll back to before this change?')) return;
                         rbBtn.disabled = true;
                         ajax('cvd_rollback', {snap_id: snap_id}).then(function(r) {
                             if (r.success) {
-                                rbBtn.textContent = '✓ Rolled back';
+                                rbBtn.textContent = 'âœ“ Rolled back';
                                 rbBtn.style.color = '#86efac';
                             } else {
                                 alert('Rollback failed: ' + r.data);
@@ -3783,7 +3784,7 @@ What would you like to build or change?</div>
             wrap.className = 'cvd-msg agent';
             var avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.textContent = '⚡';
+            avatar.textContent = 'âš¡';
             var bubble = document.createElement('div');
             bubble.className = 'bubble';
             bubble.innerHTML = '<div class="cvd-typing"><span></span><span></span><span></span></div>';
@@ -3813,7 +3814,7 @@ What would you like to build or change?</div>
             if (!confirm('Roll back to commit ' + item.dataset.snap + '?')) return;
             ajax('cvd_rollback', {snap_id: item.dataset.snap}).then(function(r) {
                 if (r.success) {
-                    addMessage('agent', '✓ Rolled back ' + (r.data.restored || []).length + ' file(s) from commit ' + item.dataset.snap + '.');
+                    addMessage('agent', 'âœ“ Rolled back ' + (r.data.restored || []).length + ' file(s) from commit ' + item.dataset.snap + '.');
                 } else {
                     alert('Rollback failed: ' + r.data);
                 }
@@ -3826,7 +3827,7 @@ What would you like to build or change?</div>
             history = [];
         });
 
-        // ── Ping heartbeat (every 2 minutes) ──────────────────────────────────
+        // â”€â”€ Ping heartbeat (every 2 minutes) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         setInterval(function() {
             if (!authenticated) return;
             fetch(AJAXURL + '?action=cvd_ping')
@@ -3839,7 +3840,7 @@ What would you like to build or change?</div>
             });
         }, 2 * 60 * 1000);
 
-        // ── AJAX helper ───────────────────────────────────────────────────────
+        // â”€â”€ AJAX helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         function ajax(action, data) {
             var params = new URLSearchParams();
             params.set('action', action);
@@ -3863,7 +3864,7 @@ What would you like to build or change?</div>
     <?php
 }
 
-// ── Admin notice for license issues ───────────────────────────────────────────
+// â”€â”€ Admin notice for license issues â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('admin_notices', function () {
     if (!current_user_can('manage_options')) return;
     $screen = get_current_screen();
@@ -3877,15 +3878,15 @@ add_action('admin_notices', function () {
     }
 });
 
-// ── Deactivation: unschedule cron ─────────────────────────────────────────────
+// â”€â”€ Deactivation: unschedule cron â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 register_deactivation_hook(__FILE__, function () {
     wp_clear_scheduled_hook('cvd_cleanup_exports');
     wp_clear_scheduled_hook('cvd_daily_license_check');
     wp_clear_scheduled_hook('cvd_telegram_async');
 });
 
-// ── Uninstall cleanup ─────────────────────────────────────────────────────────
-// Must be a named function — register_uninstall_hook() serialises the callback
+// â”€â”€ Uninstall cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Must be a named function â€” register_uninstall_hook() serialises the callback
 // to the DB; PHP cannot serialise anonymous functions (Closure).
 function cvd_uninstall_cleanup(): void {
     delete_option('cvd_api_key');
@@ -3910,7 +3911,7 @@ register_uninstall_hook(__FILE__, 'cvd_uninstall_cleanup');
 `
 
 export async function GET(_req: Request) {
-  // Require authentication — the plugin is only available to CooVex users
+  // Require authentication â€” the plugin is only available to CooVex users
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -3973,3 +3974,4 @@ export async function GET(_req: Request) {
     },
   })
 }
+
