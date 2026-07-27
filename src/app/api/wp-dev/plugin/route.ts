@@ -8,7 +8,7 @@ export const COOVEX_DEV_PHP = `<?php
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
  * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language — CooVex Dev delivers working code.
- * Version:     1.4.1
+ * Version:     1.4.2
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -19,7 +19,7 @@ export const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-define('CVD_VERSION',         '1.4.1');
+define('CVD_VERSION',         '1.4.2');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
@@ -311,9 +311,11 @@ add_action('cvd_cleanup_exports', function () {
         if (filemtime($file) < time() - DAY_IN_SECONDS) @unlink($file);
     }
 });
-if (!wp_next_scheduled('cvd_cleanup_exports')) {
-    wp_schedule_event(time(), 'daily', 'cvd_cleanup_exports');
-}
+add_action('init', function () {
+    if (!wp_next_scheduled('cvd_cleanup_exports')) {
+        wp_schedule_event(time(), 'daily', 'cvd_cleanup_exports');
+    }
+});
 
 // ── Admin Dashboard Widget ────────────────────────────────────────────────────
 add_action('wp_dashboard_setup', function () {

@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server'
 
 // ── Bump this when releasing a new plugin version ─────────────────────────────
 // Also update CVD_VERSION constant in plugin/route.ts (must match).
-export const CVD_CURRENT_VERSION    = '1.4.1'
+export const CVD_CURRENT_VERSION    = '1.4.2'
 export const CVD_REQUIRES_WP        = '5.9'
 export const CVD_TESTED_WP          = '6.8'
 export const CVD_REQUIRES_PHP       = '7.4'
 
 const CHANGELOG = `\
-= 1.4.1 - 2026-07-27 =
-* Fix: fatal error on activation caused by uninstall hook using anonymous function (PHP cannot serialise closures)
-* Fix: theme installer class_exists guard to prevent redeclaration on repeated calls
-* Fix: deactivation hook now correctly unschedules cvd_cleanup_exports cron
+= 1.4.2 - 2026-07-27 =
+* Fix: fatal error on activation — moved cron scheduling into init hook (top-level wp_schedule_event during sandbox check was problematic)
+* Fix: uninstall hook now uses a named function (PHP cannot serialise closures to DB)
+* Fix: class_exists guard on CVD_Theme_Skin to prevent redeclaration errors
+* Fix: deactivation hook now correctly unschedules all cron events
 
 = 1.4.0 - 2026-07-27 =
 * WooCommerce: create/update/delete products, create coupons, update order status
