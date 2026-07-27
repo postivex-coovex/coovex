@@ -390,6 +390,144 @@ function normalizeUrl(url: string): string {
   catch { return url.toLowerCase().trim().replace(/\/$/, '') }
 }
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Accept',
+}
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: { ...CORS, 'Access-Control-Max-Age': '86400' } })
+}
+
+// ── Streaming SSE response ─────────────────────────────────────────────────────
+async function buildStream(params: {
+  messages: LLMMessage[]
+  claudeMsgs: { role: 'user' | 'assistant'; content: unknown }[]
+  api_key: string
+  site_info: SiteInfo | undefined
+  business: { id: string; workspace_id: string; name: string; website_url: string }
+  command: string
+  request_nonce: string
+}): Promise<Response> {
+  const { messages: _messages, claudeMsgs, api_key, site_info, business, command, request_nonce } = params
+
+  const enc = new TextEncoder()
+  const body = new ReadableStream({
+    async start(controller) {
+      const send = (type: string, data: Record<string, unknown> = {}) => {
+        try { controller.enqueue(enc.encode(`data: ${JSON.stringify({ type, ...data })}\n\n`)) } catch {}
+      }
+
+      try {
+        send('status', { message: 'Analyzing...' })
+
+        const { default: Anthropic } = await import('@anthropic-ai/sdk')
+        const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+
+        send('status', { message: 'Generating response...' })
+
+        let fullText = ''
+        let inputTokens = 0
+        let outputTokens = 0
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const stream = (client.messages as any).stream({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 8192,
+          system: SYSTEM_PROMPT,
+          messages: claudeMsgs,
+        })
+
+        stream.on('text', (text: string) => {
+          fullText += text
+          send('token', { text })
+        })
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const final = await stream.finalMessage() as any
+        inputTokens  = final.usage?.input_tokens  ?? 0
+        outputTokens = final.usage?.output_tokens ?? 0
+
+        // Parse JSON from Claude
+        const cleaned = fullText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim()
+        let parsed: { message: string; changes: unknown[]; read_only?: boolean }
+        try { parsed = JSON.parse(cleaned) }
+        catch { parsed = { message: fullText, changes: [], read_only: true } }
+
+        // Resolve generate_image → sideload_image (same as non-streaming path)
+        if (Array.isArray(parsed.changes)) {
+          const resolved: unknown[] = []
+          for (const ch of parsed.changes) {
+            const change = ch as Record<string, unknown>
+            if (change.type !== 'generate_image') { resolved.push(ch); continue }
+            try {
+              const { default: OpenAI } = await import('openai')
+              const oai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+              const imgRes = await oai.images.generate({
+                model: 'dall-e-3', prompt: (change.prompt as string) ?? '',
+                n: 1, size: '1792x1024', quality: 'standard', response_format: 'url',
+              })
+              const imageUrl = imgRes.data?.[0]?.url
+              if (imageUrl) {
+                resolved.push({
+                  type: 'wp_action', action: 'sideload_image',
+                  data: { url: imageUrl, post_id: change.post_id ?? 0, title: change.alt, alt: change.alt, set_as_featured: change.set_as_featured },
+                })
+              }
+            } catch {}
+          }
+          parsed.changes = resolved
+        }
+
+        // Billing
+        const usage: LLMUsage = { input_tokens: inputTokens, output_tokens: outputTokens, model: 'claude-sonnet-4-6', provider: 'claude' }
+        const llmCostUsd      = calcLLMCostUsd(usage)
+        const creditsToDeduct = Math.max(1, Math.ceil(llmCostUsd * MARKUP / USD_PER_CREDIT))
+        const creditResult    = await deductCreditsAmount(
+          business.workspace_id, creditsToDeduct, `CooVex Dev: ${command.slice(0, 60)}`,
+        )
+        if (!creditResult.ok) {
+          send('error', { message: creditResult.error || 'Insufficient credits.' })
+          controller.close(); return
+        }
+
+        // Sign response (same mechanism as non-streaming)
+        const responsePayload = {
+          ok:                true,
+          message:           parsed.message,
+          changes:           parsed.changes ?? [],
+          read_only:         parsed.read_only ?? false,
+          credits_used:      creditsToDeduct,
+          credits_remaining: creditResult.balance,
+        }
+        const rawBody      = JSON.stringify(responsePayload)
+        const siteUrl      = normalizeUrl(site_info?.site_url ?? business.website_url ?? '')
+        const licenseToken = deriveLicenseToken(api_key, siteUrl, getTodayUTC())
+        const sig          = signResponseBody(rawBody, licenseToken, request_nonce)
+
+        send('result', { ...responsePayload, sig, nonce: request_nonce, raw_body: rawBody })
+        controller.close()
+
+      } catch (err) {
+        send('error', { message: (err as Error).message || 'Internal error' })
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+      ...CORS,
+    },
+  })
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -404,7 +542,7 @@ export async function POST(req: NextRequest) {
     } = body
 
     if (!api_key || !command) {
-      return NextResponse.json({ error: 'api_key and command required' }, { status: 400 })
+      return NextResponse.json({ error: 'api_key and command required' }, { status: 400, headers: CORS })
     }
 
     const service = createServiceClient()
@@ -417,7 +555,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle()
 
     if (!business) {
-      return NextResponse.json({ error: 'Invalid API key' }, { status: 401 })
+      return NextResponse.json({ error: 'Invalid API key' }, { status: 401, headers: CORS })
     }
 
     // ── Site URL binding check ────────────────────────────────────────────────
@@ -432,7 +570,7 @@ export async function POST(req: NextRequest) {
 
       if (license) {
         if (license.revoked) {
-          return NextResponse.json({ error: 'License revoked.', code: 'REVOKED' }, { status: 403 })
+          return NextResponse.json({ error: 'License revoked.', code: 'REVOKED' }, { status: 403, headers: CORS })
         }
         const registered = normalizeUrl(license.site_url)
         const incoming   = normalizeUrl(siteUrlFromRequest)
@@ -440,7 +578,7 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({
             error: 'This plugin is registered to a different domain.',
             code: 'SITE_MISMATCH',
-          }, { status: 403 })
+          }, { status: 403, headers: CORS })
         }
       }
     }
@@ -472,6 +610,31 @@ export async function POST(req: NextRequest) {
           { role: 'user', content: command },
         ]
       : [{ role: 'user', content: `SITE CONTEXT:\n${contextBlock}\n\n---\nCOMMAND: ${command}` }]
+
+    // Build claudeMsgs with optional screenshot/file content blocks
+    type ContentBlock =
+      | { type: 'text'; text: string }
+      | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+    const hasScreenshot = screenshot && /^data:image\/(png|jpeg|gif|webp);base64,/.test(screenshot)
+    const hasFile = file_data && file_data.content
+    const claudeMsgs = messages.map((m, i) => {
+      if (i !== messages.length - 1 || (!hasScreenshot && !hasFile)) {
+        return { role: m.role as 'user' | 'assistant', content: m.content }
+      }
+      const blocks: ContentBlock[] = []
+      if (hasScreenshot) {
+        const mime = (screenshot!.match(/^data:(image\/[^;]+)/) ?? [])[1] ?? 'image/jpeg'
+        blocks.push({ type: 'image', source: { type: 'base64', media_type: mime, data: screenshot!.replace(/^data:image\/[^;]+;base64,/, '') } })
+      }
+      blocks.push({ type: 'text', text: m.content })
+      return { role: m.role as 'user' | 'assistant', content: blocks }
+    })
+
+    // ── Streaming path (browser calling directly) ────────────────────────────
+    const wantsStream = req.headers.get('Accept')?.includes('text/event-stream') === true
+    if (wantsStream) {
+      return buildStream({ messages, claudeMsgs, api_key, site_info, business, command, request_nonce: request_nonce ?? '' })
+    }
 
     // Call AI with auto-switch (Claude Sonnet → OpenAI fallback)
     const { text: raw, usage } = await callWithAutoSwitch(messages, SYSTEM_PROMPT, screenshot, file_data)
@@ -539,7 +702,7 @@ export async function POST(req: NextRequest) {
       `CooVex Dev: ${command.slice(0, 60)}`,
     )
     if (!creditResult.ok) {
-      return NextResponse.json({ error: creditResult.error }, { status: 402 })
+      return NextResponse.json({ error: creditResult.error }, { status: 402, headers: CORS })
     }
 
     // ── Sign the response (HMAC using daily license token) ───────────────────
@@ -567,10 +730,11 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
         'X-CVD-Sig':    signature,
         'X-CVD-Nonce':  nonce,
+        ...CORS,
       },
     })
   } catch (err) {
     console.error('POST /api/wp-dev/command error:', err)
-    return NextResponse.json({ error: (err as Error).message || 'Internal error' }, { status: 500 })
+    return NextResponse.json({ error: (err as Error).message || 'Internal error' }, { status: 500, headers: CORS })
   }
 }

@@ -2,12 +2,19 @@
 
 // â”€â”€ Bump this when releasing a new plugin version â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Also update CVD_VERSION constant in plugin/route.ts (must match).
-export const CVD_CURRENT_VERSION    = '1.4.6'
+export const CVD_CURRENT_VERSION    = '1.5.0'
 export const CVD_REQUIRES_WP        = '5.9'
 export const CVD_TESTED_WP          = '6.8'
 export const CVD_REQUIRES_PHP       = '7.4'
 
 const CHANGELOG = `\
+= 1.5.0 - 2026-07-28 =
+* New: VS Code-like Activity panel — shows every change the agent is making in real time
+* Fix: timeout eliminated — agent now streams directly from the AI (no more 90-second PHP proxy timeout)
+* New: streaming response — text appears token-by-token so you see progress immediately
+* New: change status indicators — each change shows pending/applying/done/failed live
+* New: changes list with type badges (FILE/SQL/PLUG/WP) and descriptions before they are applied
+
 = 1.4.5 - 2026-07-27 =
 * Fix: removed HTTP request from activation hook — license now validates on first admin page load instead
 * Fix: eliminated top-level wp_next_scheduled() call that ran before init during activation sandbox check

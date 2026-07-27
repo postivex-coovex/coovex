@@ -19,7 +19,7 @@ export const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-define('CVD_VERSION',         '1.4.6');
+define('CVD_VERSION',         '1.5.0');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
@@ -2022,6 +2022,96 @@ add_action('wp_ajax_cvd_command', function () {
     ]);
 });
 
+// ── AJAX: get_context (browser gets credentials for direct SSE streaming) ─────
+add_action('wp_ajax_cvd_get_context', function () {
+    check_ajax_referer('cvd_nonce', 'nonce');
+    if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
+    if (!cvd_rate_check())                   wp_send_json_error('Rate limit reached.', 429);
+
+    if (!cvd_license_ok()) {
+        $status = get_option('cvd_license_status', '');
+        if ($status === 'revoked')       wp_send_json_error('License revoked.', 403);
+        if ($status === 'site_mismatch') wp_send_json_error('License domain mismatch.', 403);
+        wp_send_json_error('License not validated. Check your API key in Settings.', 402);
+    }
+
+    $api_key = get_option('cvd_api_key', '');
+    if (empty($api_key)) wp_send_json_error('API key not configured.', 400);
+
+    $command       = sanitize_textarea_field($_POST['command'] ?? '');
+    $request_nonce = bin2hex(random_bytes(16));
+    $site_context  = cvd_site_context($command);
+
+    $cmd_lower    = strtolower($command);
+    $sec_keywords = ['security','malware','hack','hacked','scan','inject','suspicious','virus','infected','clean my','vulnerability'];
+    foreach ($sec_keywords as $kw) {
+        if (strpos($cmd_lower, $kw) !== false) {
+            $site_context['security_scan'] = cvd_security_scan();
+            break;
+        }
+    }
+
+    $raw_history = json_decode(stripslashes($_POST['history'] ?? '[]'), true) ?? [];
+    $history     = array_slice($raw_history, -10);
+
+    wp_send_json_success([
+        'api_key'       => $api_key,
+        'stream_url'    => CVD_API_URL,
+        'site_info'     => $site_context,
+        'history'       => $history,
+        'request_nonce' => $request_nonce,
+    ]);
+});
+
+// ── AJAX: apply_changes (browser sends SSE result; PHP verifies + applies) ────
+add_action('wp_ajax_cvd_apply_changes', function () {
+    check_ajax_referer('cvd_nonce', 'nonce');
+    if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
+
+    $changes   = json_decode(stripslashes($_POST['changes']   ?? '[]'), true) ?? [];
+    $sig       = sanitize_text_field($_POST['sig']       ?? '');
+    $sig_nonce = sanitize_text_field($_POST['sig_nonce'] ?? '');
+    $raw_body  = wp_unslash($_POST['raw_body'] ?? '');
+    $command   = sanitize_textarea_field($_POST['command'] ?? '');
+
+    if (!empty($sig) && !empty($raw_body)) {
+        if (!cvd_verify_response($raw_body, $sig, $sig_nonce)) {
+            cvd_license_validate();
+            if (!cvd_verify_response($raw_body, $sig, $sig_nonce)) {
+                wp_send_json_error('Response integrity check failed. Changes not applied.', 400);
+            }
+        }
+    }
+
+    $files_touched = [];
+    foreach ($changes as $ch) {
+        if (($ch['type'] ?? 'file') === 'file' && !empty($ch['file'])) {
+            $files_touched[] = $ch['file'];
+        }
+    }
+
+    $snap_id = !empty($files_touched) ? cvd_snapshot_take($files_touched, $command) : null;
+
+    $results = [];
+    foreach ($changes as $ch) {
+        $results[] = cvd_apply_change($ch);
+    }
+
+    cvd_audit_log([
+        'command' => $command,
+        'changes' => count($changes),
+        'snap_id' => $snap_id,
+        'sig_ok'  => !empty($sig),
+        'user'    => wp_get_current_user()->user_login,
+        'time'    => time(),
+    ]);
+
+    wp_send_json_success([
+        'results' => $results,
+        'snap_id' => $snap_id,
+    ]);
+});
+
 // â”€â”€ AJAX: rollback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_ajax_cvd_rollback', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
@@ -3477,9 +3567,150 @@ function cvd_page_agent() {
     #cvd-auth-links a { font-size: 12px; color: #475569; text-decoration: none; }
     #cvd-auth-links a:hover { color: #94a3b8; }
     /* Scrollbar */
-    #cvd-messages::-webkit-scrollbar, #cvd-snap-list::-webkit-scrollbar { width: 4px; }
-    #cvd-messages::-webkit-scrollbar-track, #cvd-snap-list::-webkit-scrollbar-track { background: transparent; }
+    #cvd-messages::-webkit-scrollbar, #cvd-snap-list::-webkit-scrollbar, #cvd-activity-list::-webkit-scrollbar { width: 4px; }
+    #cvd-messages::-webkit-scrollbar-track, #cvd-snap-list::-webkit-scrollbar-track, #cvd-activity-list::-webkit-scrollbar-track { background: transparent; }
     #cvd-messages::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    #cvd-activity-list::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+    /* ── Activity panel ── */
+    #cvd-activity {
+        width: 300px;
+        min-width: 300px;
+        background: #070d1a;
+        border-left: 1px solid #1e293b;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: width .25s ease, min-width .25s ease;
+    }
+    #cvd-activity.cvd-act-hidden {
+        width: 0;
+        min-width: 0;
+        border-left: none;
+    }
+    #cvd-activity-header {
+        padding: 10px 14px;
+        border-bottom: 1px solid #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    #cvd-activity-header .cvd-act-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #475569;
+        flex: 1;
+    }
+    #cvd-activity-close {
+        background: none;
+        border: none;
+        color: #334155;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 2px 4px;
+        line-height: 1;
+        border-radius: 4px;
+    }
+    #cvd-activity-close:hover { color: #94a3b8; background: #1e293b; }
+    #cvd-activity-status {
+        padding: 10px 14px;
+        border-bottom: 1px solid #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #64748b;
+        flex-shrink: 0;
+        min-height: 38px;
+    }
+    .cvd-act-spinner {
+        width: 12px;
+        height: 12px;
+        border: 2px solid #1e293b;
+        border-top-color: #60a5fa;
+        border-radius: 50%;
+        animation: cvd-spin .7s linear infinite;
+        flex-shrink: 0;
+    }
+    @keyframes cvd-spin { to { transform: rotate(360deg); } }
+    #cvd-activity-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+    .cvd-act-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 8px 14px;
+        border-bottom: 1px solid #0a0f1e;
+        transition: background .12s;
+    }
+    .cvd-act-item:hover { background: #0d1526; }
+    .cvd-act-icon {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1.5px solid #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 8px;
+        flex-shrink: 0;
+        margin-top: 1px;
+        color: #475569;
+        transition: all .2s;
+    }
+    .cvd-act-icon.applying {
+        border-color: #3b82f6;
+        border-top-color: transparent;
+        animation: cvd-spin .7s linear infinite;
+        color: transparent;
+    }
+    .cvd-act-icon.done {
+        background: #052e16;
+        border-color: #166534;
+        color: #86efac;
+    }
+    .cvd-act-icon.fail {
+        background: #3f0a0a;
+        border-color: #7f1d1d;
+        color: #fca5a5;
+    }
+    .cvd-act-info { flex: 1; min-width: 0; }
+    .cvd-act-badge {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        padding: 1px 5px;
+        border-radius: 3px;
+        margin-bottom: 3px;
+    }
+    .cvd-act-badge-file   { background: #0f2441; color: #60a5fa; }
+    .cvd-act-badge-db     { background: #1e0f3d; color: #c4b5fd; }
+    .cvd-act-badge-plugin { background: #0c2010; color: #86efac; }
+    .cvd-act-badge-wp     { background: #1a1200; color: #fbbf24; }
+    .cvd-act-desc {
+        font-family: monospace;
+        font-size: 11px;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .cvd-act-desc.ok   { color: #94a3b8; }
+    .cvd-act-desc.fail { color: #f87171; }
+    #cvd-activity-footer {
+        padding: 8px 14px;
+        border-top: 1px solid #1e293b;
+        font-size: 11px;
+        color: #334155;
+        flex-shrink: 0;
+        min-height: 30px;
+    }
     </style>
 
     <div id="cvd-app" style="position:relative;">
@@ -3547,7 +3778,21 @@ What would you like to build or change?</div>
                 <textarea id="cvd-textarea" rows="1" placeholder="Tell me what to build or changeâ€¦ (Ctrl+Enter to send)"></textarea>
                 <button id="cvd-send-btn">Send</button>
             </div>
-            <div id="cvd-input-hint">Ctrl+Enter to send Â· credits deducted per use</div>
+            <div id="cvd-input-hint">Ctrl+Enter to send &middot; credits deducted per use</div>
+        </div>
+
+        <!-- Activity panel -->
+        <div id="cvd-activity" class="cvd-act-hidden">
+            <div id="cvd-activity-header">
+                <span class="cvd-act-title">Activity</span>
+                <button id="cvd-activity-close" title="Close">&#215;</button>
+            </div>
+            <div id="cvd-activity-status">
+                <div class="cvd-act-spinner" id="cvd-act-spinner"></div>
+                <span id="cvd-act-status-text">Waiting...</span>
+            </div>
+            <div id="cvd-activity-list"></div>
+            <div id="cvd-activity-footer"></div>
         </div>
 
     </div>
@@ -3640,6 +3885,100 @@ What would you like to build or change?</div>
 
         sendBtn.addEventListener('click', sendCommand);
 
+        // ── Activity panel refs ───────────────────────────────────────────────
+        var actPanel      = document.getElementById('cvd-activity');
+        var actList       = document.getElementById('cvd-activity-list');
+        var actFooter     = document.getElementById('cvd-activity-footer');
+        var actStatusText = document.getElementById('cvd-act-status-text');
+        var actSpinner    = document.getElementById('cvd-act-spinner');
+
+        function actOpen()  { actPanel.classList.remove('cvd-act-hidden'); }
+        function actClose() { actPanel.classList.add('cvd-act-hidden'); }
+        function actStatus(text, spin) {
+            actStatusText.textContent = text;
+            actSpinner.style.display = spin ? '' : 'none';
+        }
+
+        function actChangeBadge(ch) {
+            var t = ch.type || 'file';
+            if (t === 'db') return ['SQL', 'cvd-act-badge-db'];
+            if (t === 'plugin_install') return ['PLUG', 'cvd-act-badge-plugin'];
+            if (t === 'wp_action') return ['WP', 'cvd-act-badge-wp'];
+            return [(ch.action || 'FILE').toUpperCase().slice(0,6), 'cvd-act-badge-file'];
+        }
+        function actChangeDesc(ch) {
+            var t = ch.type || 'file';
+            if (t === 'file') return ch.file || 'file';
+            if (t === 'db') return ch.description || 'SQL query';
+            if (t === 'plugin_install') return ch.slug || 'plugin';
+            if (t === 'wp_action') return (ch.action || '') + (ch.data && ch.data.name ? ': ' + ch.data.name : ch.data && ch.data.post_title ? ': ' + ch.data.post_title : '');
+            return ch.type || 'change';
+        }
+
+        function actRenderChanges(changes) {
+            actList.innerHTML = '';
+            changes.forEach(function(ch, i) {
+                var row = document.createElement('div');
+                row.className = 'cvd-act-item';
+                row.dataset.idx = i;
+
+                var icon = document.createElement('div');
+                icon.className = 'cvd-act-icon';
+                icon.innerHTML = '&#9675;';
+
+                var info = document.createElement('div');
+                info.className = 'cvd-act-info';
+
+                var badgeInfo = actChangeBadge(ch);
+                var badge = document.createElement('span');
+                badge.className = 'cvd-act-badge ' + badgeInfo[1];
+                badge.textContent = badgeInfo[0];
+
+                var desc = document.createElement('div');
+                desc.className = 'cvd-act-desc';
+                desc.textContent = actChangeDesc(ch);
+                desc.title = actChangeDesc(ch);
+
+                info.appendChild(badge);
+                info.appendChild(desc);
+                row.appendChild(icon);
+                row.appendChild(info);
+                actList.appendChild(row);
+            });
+            actList.scrollTop = 0;
+        }
+
+        function actMarkDone(results) {
+            var rows = actList.querySelectorAll('.cvd-act-item');
+            rows.forEach(function(row, i) {
+                var icon = row.querySelector('.cvd-act-icon');
+                var desc = row.querySelector('.cvd-act-desc');
+                var res  = results[i];
+                if (!res) { icon.className = 'cvd-act-icon fail'; icon.innerHTML = '&#10005;'; return; }
+                if (res.ok !== false) {
+                    icon.className = 'cvd-act-icon done';
+                    icon.innerHTML = '&#10003;';
+                    desc.className = 'cvd-act-desc ok';
+                } else {
+                    icon.className = 'cvd-act-icon fail';
+                    icon.innerHTML = '&#10005;';
+                    desc.className = 'cvd-act-desc fail';
+                    if (res.error) desc.title = res.error;
+                }
+            });
+        }
+
+        document.getElementById('cvd-activity-close').addEventListener('click', actClose);
+
+        function addCreditsNote(used) {
+            if (used == null) return;
+            var note = document.createElement('span');
+            note.style.cssText = 'color:#475569;margin-left:6px;font-size:10px;';
+            note.textContent = '(' + used + ' used)';
+            document.getElementById('cvd-credits-bar').appendChild(note);
+            setTimeout(function(){ note.remove(); }, 5000);
+        }
+
         function sendCommand() {
             if (!authenticated) { authOverlay.style.display = 'flex'; return; }
             var cmd = textarea.value.trim();
@@ -3650,36 +3989,128 @@ What would you like to build or change?</div>
             history.push({role: 'user', content: cmd});
             textarea.value = '';
             textarea.style.height = '';
-
             sendBtn.disabled = true;
-            var typingEl = addTyping();
 
-            ajax('cvd_command', {command: cmd, history: JSON.stringify(history)})
-            .then(function(r) {
-                typingEl.remove();
-                if (r.success) {
-                    var d = r.data;
-                    if (d.credits_remaining != null) creditsEl.textContent = d.credits_remaining;
-                    if (d.credits_used != null) {
-                        var usedNote = document.createElement('span');
-                        usedNote.style.cssText = 'color:#475569;margin-left:6px;font-size:10px;';
-                        usedNote.textContent = '(' + d.credits_used + ' used)';
-                        document.getElementById('cvd-credits-bar').appendChild(usedNote);
-                        setTimeout(function(){ usedNote.remove(); }, 5000);
-                    }
-                    addAgentMessage(d.message, d.changes, d.snap_id);
-                    history.push({role: 'assistant', content: d.message});
-                    if (history.length > 20) history = history.slice(-20);
-                    if (d.snap_id) addSnapToSidebar(d.snap_id, cmd);
-                } else {
-                    var errCode = typeof r.data === 'object' ? r.data : {message: r.data};
-                    if (errCode === 401) { authenticated = false; authOverlay.style.display = 'flex'; return; }
-                    addMessage('agent error', r.data || 'An error occurred.');
+            // Show typing bubble + open activity panel
+            var typingEl = addTyping();
+            actList.innerHTML = '';
+            actFooter.textContent = '';
+            actOpen();
+            actStatus('Preparing...', true);
+
+            // Step 1: get credentials from PHP (fast)
+            ajax('cvd_get_context', {command: cmd, history: JSON.stringify(history)})
+            .then(function(ctxR) {
+                if (!ctxR.success) {
+                    typingEl.remove();
+                    actClose();
+                    addMessage('agent error', ctxR.data || 'Failed to prepare request.');
+                    return;
                 }
+                var ctx = ctxR.data;
+                actStatus('Connecting...', true);
+
+                // Step 2: stream directly from Next.js
+                return fetch(ctx.stream_url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'Accept': 'text/event-stream'},
+                    body: JSON.stringify({
+                        api_key:       ctx.api_key,
+                        command:       cmd,
+                        history:       ctx.history,
+                        site_info:     ctx.site_info,
+                        request_nonce: ctx.request_nonce,
+                    }),
+                })
+                .then(function(res) {
+                    if (!res.ok || !res.body) {
+                        return res.text().then(function(t) {
+                            var msg = t;
+                            try { msg = JSON.parse(t).error || t; } catch(e) {}
+                            throw new Error('HTTP ' + res.status + ': ' + msg.slice(0, 120));
+                        });
+                    }
+
+                    var reader  = res.body.getReader();
+                    var decoder = new TextDecoder();
+                    var buf     = '';
+
+                    function pump() {
+                        return reader.read().then(function(chunk) {
+                            if (chunk.done) return;
+                            buf += decoder.decode(chunk.value, {stream: true});
+
+                            var parts = buf.split('\n\n');
+                            buf = parts.pop() || '';
+
+                            var applyPromise = Promise.resolve();
+
+                            parts.forEach(function(part) {
+                                if (!part.startsWith('data: ')) return;
+                                var d;
+                                try { d = JSON.parse(part.slice(6).trim()); } catch(e) { return; }
+
+                                if (d.type === 'status') {
+                                    actStatus(d.message, true);
+                                } else if (d.type === 'token') {
+                                    actStatus('Generating...', true);
+                                } else if (d.type === 'result') {
+                                    typingEl.remove();
+                                    if (d.credits_remaining != null) creditsEl.textContent = d.credits_remaining;
+                                    addCreditsNote(d.credits_used);
+
+                                    var changes = d.changes || [];
+                                    if (changes.length === 0) {
+                                        actClose();
+                                        addAgentMessage(d.message, [], null);
+                                    } else {
+                                        actStatus('Applying ' + changes.length + ' change' + (changes.length > 1 ? 's' : '') + '...', true);
+                                        actRenderChanges(changes);
+
+                                        applyPromise = ajax('cvd_apply_changes', {
+                                            changes:   JSON.stringify(changes),
+                                            sig:       d.sig || '',
+                                            sig_nonce: d.nonce || '',
+                                            raw_body:  d.raw_body || '',
+                                            command:   cmd,
+                                        }).then(function(applyR) {
+                                            var results = applyR.success ? (applyR.data.results || []) : [];
+                                            var snap_id = applyR.success ? (applyR.data.snap_id || null) : null;
+
+                                            actMarkDone(results);
+                                            var okCount   = results.filter(function(r){ return r && r.ok !== false; }).length;
+                                            actStatus(okCount + '/' + results.length + ' applied', false);
+                                            actFooter.textContent = snap_id ? 'Snapshot: #' + snap_id : '';
+
+                                            var merged = changes.map(function(ch, i) {
+                                                return Object.assign({}, ch, results[i] || {});
+                                            });
+                                            addAgentMessage(d.message, merged, snap_id);
+                                            if (snap_id) addSnapToSidebar(snap_id, cmd);
+                                        });
+                                    }
+
+                                    history.push({role: 'assistant', content: d.message});
+                                    if (history.length > 20) history = history.slice(-20);
+
+                                } else if (d.type === 'error') {
+                                    typingEl.remove();
+                                    actClose();
+                                    addMessage('agent error', d.message || 'An error occurred.');
+                                }
+                            });
+
+                            return applyPromise.then(pump);
+                        });
+                    }
+
+                    return pump();
+                });
             })
             .catch(function(err) {
                 typingEl.remove();
-                addMessage('agent error', 'Network error: ' + err.message);
+                actClose();
+                addMessage('agent error', 'Error: ' + err.message);
             })
             .finally(function() {
                 sendBtn.disabled = false;
