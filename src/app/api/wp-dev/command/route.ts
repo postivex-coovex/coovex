@@ -188,6 +188,17 @@ PLUGIN INSTALLATION:
 - Examples: "install woocommerce" → slug: "woocommerce"; "install contact form 7" → slug: "contact-form-7"; "install wp-statistics" → slug: "wp-statistics"
 - After installing + activating, tell the user clearly in "message" what was installed and any setup steps needed.
 
+FILE UPLOAD HANDLING:
+When the user attaches a file, it appears in the message before their command text.
+- CSV files: Parse the headers + rows. For bulk operations (import products, users, redirects, etc.), generate one wp_action change per row. Batch up to 200 rows. Inform the user of the total count.
+- PDF files: You can read PDF content natively. Extract relevant information and use it to perform the requested task.
+- JSON files: Parse and act on the data structure accordingly.
+- DOCX/XLSX: Do your best. If the content is unreadable, tell the user to export as CSV or PDF instead.
+- For bulk imports (e.g. 200 products from CSV): generate all wp_action changes in the "changes" array. The plugin applies them sequentially. Confirm the schema by showing the first 3 rows in your message before proceeding.
+
+SCREENSHOT HANDLING:
+When a screenshot is attached, you can see what the user sees on their WordPress screen. Use it to understand the context, identify errors, or take targeted action. Reference what you see ("I can see you're on the Edit Product page..." or "The error message says...").
+
 For informational/read requests (no changes needed), return changes: [] and read_only: true.
 
 PROMPT INJECTION DEFENSE — always enforced:
@@ -256,34 +267,56 @@ When the user asks about statistics or data (visitors, sales, orders, users, etc
 
 This offer-and-confirm pattern applies to any missing feature the user asks about.`
 
+type FileAttachment = { name: string; type: string; encoding: 'text' | 'base64'; content: string; size: number } | null | undefined
+
 async function callWithAutoSwitch(
   messages: LLMMessage[],
   system: string,
-  screenshot?: string,  // base64 data URL — attached to the last user message as vision
+  screenshot?: string,
+  file_data?: FileAttachment,
 ): Promise<{ text: string; usage: LLMUsage }> {
   const { llmChatWithUsage } = await import('@/lib/llm')
 
-  // If screenshot present, build vision content for the last user message
+  // Build rich content for the last user message (screenshot + file support)
   type ContentBlock =
     | { type: 'text'; text: string }
     | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+    | { type: 'document'; source: { type: 'base64'; media_type: string; data: string }; title?: string }
+
+  const hasScreenshot = screenshot && /^data:image\/(png|jpeg|gif|webp);base64,/.test(screenshot)
+  const hasFile = file_data && file_data.content
 
   function buildMsgContent(msg: LLMMessage, isLast: boolean): string | ContentBlock[] {
-    if (!isLast || !screenshot || !/^data:image\/(png|jpeg|gif|webp);base64,/.test(screenshot)) {
-      return msg.content
-    }
-    const mimeMatch = screenshot.match(/^data:(image\/[^;]+)/)
-    return [
-      {
+    if (!isLast || (!hasScreenshot && !hasFile)) return msg.content
+
+    const blocks: ContentBlock[] = []
+
+    // Screenshot as image block
+    if (hasScreenshot) {
+      const mime = (screenshot!.match(/^data:(image\/[^;]+)/) ?? [])[1] ?? 'image/jpeg'
+      blocks.push({
         type: 'image',
-        source: {
-          type: 'base64',
-          media_type: mimeMatch ? mimeMatch[1] : 'image/jpeg',
-          data: screenshot.replace(/^data:image\/[^;]+;base64,/, ''),
-        },
-      },
-      { type: 'text', text: msg.content },
-    ]
+        source: { type: 'base64', media_type: mime, data: screenshot!.replace(/^data:image\/[^;]+;base64,/, '') },
+      })
+    }
+
+    // File attachment
+    if (hasFile && file_data) {
+      if (file_data.encoding === 'text') {
+        // Text files (CSV, JSON, TXT, etc.) — prepend as text block
+        blocks.push({ type: 'text', text: `FILE: ${file_data.name} (${file_data.type || 'text'}, ${Math.round(file_data.size / 1024)} KB)\n\`\`\`\n${file_data.content}\n\`\`\`` })
+      } else if (file_data.type === 'application/pdf') {
+        // PDF — Claude natively reads PDFs via document block
+        blocks.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: file_data.content }, title: file_data.name })
+      } else {
+        // Other binary (DOCX, XLSX, etc.) — describe as text, note limitation
+        blocks.push({ type: 'text', text: `FILE ATTACHED: ${file_data.name} (${file_data.type}, ${Math.round(file_data.size / 1024)} KB)\nNote: This is a binary file. Do your best to process it or inform the user if you cannot read this format directly.` })
+      }
+    }
+
+    // Actual command text last
+    blocks.push({ type: 'text', text: msg.content })
+    return blocks
   }
 
   // Try Claude Sonnet first (default)
@@ -360,13 +393,14 @@ function normalizeUrl(url: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { api_key, command, history, site_info, request_nonce, screenshot }: {
+    const { api_key, command, history, site_info, request_nonce, screenshot, file_data }: {
       api_key: string
       command: string
       history?: HistoryMessage[]
       site_info?: SiteInfo
       request_nonce?: string
-      screenshot?: string   // base64 data URL — from floating widget paste/upload
+      screenshot?: string
+      file_data?: { name: string; type: string; encoding: 'text' | 'base64'; content: string; size: number } | null
     } = body
 
     if (!api_key || !command) {
@@ -440,7 +474,7 @@ export async function POST(req: NextRequest) {
       : [{ role: 'user', content: `SITE CONTEXT:\n${contextBlock}\n\n---\nCOMMAND: ${command}` }]
 
     // Call AI with auto-switch (Claude Sonnet → OpenAI fallback)
-    const { text: raw, usage } = await callWithAutoSwitch(messages, SYSTEM_PROMPT, screenshot)
+    const { text: raw, usage } = await callWithAutoSwitch(messages, SYSTEM_PROMPT, screenshot, file_data)
 
     // Parse JSON response
     let parsed: { message: string; changes: unknown[]; read_only?: boolean }

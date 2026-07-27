@@ -2062,8 +2062,12 @@ function cvd_render_floating_widget(): void {
 .cvd-err{background:#fef2f2!important;color:#991b1b!important}
 .cvd-thumb{max-width:100%;border-radius:8px;margin-bottom:6px;display:block}
 #cvd-wprv{padding:8px 14px;border-top:1px solid #f8fafc;display:none;align-items:center;gap:10px;flex-shrink:0}
-#cvd-wpi{height:44px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0}
-#cvd-wprv span{font-size:12px;color:#64748b;flex:1}
+#cvd-wpi{height:44px;border-radius:6px;object-fit:cover;border:1px solid #e2e8f0;display:none}
+#cvd-wfc{display:none;align-items:center;gap:8px;background:#f8fafc;border-radius:8px;padding:5px 10px;flex:1;min-width:0}
+#cvd-wfi{width:28px;height:28px;border-radius:6px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+#cvd-wfn{font-size:12px;font-weight:500;color:#1e293b;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#cvd-wfs{font-size:11px;color:#94a3b8;flex-shrink:0;white-space:nowrap}
+#cvd-wpl{font-size:12px;color:#64748b;flex-shrink:0}
 #cvd-wrm{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;padding:2px;
   line-height:1;transition:color .12s;display:flex}
 #cvd-wrm:hover{color:#ef4444}
@@ -2101,16 +2105,17 @@ function cvd_render_floating_widget(): void {
     </div>
     <div id="cvd-wprv">
       <img id="cvd-wpi" src="" alt="screenshot">
-      <span>Screenshot attached</span>
-      <button id="cvd-wrm" aria-label="Remove screenshot">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <div id="cvd-wfc"><div id="cvd-wfi"></div><span id="cvd-wfn"></span><span id="cvd-wfs"></span></div>
+      <span id="cvd-wpl">Attached</span>
+      <button id="cvd-wrm" aria-label="Remove attachment">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div id="cvd-wi">
-      <textarea id="cvd-wtx" rows="1" placeholder="Ask anything… (Ctrl+V to attach screenshot)"></textarea>
-      <label id="cvd-wil" title="Attach screenshot">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <input type="file" id="cvd-wf" accept="image/*" style="display:none">
+      <textarea id="cvd-wtx" rows="1" placeholder="Ask anything… paste screenshot (Ctrl+V) or attach file"></textarea>
+      <label id="cvd-wil" title="Attach file or screenshot">
+        <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+        <input type="file" id="cvd-wf" accept="image/*,.csv,.txt,.json,.pdf,.doc,.docx,.xls,.xlsx,.md,.log,.tsv" style="display:none">
       </label>
       <button id="cvd-wsd" disabled aria-label="Send">
         <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -2134,37 +2139,81 @@ function cvd_render_floating_widget(): void {
   var AJAX='<?php echo esc_js($ajax); ?>';
   var NONCE='<?php echo esc_js($nonce); ?>';
   var isAdmin=<?php echo is_admin() ? 'true' : 'false'; ?>;
-  var screenshot=null, open=false;
+  var screenshot=null, fileData=null, open=false;
 
   var $=function(id){return document.getElementById(id);};
-  var root=$('cvd-w'), panel=$('cvd-wp'), btn=$('cvd-wb'), cls=$('cvd-wcls');
+  var panel=$('cvd-wp'), btn=$('cvd-wb'), cls=$('cvd-wcls');
   var msgs=$('cvd-wm'), txt=$('cvd-wtx'), snd=$('cvd-wsd');
   var prv=$('cvd-wprv'), pi=$('cvd-wpi'), rm=$('cvd-wrm');
+  var fc=$('cvd-wfc'), fi=$('cvd-wfi'), fn=$('cvd-wfn'), fs=$('cvd-wfs'), fp=$('cvd-wpl');
   var file=$('cvd-wf'), ctx=$('cvd-wctx');
 
-  // Screen context
   var screenCtx=(isAdmin?'WP Admin — ':'')+document.title.replace(' ‹ '+document.title.split(' ‹ ').pop(),'');
   ctx.textContent=screenCtx; ctx.title=screenCtx;
+
+  function hasAttachment(){ return !!(screenshot||fileData); }
 
   function toggle(){
     open=!open;
     panel.style.display=open?'flex':'none';
-    if(open) setTimeout(function(){txt.focus();},80);
+    if(open)setTimeout(function(){txt.focus();},80);
   }
   btn.addEventListener('click',toggle);
   cls.addEventListener('click',function(){open=false;panel.style.display='none';});
 
-  // Auto-resize textarea
   txt.addEventListener('input',function(){
     this.style.height='auto';
     this.style.height=Math.min(this.scrollHeight,96)+'px';
-    snd.disabled=!(this.value.trim()||screenshot);
+    snd.disabled=!(this.value.trim()||hasAttachment());
   });
   txt.addEventListener('keydown',function(e){
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!snd.disabled)send();}
   });
 
-  // Compress + set screenshot
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  function fmtSize(b){
+    if(b<1024)return b+' B';
+    if(b<1048576)return (b/1024).toFixed(1)+' KB';
+    return (b/1048576).toFixed(1)+' MB';
+  }
+  function fileIcon(type,name){
+    if(/pdf/i.test(type))return '📄';
+    if(/csv|tsv/i.test(type)||/\.(csv|tsv)$/i.test(name))return '📊';
+    if(/sheet|excel|xlsx|xls/i.test(type+name))return '📈';
+    if(/word|docx|doc/i.test(type+name))return '📝';
+    if(/json/i.test(type+name))return '🔧';
+    if(/xml/i.test(type+name))return '🗂';
+    return '📎';
+  }
+
+  function clearAttachment(){
+    screenshot=null; fileData=null;
+    pi.style.display='none'; pi.src='';
+    fc.style.display='none';
+    prv.style.display='none';
+    snd.disabled=!txt.value.trim();
+  }
+
+  function showImgPreview(dataUrl){
+    fc.style.display='none';
+    pi.src=dataUrl; pi.style.display='block';
+    fp.textContent='Screenshot attached';
+    prv.style.display='flex';
+    snd.disabled=!(txt.value.trim()||hasAttachment());
+  }
+
+  function showFileChip(name,size,type){
+    pi.style.display='none';
+    fi.textContent=fileIcon(type,name);
+    fn.textContent=name;
+    fs.textContent=fmtSize(size);
+    fc.style.display='flex';
+    fp.textContent='File attached';
+    prv.style.display='flex';
+    snd.disabled=!(txt.value.trim()||hasAttachment());
+  }
+
+  // ── Screenshot compression ────────────────────────────────────────────────
   function setShot(dataUrl){
     var img=new Image();
     img.onload=function(){
@@ -2174,83 +2223,116 @@ function cvd_render_floating_widget(): void {
       var c=document.createElement('canvas');
       c.width=w;c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);
-      var out=c.toDataURL('image/jpeg',0.82);
-      screenshot=out; pi.src=out;
-      prv.style.display='flex';
-      snd.disabled=!(txt.value.trim()||screenshot);
+      screenshot=c.toDataURL('image/jpeg',0.82);
+      fileData=null;
+      showImgPreview(screenshot);
     };
     img.src=dataUrl;
   }
 
-  file.addEventListener('change',function(){
-    if(!this.files[0])return;
+  // ── File handler: routes image vs text vs binary ──────────────────────────
+  function handleFile(f){
+    var MAX_TEXT=512*1024, MAX_BIN=10*1024*1024;
+    var name=f.name, type=f.type||'', size=f.size;
+    if(size>MAX_BIN){alert('File too large (max 10 MB).');return;}
+    if(type.startsWith('image/')){
+      var r=new FileReader();r.onload=function(e){setShot(e.target.result);};r.readAsDataURL(f);return;
+    }
+    var isText=type.startsWith('text/')||/\.(csv|tsv|txt|json|xml|md|log)$/i.test(name);
+    if(isText){
+      var r=new FileReader();
+      r.onload=function(e){
+        var content=e.target.result;
+        if(content.length>MAX_TEXT)content=content.substring(0,MAX_TEXT)+'\n[... truncated at 500 KB ...]';
+        screenshot=null;
+        fileData={name:name,type:type||'text/plain',encoding:'text',content:content,size:size};
+        showFileChip(name,size,type);
+      };
+      r.readAsText(f);return;
+    }
+    // Binary (PDF, DOCX, XLSX, etc.) → base64
     var r=new FileReader();
-    r.onload=function(e){setShot(e.target.result);};
-    r.readAsDataURL(this.files[0]);
-    this.value='';
-  });
+    r.onload=function(e){
+      var dataUrl=e.target.result;
+      var b64=dataUrl.replace(/^data:[^;]+;base64,/,'');
+      if(b64.length>14*1024*1024){alert('File too large after encoding.');return;}
+      screenshot=null;
+      fileData={name:name,type:type||'application/octet-stream',encoding:'base64',content:b64,size:size};
+      showFileChip(name,size,type);
+    };
+    r.readAsDataURL(f);
+  }
 
-  rm.addEventListener('click',function(){
-    screenshot=null;pi.src='';prv.style.display='none';
-    snd.disabled=!txt.value.trim();
-  });
+  file.addEventListener('change',function(){if(this.files[0])handleFile(this.files[0]);this.value='';});
+  rm.addEventListener('click',clearAttachment);
 
   // Paste image
   document.addEventListener('paste',function(e){
     if(!open)return;
-    var items=(e.clipboardData||window.clipboardData||{}).items||[];
+    var items=(e.clipboardData||{}).items||[];
     for(var i=0;i<items.length;i++){
       if(items[i].type.indexOf('image')!==-1){
-        var r=new FileReader();
-        r.onload=function(ev){setShot(ev.target.result);};
-        r.readAsDataURL(items[i].getAsFile());
-        e.preventDefault(); break;
+        var r=new FileReader();r.onload=function(ev){setShot(ev.target.result);};
+        r.readAsDataURL(items[i].getAsFile());e.preventDefault();break;
       }
     }
   });
 
+  // Drag-and-drop files onto widget panel
+  panel.addEventListener('dragover',function(e){e.preventDefault();panel.style.outline='2px dashed #2563eb';});
+  panel.addEventListener('dragleave',function(){panel.style.outline='';});
+  panel.addEventListener('drop',function(e){
+    e.preventDefault();panel.style.outline='';
+    var f=e.dataTransfer&&e.dataTransfer.files[0];
+    if(f)handleFile(f);
+  });
+
+  // ── Message rendering ─────────────────────────────────────────────────────
   function addMsg(html,cls,thumb){
-    var d=document.createElement('div');
-    d.className='cvd-msg '+cls;
+    var d=document.createElement('div');d.className='cvd-msg '+cls;
     if(thumb){var im=document.createElement('img');im.className='cvd-thumb';im.src=thumb;d.appendChild(im);}
     if(cls==='cvd-a'&&html==='…'){
       var t=document.createElement('div');t.className='cvd-typing';
       t.innerHTML='<span></span><span></span><span></span>';d.appendChild(t);
-    } else {
-      d.appendChild(document.createTextNode(html));
-    }
+    }else{d.appendChild(document.createTextNode(html));}
     msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;
   }
 
+  // ── Send ──────────────────────────────────────────────────────────────────
   function send(){
     var cmd=txt.value.trim();
-    if(!cmd&&!screenshot)return;
-    addMsg(cmd||(screenshot?'[screenshot]':''),'cvd-u',screenshot||null);
+    if(!cmd&&!hasAttachment())return;
+    var label=cmd||(screenshot?'[screenshot]':fileData?('['+fileData.name+']'):'');
+    addMsg(label,'cvd-u',screenshot||null);
     txt.value='';txt.style.height='auto';
-    var shot=screenshot; screenshot=null; pi.src=''; prv.style.display='none';
+    var shot=screenshot,fd=fileData;
+    clearAttachment();
     snd.disabled=true;
     var typing=addMsg('…','cvd-a');
+
+    var defaultCmd=shot
+      ?'Analyze this screenshot and tell me what you see. Suggest what I can do or ask me for a specific task.'
+      :(fd?'I have attached a file called "'+fd.name+'". Please analyze it and perform the task I described, or tell me what it contains and what you can do with it.'
+          :'');
 
     var p=new URLSearchParams();
     p.append('action','cvd_float_command');
     p.append('nonce',NONCE);
-    p.append('command',cmd||'Analyze this screenshot and tell me what you see or suggest what I should do.');
+    p.append('command',cmd||defaultCmd);
     p.append('screen_context',screenCtx);
     p.append('current_url',location.href);
     if(shot)p.append('screenshot',shot);
+    if(fd)p.append('file_data',JSON.stringify(fd));
 
     fetch(AJAX,{method:'POST',body:p})
       .then(function(r){return r.json();})
       .then(function(res){
         msgs.removeChild(typing);
         if(res.success){
-          var msg=res.data&&res.data.message?res.data.message:'Done.';
-          addMsg(msg,'cvd-a');
+          addMsg((res.data&&res.data.message)||'Done.','cvd-a');
           var app=res.data&&res.data.applied?res.data.applied.filter(function(c){return c.ok;}).length:0;
-          if(app) addMsg('✓ '+app+' change'+(app>1?'s':'')+' applied successfully.','cvd-a');
-        } else {
-          addMsg(res.data||'Something went wrong.','cvd-a cvd-err');
-        }
+          if(app)addMsg('✓ '+app+' change'+(app>1?'s':'')+' applied.','cvd-a');
+        }else{addMsg(res.data||'Something went wrong.','cvd-a cvd-err');}
         snd.disabled=!txt.value.trim();
       })
       .catch(function(){
@@ -2291,14 +2373,40 @@ add_action('wp_ajax_cvd_float_command', function () {
     $screen_ctx = sanitize_text_field(wp_unslash($_POST['screen_context'] ?? ''));
     $curr_url   = esc_url_raw(wp_unslash($_POST['current_url'] ?? ''));
     $screenshot = wp_unslash($_POST['screenshot'] ?? '');
+    $file_raw   = wp_unslash($_POST['file_data'] ?? '');
 
-    // Validate screenshot — must be image data URL, max 3 MB base64
-    if ($screenshot && !preg_match('/^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+\/=\r\n]+$/', trim($screenshot))) {
-        $screenshot = '';
-    }
+    // Validate screenshot
+    if ($screenshot && !preg_match('/^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+\/=\r\n]+$/', trim($screenshot))) $screenshot = '';
     if (strlen($screenshot) > 3 * 1024 * 1024) $screenshot = '';
 
-    if (empty($command)) $command = 'Analyze this screenshot and describe what you see on my WordPress site. Suggest what I can ask you to do.';
+    // Validate file_data JSON
+    $file_data = null;
+    if ($file_raw) {
+        $fd = json_decode($file_raw, true);
+        $allowed_types = ['text/plain','text/csv','text/tsv','application/json','application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/msword','application/vnd.ms-excel','application/octet-stream',''];
+        if (is_array($fd) && !empty($fd['name']) && !empty($fd['encoding']) && isset($fd['content'])) {
+            // Size limits: text 1MB, binary 10MB base64
+            $max = ($fd['encoding'] === 'text') ? 1024 * 1024 : 12 * 1024 * 1024;
+            if (strlen($fd['content']) <= $max) {
+                $file_data = [
+                    'name'     => sanitize_file_name($fd['name']),
+                    'type'     => sanitize_text_field($fd['type'] ?? ''),
+                    'encoding' => $fd['encoding'] === 'base64' ? 'base64' : 'text',
+                    'content'  => $fd['content'],
+                    'size'     => (int)($fd['size'] ?? 0),
+                ];
+            }
+        }
+    }
+
+    if (empty($command)) {
+        if ($screenshot) $command = 'Analyze this screenshot of my WordPress admin and tell me what you see. Suggest what I should do.';
+        elseif ($file_data) $command = 'I have attached a file called "' . $file_data['name'] . '". Analyze it and tell me what it contains and what you can do with it.';
+        else wp_send_json_error('Empty command', 400);
+    }
 
     $api_key = get_option('cvd_api_key', '');
     if (empty($api_key)) wp_send_json_error('API key not configured. Open CooVex Dev to set it up.', 400);
@@ -2313,6 +2421,7 @@ add_action('wp_ajax_cvd_float_command', function () {
         'history'        => [],
         'site_info'      => $site_info,
         'screenshot'     => $screenshot,
+        'file_data'      => $file_data,
         'request_nonce'  => bin2hex(random_bytes(16)),
     ]);
 
