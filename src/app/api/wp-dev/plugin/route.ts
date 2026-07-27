@@ -8,7 +8,7 @@ export const COOVEX_DEV_PHP = `<?php
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
  * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language — CooVex Dev delivers working code.
- * Version:     1.4.0
+ * Version:     1.4.1
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -19,7 +19,7 @@ export const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-define('CVD_VERSION',         '1.4.0');
+define('CVD_VERSION',         '1.4.1');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
@@ -992,11 +992,13 @@ function cvd_apply_wp_action(array $change): array {
             $api = themes_api('theme_information', ['slug' => $slug, 'fields' => ['sections' => false]]);
             if (is_wp_error($api)) return ['ok' => false, 'error' => "Theme '$slug' not found on wordpress.org: " . $api->get_error_message()];
 
-            class CVD_Theme_Skin extends WP_Upgrader_Skin {
-                public function feedback($string, ...$args) {}
-                public function header() {}
-                public function footer() {}
-                public function error($errors) {}
+            if (!class_exists('CVD_Theme_Skin')) {
+                class CVD_Theme_Skin extends WP_Upgrader_Skin {
+                    public function feedback($string, ...$args) {}
+                    public function header() {}
+                    public function footer() {}
+                    public function error($errors) {}
+                }
             }
             $upgrader = new Theme_Upgrader(new CVD_Theme_Skin());
             $result   = $upgrader->install($api->download_link);
@@ -3875,12 +3877,15 @@ add_action('admin_notices', function () {
 
 // ── Deactivation: unschedule cron ─────────────────────────────────────────────
 register_deactivation_hook(__FILE__, function () {
+    wp_clear_scheduled_hook('cvd_cleanup_exports');
     wp_clear_scheduled_hook('cvd_daily_license_check');
     wp_clear_scheduled_hook('cvd_telegram_async');
 });
 
 // ── Uninstall cleanup ─────────────────────────────────────────────────────────
-register_uninstall_hook(__FILE__, function () {
+// Must be a named function — register_uninstall_hook() serialises the callback
+// to the DB; PHP cannot serialise anonymous functions (Closure).
+function cvd_uninstall_cleanup(): void {
     delete_option('cvd_api_key');
     delete_option('cvd_password_hash');
     delete_option('cvd_snapshots');
@@ -3892,8 +3897,14 @@ register_uninstall_hook(__FILE__, function () {
     delete_option('cvd_telegram_chat_id');
     delete_option('cvd_telegram_webhook_secret');
     delete_option('cvd_telegram_webhook_registered');
+    delete_option('cvd_maintenance_enabled');
+    delete_option('cvd_redirects');
+    delete_option('cvd_webhooks');
+    delete_option('cvd_login_log');
+    wp_clear_scheduled_hook('cvd_cleanup_exports');
     wp_clear_scheduled_hook('cvd_daily_license_check');
-});
+}
+register_uninstall_hook(__FILE__, 'cvd_uninstall_cleanup');
 `
 
 export async function GET(_req: Request) {
