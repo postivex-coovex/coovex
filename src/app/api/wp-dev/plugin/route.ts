@@ -4177,6 +4177,11 @@ What would you like to build or change?</div>
             }
             actOpen();
             actStatus('Preparing...', true);
+            // Live "thinking" display in activity panel — updated as tokens stream in
+            var thoughtsEl = document.createElement('div');
+            thoughtsEl.style.cssText = 'padding:6px 8px;background:#0f172a;border-radius:6px;font-size:11px;color:#64748b;line-height:1.5;font-style:italic;margin:4px 0 2px;min-height:28px;transition:color .2s;';
+            thoughtsEl.textContent = '…';
+            actList.insertBefore(thoughtsEl, actList.firstChild);
 
             // Step 1: get credentials from PHP (fast)
             ajax('cvd_get_context', {command: cmd, history: JSON.stringify(history)})
@@ -4240,10 +4245,16 @@ What would you like to build or change?</div>
                                     var msgM = streamBuf.match(/"message"\s*:\s*"((?:[^"\\]|\\[\s\S])*)/);
                                     if (msgM && msgM[1].length > 3) {
                                         var partial = msgM[1].replace(/\\n/g,' ').replace(/\\"/g,'"').replace(/\\t/g,' ');
+                                        // Update typing bubble in chat
                                         var streamBubble = typingEl.querySelector('.bubble');
                                         if (streamBubble) {
                                             streamBubble.style.cssText = 'font-style:italic;color:#94a3b8;font-size:13px;max-width:320px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;';
                                             streamBubble.textContent = partial;
+                                        }
+                                        // Update live "thinking" in activity panel
+                                        if (thoughtsEl) {
+                                            thoughtsEl.style.color = '#94a3b8';
+                                            thoughtsEl.textContent = partial.slice(-120);
                                         }
                                         messages.scrollTop = messages.scrollHeight;
                                     }
@@ -4289,6 +4300,9 @@ What would you like to build or change?</div>
                                         messages.appendChild(btn);
                                         messages.scrollTop = messages.scrollHeight;
                                     }
+
+                                    // Thinking indicator no longer needed once result arrives
+                                    if (thoughtsEl && thoughtsEl.parentNode) thoughtsEl.remove();
 
                                     var changes = d.changes || [];
                                     if (changes.length === 0) {
@@ -4347,6 +4361,9 @@ What would you like to build or change?</div>
                                                 // Apply changes one-by-one for live progress
                                                 var snapId = null;
                                                 var failedItems = [];
+                                                var sideOutputs = []; // collect read-only action results to feed back to Claude
+                                                // Remove the live thinking indicator now that we have real changes
+                                                if (thoughtsEl && thoughtsEl.parentNode) thoughtsEl.remove();
                                                 var rows = actList.querySelectorAll('.cvd-act-item');
 
                                                 function applyOne(i) {
@@ -4378,7 +4395,14 @@ What would you like to build or change?</div>
                                                                         appliedDescs.push(chg.description || chg.action || chg.path || chg.type || ('change '+(idx+1)));
                                                                     }
                                                                 });
-                                                                var stepDoneMsg = '[STEP_DONE] Applied ' + okCount + ' change(s): ' + appliedDescs.slice(0,6).join(', ') + (appliedDescs.length > 6 ? '...' : '') + '. Continue with the next step.';
+                                                                var stepDoneMsg = '[STEP_DONE] Applied ' + okCount + ' change(s): ' + appliedDescs.slice(0,6).join(', ') + (appliedDescs.length > 6 ? '...' : '') + '.';
+                                                                if (sideOutputs.length > 0) {
+                                                                    stepDoneMsg += '\n\nINFO GATHERED (use this to decide next steps):\n';
+                                                                    sideOutputs.forEach(function(so) {
+                                                                        stepDoneMsg += '\n[' + so.action + ']\n' + so.output + '\n';
+                                                                    });
+                                                                }
+                                                                stepDoneMsg += '\n\nContinue with the next step.';
 
                                                                 // Auto-continue countdown
                                                                 var cdSecs = 3;
@@ -4557,6 +4581,13 @@ What would you like to build or change?</div>
                                                                 if (!baRes.ok) failedItems.push({ desc: res.title || 'browser_act', error: baRes.error });
                                                                 return applyOne(i + 1);
                                                             });
+                                                        }
+
+                                                        // Collect read-only outputs to feed back to Claude in [STEP_DONE]
+                                                        var readOnlyActions = ['site_audit','list_files','read_file_raw','pdf_extract','server_info','cache_flush','send_test_email'];
+                                                        if (res.client_action === 'terminal_output' && res.output &&
+                                                            readOnlyActions.indexOf(chgI.action || '') !== -1) {
+                                                            sideOutputs.push({ action: chgI.action || 'info', output: String(res.output).slice(0, 3000) });
                                                         }
 
                                                         // terminal_output: render code/shell output block in chat

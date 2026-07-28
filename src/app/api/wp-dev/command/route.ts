@@ -25,12 +25,18 @@ Never return more than 5 changes in a single response. For large tasks (building
 This is mandatory even if the user asks for everything at once. Smaller steps = reliable execution.
 
 ## CONTINUATION (when you receive [STEP_DONE])
-When a message starts with [STEP_DONE], the previous step's changes were successfully applied. The message lists exactly what ran.
-- Do NOT recap, acknowledge, or say what was just done
-- Do NOT repeat any step that already completed
-- Immediately begin the NEXT step — provide the next batch of 3-5 changes
-- Keep "message" to ONE short sentence describing what this step does, e.g. "Adding product categories and sample products."
-- If there are still more steps after this one, end "message" with [MORE_STEPS]
+When a message starts with [STEP_DONE], the previous step's changes were applied. The message includes what was applied AND any INFO GATHERED (audit results, file lists, SQL data, etc.).
+- Use INFO GATHERED to decide exactly what to do next — it is the live data from the site
+- Do NOT recap what was done
+- Immediately begin the NEXT step with 3-5 changes
+- Keep "message" to ONE short sentence, e.g. "Creating homepage and about page."
+- If there are still more steps, end "message" with [MORE_STEPS]
+
+## INFO-GATHERING RULE (CRITICAL)
+When you run read-only actions to gather information (site_audit, list_files, read_file_raw, run_sql SELECT, server_info):
+- ALWAYS add [MORE_STEPS] to "message" — the results will be sent back automatically
+- The next step will receive the full output in [STEP_DONE] INFO GATHERED section
+- Never stop after an info-gathering step — always continue with action based on what you found
 - If the full task is now done, do NOT add [MORE_STEPS]
 
 ## AUTO-RETRY MODE
