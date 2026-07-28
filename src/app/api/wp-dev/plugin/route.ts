@@ -1998,11 +1998,13 @@ add_action('wp_ajax_cvd_apply_changes', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
 
-    $changes   = json_decode(stripslashes($_POST['changes']   ?? '[]'), true) ?? [];
-    $sig       = sanitize_text_field($_POST['sig']       ?? '');
-    $sig_nonce = sanitize_text_field($_POST['sig_nonce'] ?? '');
-    $raw_body  = wp_unslash($_POST['raw_body'] ?? '');
-    $command   = sanitize_textarea_field($_POST['command'] ?? '');
+    $changes     = json_decode(stripslashes($_POST['changes']   ?? '[]'), true) ?? [];
+    $sig         = sanitize_text_field($_POST['sig']       ?? '');
+    $sig_nonce   = sanitize_text_field($_POST['sig_nonce'] ?? '');
+    $raw_body    = wp_unslash($_POST['raw_body'] ?? '');
+    $command     = sanitize_textarea_field($_POST['command'] ?? '');
+    $change_idx  = isset($_POST['change_index']) ? (int)$_POST['change_index'] : -1;
+    $prev_snap   = sanitize_text_field($_POST['snap_id'] ?? '');
 
     if (!empty($sig) && !empty($raw_body)) {
         if (!cvd_verify_response($raw_body, $sig, $sig_nonce)) {
@@ -2013,33 +2015,65 @@ add_action('wp_ajax_cvd_apply_changes', function () {
         }
     }
 
-    $files_touched = [];
-    foreach ($changes as $ch) {
-        if (($ch['type'] ?? 'file') === 'file' && !empty($ch['file'])) {
-            $files_touched[] = $ch['file'];
+    if ($change_idx >= 0) {
+        // Single-change mode — enables live per-change progress in the UI
+        $snap_id = $prev_snap ?: null;
+
+        // Take snapshot only on the first change (covers all files upfront)
+        if ($change_idx === 0) {
+            $files_touched = [];
+            foreach ($changes as $ch) {
+                if (($ch['type'] ?? 'file') === 'file' && !empty($ch['file'])) {
+                    $files_touched[] = $ch['file'];
+                }
+            }
+            $snap_id = !empty($files_touched) ? cvd_snapshot_take($files_touched, $command) : null;
         }
+
+        $result = ($change_idx < count($changes))
+            ? cvd_apply_change($changes[$change_idx])
+            : ['ok' => false, 'error' => 'Index out of bounds'];
+
+        // Write audit log only on the last change
+        if ($change_idx === count($changes) - 1) {
+            cvd_audit_log([
+                'command' => $command,
+                'changes' => count($changes),
+                'snap_id' => $snap_id,
+                'sig_ok'  => !empty($sig),
+                'user'    => wp_get_current_user()->user_login,
+                'time'    => time(),
+            ]);
+        }
+
+        wp_send_json_success(['result' => $result, 'snap_id' => $snap_id]);
+
+    } else {
+        // Batch mode (backward-compatible)
+        $files_touched = [];
+        foreach ($changes as $ch) {
+            if (($ch['type'] ?? 'file') === 'file' && !empty($ch['file'])) {
+                $files_touched[] = $ch['file'];
+            }
+        }
+        $snap_id = !empty($files_touched) ? cvd_snapshot_take($files_touched, $command) : null;
+
+        $results = [];
+        foreach ($changes as $ch) {
+            $results[] = cvd_apply_change($ch);
+        }
+
+        cvd_audit_log([
+            'command' => $command,
+            'changes' => count($changes),
+            'snap_id' => $snap_id,
+            'sig_ok'  => !empty($sig),
+            'user'    => wp_get_current_user()->user_login,
+            'time'    => time(),
+        ]);
+
+        wp_send_json_success(['results' => $results, 'snap_id' => $snap_id]);
     }
-
-    $snap_id = !empty($files_touched) ? cvd_snapshot_take($files_touched, $command) : null;
-
-    $results = [];
-    foreach ($changes as $ch) {
-        $results[] = cvd_apply_change($ch);
-    }
-
-    cvd_audit_log([
-        'command' => $command,
-        'changes' => count($changes),
-        'snap_id' => $snap_id,
-        'sig_ok'  => !empty($sig),
-        'user'    => wp_get_current_user()->user_login,
-        'time'    => time(),
-    ]);
-
-    wp_send_json_success([
-        'results' => $results,
-        'snap_id' => $snap_id,
-    ]);
 });
 
 // -- AJAX: rollback ------------------------------------------------------------
@@ -3827,13 +3861,30 @@ What would you like to build or change?</div>
                                     history.push({role: 'assistant', content: d.message});
                                     if (history.length > 20) history = history.slice(-20);
 
+                                    // Show a "Continue" quick-action button if AI asks user to continue
+                                    function maybeAddContinueBtn(text) {
+                                        if (!/continue|next step|say.*continue|type.*continue|proceed to/i.test(text)) return;
+                                        var btn = document.createElement('button');
+                                        btn.style.cssText = 'display:block;margin:6px 0 4px 44px;background:#2563eb;color:#fff;border:none;padding:5px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;';
+                                        btn.textContent = 'Continue';
+                                        btn.addEventListener('click', function() {
+                                            btn.remove();
+                                            textarea.value = 'continue';
+                                            sendCommand();
+                                        });
+                                        messages.appendChild(btn);
+                                        messages.scrollTop = messages.scrollHeight;
+                                    }
+
                                     var changes = d.changes || [];
                                     if (changes.length === 0) {
                                         actClose();
                                         addAgentMessage(d.message, [], null);
+                                        maybeAddContinueBtn(d.message);
                                     } else {
                                         // Show the AI's message immediately
                                         addAgentMessage(d.message, [], null);
+                                        maybeAddContinueBtn(d.message);
 
                                         // Show pending changes in activity panel
                                         actRenderChanges(changes);
@@ -3855,23 +3906,59 @@ What would you like to build or change?</div>
                                                 applyBtn.disabled = true;
                                                 discardBtn.disabled = true;
                                                 actFooter.innerHTML = '';
-                                                actStatus('Applying ' + changes.length + ' change' + (changes.length !== 1 ? 's' : '') + '...', true);
 
-                                                ajax('cvd_apply_changes', {
-                                                    changes:   JSON.stringify(changes),
-                                                    sig:       d.sig || '',
-                                                    sig_nonce: d.nonce || '',
-                                                    raw_body:  d.raw_body || '',
-                                                    command:   cmd,
-                                                }).then(function(applyR) {
-                                                    var results = applyR.success ? (applyR.data.results || []) : [];
-                                                    var snap_id = applyR.success ? (applyR.data.snap_id || null) : null;
-                                                    actMarkDone(results);
-                                                    var okCount = results.filter(function(r){ return r && r.ok !== false; }).length;
-                                                    actStatus(okCount + '/' + results.length + ' applied', false);
-                                                    actFooter.textContent = snap_id ? 'Snapshot: #' + snap_id : '';
-                                                    if (snap_id) addSnapToSidebar(snap_id, cmd);
-                                                }).finally(resolve);
+                                                // Apply changes one-by-one for live progress
+                                                var snapId = null;
+                                                var rows = actList.querySelectorAll('.cvd-act-item');
+
+                                                function applyOne(i) {
+                                                    if (i >= changes.length) {
+                                                        var okCount = 0;
+                                                        rows.forEach(function(r) { if (r.querySelector('.cvd-act-icon.done')) okCount++; });
+                                                        actStatus(okCount + '/' + changes.length + ' applied', false);
+                                                        actFooter.textContent = snapId ? 'Snapshot: #' + snapId : '';
+                                                        if (snapId) addSnapToSidebar(snapId, cmd);
+                                                        return Promise.resolve();
+                                                    }
+
+                                                    // Animate current item
+                                                    var row = rows[i];
+                                                    if (row) {
+                                                        var icon = row.querySelector('.cvd-act-icon');
+                                                        if (icon) { icon.className = 'cvd-act-icon applying'; icon.innerHTML = ''; }
+                                                    }
+                                                    actStatus('Applying ' + (i + 1) + ' / ' + changes.length + '...', true);
+
+                                                    return ajax('cvd_apply_changes', {
+                                                        changes:      JSON.stringify(changes),
+                                                        sig:          d.sig || '',
+                                                        sig_nonce:    d.nonce || '',
+                                                        raw_body:     d.raw_body || '',
+                                                        command:      cmd,
+                                                        change_index: i,
+                                                        snap_id:      snapId || '',
+                                                    }).then(function(r) {
+                                                        var res = r.success ? (r.data.result || {}) : { ok: false, error: 'Failed' };
+                                                        if (r.success && r.data.snap_id) snapId = r.data.snap_id;
+
+                                                        if (row) {
+                                                            var ic = row.querySelector('.cvd-act-icon');
+                                                            var dc = row.querySelector('.cvd-act-desc');
+                                                            if (ic) {
+                                                                if (res.ok !== false) {
+                                                                    ic.className = 'cvd-act-icon done'; ic.innerHTML = '&#10003;';
+                                                                    if (dc) dc.className = 'cvd-act-desc ok';
+                                                                } else {
+                                                                    ic.className = 'cvd-act-icon fail'; ic.innerHTML = '&#10005;';
+                                                                    if (dc) { dc.className = 'cvd-act-desc fail'; dc.title = res.error || ''; }
+                                                                }
+                                                            }
+                                                        }
+                                                        return applyOne(i + 1);
+                                                    });
+                                                }
+
+                                                applyOne(0).finally(resolve);
                                             });
 
                                             discardBtn.addEventListener('click', function() {
