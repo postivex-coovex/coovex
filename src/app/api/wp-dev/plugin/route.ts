@@ -4261,7 +4261,7 @@ What would you like to build or change?</div>
                                             messages.scrollTop = messages.scrollHeight;
                                         } else {
                                             addAgentMessage(displayMsg, [], null);
-                                            if (hasMoreSteps) showContinueBtn();
+                                            // No showContinueBtn here — activity panel auto-continues after apply
                                         }
 
                                         // Show pending changes in activity panel
@@ -4300,18 +4300,9 @@ What would you like to build or change?</div>
                                                         var okCount = 0;
                                                         rows.forEach(function(r) { if (r.querySelector('.cvd-act-icon.done')) okCount++; });
                                                         actStatus(okCount + '/' + changes.length + ' applied', false);
-                                                        // Always show Continue button after apply
                                                         actFooter.innerHTML = snapId ? '<span style="color:#94a3b8;font-size:11px;">Snapshot #' + snapId + '</span>' : '';
-                                                        var nextBtn = document.createElement('button');
-                                                        nextBtn.textContent = 'Continue →';
-                                                        nextBtn.style.cssText = 'float:right;background:#2563eb;color:#fff;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;';
-                                                        nextBtn.addEventListener('click', function() {
-                                                            nextBtn.remove();
-                                                            textarea.value = 'continue';
-                                                            sendCommand();
-                                                        });
-                                                        actFooter.appendChild(nextBtn);
                                                         if (snapId) addSnapToSidebar(snapId, cmd);
+
                                                         // Auto-escalate failures to Claude (max 2 attempts)
                                                         if (failedItems.length > 0 && cvdAutoFixDepth < 2) {
                                                             cvdAutoFixDepth++;
@@ -4323,6 +4314,60 @@ What would you like to build or change?</div>
                                                         } else {
                                                             cvdAutoFix = false;
                                                             cvdAutoFixDepth = 0;
+
+                                                            if (hasMoreSteps) {
+                                                                // Build informative step-done message so Claude knows what was applied
+                                                                var appliedDescs = [];
+                                                                rows.forEach(function(r, idx) {
+                                                                    if (r.querySelector('.cvd-act-icon.done')) {
+                                                                        var chg = changes[idx] || {};
+                                                                        appliedDescs.push(chg.description || chg.action || chg.path || chg.type || ('change '+(idx+1)));
+                                                                    }
+                                                                });
+                                                                var stepDoneMsg = '[STEP_DONE] Applied ' + okCount + ' change(s): ' + appliedDescs.slice(0,6).join(', ') + (appliedDescs.length > 6 ? '...' : '') + '. Continue with the next step.';
+
+                                                                // Auto-continue countdown
+                                                                var cdSecs = 3;
+                                                                var cdSpan = document.createElement('span');
+                                                                cdSpan.style.cssText = 'color:#94a3b8;font-size:11px;';
+                                                                cdSpan.textContent = 'Continuing in ' + cdSecs + 's…';
+                                                                var pauseBtn = document.createElement('button');
+                                                                pauseBtn.style.cssText = 'background:none;border:1px solid #64748b;color:#64748b;padding:2px 7px;border-radius:4px;cursor:pointer;font-size:10px;margin-left:6px;';
+                                                                pauseBtn.textContent = 'Pause';
+                                                                actFooter.appendChild(cdSpan);
+                                                                actFooter.appendChild(pauseBtn);
+
+                                                                var cdPaused = false;
+                                                                var cdTimer = setInterval(function() {
+                                                                    if (cdPaused) return;
+                                                                    cdSecs--;
+                                                                    if (cdSecs <= 0) {
+                                                                        clearInterval(cdTimer);
+                                                                        actFooter.innerHTML = '';
+                                                                        textarea.value = stepDoneMsg;
+                                                                        sendCommand();
+                                                                    } else {
+                                                                        cdSpan.textContent = 'Continuing in ' + cdSecs + 's…';
+                                                                    }
+                                                                }, 1000);
+
+                                                                pauseBtn.addEventListener('click', function() {
+                                                                    cdPaused = true;
+                                                                    clearInterval(cdTimer);
+                                                                    cdSpan.textContent = 'Paused — ';
+                                                                    pauseBtn.remove();
+                                                                    var manualBtn = document.createElement('button');
+                                                                    manualBtn.textContent = 'Continue →';
+                                                                    manualBtn.style.cssText = 'background:#2563eb;color:#fff;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;';
+                                                                    manualBtn.addEventListener('click', function() {
+                                                                        actFooter.innerHTML = '';
+                                                                        textarea.value = stepDoneMsg;
+                                                                        sendCommand();
+                                                                    });
+                                                                    actFooter.appendChild(manualBtn);
+                                                                });
+                                                            }
+                                                            // If no more steps — nothing extra, task is complete
                                                         }
                                                         return Promise.resolve();
                                                     }
