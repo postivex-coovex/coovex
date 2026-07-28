@@ -1894,9 +1894,53 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'client_action' => 'terminal_output', 'output' => "Elementor page $page_id updated.", 'lang' => 'text'];
         }
 
+        // -- Agent memory: Claude's persistent notes in plugin folder ------------
+        case 'write_memory': {
+            $file    = sanitize_text_field($data['file'] ?? 'cvd-notes.md');
+            // Only allow .md and .json files in plugin dir
+            $allowed = ['cvd-notes.md', 'cvd-plan.md', 'cvd-skills.json', 'cvd-site-map.md'];
+            if (!in_array($file, $allowed, true)) {
+                return ['ok' => false, 'error' => 'Memory file must be one of: ' . implode(', ', $allowed)];
+            }
+            $content = $data['content'] ?? '';
+            $mode    = $data['mode'] ?? 'overwrite'; // overwrite | append
+            $path    = WP_PLUGIN_DIR . '/coovex-dev/' . $file;
+            if ($mode === 'append') {
+                file_put_contents($path, "\n" . $content, FILE_APPEND | LOCK_EX);
+            } else {
+                file_put_contents($path, $content, LOCK_EX);
+            }
+            return ['ok' => true, 'file' => $file, 'mode' => $mode, 'bytes' => strlen($content)];
+        }
+
+        case 'read_memory': {
+            $file    = sanitize_text_field($data['file'] ?? 'cvd-notes.md');
+            $allowed = ['cvd-notes.md', 'cvd-plan.md', 'cvd-skills.json', 'cvd-site-map.md', 'cvd-actions.log'];
+            if (!in_array($file, $allowed, true)) {
+                return ['ok' => false, 'error' => 'Memory file must be one of: ' . implode(', ', $allowed)];
+            }
+            $path = WP_PLUGIN_DIR . '/coovex-dev/' . $file;
+            if (!file_exists($path)) return ['ok' => true, 'client_action' => 'terminal_output', 'output' => "(empty — no content yet)", 'lang' => 'text'];
+            return ['ok' => true, 'client_action' => 'terminal_output', 'output' => file_get_contents($path), 'lang' => 'text'];
+        }
+
         default:
             return ['ok' => false, 'error' => "Unknown wp_action: '$action'"];
     }
+}
+
+// -- Agent memory: Claude's own notes persisted in plugin folder --------------
+function cvd_get_agent_memory(): array {
+    $dir   = WP_PLUGIN_DIR . '/coovex-dev/';
+    $files = ['cvd-notes.md', 'cvd-plan.md', 'cvd-skills.json', 'cvd-site-map.md'];
+    $mem   = [];
+    foreach ($files as $f) {
+        $path = $dir . $f;
+        if (file_exists($path) && filesize($path) > 0) {
+            $mem[$f] = mb_substr(file_get_contents($path), 0, 4000);
+        }
+    }
+    return $mem;
 }
 
 // -- Action log: persistent record of what Claude has done --------------------
@@ -2021,6 +2065,7 @@ function cvd_site_context(string $command = ''): array {
         'widget_areas'  => $widget_areas,
         'stats'         => cvd_gather_stats($plugin_names),
         'recent_actions'=> cvd_get_recent_log(20), // last 20 actions taken this session
+        'agent_memory'  => cvd_get_agent_memory(),  // Claude's own persistent notes
     ];
 
     // -- Selective deep context (based on command keywords) --------------------
