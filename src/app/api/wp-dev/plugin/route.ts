@@ -1717,17 +1717,32 @@ function cvd_apply_wp_action(array $change): array {
             $title        = sanitize_text_field($data['title'] ?? 'Setup Required');
             $instructions = array_map('sanitize_text_field', (array)($data['instructions'] ?? []));
             if (!$url) return ['ok' => false, 'error' => 'embed_page requires data.url'];
-            // Resolve admin-relative URLs
-            if (strpos($url, 'http') !== 0) {
-                $url = admin_url(ltrim($url, '/'));
-            }
+            if (strpos($url, 'http') !== 0) $url = admin_url(ltrim($url, '/'));
             return [
                 'ok'            => true,
-                'action'        => 'embed_page',
                 'client_action' => 'embed_page',
                 'url'           => $url,
                 'title'         => $title,
                 'instructions'  => $instructions,
+            ];
+        }
+
+        case 'browser_act': {
+            $url   = esc_url_raw($data['url'] ?? '');
+            $title = sanitize_text_field($data['title'] ?? 'Browser Action');
+            $js    = $data['js'] ?? '';   // raw JS — trust: only admin can run this
+            $fill  = (array)($data['fill'] ?? []);  // [{selector, value}, ...]
+            $click = sanitize_text_field($data['click'] ?? '');
+            if (!$url) return ['ok' => false, 'error' => 'browser_act requires data.url'];
+            if (strpos($url, 'http') !== 0) $url = admin_url(ltrim($url, '/'));
+            return [
+                'ok'            => true,
+                'client_action' => 'browser_act',
+                'url'           => $url,
+                'title'         => $title,
+                'js'            => $js,
+                'fill'          => $fill,
+                'click'         => $click,
             ];
         }
 
@@ -4196,9 +4211,10 @@ What would you like to build or change?</div>
                         });
                     }
 
-                    var reader  = res.body.getReader();
-                    var decoder = new TextDecoder();
-                    var buf     = '';
+                    var reader    = res.body.getReader();
+                    var decoder   = new TextDecoder();
+                    var buf       = '';
+                    var streamBuf = '';  // accumulates raw token text for live preview
 
                     function pump() {
                         return reader.read().then(function(chunk) {
@@ -4219,6 +4235,18 @@ What would you like to build or change?</div>
                                     actStatus(d.message, true);
                                 } else if (d.type === 'token') {
                                     actStatus('Generating...', true);
+                                    streamBuf += (d.text || '');
+                                    // Extract partial "message" value from Claude's JSON as it streams
+                                    var msgM = streamBuf.match(/"message"\s*:\s*"((?:[^"\\]|\\[\s\S])*)/);
+                                    if (msgM && msgM[1].length > 3) {
+                                        var partial = msgM[1].replace(/\\n/g,' ').replace(/\\"/g,'"').replace(/\\t/g,' ');
+                                        var streamBubble = typingEl.querySelector('.bubble');
+                                        if (streamBubble) {
+                                            streamBubble.style.cssText = 'font-style:italic;color:#94a3b8;font-size:13px;max-width:320px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;';
+                                            streamBubble.textContent = partial;
+                                        }
+                                        messages.scrollTop = messages.scrollHeight;
+                                    }
                                 } else if (d.type === 'result') {
                                     typingEl.remove();
                                     if (d.credits_remaining != null) creditsEl.textContent = d.credits_remaining;
@@ -4460,6 +4488,75 @@ What would you like to build or change?</div>
                                                                     resolveDone();
                                                                 });
                                                             }).then(function() { return applyOne(i + 1); });
+                                                        }
+
+                                                        // browser_act: load URL in iframe, auto-fill + click, return result
+                                                        if (res.client_action === 'browser_act') {
+                                                            var baIc = row && row.querySelector('.cvd-act-icon');
+                                                            if (baIc) { baIc.className = 'cvd-act-icon waiting'; baIc.innerHTML = '&#128279;'; }
+                                                            actStatus('Running browser action...', true);
+
+                                                            // Show iframe in chat
+                                                            var baWrap = document.createElement('div');
+                                                            baWrap.className = 'cvd-iframe-wrap';
+                                                            var baBar = document.createElement('div');
+                                                            baBar.className = 'cvd-iframe-bar';
+                                                            var baStatus = document.createElement('span');
+                                                            baStatus.style.cssText = 'margin-left:auto;font-size:10px;color:#fbbf24;';
+                                                            baStatus.textContent = '⟳ Loading...';
+                                                            baBar.innerHTML = '<span>&#127760; ' + (res.title || 'Browser Action') + '</span>';
+                                                            baBar.appendChild(baStatus);
+                                                            var baFr = document.createElement('iframe');
+                                                            baFr.style.cssText = 'width:100%;height:420px;border:none;display:block;background:#fff;';
+                                                            baWrap.appendChild(baBar);
+                                                            baWrap.appendChild(baFr);
+                                                            messages.appendChild(baWrap);
+                                                            messages.scrollTop = messages.scrollHeight;
+
+                                                            return new Promise(function(resolveBa) {
+                                                                var loadCount = 0;
+                                                                baFr.addEventListener('load', function() {
+                                                                    loadCount++;
+                                                                    // Skip about:blank initial load
+                                                                    if (loadCount === 1 && !baFr.src) return;
+                                                                    try {
+                                                                        var win = baFr.contentWindow;
+                                                                        var doc = baFr.contentDocument || win.document;
+                                                                        // Auto-fill inputs
+                                                                        if (res.fill && Array.isArray(res.fill)) {
+                                                                            res.fill.forEach(function(f) {
+                                                                                var el = doc.querySelector(f.selector);
+                                                                                if (el) { el.value = f.value; el.dispatchEvent(new Event('input', {bubbles:true})); el.dispatchEvent(new Event('change', {bubbles:true})); }
+                                                                            });
+                                                                        }
+                                                                        // Auto-click button
+                                                                        if (res.click) {
+                                                                            var btn = doc.querySelector(res.click);
+                                                                            if (btn) btn.click();
+                                                                        }
+                                                                        // Execute custom JS and capture result
+                                                                        var baResult = '';
+                                                                        if (res.js) {
+                                                                            try { baResult = String(win.eval(res.js) || ''); } catch(je) { baResult = 'JS error: ' + je.message; }
+                                                                        }
+                                                                        baStatus.style.color = '#22c55e';
+                                                                        baStatus.textContent = '✓ Done';
+                                                                        if (baIc) { baIc.className = 'cvd-act-icon done'; baIc.innerHTML = '&#10003;'; }
+                                                                        resolveBa({ ok: true, output: baResult || ('Completed on ' + doc.title) });
+                                                                    } catch(e) {
+                                                                        baStatus.style.color = '#ef4444';
+                                                                        baStatus.textContent = '✗ ' + e.message;
+                                                                        if (baIc) { baIc.className = 'cvd-act-icon fail'; baIc.innerHTML = '&#10007;'; }
+                                                                        resolveBa({ ok: false, error: e.message });
+                                                                    }
+                                                                });
+                                                                // Set timeout in case page never loads
+                                                                setTimeout(function() { resolveBa({ ok: false, error: 'Timeout waiting for page' }); }, 30000);
+                                                                baFr.src = res.url;
+                                                            }).then(function(baRes) {
+                                                                if (!baRes.ok) failedItems.push({ desc: res.title || 'browser_act', error: baRes.error });
+                                                                return applyOne(i + 1);
+                                                            });
                                                         }
 
                                                         // terminal_output: render code/shell output block in chat

@@ -290,14 +290,31 @@ PDF TEXT EXTRACTION:
   → Extracts text from PDFs in media library or by path. Use for content analysis, import, or SEO tasks.
   → May not work on scanned/image-based PDFs (no embedded text)
 
-EMBED PAGE (user-interaction required):
-When a task requires the user to interact with a WordPress admin screen (e.g. WooCommerce Setup Wizard, theme customizer, payment gateway OAuth, plugin onboarding wizard), use embed_page to open it as an iframe inside the chat. The user can complete the setup without leaving the chat and then click "Done ✓" to continue.
+BROWSER AUTOMATION (agent acts as the user — no human click needed):
+Use browser_act to load a WP admin page in an iframe and automatically fill inputs, click buttons, and execute JavaScript. The agent does it — the user just watches.
+{ "type": "wp_action", "action": "browser_act", "data": {
+    "url": "admin.php?page=wc-setup&step=store_setup",
+    "title": "WooCommerce Store Setup",
+    "fill": [
+      { "selector": "#store-country-state", "value": "BD" },
+      { "selector": "#store-currency", "value": "BDT" }
+    ],
+    "click": ".button-primary",
+    "js": "return document.title;"
+  }
+}
+  → fill: array of {selector, value} — fills inputs before clicking
+  → click: CSS selector of button to click after filling
+  → js: JavaScript to run after the page loads (return value is logged)
+  → Use for: WooCommerce setup wizard steps, plugin onboarding, settings pages with no direct WP option key
+  → Prefer run_php (update_option, wp_update_post) when you know the option key — it's faster
+  → Use browser_act when you need to interact with a setup wizard UI
+
+EMBED PAGE (user-interaction required — user must click):
+When a task requires the user to interact with a WordPress admin screen (payment gateway OAuth, manual file upload, etc.), use embed_page. The chat pauses until the user clicks "Done ✓".
 { "type": "wp_action", "action": "embed_page", "data": { "url": "admin.php?page=wc-setup", "title": "WooCommerce Setup Wizard", "instructions": ["Choose your store country and currency", "Click 'Let's go!' to start", "Click 'Done ✓' in the chat when finished"] } }
-  → url can be a full https:// URL or a wp-admin relative path (e.g. "admin.php?page=wc-setup")
-  → instructions appear in the Activity panel step-by-step to guide the user
-  → The chat pauses automatically until the user clicks "Done ✓"
-  → Chain embed_page before or after automated changes in the same response
-  → Use for: WooCommerce wizard, theme customizer (?page=customize), payment gateway settings, plugin onboarding screens, any page that requires form input the AI cannot fill
+  → Use this only when human interaction is truly required (OAuth flows, manual uploads)
+  → For automated setup steps, prefer browser_act instead
 
 PLUGIN INSTALLATION:
 - Use type "plugin_install" to install any plugin from wordpress.org by its slug (the part of the plugin URL after /plugins/).
