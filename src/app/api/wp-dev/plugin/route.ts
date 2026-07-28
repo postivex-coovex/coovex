@@ -69,7 +69,7 @@ add_filter('pre_set_site_transient_update_plugins', function ($transient) {
     return $transient;
 });
 
-// "View version X.X details" popup in WP admin â†’ Plugins
+// "View version X.X details" popup in WP admin → Plugins
 add_filter('plugins_api', function ($result, $action, $args) {
     if ($action !== 'plugin_information' || ($args->slug ?? '') !== 'coovex-dev') return $result;
 
@@ -1908,7 +1908,7 @@ add_action('wp_ajax_cvd_command', function () {
     }
 
     $api_key = get_option('cvd_api_key', '');
-    if (empty($api_key)) wp_send_json_error('API key not configured. Go to CooVex Dev â†’ Settings.', 400);
+    if (empty($api_key)) wp_send_json_error('API key not configured. Go to CooVex Dev → Settings.', 400);
 
     $command = sanitize_textarea_field($_POST['command'] ?? '');
     if (empty($command)) wp_send_json_error('Empty command', 400);
@@ -2282,13 +2282,13 @@ function cvd_render_floating_widget(): void {
     return (b/1048576).toFixed(1)+' MB';
   }
   function fileIcon(type,name){
-    if(/pdf/i.test(type))return 'ðŸ“„';
-    if(/csv|tsv/i.test(type)||/\.(csv|tsv)$/i.test(name))return 'ðŸ“Š';
-    if(/sheet|excel|xlsx|xls/i.test(type+name))return 'ðŸ“ˆ';
-    if(/word|docx|doc/i.test(type+name))return 'ðŸ“';
-    if(/json/i.test(type+name))return 'ðŸ”§';
-    if(/xml/i.test(type+name))return 'ðŸ—‚';
-    return 'ðŸ“Ž';
+    if(/pdf/i.test(type))return 'PDF';
+    if(/csv|tsv/i.test(type)||/\.(csv|tsv)$/i.test(name))return 'CSV';
+    if(/sheet|excel|xlsx|xls/i.test(type+name))return 'XLS';
+    if(/word|docx|doc/i.test(type+name))return 'DOC';
+    if(/json/i.test(type+name))return 'JSON';
+    if(/xml/i.test(type+name))return 'XML';
+    return 'FILE';
   }
 
   function clearAttachment(){
@@ -2355,7 +2355,7 @@ function cvd_render_floating_widget(): void {
       };
       r.readAsText(f);return;
     }
-    // Binary (PDF, DOCX, XLSX, etc.) â†’ base64
+    // Binary (PDF, DOCX, XLSX, etc.) → base64
     var r=new FileReader();
     r.onload=function(e){
       var dataUrl=e.target.result;
@@ -2787,7 +2787,7 @@ function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0):
     $token   = get_option('cvd_telegram_bot_token', '');
     $api_key = get_option('cvd_api_key', '');
     if (empty($token) || empty($api_key)) {
-        cvd_telegram_send($token, $chat_id, 'âš ï¸ CooVex Dev is not configured. Check plugin settings.', $reply_to ?: null);
+        cvd_telegram_send($token, $chat_id, '[!] CooVex Dev is not configured. Check plugin settings.', $reply_to ?: null);
         return;
     }
 
@@ -2815,7 +2815,7 @@ function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0):
     $code    = wp_remote_retrieve_response_code($response);
     $payload = json_decode(wp_remote_retrieve_body($response), true);
 
-    if ($code === 402) { cvd_telegram_send($token, $chat_id, 'âš ï¸ ' . ($payload['error'] ?? 'Insufficient credits.'), $reply_to ?: null); return; }
+    if ($code === 402) { cvd_telegram_send($token, $chat_id, '[!] ' . ($payload['error'] ?? 'Insufficient credits.'), $reply_to ?: null); return; }
     if ($code !== 200 || empty($payload['ok'])) { cvd_telegram_send($token, $chat_id, 'âŒ ' . ($payload['error'] ?? 'Error'), $reply_to ?: null); return; }
 
     $changes = $payload['changes'] ?? [];
@@ -2833,8 +2833,8 @@ function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0):
     $fail  = count($applied) - $ok;
 
     if (!empty($applied)) {
-        $msg .= "\n\nâœ… {$ok} change(s) applied.";
-        if ($fail) $msg .= " âš ï¸ {$fail} failed.";
+        $msg .= "\n\n[OK] {$ok} change(s) applied.";
+        if ($fail) $msg .= " [!] {$fail} failed.";
         if ($snap_id) $msg .= "\n_Commit \`{$snap_id}\` \u2014 rollback in WP admin._";
     }
     if ($payload['credits_used'] ?? null) $msg .= "\n_Credits used: " . $payload['credits_used'] . "_";
@@ -2872,14 +2872,14 @@ function cvd_telegram_webhook_handler(WP_REST_Request $request): WP_REST_Respons
     $msg_id  = (int)($message['message_id'] ?? 0);
 
     if (!empty($allowed_chat) && $chat_id !== $allowed_chat) {
-        cvd_telegram_send($token, $chat_id, 'â›” Unauthorized.', $msg_id);
+        cvd_telegram_send($token, $chat_id, '[Blocked] Unauthorized.', $msg_id);
         return new WP_REST_Response(['ok' => true]);
     }
     if (empty($text)) return new WP_REST_Response(['ok' => true]);
 
     if ($text === '/start') {
         cvd_telegram_send($token, $chat_id,
-            "ðŸ‘‹ *CooVex Dev* connected!\n\nSend me tasks in plain language and I'll execute them on your WordPress site.\n\n*Examples:*\nâ€¢ _How many visitors today?_\nâ€¢ _Add a Buy Now button next to Add to Cart_\nâ€¢ _Create a login activity log plugin_\nâ€¢ _Show WooCommerce sales this month_",
+            "*CooVex Dev* connected!\n\nSend me tasks in plain language and I’ll execute them on your WordPress site.\n\n*Examples:*\n- _How many visitors today?_\n- _Add a Buy Now button next to Add to Cart_\n- _Create a login activity log plugin_\n- _Show WooCommerce sales this month_",
         $msg_id);
         return new WP_REST_Response(['ok' => true]);
     }
@@ -2975,7 +2975,7 @@ function cvd_page_settings() {
                             value="<?php echo esc_attr(get_option('cvd_api_key','')); ?>"
                             class="regular-text" autocomplete="new-password" />
                         <p class="description">
-                            Find it in <a href="https://app.coovex.com/settings/integrations" target="_blank">CooVex â†’ Settings â†’ Integrations</a>.
+                            Find it in <a href="https://app.coovex.com/settings/integrations" target="_blank">CooVex → Settings → Integrations</a>.
                             Credits are deducted per command based on actual usage (100 credits = $1).
                         </p>
                     </td>
@@ -3054,7 +3054,7 @@ function cvd_page_settings() {
                         <input type="password" id="cvd_telegram_bot_token" name="cvd_telegram_bot_token"
                             value="<?php echo esc_attr(get_option('cvd_telegram_bot_token','')); ?>"
                             class="regular-text" autocomplete="new-password" />
-                        <p class="description">From @BotFather: <code>/newbot</code> â†’ copy the token.</p>
+                        <p class="description">From @BotFather: <code>/newbot</code> → copy the token.</p>
                     </td>
                 </tr>
                 <tr>
@@ -3081,7 +3081,7 @@ function cvd_page_settings() {
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <?php if ($tg_token): ?>
             <button id="cvd-tg-register" class="button button-primary">
-                <?php echo $tg_registered ? 'â†» Re-register Webhook' : '\u26A1 Register Telegram Webhook'; ?>
+                <?php echo $tg_registered ? ' Re-register Webhook' : 'Register Telegram Webhook'; ?>
             </button>
             <?php if ($tg_registered): ?>
             <button id="cvd-tg-unregister" class="button button-secondary">Remove Webhook</button>
@@ -3238,43 +3238,44 @@ function cvd_page_agent() {
     $session_ttl_min = CVD_SESSION_TTL / 60;
     ?>
     <style>
-    #wpcontent { background: #0f172a !important; }
+    #wpcontent { background: #f8fafc !important; }
     #wpbody-content { padding: 0 !important; }
     #cvd-app {
         display: flex;
         height: calc(100vh - 46px);
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: #0f172a;
-        color: #e2e8f0;
+        background: #f8fafc;
+        color: #0f172a;
     }
     /* -- Sidebar -- */
     #cvd-sidebar {
         width: 260px;
         min-width: 260px;
-        background: #0a0f1e;
-        border-right: 1px solid #1e293b;
+        background: #f1f5f9;
+        border-right: 1px solid #e2e8f0;
         display: flex;
         flex-direction: column;
         overflow: hidden;
     }
     #cvd-sidebar-header {
         padding: 16px;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid #e2e8f0;
         display: flex;
         align-items: center;
         gap: 10px;
+        background: #ffffff;
     }
     #cvd-sidebar-header .cvd-logo {
         font-size: 15px;
         font-weight: 700;
-        color: #60a5fa;
+        color: #2563eb;
         letter-spacing: -.3px;
     }
     #cvd-sidebar-header .cvd-version {
         margin-left: auto;
         font-size: 10px;
-        color: #475569;
-        background: #1e293b;
+        color: #64748b;
+        background: #e2e8f0;
         padding: 2px 6px;
         border-radius: 4px;
     }
@@ -3282,9 +3283,10 @@ function cvd_page_agent() {
         padding: 10px 16px;
         font-size: 12px;
         color: #64748b;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid #e2e8f0;
+        background: #ffffff;
     }
-    #cvd-credits-bar span { color: #94a3b8; }
+    #cvd-credits-bar span { color: #0f172a; font-weight: 600; }
     #cvd-snap-list {
         flex: 1;
         overflow-y: auto;
@@ -3296,15 +3298,15 @@ function cvd_page_agent() {
         border-left: 3px solid transparent;
         transition: background .15s;
     }
-    #cvd-snap-list .snap-item:hover { background: #1e293b; }
+    #cvd-snap-list .snap-item:hover { background: #e2e8f0; }
     #cvd-snap-list .snap-item .snap-id {
         font-size: 11px;
         font-family: monospace;
-        color: #60a5fa;
+        color: #2563eb;
     }
     #cvd-snap-list .snap-item .snap-label {
         font-size: 12px;
-        color: #cbd5e1;
+        color: #374151;
         margin-top: 2px;
         white-space: nowrap;
         overflow: hidden;
@@ -3312,39 +3314,41 @@ function cvd_page_agent() {
     }
     #cvd-snap-list .snap-item .snap-time {
         font-size: 10px;
-        color: #475569;
+        color: #94a3b8;
         margin-top: 2px;
     }
     #cvd-sidebar-footer {
         padding: 12px 16px;
-        border-top: 1px solid #1e293b;
+        border-top: 1px solid #e2e8f0;
         display: flex;
         gap: 8px;
+        background: #ffffff;
     }
     #cvd-sidebar-footer button {
         font-size: 11px;
         padding: 5px 10px;
         border-radius: 6px;
-        border: 1px solid #334155;
+        border: 1px solid #cbd5e1;
         background: transparent;
-        color: #94a3b8;
+        color: #475569;
         cursor: pointer;
     }
-    #cvd-sidebar-footer button:hover { background: #1e293b; color: #e2e8f0; }
+    #cvd-sidebar-footer button:hover { background: #e2e8f0; color: #0f172a; }
     /* -- Main -- */
     #cvd-main {
         flex: 1;
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        background: #ffffff;
     }
     #cvd-topbar {
         padding: 12px 20px;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid #e2e8f0;
         display: flex;
         align-items: center;
         gap: 10px;
-        background: #0f172a;
+        background: #ffffff;
     }
     #cvd-topbar .status-dot {
         width: 8px; height: 8px;
@@ -3357,7 +3361,7 @@ function cvd_page_agent() {
     #cvd-topbar .session-timer {
         margin-left: auto;
         font-size: 11px;
-        color: #475569;
+        color: #94a3b8;
         font-family: monospace;
     }
     /* -- Messages -- */
@@ -3368,6 +3372,7 @@ function cvd_page_agent() {
         display: flex;
         flex-direction: column;
         gap: 16px;
+        background: #ffffff;
     }
     .cvd-msg {
         display: flex;
@@ -3384,8 +3389,8 @@ function cvd_page_agent() {
         margin-bottom: 4px;
         flex-shrink: 0;
     }
-    .cvd-msg.user .avatar { background: #1d4ed8; color: #bfdbfe; }
-    .cvd-msg.agent .avatar { background: #1e293b; color: #60a5fa; font-size: 14px; }
+    .cvd-msg.user .avatar { background: #2563eb; color: #ffffff; }
+    .cvd-msg.agent .avatar { background: #e2e8f0; color: #2563eb; font-size: 14px; }
     .cvd-msg .bubble {
         padding: 10px 14px;
         border-radius: 12px;
@@ -3394,14 +3399,14 @@ function cvd_page_agent() {
         white-space: pre-wrap;
         word-break: break-word;
     }
-    .cvd-msg.user .bubble { background: #1e3a8a; color: #e0f2fe; border-bottom-right-radius: 4px; }
-    .cvd-msg.agent .bubble { background: #1e293b; color: #e2e8f0; border-bottom-left-radius: 4px; }
-    .cvd-msg.agent.error .bubble { background: #450a0a; color: #fca5a5; }
+    .cvd-msg.user .bubble { background: #2563eb; color: #ffffff; border-bottom-right-radius: 4px; }
+    .cvd-msg.agent .bubble { background: #f1f5f9; color: #0f172a; border-bottom-left-radius: 4px; }
+    .cvd-msg.agent.error .bubble { background: #fef2f2; color: #b91c1c; }
     /* -- Changes block -- */
     .cvd-changes { margin-top: 8px; width: 100%; }
     .cvd-change-item {
-        background: #0f2441;
-        border: 1px solid #1e3a5f;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
         border-radius: 8px;
         margin-top: 6px;
         overflow: hidden;
@@ -3420,20 +3425,20 @@ function cvd_page_agent() {
         text-transform: uppercase;
         letter-spacing: .5px;
     }
-    .badge-create { background: #14532d; color: #86efac; }
-    .badge-update { background: #1e3a5f; color: #60a5fa; }
-    .badge-delete { background: #450a0a; color: #fca5a5; }
-    .badge-db     { background: #2d1b69; color: #c4b5fd; }
+    .badge-create { background: #dcfce7; color: #166534; }
+    .badge-update { background: #dbeafe; color: #1d4ed8; }
+    .badge-delete { background: #fee2e2; color: #991b1b; }
+    .badge-db     { background: #ede9fe; color: #6d28d9; }
     .cvd-change-header .filepath {
         font-family: monospace;
         font-size: 12px;
-        color: #94a3b8;
+        color: #475569;
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .cvd-change-header .toggle-icon { color: #475569; font-size: 11px; }
+    .cvd-change-header .toggle-icon { color: #94a3b8; font-size: 11px; }
     .cvd-change-body {
         display: none;
         padding: 0 12px 12px;
@@ -3441,35 +3446,36 @@ function cvd_page_agent() {
     .cvd-change-body pre {
         margin: 0;
         padding: 10px;
-        background: #020617;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
         border-radius: 6px;
         font-family: 'Cascadia Code', 'Fira Code', 'SF Mono', monospace;
         font-size: 11px;
         line-height: 1.5;
-        color: #94a3b8;
+        color: #374151;
         overflow-x: auto;
         max-height: 300px;
     }
     .cvd-change-item.open .cvd-change-body { display: block; }
-    .cvd-change-item.ok .cvd-change-header { background: #0a1628; }
-    .cvd-change-item.fail .cvd-change-header { background: #1a0a0a; }
+    .cvd-change-item.ok .cvd-change-header { background: #f0fdf4; }
+    .cvd-change-item.fail .cvd-change-header { background: #fef2f2; }
     .cvd-rollback-inline {
         margin-top: 6px;
         font-size: 11px;
-        color: #60a5fa;
+        color: #2563eb;
         cursor: pointer;
         display: inline-flex; align-items: center; gap: 4px;
         padding: 3px 8px;
-        border: 1px solid #1e3a5f;
+        border: 1px solid #bfdbfe;
         border-radius: 5px;
         background: transparent;
     }
-    .cvd-rollback-inline:hover { background: #1e293b; }
+    .cvd-rollback-inline:hover { background: #eff6ff; }
     /* -- Typing indicator -- */
     .cvd-typing { display: flex; align-items: center; gap: 4px; padding: 8px 14px; }
     .cvd-typing span {
         width: 6px; height: 6px;
-        background: #60a5fa;
+        background: #2563eb;
         border-radius: 50%;
         animation: cvd-bounce .8s infinite;
     }
@@ -3479,16 +3485,16 @@ function cvd_page_agent() {
     /* -- Input -- */
     #cvd-input-area {
         padding: 16px 20px;
-        border-top: 1px solid #1e293b;
-        background: #0f172a;
+        border-top: 1px solid #e2e8f0;
+        background: #ffffff;
         display: flex; gap: 10px; align-items: flex-end;
     }
     #cvd-textarea {
         flex: 1;
-        background: #1e293b;
-        border: 1px solid #334155;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
-        color: #e2e8f0;
+        color: #0f172a;
         font-size: 13.5px;
         line-height: 1.5;
         padding: 10px 14px;
@@ -3498,8 +3504,8 @@ function cvd_page_agent() {
         outline: none;
         font-family: inherit;
     }
-    #cvd-textarea:focus { border-color: #3b82f6; }
-    #cvd-textarea::placeholder { color: #475569; }
+    #cvd-textarea:focus { border-color: #2563eb; }
+    #cvd-textarea::placeholder { color: #94a3b8; }
     #cvd-send-btn {
         background: #2563eb;
         border: none;
@@ -3514,12 +3520,12 @@ function cvd_page_agent() {
     }
     #cvd-send-btn:hover:not(:disabled) { background: #1d4ed8; }
     #cvd-send-btn:disabled { opacity: .4; cursor: not-allowed; }
-    #cvd-input-hint { font-size: 11px; color: #334155; padding: 0 20px 8px; text-align: right; }
+    #cvd-input-hint { font-size: 11px; color: #cbd5e1; padding: 0 20px 8px; text-align: right; }
     /* -- Auth overlay -- */
     #cvd-auth-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,.75);
+        background: rgba(0,0,0,.4);
         backdrop-filter: blur(4px);
         display: flex;
         align-items: center;
@@ -3527,28 +3533,29 @@ function cvd_page_agent() {
         z-index: 1000;
     }
     #cvd-auth-box {
-        background: #0f172a;
-        border: 1px solid #1e293b;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 16px;
         padding: 36px 40px;
         width: 360px;
         text-align: center;
+        box-shadow: 0 4px 24px rgba(0,0,0,.08);
     }
     #cvd-auth-box .icon { font-size: 40px; margin-bottom: 12px; }
-    #cvd-auth-box h2 { font-size: 20px; color: #e2e8f0; margin: 0 0 4px; }
+    #cvd-auth-box h2 { font-size: 20px; color: #0f172a; margin: 0 0 4px; }
     #cvd-auth-box p { font-size: 13px; color: #64748b; margin: 0 0 24px; }
     #cvd-auth-input {
         width: 100%;
-        background: #1e293b;
-        border: 1px solid #334155;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
         border-radius: 10px;
-        color: #e2e8f0;
+        color: #0f172a;
         font-size: 15px;
         padding: 12px 14px;
         outline: none;
         box-sizing: border-box;
     }
-    #cvd-auth-input:focus { border-color: #3b82f6; }
+    #cvd-auth-input:focus { border-color: #2563eb; }
     #cvd-auth-btn {
         width: 100%;
         background: #2563eb;
@@ -3562,21 +3569,21 @@ function cvd_page_agent() {
         margin-top: 12px;
     }
     #cvd-auth-btn:hover { background: #1d4ed8; }
-    #cvd-auth-error { color: #f87171; font-size: 12px; margin-top: 8px; min-height: 18px; }
+    #cvd-auth-error { color: #ef4444; font-size: 12px; margin-top: 8px; min-height: 18px; }
     #cvd-auth-links { margin-top: 20px; }
-    #cvd-auth-links a { font-size: 12px; color: #475569; text-decoration: none; }
-    #cvd-auth-links a:hover { color: #94a3b8; }
+    #cvd-auth-links a { font-size: 12px; color: #94a3b8; text-decoration: none; }
+    #cvd-auth-links a:hover { color: #475569; }
     /* Scrollbar */
     #cvd-messages::-webkit-scrollbar, #cvd-snap-list::-webkit-scrollbar, #cvd-activity-list::-webkit-scrollbar { width: 4px; }
     #cvd-messages::-webkit-scrollbar-track, #cvd-snap-list::-webkit-scrollbar-track, #cvd-activity-list::-webkit-scrollbar-track { background: transparent; }
-    #cvd-messages::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
-    #cvd-activity-list::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
-    /* ── Activity panel ── */
+    #cvd-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+    #cvd-activity-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+    /* -- Activity panel -- */
     #cvd-activity {
         width: 300px;
         min-width: 300px;
-        background: #070d1a;
-        border-left: 1px solid #1e293b;
+        background: #f8fafc;
+        border-left: 1px solid #e2e8f0;
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -3589,34 +3596,35 @@ function cvd_page_agent() {
     }
     #cvd-activity-header {
         padding: 10px 14px;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid #e2e8f0;
         display: flex;
         align-items: center;
         gap: 8px;
         flex-shrink: 0;
+        background: #ffffff;
     }
     #cvd-activity-header .cvd-act-title {
         font-size: 11px;
         font-weight: 700;
         letter-spacing: 1px;
         text-transform: uppercase;
-        color: #475569;
+        color: #94a3b8;
         flex: 1;
     }
     #cvd-activity-close {
         background: none;
         border: none;
-        color: #334155;
+        color: #cbd5e1;
         cursor: pointer;
         font-size: 14px;
         padding: 2px 4px;
         line-height: 1;
         border-radius: 4px;
     }
-    #cvd-activity-close:hover { color: #94a3b8; background: #1e293b; }
+    #cvd-activity-close:hover { color: #475569; background: #f1f5f9; }
     #cvd-activity-status {
         padding: 10px 14px;
-        border-bottom: 1px solid #0f172a;
+        border-bottom: 1px solid #e2e8f0;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -3624,12 +3632,13 @@ function cvd_page_agent() {
         color: #64748b;
         flex-shrink: 0;
         min-height: 38px;
+        background: #ffffff;
     }
     .cvd-act-spinner {
         width: 12px;
         height: 12px;
-        border: 2px solid #1e293b;
-        border-top-color: #60a5fa;
+        border: 2px solid #e2e8f0;
+        border-top-color: #2563eb;
         border-radius: 50%;
         animation: cvd-spin .7s linear infinite;
         flex-shrink: 0;
@@ -3644,39 +3653,39 @@ function cvd_page_agent() {
         align-items: flex-start;
         gap: 9px;
         padding: 8px 14px;
-        border-bottom: 1px solid #0a0f1e;
+        border-bottom: 1px solid #f1f5f9;
         transition: background .12s;
     }
-    .cvd-act-item:hover { background: #0d1526; }
+    .cvd-act-item:hover { background: #f1f5f9; }
     .cvd-act-icon {
         width: 16px;
         height: 16px;
         border-radius: 50%;
-        border: 1.5px solid #334155;
+        border: 1.5px solid #cbd5e1;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 8px;
         flex-shrink: 0;
         margin-top: 1px;
-        color: #475569;
+        color: #94a3b8;
         transition: all .2s;
     }
     .cvd-act-icon.applying {
-        border-color: #3b82f6;
+        border-color: #2563eb;
         border-top-color: transparent;
         animation: cvd-spin .7s linear infinite;
         color: transparent;
     }
     .cvd-act-icon.done {
-        background: #052e16;
-        border-color: #166534;
-        color: #86efac;
+        background: #dcfce7;
+        border-color: #22c55e;
+        color: #166534;
     }
     .cvd-act-icon.fail {
-        background: #3f0a0a;
-        border-color: #7f1d1d;
-        color: #fca5a5;
+        background: #fee2e2;
+        border-color: #ef4444;
+        color: #b91c1c;
     }
     .cvd-act-info { flex: 1; min-width: 0; }
     .cvd-act-badge {
@@ -3689,10 +3698,10 @@ function cvd_page_agent() {
         border-radius: 3px;
         margin-bottom: 3px;
     }
-    .cvd-act-badge-file   { background: #0f2441; color: #60a5fa; }
-    .cvd-act-badge-db     { background: #1e0f3d; color: #c4b5fd; }
-    .cvd-act-badge-plugin { background: #0c2010; color: #86efac; }
-    .cvd-act-badge-wp     { background: #1a1200; color: #fbbf24; }
+    .cvd-act-badge-file   { background: #dbeafe; color: #1d4ed8; }
+    .cvd-act-badge-db     { background: #ede9fe; color: #6d28d9; }
+    .cvd-act-badge-plugin { background: #dcfce7; color: #166534; }
+    .cvd-act-badge-wp     { background: #fef9c3; color: #a16207; }
     .cvd-act-desc {
         font-family: monospace;
         font-size: 11px;
@@ -3701,15 +3710,16 @@ function cvd_page_agent() {
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .cvd-act-desc.ok   { color: #94a3b8; }
-    .cvd-act-desc.fail { color: #f87171; }
+    .cvd-act-desc.ok   { color: #374151; }
+    .cvd-act-desc.fail { color: #ef4444; }
     #cvd-activity-footer {
         padding: 8px 14px;
-        border-top: 1px solid #1e293b;
+        border-top: 1px solid #e2e8f0;
         font-size: 11px;
-        color: #334155;
+        color: #cbd5e1;
         flex-shrink: 0;
         min-height: 30px;
+        background: #ffffff;
     }
     </style>
 
@@ -3718,14 +3728,13 @@ function cvd_page_agent() {
         <!-- Auth overlay -->
         <div id="cvd-auth-overlay" style="display: <?php echo $already_authed === 'true' ? 'none' : 'flex'; ?>;">
             <div id="cvd-auth-box">
-                <div class="icon">ðŸ”‘</div>
                 <h2>CooVex Dev</h2>
                 <p>Enter your dev password to start this session.<br>Sessions expire after <?php echo $session_ttl_min; ?> minutes of inactivity.</p>
                 <input type="password" id="cvd-auth-input" placeholder="Dev password" autocomplete="current-password" />
                 <button id="cvd-auth-btn">Unlock</button>
                 <div id="cvd-auth-error"></div>
                 <div id="cvd-auth-links">
-                    <a href="<?php echo admin_url('admin.php?page=coovex-dev-settings'); ?>">Forgot password? Reset in Settings â†’</a>
+                    <a href="<?php echo admin_url('admin.php?page=coovex-dev-settings'); ?>">Forgot password? Reset in Settings →</a>
                 </div>
             </div>
         </div>
