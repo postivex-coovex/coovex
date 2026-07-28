@@ -3627,7 +3627,13 @@ What would you like to build or change?</div>
     (function() {
         var NONCE = <?php echo json_encode($nonce); ?>;
         var AJAXURL = <?php echo json_encode(admin_url('admin-ajax.php')); ?>;
+        var STORE_KEY = 'cvd_chat_' + location.hostname;
         var history = [];
+        var displayMsgs = [];
+
+        function saveChat() {
+            try { localStorage.setItem(STORE_KEY, JSON.stringify({h: history, m: displayMsgs})); } catch(e) {}
+        }
 
         // -- Send command ------------------------------------------------------
         var textarea  = document.getElementById('cvd-textarea');
@@ -3919,6 +3925,13 @@ What would you like to build or change?</div>
             wrap.appendChild(bubble);
             messages.appendChild(wrap);
             messages.scrollTop = messages.scrollHeight;
+
+            // Persist non-error messages across page refreshes
+            if (!isError) {
+                displayMsgs.push({r: isUser ? 'user' : 'agent', t: text});
+                saveChat();
+            }
+
             return wrap;
         }
 
@@ -4052,10 +4065,38 @@ What would you like to build or change?</div>
             });
         });
 
+        // ── Restore chat from localStorage on page load ───────────────────────
+        (function() {
+            var stored;
+            try { stored = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch(e) {}
+            if (stored && stored.m && stored.m.length > 0) {
+                messages.innerHTML = '';  // remove welcome message
+                history = stored.h || [];
+                displayMsgs = stored.m || [];
+                displayMsgs.forEach(function(m) {
+                    var isUser = m.r === 'user';
+                    var wrap = document.createElement('div');
+                    wrap.className = 'cvd-msg ' + (isUser ? 'user' : 'agent');
+                    var avatar = document.createElement('div');
+                    avatar.className = 'avatar';
+                    avatar.textContent = isUser ? wp_username_initial : '⚡';
+                    var bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    bubble.textContent = m.t;
+                    wrap.appendChild(avatar);
+                    wrap.appendChild(bubble);
+                    messages.appendChild(wrap);
+                });
+                messages.scrollTop = messages.scrollHeight;
+            }
+        })();
+
         // Clear chat
         document.getElementById('cvd-clear-btn').addEventListener('click', function() {
             messages.innerHTML = '';
             history = [];
+            displayMsgs = [];
+            try { localStorage.removeItem(STORE_KEY); } catch(e) {}
         });
 
         // -- AJAX helper -------------------------------------------------------
