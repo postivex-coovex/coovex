@@ -3861,13 +3861,16 @@ What would you like to build or change?</div>
                                     history.push({role: 'assistant', content: d.message});
                                     if (history.length > 20) history = history.slice(-20);
 
-                                    // Show a "Continue" quick-action button if AI asks user to continue
-                                    function maybeAddContinueBtn(text) {
-                                        // Match English OR Bengali step/continue patterns
-                                        if (!/continue|next step|say.*continue|type.*continue|proceed|step\s*\d|ধাপ|এগিয়ে|continue\s*করুন|continue\s*বলুন/i.test(text)) return;
+                                    // Strip [MORE_STEPS] marker and show Continue button if present
+                                    var hasMoreSteps = d.message && d.message.indexOf('[MORE_STEPS]') !== -1;
+                                    var displayMsg   = hasMoreSteps
+                                        ? d.message.replace(/\[MORE_STEPS\]\s*/g, '').trim()
+                                        : d.message;
+
+                                    function showContinueBtn() {
                                         var btn = document.createElement('button');
-                                        btn.style.cssText = 'display:block;margin:6px 0 4px 44px;background:#2563eb;color:#fff;border:none;padding:5px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;';
-                                        btn.textContent = 'Continue';
+                                        btn.style.cssText = 'display:block;margin:6px 0 4px 44px;background:#2563eb;color:#fff;border:none;padding:5px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;';
+                                        btn.textContent = 'Continue →';
                                         btn.addEventListener('click', function() {
                                             btn.remove();
                                             textarea.value = 'continue';
@@ -3880,12 +3883,12 @@ What would you like to build or change?</div>
                                     var changes = d.changes || [];
                                     if (changes.length === 0) {
                                         actClose();
-                                        addAgentMessage(d.message, [], null);
-                                        maybeAddContinueBtn(d.message);
+                                        addAgentMessage(displayMsg, [], null);
+                                        if (hasMoreSteps) showContinueBtn();
                                     } else {
                                         // Show the AI's message immediately
-                                        addAgentMessage(d.message, [], null);
-                                        maybeAddContinueBtn(d.message);
+                                        addAgentMessage(displayMsg, [], null);
+                                        if (hasMoreSteps) showContinueBtn();
 
                                         // Show pending changes in activity panel
                                         actRenderChanges(changes);
