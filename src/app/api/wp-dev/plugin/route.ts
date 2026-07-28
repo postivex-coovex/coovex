@@ -1782,6 +1782,106 @@ function cvd_apply_wp_action(array $change): array {
             ];
         }
 
+        // -- Inject / replace custom CSS on the site ---------------------------
+        case 'inject_css': {
+            $css    = $data['css']    ?? '';
+            $label  = sanitize_text_field($data['label'] ?? 'cvd-custom');
+            $mode   = $data['mode']   ?? 'append'; // append | replace
+            if (!$css) return ['ok' => false, 'error' => 'inject_css requires data.css'];
+            $sheet  = get_stylesheet();
+            $current = wp_get_custom_css($sheet) ?: '';
+            $marker_s = "/* $label-start */";
+            $marker_e = "/* $label-end */";
+            $block    = "$marker_s\n$css\n$marker_e";
+            if ($mode === 'replace' || strpos($current, $marker_s) !== false) {
+                $current = preg_replace('/' . preg_quote($marker_s,'/').'.*?'.preg_quote($marker_e,'/').'[\s]*/s', '', $current);
+            }
+            $updated = trim($current) . "\n" . $block;
+            $result  = wp_update_custom_css_post($sheet, $updated);
+            if (is_wp_error($result)) return ['ok' => false, 'error' => $result->get_error_message()];
+            return ['ok' => true, 'client_action' => 'terminal_output', 'output' => "CSS injected ($label). " . strlen($css) . " bytes.", 'lang' => 'text'];
+        }
+
+        // -- Design a page: set HTML + inject scoped CSS in one action ---------
+        case 'design_page': {
+            $page_id  = intval($data['page_id'] ?? 0);
+            $title    = sanitize_text_field($data['title'] ?? '');
+            $html     = $data['html'] ?? '';
+            $css      = $data['css']  ?? '';
+            $template = sanitize_text_field($data['template'] ?? ''); // e.g. 'full-width'
+            $log      = [];
+            // Resolve page by title if no ID
+            if (!$page_id && $title) {
+                $found = get_posts(['post_type' => 'page', 'post_status' => 'any', 'title' => $title, 'numberposts' => 1]);
+                if ($found) $page_id = $found[0]->ID;
+            }
+            if (!$page_id) return ['ok' => false, 'error' => 'design_page: page not found — provide page_id or title'];
+            // Update content
+            if ($html) {
+                $upd = ['ID' => $page_id, 'post_content' => $html, 'post_status' => 'publish'];
+                if ($template) $upd['page_template'] = $template;
+                $res = wp_update_post($upd, true);
+                $log[] = is_wp_error($res) ? 'HTML error: '.$res->get_error_message() : "HTML updated (post $page_id)";
+            }
+            // Inject page-scoped CSS
+            if ($css) {
+                $label  = "cvd-page-$page_id";
+                $sheet  = get_stylesheet();
+                $current = wp_get_custom_css($sheet) ?: '';
+                $marker_s = "/* $label-start */";
+                $marker_e = "/* $label-end */";
+                $block    = "$marker_s\n$css\n$marker_e";
+                $current  = preg_replace('/'.preg_quote($marker_s,'/').'.*?'.preg_quote($marker_e,'/').'[\s]*/s', '', $current);
+                $result   = wp_update_custom_css_post($sheet, trim($current)."\n".$block);
+                $log[]    = is_wp_error($result) ? 'CSS error: '.$result->get_error_message() : 'CSS injected ('.strlen($css).' bytes)';
+            }
+            // Set full-width via page meta (Astra / most themes)
+            if ($template === 'full-width' || $template === 'elementor_canvas') {
+                update_post_meta($page_id, '_wp_page_template', $template ?: 'full-width');
+                update_post_meta($page_id, 'site-sidebar-layout', 'no-sidebar');
+                update_post_meta($page_id, 'site-content-layout', 'full-width');
+                update_post_meta($page_id, 'ast-main-header-display', 'disabled');
+                update_post_meta($page_id, 'footer-sml-layout', 'disabled');
+                $log[] = 'Full-width layout set';
+            }
+            return ['ok' => true, 'client_action' => 'terminal_output', 'output' => implode("\n", $log), 'lang' => 'text'];
+        }
+
+        // -- Elementor: set a page's design programmatically ------------------
+        case 'elementor_set_page': {
+            $page_id      = intval($data['page_id']  ?? 0);
+            $title        = sanitize_text_field($data['title'] ?? '');
+            $elementor_json = $data['elementor_json'] ?? ''; // Elementor v3 JSON string
+            $css          = $data['css'] ?? '';
+            if (!$page_id && $title) {
+                $found = get_posts(['post_type' => 'page', 'post_status' => 'any', 'title' => $title, 'numberposts' => 1]);
+                if ($found) $page_id = $found[0]->ID;
+            }
+            if (!$page_id) return ['ok' => false, 'error' => 'elementor_set_page: page not found'];
+            if (!class_exists('\\Elementor\\Plugin')) return ['ok' => false, 'error' => 'Elementor not installed or not active'];
+            if ($elementor_json) {
+                update_post_meta($page_id, '_elementor_data',      $elementor_json);
+                update_post_meta($page_id, '_elementor_edit_mode', 'builder');
+                update_post_meta($page_id, '_elementor_version',   ELEMENTOR_VERSION);
+                wp_update_post(['ID' => $page_id, 'post_content' => '']);
+                // Flush Elementor CSS cache
+                if (method_exists('\\Elementor\\Plugin', 'instance') && isset(\\Elementor\\Plugin::instance()->files_manager)) {
+                    \\Elementor\\Plugin::instance()->files_manager->clear_cache();
+                }
+            }
+            if ($css) {
+                update_post_meta($page_id, '_elementor_css', ''); // clear cached CSS
+                // Also inject via WP custom CSS
+                $sheet   = get_stylesheet();
+                $current = wp_get_custom_css($sheet) ?: '';
+                $label   = "cvd-el-$page_id";
+                $block   = "/* $label-start */\n$css\n/* $label-end */";
+                $current = preg_replace('/\/\* '.preg_quote($label,'/').'.*?\/\* \/'.$label.'\*\//s', '', $current);
+                wp_update_custom_css_post($sheet, trim($current)."\n".$block);
+            }
+            return ['ok' => true, 'client_action' => 'terminal_output', 'output' => "Elementor page $page_id updated.", 'lang' => 'text'];
+        }
+
         default:
             return ['ok' => false, 'error' => "Unknown wp_action: '$action'"];
     }
