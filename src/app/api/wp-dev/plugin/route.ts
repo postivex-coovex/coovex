@@ -4399,8 +4399,7 @@ What would you like to build or change?</div>
                                                                 if (sideOutputs.length > 0) {
                                                                     stepDoneMsg += '\\n\\nINFO GATHERED (use this to decide next steps):\\n';
                                                                     sideOutputs.forEach(function(so) {
-                                                                        var safeOut = String(so.output).replace(/[\r\n]+/g, ' | ').replace(/'/g, "\\'").slice(0, 2000);
-                                                                        stepDoneMsg += '\\n[' + so.action + '] ' + safeOut;
+                                                                        stepDoneMsg += '\\n[' + so.action + '] ' + String(so.output).slice(0, 2000);
                                                                     });
                                                                 }
                                                                 stepDoneMsg += '\\n\\nContinue with the next step.';
