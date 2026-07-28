@@ -4458,6 +4458,36 @@ What would you like to build or change?</div>
 
                                 if (d.type === 'status') {
                                     actStatus(d.message, true);
+                                } else if (d.type === 'progress') {
+                                    // Server-side progress event (DALL-E, sideload, etc.)
+                                    actStatus(d.text || 'Processing...', true);
+                                    var progRow = document.createElement('div');
+                                    progRow.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:5px 8px;background:#0c1a30;border-radius:5px;margin-bottom:3px;font-size:11px;border-left:2px solid #3b82f6;';
+                                    var progIcon = document.createElement('span');
+                                    progIcon.style.cssText = 'flex-shrink:0;margin-top:1px;font-size:12px;';
+                                    var txt = d.text || '';
+                                    progIcon.textContent = txt.startsWith('✓') ? '✓' : txt.startsWith('✗') ? '✗' : txt.startsWith('⚠') ? '⚠' : '⟳';
+                                    var progColor = txt.startsWith('✓') ? '#4ade80' : txt.startsWith('✗') ? '#f87171' : txt.startsWith('⚠') ? '#fbbf24' : '#60a5fa';
+                                    progIcon.style.color = progColor;
+                                    var progText = document.createElement('div');
+                                    progText.style.cssText = 'flex:1;min-width:0;';
+                                    var progMain = document.createElement('div');
+                                    progMain.style.cssText = 'color:#e2e8f0;font-weight:500;';
+                                    progMain.textContent = txt.replace(/^[✓✗⚠⟳]\s*/, '');
+                                    progText.appendChild(progMain);
+                                    if (d.detail) {
+                                        var progDetail = document.createElement('div');
+                                        progDetail.style.cssText = 'color:#64748b;font-size:10px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                                        progDetail.textContent = d.detail;
+                                        progText.appendChild(progDetail);
+                                    }
+                                    progRow.appendChild(progIcon);
+                                    progRow.appendChild(progText);
+                                    if (thoughtsEl && thoughtsEl.parentNode) {
+                                        actList.insertBefore(progRow, thoughtsEl);
+                                    } else {
+                                        actList.insertBefore(progRow, actList.firstChild);
+                                    }
                                 } else if (d.type === 'token') {
                                     actStatus('Generating...', true);
                                     streamBuf += (d.text || '');

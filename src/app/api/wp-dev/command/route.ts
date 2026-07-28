@@ -706,20 +706,27 @@ async function buildStream(params: {
             const change = ch as Record<string, unknown>
             if (change.type !== 'generate_image') { resolved.push(ch); continue }
             try {
+              const prompt = (change.prompt as string) ?? ''
+              send('progress', { text: `🎨 Generating image with DALL-E 3…`, detail: prompt.slice(0, 80) })
               const { default: OpenAI } = await import('openai')
               const oai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
               const imgRes = await oai.images.generate({
-                model: 'dall-e-3', prompt: (change.prompt as string) ?? '',
+                model: 'dall-e-3', prompt,
                 n: 1, size: '1792x1024', quality: 'standard', response_format: 'url',
               })
               const imageUrl = imgRes.data?.[0]?.url
               if (imageUrl) {
+                send('progress', { text: `✓ Image ready — uploading to WordPress media library…` })
                 resolved.push({
                   type: 'wp_action', action: 'sideload_image',
                   data: { url: imageUrl, post_id: change.post_id ?? 0, title: change.alt, alt: change.alt, set_as_featured: change.set_as_featured },
                 })
+              } else {
+                send('progress', { text: `⚠ DALL-E returned no image URL`, detail: 'Skipping.' })
               }
-            } catch {}
+            } catch (imgErr) {
+              send('progress', { text: `✗ Image generation failed: ${(imgErr as Error).message?.slice(0, 80)}` })
+            }
           }
           parsed.changes = resolved
         }
