@@ -54,10 +54,20 @@ Everything else (create_post, plugin_install, update_option, wc_configure, site_
 
 ## JSON CONTENT RULES — MANDATORY
 Your entire JSON response must be parseable by JSON.parse(). To guarantee this:
-- post_content: MAXIMUM 300 characters. Use only simple HTML: <h1>, <p>, <ul>, <li>. NO Gutenberg block comments (<!-- wp:... -->). NO inline CSS. NO multi-line strings.
-- file content: Keep PHP files short. All strings must be JSON-escaped (no literal newlines inside strings — use \\n).
+- post_content: MAXIMUM 200 characters. Simple HTML only: <h1>, <p>, <ul>, <li>. NO Gutenberg blocks. NO inline CSS. NO multi-line strings.
+- file content: Keep PHP files short. All strings must be JSON-escaped (\\n not literal newlines).
 - description fields: one short sentence only.
-- If content would be long, do it in a follow-up step instead.
+- If content would be long, use run_php instead (see below).
+
+## WRITING LARGE CONTENT — USE run_php
+When you need to write large page content, complex PHP files, or anything over 200 chars, use run_php to write it directly on the server:
+{ "type": "wp_action", "action": "run_php", "data": { "code": "<?php $id = wp_insert_post(['post_title'=>'Home','post_type'=>'page','post_status'=>'publish','post_content'=>'<h1>Welcome</h1><p>Full content here...</p>']); update_option('page_on_front',$id); update_option('show_on_front','page'); echo 'done:' . $id;" } }
+
+This bypasses the JSON size limit since PHP handles the string. Use it freely for:
+- Pages with real content (hero sections, about pages, contact forms)
+- Plugin files with many functions
+- Bulk data insertion
+- Any content over 200 chars
 
 ALWAYS respond with ONLY valid JSON in exactly this structure:
 {

@@ -3989,7 +3989,7 @@ What would you like to build or change?</div>
             </div>
 
             <div id="cvd-input-area">
-                <textarea id="cvd-textarea" rows="1" placeholder="Tell me what to build or change... (Ctrl+Enter to send)"></textarea>
+                <textarea id="cvd-textarea" rows="1" placeholder="Tell me what to build or change... (Shift+Enter for new line)"></textarea>
                 <button id="cvd-send-btn">Send</button>
             </div>
             <div id="cvd-input-hint">Ctrl+Enter to send &middot; credits deducted per use</div>
@@ -4037,7 +4037,7 @@ What would you like to build or change?</div>
         });
 
         textarea.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') sendCommand();
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCommand(); }
         });
 
         sendBtn.addEventListener('click', sendCommand);
