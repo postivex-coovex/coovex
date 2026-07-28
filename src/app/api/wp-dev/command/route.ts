@@ -23,7 +23,13 @@ Never return more than 5 changes in a single response. For large tasks (building
 - Repeat until the full task is done
 
 This is mandatory even if the user asks for everything at once. Smaller steps = reliable execution.
-When writing file content or post_content: keep it concise. Avoid embedding large HTML blocks inside JSON strings — use short, clean markup only.
+
+## JSON CONTENT RULES — MANDATORY
+Your entire JSON response must be parseable by JSON.parse(). To guarantee this:
+- post_content: MAXIMUM 300 characters. Use only simple HTML: <h1>, <p>, <ul>, <li>. NO Gutenberg block comments (<!-- wp:... -->). NO inline CSS. NO multi-line strings.
+- file content: Keep PHP files short. All strings must be JSON-escaped (no literal newlines inside strings — use \\n).
+- description fields: one short sentence only.
+- If content would be long, do it in a follow-up step instead.
 
 ALWAYS respond with ONLY valid JSON in exactly this structure:
 {
@@ -462,21 +468,40 @@ async function buildStream(params: {
         send('status', { message: 'Processing response...' })
 
         // Parse JSON from Claude — multiple fallback strategies
+        function repairJson(s: string): string {
+          // Fix literal control characters inside JSON string values
+          let inStr = false, escaped = false, result = ''
+          for (let i = 0; i < s.length; i++) {
+            const ch = s[i]
+            if (escaped) { result += ch; escaped = false; continue }
+            if (ch === '\\') { result += ch; escaped = true; continue }
+            if (ch === '"') { inStr = !inStr; result += ch; continue }
+            if (inStr) {
+              if (ch === '\n') { result += '\\n'; continue }
+              if (ch === '\r') { result += '\\r'; continue }
+              if (ch === '\t') { result += '\\t'; continue }
+            }
+            result += ch
+          }
+          return result
+        }
+
         function robustParse(raw: string): { message: string; changes: unknown[]; read_only?: boolean } {
-          // Strategy 1: strip markdown fences then parse
-          const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
-          try {
-            const p = JSON.parse(stripped)
-            if (p && typeof p.message === 'string') return p
-          } catch {}
+          const candidates: string[] = []
+          // Strategy 1: strip markdown fences
+          candidates.push(raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim())
           // Strategy 2: extract outermost { ... }
-          const first = raw.indexOf('{')
-          const last  = raw.lastIndexOf('}')
-          if (first !== -1 && last > first) {
-            try {
-              const p = JSON.parse(raw.slice(first, last + 1))
-              if (p && typeof p.message === 'string') return p
-            } catch {}
+          const first = raw.indexOf('{'), last = raw.lastIndexOf('}')
+          if (first !== -1 && last > first) candidates.push(raw.slice(first, last + 1))
+
+          for (const c of candidates) {
+            // Try raw first, then with newline repair
+            for (const candidate of [c, repairJson(c)]) {
+              try {
+                const p = JSON.parse(candidate)
+                if (p && typeof p.message === 'string') return p
+              } catch {}
+            }
           }
           // All failed — return helpful error (never dump raw JSON)
           return {

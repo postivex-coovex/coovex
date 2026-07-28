@@ -2307,7 +2307,7 @@ function cvd_render_floating_widget(): void {
       var r=new FileReader();
       r.onload=function(e){
         var content=e.target.result;
-        if(content.length>MAX_TEXT)content=content.substring(0,MAX_TEXT)+'\n[... truncated at 500 KB ...]';
+        if(content.length>MAX_TEXT)content=content.substring(0,MAX_TEXT)+'\\n[... truncated at 500 KB ...]';
         screenshot=null;
         fileData={name:name,type:type||'text/plain',encoding:'text',content:content,size:size};
         showFileChip(name,size,type);
