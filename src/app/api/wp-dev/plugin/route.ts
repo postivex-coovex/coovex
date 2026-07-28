@@ -355,6 +355,18 @@ add_action('wp_dashboard_setup', function () {
     });
 });
 
+// -- Output CooVex-injected CSS in <head> on every frontend page --------------
+add_action('wp_head', function () {
+    $keys = get_option('cvd_css_keys', []);
+    if (empty($keys)) return;
+    $out = '';
+    foreach ((array)$keys as $key) {
+        $css = get_option($key, '');
+        if ($css) $out .= $css . "\\n";
+    }
+    if ($out) echo '<style id="cvd-injected-css">' . $out . '</style>';
+}, 99);
+
 // -- Admin menu ----------------------------------------------------------------
 add_action('admin_menu', function () {
     add_menu_page(
@@ -1796,22 +1808,24 @@ function cvd_apply_wp_action(array $change): array {
 
         // -- Inject / replace custom CSS on the site ---------------------------
         case 'inject_css': {
-            $css    = $data['css']    ?? '';
-            $label  = sanitize_text_field($data['label'] ?? 'cvd-custom');
-            $mode   = $data['mode']   ?? 'append'; // append | replace
+            $css   = $data['css']   ?? '';
+            $label = sanitize_text_field($data['label'] ?? 'cvd-custom');
+            $mode  = $data['mode']  ?? 'append'; // append | replace
             if (!$css) return ['ok' => false, 'error' => 'inject_css requires data.css'];
-            $sheet  = get_stylesheet();
-            $current = wp_get_custom_css($sheet) ?: '';
-            $marker_s = "/* $label-start */";
-            $marker_e = "/* $label-end */";
-            $block    = "$marker_s\n$css\n$marker_e";
-            if ($mode === 'replace' || strpos($current, $marker_s) !== false) {
-                $current = preg_replace('/' . preg_quote($marker_s,'/').'.*?'.preg_quote($marker_e,'/').'[\s]*/s', '', $current);
+            $opt_key = 'cvd_css_' . $label;
+            if ($mode === 'append') {
+                $existing = get_option($opt_key, '');
+                update_option($opt_key, $existing . "\n" . $css, false);
+            } else {
+                update_option($opt_key, $css, false);
             }
-            $updated = trim($current) . "\n" . $block;
-            $result  = wp_update_custom_css_post($sheet, $updated);
-            if (is_wp_error($result)) return ['ok' => false, 'error' => $result->get_error_message()];
-            return ['ok' => true, 'client_action' => 'terminal_output', 'output' => "CSS injected ($label). " . strlen($css) . " bytes.", 'lang' => 'text'];
+            // Register key in master list so wp_head outputs it
+            $all_keys = (array) get_option('cvd_css_keys', []);
+            if (!in_array($opt_key, $all_keys, true)) {
+                $all_keys[] = $opt_key;
+                update_option('cvd_css_keys', $all_keys, false);
+            }
+            return ['ok' => true, 'client_action' => 'terminal_output', 'output' => "CSS saved to wp_head ($label, " . strlen($css) . " bytes). Active on all pages now.", 'lang' => 'text'];
         }
 
         // -- Design a page: set HTML + inject scoped CSS in one action ---------
@@ -1831,30 +1845,36 @@ function cvd_apply_wp_action(array $change): array {
             // Update content
             if ($html) {
                 $upd = ['ID' => $page_id, 'post_content' => $html, 'post_status' => 'publish'];
-                if ($template) $upd['page_template'] = $template;
                 $res = wp_update_post($upd, true);
                 $log[] = is_wp_error($res) ? 'HTML error: '.$res->get_error_message() : "HTML updated (post $page_id)";
             }
-            // Inject page-scoped CSS
+            // Inject page-scoped CSS via wp_head (same reliable mechanism as inject_css)
             if ($css) {
-                $label  = "cvd-page-$page_id";
-                $sheet  = get_stylesheet();
-                $current = wp_get_custom_css($sheet) ?: '';
-                $marker_s = "/* $label-start */";
-                $marker_e = "/* $label-end */";
-                $block    = "$marker_s\n$css\n$marker_e";
-                $current  = preg_replace('/'.preg_quote($marker_s,'/').'.*?'.preg_quote($marker_e,'/').'[\s]*/s', '', $current);
-                $result   = wp_update_custom_css_post($sheet, trim($current)."\n".$block);
-                $log[]    = is_wp_error($result) ? 'CSS error: '.$result->get_error_message() : 'CSS injected ('.strlen($css).' bytes)';
+                $opt_key  = 'cvd_css_page_' . $page_id;
+                update_option($opt_key, $css, false);
+                $all_keys = (array) get_option('cvd_css_keys', []);
+                if (!in_array($opt_key, $all_keys, true)) {
+                    $all_keys[] = $opt_key;
+                    update_option('cvd_css_keys', $all_keys, false);
+                }
+                $log[] = 'CSS saved (' . strlen($css) . ' bytes) — active via wp_head';
             }
-            // Set full-width via page meta (Astra / most themes)
-            if ($template === 'full-width' || $template === 'elementor_canvas') {
-                update_post_meta($page_id, '_wp_page_template', $template ?: 'full-width');
+            // Set layout via Astra post meta (no _wp_page_template — Astra ignores it)
+            if ($template) {
+                // Remove sidebar
                 update_post_meta($page_id, 'site-sidebar-layout', 'no-sidebar');
-                update_post_meta($page_id, 'site-content-layout', 'full-width');
-                update_post_meta($page_id, 'ast-main-header-display', 'disabled');
-                update_post_meta($page_id, 'footer-sml-layout', 'disabled');
-                $log[] = 'Full-width layout set';
+                if ($template === 'full-width') {
+                    // Full-width content, keep header + footer
+                    update_post_meta($page_id, 'site-content-layout', 'page-builder');
+                    delete_post_meta($page_id, 'ast-main-header-display');
+                    delete_post_meta($page_id, 'footer-sml-layout');
+                } elseif ($template === 'elementor_canvas') {
+                    // Canvas: hide header + footer too
+                    update_post_meta($page_id, 'site-content-layout', 'page-builder');
+                    update_post_meta($page_id, 'ast-main-header-display', 'disabled');
+                    update_post_meta($page_id, 'footer-sml-layout', 'disabled');
+                }
+                $log[] = "Layout: $template (no-sidebar, page-builder content)";
             }
             return ['ok' => true, 'client_action' => 'terminal_output', 'output' => implode("\n", $log), 'lang' => 'text'];
         }
