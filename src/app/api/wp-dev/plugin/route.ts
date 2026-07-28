@@ -3799,7 +3799,7 @@ What would you like to build or change?</div>
                             if (chunk.done) return;
                             buf += decoder.decode(chunk.value, {stream: true});
 
-                            var parts = buf.split('\n\n');
+                            var parts = buf.split('\\n\\n');
                             buf = parts.pop() || '';
 
                             var applyPromise = Promise.resolve();
