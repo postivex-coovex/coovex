@@ -371,6 +371,42 @@ add_action('admin_menu', function () {
     add_submenu_page('coovex-dev', 'Settings',        'Settings',        'manage_options', 'coovex-dev-settings', 'cvd_page_settings');
 });
 
+// -- Frontend floating widget (admin only) ------------------------------------
+add_action('wp_footer', function () {
+    if (!current_user_can('manage_options')) return;
+    $agent_url = esc_url(admin_url('admin.php?page=coovex-dev'));
+    echo <<<HTML
+<style>
+#cvd-fab{position:fixed;bottom:24px;right:24px;width:50px;height:50px;background:#2563eb;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(37,99,235,.55);z-index:99999;border:none;font-size:22px;color:#fff;transition:transform .2s,box-shadow .2s;text-decoration:none;}
+#cvd-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,99,235,.75);}
+#cvd-fab-badge{position:absolute;top:-2px;right:-2px;background:#22c55e;border-radius:50%;width:12px;height:12px;border:2px solid #fff;}
+#cvd-fab-panel{position:fixed;bottom:88px;right:24px;width:440px;height:620px;background:#0f172a;border-radius:16px;box-shadow:0 8px 48px rgba(0,0,0,.6);z-index:99998;display:none;flex-direction:column;overflow:hidden;border:1px solid #1e293b;}
+#cvd-fab-panel.cvd-open{display:flex;}
+#cvd-fab-head{background:#1e293b;padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:13px;color:#e2e8f0;font-weight:600;font-family:-apple-system,sans-serif;}
+#cvd-fab-head button{margin-left:auto;background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;line-height:1;}
+#cvd-fab-panel iframe{flex:1;border:none;width:100%;height:100%;}
+</style>
+<div id="cvd-fab" title="CooVex Dev Agent">⚡<span id="cvd-fab-badge"></span></div>
+<div id="cvd-fab-panel">
+  <div id="cvd-fab-head">⚡ CooVex Dev <button id="cvd-fab-close">✕</button></div>
+  <iframe id="cvd-fab-iframe" src="" data-src="{$agent_url}"></iframe>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById('cvd-fab');
+  var panel=document.getElementById('cvd-fab-panel');
+  var iframe=document.getElementById('cvd-fab-iframe');
+  var closeBtn=document.getElementById('cvd-fab-close');
+  btn.addEventListener('click',function(){
+    if(panel.classList.contains('cvd-open')){panel.classList.remove('cvd-open');}
+    else{if(!iframe.src)iframe.src=iframe.dataset.src;panel.classList.add('cvd-open');}
+  });
+  closeBtn.addEventListener('click',function(){panel.classList.remove('cvd-open');});
+})();
+</script>
+HTML;
+});
+
 // -- Settings registration -----------------------------------------------------
 add_action('admin_init', function () {
     register_setting('cvd_options', 'cvd_api_key',              ['sanitize_callback' => 'sanitize_text_field']);
@@ -4029,7 +4065,8 @@ What would you like to build or change?</div>
     <script>
     (function() {
         var NONCE = <?php echo json_encode($nonce); ?>;
-        var AJAXURL = <?php echo json_encode(admin_url('admin-ajax.php')); ?>;
+        var AJAXURL   = <?php echo json_encode(admin_url('admin-ajax.php')); ?>;
+        var cvdSiteUrl = <?php echo json_encode(get_site_url()); ?>;
         var STORE_KEY = 'cvd_chat_' + location.hostname;
         var history = [];
         var displayMsgs = [];
@@ -4445,7 +4482,14 @@ What would you like to build or change?</div>
                                                                     actFooter.appendChild(manualBtn);
                                                                 });
                                                             }
-                                                            // If no more steps — nothing extra, task is complete
+                                                            // If no more steps — task complete, show preview button
+                                                        } else {
+                                                            var previewBtn = document.createElement('a');
+                                                            previewBtn.textContent = '👁 Preview site';
+                                                            previewBtn.href = cvdSiteUrl || '/';
+                                                            previewBtn.target = '_blank';
+                                                            previewBtn.style.cssText = 'float:right;background:#0f172a;color:#60a5fa;border:1px solid #1e293b;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;text-decoration:none;';
+                                                            actFooter.appendChild(previewBtn);
                                                         }
                                                         return Promise.resolve();
                                                     }
