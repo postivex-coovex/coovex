@@ -449,11 +449,33 @@ async function buildStream(params: {
         inputTokens  = final.usage?.input_tokens  ?? 0
         outputTokens = final.usage?.output_tokens ?? 0
 
-        // Parse JSON from Claude
-        const cleaned = fullText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim()
-        let parsed: { message: string; changes: unknown[]; read_only?: boolean }
-        try { parsed = JSON.parse(cleaned) }
-        catch { parsed = { message: fullText, changes: [], read_only: true } }
+        send('status', { message: 'Processing response...' })
+
+        // Parse JSON from Claude — multiple fallback strategies
+        function robustParse(raw: string): { message: string; changes: unknown[]; read_only?: boolean } {
+          // Strategy 1: strip markdown fences then parse
+          const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
+          try {
+            const p = JSON.parse(stripped)
+            if (p && typeof p.message === 'string') return p
+          } catch {}
+          // Strategy 2: extract outermost { ... }
+          const first = raw.indexOf('{')
+          const last  = raw.lastIndexOf('}')
+          if (first !== -1 && last > first) {
+            try {
+              const p = JSON.parse(raw.slice(first, last + 1))
+              if (p && typeof p.message === 'string') return p
+            } catch {}
+          }
+          // All failed — return helpful error (never dump raw JSON)
+          return {
+            message: 'I generated a response but it was too large to format correctly. Please try breaking the request into smaller steps (e.g. "Install WooCommerce first", then "Now set up the store").',
+            changes: [],
+            read_only: true,
+          }
+        }
+        const parsed = robustParse(fullText)
 
         // Resolve generate_image → sideload_image (same as non-streaming path)
         if (Array.isArray(parsed.changes)) {

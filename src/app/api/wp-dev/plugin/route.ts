@@ -3818,39 +3818,62 @@ What would you like to build or change?</div>
                                     if (d.credits_remaining != null) creditsEl.textContent = d.credits_remaining;
                                     addCreditsNote(d.credits_used);
 
+                                    history.push({role: 'assistant', content: d.message});
+                                    if (history.length > 20) history = history.slice(-20);
+
                                     var changes = d.changes || [];
                                     if (changes.length === 0) {
                                         actClose();
                                         addAgentMessage(d.message, [], null);
                                     } else {
-                                        actStatus('Applying ' + changes.length + ' change' + (changes.length > 1 ? 's' : '') + '...', true);
+                                        // Show the AI's message immediately
+                                        addAgentMessage(d.message, [], null);
+
+                                        // Show pending changes in activity panel
                                         actRenderChanges(changes);
+                                        actStatus(changes.length + ' change' + (changes.length !== 1 ? 's' : '') + ' ready', false);
 
-                                        applyPromise = ajax('cvd_apply_changes', {
-                                            changes:   JSON.stringify(changes),
-                                            sig:       d.sig || '',
-                                            sig_nonce: d.nonce || '',
-                                            raw_body:  d.raw_body || '',
-                                            command:   cmd,
-                                        }).then(function(applyR) {
-                                            var results = applyR.success ? (applyR.data.results || []) : [];
-                                            var snap_id = applyR.success ? (applyR.data.snap_id || null) : null;
+                                        // Confirmation buttons
+                                        actFooter.innerHTML = '';
+                                        var applyBtn = document.createElement('button');
+                                        applyBtn.style.cssText = 'background:#2563eb;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;margin-right:6px;';
+                                        applyBtn.textContent = 'Apply ' + changes.length + (changes.length !== 1 ? ' changes' : ' change');
+                                        var discardBtn = document.createElement('button');
+                                        discardBtn.style.cssText = 'background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;';
+                                        discardBtn.textContent = 'Discard';
+                                        actFooter.appendChild(applyBtn);
+                                        actFooter.appendChild(discardBtn);
 
-                                            actMarkDone(results);
-                                            var okCount   = results.filter(function(r){ return r && r.ok !== false; }).length;
-                                            actStatus(okCount + '/' + results.length + ' applied', false);
-                                            actFooter.textContent = snap_id ? 'Snapshot: #' + snap_id : '';
+                                        applyPromise = new Promise(function(resolve) {
+                                            applyBtn.addEventListener('click', function() {
+                                                applyBtn.disabled = true;
+                                                discardBtn.disabled = true;
+                                                actFooter.innerHTML = '';
+                                                actStatus('Applying ' + changes.length + ' change' + (changes.length !== 1 ? 's' : '') + '...', true);
 
-                                            var merged = changes.map(function(ch, i) {
-                                                return Object.assign({}, ch, results[i] || {});
+                                                ajax('cvd_apply_changes', {
+                                                    changes:   JSON.stringify(changes),
+                                                    sig:       d.sig || '',
+                                                    sig_nonce: d.nonce || '',
+                                                    raw_body:  d.raw_body || '',
+                                                    command:   cmd,
+                                                }).then(function(applyR) {
+                                                    var results = applyR.success ? (applyR.data.results || []) : [];
+                                                    var snap_id = applyR.success ? (applyR.data.snap_id || null) : null;
+                                                    actMarkDone(results);
+                                                    var okCount = results.filter(function(r){ return r && r.ok !== false; }).length;
+                                                    actStatus(okCount + '/' + results.length + ' applied', false);
+                                                    actFooter.textContent = snap_id ? 'Snapshot: #' + snap_id : '';
+                                                    if (snap_id) addSnapToSidebar(snap_id, cmd);
+                                                }).finally(resolve);
                                             });
-                                            addAgentMessage(d.message, merged, snap_id);
-                                            if (snap_id) addSnapToSidebar(snap_id, cmd);
+
+                                            discardBtn.addEventListener('click', function() {
+                                                actClose();
+                                                resolve();
+                                            });
                                         });
                                     }
-
-                                    history.push({role: 'assistant', content: d.message});
-                                    if (history.length > 20) history = history.slice(-20);
 
                                 } else if (d.type === 'error') {
                                     typingEl.remove();
