@@ -4676,15 +4676,15 @@ What would you like to build or change?</div>
                                                                     });
                                                                     actFooter.appendChild(manualBtn);
                                                                 });
-                                                            }
                                                             // If no more steps — task complete, show preview button
-                                                        } else {
-                                                            var previewBtn = document.createElement('a');
-                                                            previewBtn.textContent = '👁 Preview site';
-                                                            previewBtn.href = cvdSiteUrl || '/';
-                                                            previewBtn.target = '_blank';
-                                                            previewBtn.style.cssText = 'float:right;background:#0f172a;color:#60a5fa;border:1px solid #1e293b;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;text-decoration:none;';
-                                                            actFooter.appendChild(previewBtn);
+                                                            } else {
+                                                                var previewBtn = document.createElement('a');
+                                                                previewBtn.textContent = '👁 Preview site';
+                                                                previewBtn.href = cvdSiteUrl || '/';
+                                                                previewBtn.target = '_blank';
+                                                                previewBtn.style.cssText = 'float:right;background:#0f172a;color:#60a5fa;border:1px solid #1e293b;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;text-decoration:none;';
+                                                                actFooter.appendChild(previewBtn);
+                                                            }
                                                         }
                                                         return Promise.resolve();
                                                     }
