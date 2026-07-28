@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import DevAgentClient from './dev-agent-client'
+import { CVD_CURRENT_VERSION } from '@/app/api/wp-dev/update/route'
 
 export const metadata: Metadata = { title: 'WordPress Dev Agent — CooVex' }
 
@@ -48,6 +49,7 @@ export default async function DevAgentPage() {
       apiKey={apiKey}
       businessName={business?.name ?? ''}
       licenses={licenses ?? []}
+      pluginVersion={CVD_CURRENT_VERSION}
     />
   )
 }

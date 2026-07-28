@@ -20,9 +20,10 @@ interface Props {
   apiKey: string
   businessName: string
   licenses: License[]
+  pluginVersion?: string
 }
 
-export default function DevAgentClient({ apiKey, businessName, licenses }: Props) {
+export default function DevAgentClient({ apiKey, businessName, licenses, pluginVersion = '1.6.0' }: Props) {
   const [copied, setCopied] = useState(false)
   const [regenerating, setRegenerating] = useState(false)
   const [currentKey, setCurrentKey] = useState(apiKey)
@@ -149,7 +150,7 @@ export default function DevAgentClient({ apiKey, businessName, licenses }: Props
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">CooVex Dev Plugin</p>
-            <p className="text-xs text-slate-400 mt-0.5">Version 1.5.0 &middot; WordPress 5.9+ &middot; PHP 7.4+</p>
+            <p className="text-xs text-slate-400 mt-0.5">Version {pluginVersion} &middot; WordPress 5.9+ &middot; PHP 7.4+</p>
           </div>
           <a
             href={downloadUrl}
