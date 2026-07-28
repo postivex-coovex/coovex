@@ -8,7 +8,7 @@ export const COOVEX_DEV_PHP = `<?php
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
  * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language \u2014 CooVex Dev delivers working code.
- * Version:     1.6.0
+ * Version:     1.7.0
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -19,7 +19,7 @@ export const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // -- Constants -----------------------------------------------------------------
-define('CVD_VERSION',         '1.6.0');
+define('CVD_VERSION',         '1.7.0');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
@@ -359,6 +359,14 @@ add_action('wp_dashboard_setup', function () {
 add_action('wp_head', function () {
     // 1. Design system CSS framework
     echo '<style id="cvd-design-system">
+:root{
+--cvd-primary:#2563eb;--cvd-primary-dark:#1d4ed8;--cvd-primary-light:#dbeafe;
+--cvd-accent:#f59e0b;--cvd-accent-dark:#d97706;
+--cvd-dark:#0f172a;--cvd-dark-2:#1e293b;--cvd-dark-3:#334155;
+--cvd-text:#374151;--cvd-text-muted:#64748b;--cvd-border:#e2e8f0;
+--cvd-hero-bg:linear-gradient(135deg,#1e3a8a 0%,var(--cvd-primary) 100%);
+--cvd-radius:16px;--cvd-shadow:0 2px 20px rgba(0,0,0,.06);
+}
 *[class^="cvd-"],*[class*=" cvd-"]{box-sizing:border-box}
 /* LAYOUT */
 .cvd-container{max-width:1200px;margin:0 auto;padding:0 1.5rem}
@@ -377,6 +385,7 @@ add_action('wp_head', function () {
 .cvd-hero--green{background:linear-gradient(135deg,#065f46 0%,#059669 100%)}
 .cvd-hero--red{background:linear-gradient(135deg,#991b1b 0%,#dc2626 100%)}
 .cvd-hero--light{background:linear-gradient(135deg,#f8fafc 0%,#e2e8f0 100%)}
+.cvd-hero--brand{background:var(--cvd-hero-bg)}
 .cvd-hero__inner{max-width:820px;margin:0 auto;position:relative;z-index:1}
 .cvd-hero__tag{display:inline-block;background:rgba(255,255,255,.15);color:#fff;padding:.35rem 1rem;border-radius:50px;font-size:.8rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1.5rem;backdrop-filter:blur(10px)}
 .cvd-hero h1,.cvd-hero__title{font-size:clamp(2.2rem,6vw,4rem);font-weight:800;color:#fff;line-height:1.1;margin:0 0 1.25rem}
@@ -399,6 +408,10 @@ add_action('wp_head', function () {
 .cvd-btn--pill{border-radius:50px}
 .cvd-btn--lg{padding:1rem 2.5rem;font-size:1.1rem}
 .cvd-btn--sm{padding:.5rem 1.25rem;font-size:.875rem}
+.cvd-btn--brand{background:var(--cvd-primary);color:#fff!important;border-color:var(--cvd-primary)}
+.cvd-btn--brand:hover{background:var(--cvd-primary-dark);border-color:var(--cvd-primary-dark);transform:translateY(-2px)}
+.cvd-btn--accent{background:var(--cvd-accent);color:#fff!important;border-color:var(--cvd-accent)}
+.cvd-btn--accent:hover{background:var(--cvd-accent-dark);border-color:var(--cvd-accent-dark);transform:translateY(-2px)}
 /* CARDS */
 .cvd-card{background:#fff;border-radius:16px;padding:2rem;box-shadow:0 2px 20px rgba(0,0,0,.06);border:1px solid #f1f5f9;transition:all .25s}
 .cvd-card:hover{box-shadow:0 8px 40px rgba(0,0,0,.12);transform:translateY(-4px)}
@@ -450,6 +463,7 @@ add_action('wp_head', function () {
 .cvd-cta{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);padding:5rem 1.5rem;text-align:center}
 .cvd-cta--dark{background:#0f172a}.cvd-cta--green{background:linear-gradient(135deg,#065f46,#059669)}
 .cvd-cta--purple{background:linear-gradient(135deg,#4f46e5,#7c3aed)}
+.cvd-cta--brand{background:var(--cvd-hero-bg)}
 .cvd-cta h2{font-size:clamp(1.8rem,4vw,2.75rem);font-weight:800;color:#fff;margin:0 0 1rem}
 .cvd-cta p{color:rgba(255,255,255,.8);font-size:1.15rem;margin:0 0 2.5rem;max-width:560px;margin-left:auto;margin-right:auto}
 /* STATS */

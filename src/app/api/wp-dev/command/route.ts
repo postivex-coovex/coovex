@@ -83,7 +83,6 @@ The plugin loads a full CSS framework on every page. Use cvd-* classes and write
 
 ### HERO SECTIONS (full-height banners):
 Themes: cvd-hero--blue | cvd-hero--dark | cvd-hero--purple | cvd-hero--green | cvd-hero--red | cvd-hero--light
-```html
 <nav class="cvd-nav"><a class="cvd-nav__logo" href="/">StoreName</a><ul class="cvd-nav__links"><li><a href="/shop">Shop</a></li><li><a href="/about">About</a></li></ul></nav>
 <section class="cvd-hero cvd-hero--blue">
   <div class="cvd-hero__inner cvd-fade-in">
@@ -96,10 +95,8 @@ Themes: cvd-hero--blue | cvd-hero--dark | cvd-hero--purple | cvd-hero--green | c
     </div>
   </div>
 </section>
-```
 
 ### FEATURE CARDS SECTION:
-```html
 <section class="cvd-section cvd-bg-light">
   <div class="cvd-container">
     <div class="cvd-header cvd-fade-in">
@@ -114,20 +111,16 @@ Themes: cvd-hero--blue | cvd-hero--dark | cvd-hero--purple | cvd-hero--green | c
     </div>
   </div>
 </section>
-```
 
 ### STATS BAR:
-```html
 <section class="cvd-stats"><div class="cvd-container"><div class="cvd-grid cvd-grid-4">
   <div class="cvd-stat"><span class="cvd-stat__number">10K+</span><span class="cvd-stat__label">Happy Customers</span></div>
   <div class="cvd-stat"><span class="cvd-stat__number">500+</span><span class="cvd-stat__label">Products</span></div>
   <div class="cvd-stat"><span class="cvd-stat__number">24h</span><span class="cvd-stat__label">Fast Delivery</span></div>
   <div class="cvd-stat"><span class="cvd-stat__number">4.9★</span><span class="cvd-stat__label">Rating</span></div>
 </div></div></section>
-```
 
 ### CTA SECTION:
-```html
 <section class="cvd-cta">
   <div class="cvd-container">
     <h2>Ready to Start Shopping?</h2>
@@ -135,16 +128,27 @@ Themes: cvd-hero--blue | cvd-hero--dark | cvd-hero--purple | cvd-hero--green | c
     <a href="/shop" class="cvd-btn cvd-btn--primary cvd-btn--lg cvd-btn--pill">Browse Products →</a>
   </div>
 </section>
-```
 
 ### PRICING:
 Card variants: cvd-pricing | cvd-pricing--featured (highlighted)
 Add cvd-pricing__badge inside for "Most Popular" label.
 
-### BUTTONS: cvd-btn + cvd-btn--primary | --white | --outline | --blue | --dark | --pill | --lg | --sm
+### BUTTONS: cvd-btn + cvd-btn--primary | --white | --outline | --blue | --dark | --brand | --accent | --pill | --lg | --sm
 ### CARD THEMES: cvd-card | cvd-card--dark | cvd-card--blue | cvd-card--gradient
 ### ANIMATIONS: add class cvd-fade-in to any element — it animates on scroll automatically
 ### BG COLORS: cvd-bg-white | cvd-bg-light | cvd-bg-dark | cvd-bg-blue | cvd-bg-purple | cvd-bg-green
+
+### CUSTOM BRAND COLORS (when user wants specific colors):
+The design system has CSS variables. To apply custom colors site-wide, use ONE small inject_css call, then use --brand classes:
+Step 1 — Set brand colors:
+{ "type": "wp_action", "action": "inject_css", "data": { "label": "brand-colors", "mode": "replace", "css": ":root{--cvd-primary:#e63946;--cvd-primary-dark:#c1121f;--cvd-primary-light:#ffd6d8;--cvd-accent:#e63946;--cvd-hero-bg:linear-gradient(135deg,#9b1d20 0%,#e63946 100%)}" } }
+Step 2 — Use brand classes in page: cvd-hero--brand, cvd-btn--brand, cvd-btn--accent, cvd-cta--brand
+Examples of common brand vars:
+- Red brand: --cvd-primary:#e63946; --cvd-primary-dark:#c1121f; --cvd-hero-bg:linear-gradient(135deg,#9b1d20,#e63946)
+- Orange brand: --cvd-primary:#ea580c; --cvd-primary-dark:#c2410c; --cvd-hero-bg:linear-gradient(135deg,#7c2d12,#ea580c)
+- Teal brand: --cvd-primary:#0d9488; --cvd-primary-dark:#0f766e; --cvd-hero-bg:linear-gradient(135deg,#134e4a,#0d9488)
+- Pink brand: --cvd-primary:#db2777; --cvd-primary-dark:#be185d; --cvd-hero-bg:linear-gradient(135deg,#831843,#db2777)
+You can also use ANY hex color the user specifies.
 
 RULE: For any page design, use cvd-* classes FIRST. Only use inject_css if you need something the system can't do.
 

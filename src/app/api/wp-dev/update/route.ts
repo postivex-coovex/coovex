@@ -2,12 +2,18 @@
 
 // â”€â”€ Bump this when releasing a new plugin version â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Also update CVD_VERSION constant in plugin/route.ts (must match).
-export const CVD_CURRENT_VERSION    = '1.6.0'
+export const CVD_CURRENT_VERSION    = '1.7.0'
 export const CVD_REQUIRES_WP        = '5.9'
 export const CVD_TESTED_WP          = '6.8'
 export const CVD_REQUIRES_PHP       = '7.4'
 
 const CHANGELOG = `\
+= 1.7.0 - 2026-07-29 =
+* Fix: build error — triple backticks inside template literal caused TypeScript syntax error
+* New: CSS variables (--cvd-primary, --cvd-accent, --cvd-hero-bg etc.) in design system
+* New: custom brand color support — one inject_css sets colors site-wide via CSS variables
+* New: cvd-hero--brand, cvd-btn--brand, cvd-btn--accent, cvd-cta--brand variable-based classes
+
 = 1.6.0 - 2026-07-29 =
 * Fix: agent no longer responds with empty text when it should be making changes
 * Fix: JavaScript SyntaxError in hasMoreSteps/else block — plugin was broken on load
