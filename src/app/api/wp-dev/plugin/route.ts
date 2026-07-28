@@ -4397,12 +4397,13 @@ What would you like to build or change?</div>
                                                                 });
                                                                 var stepDoneMsg = '[STEP_DONE] Applied ' + okCount + ' change(s): ' + appliedDescs.slice(0,6).join(', ') + (appliedDescs.length > 6 ? '...' : '') + '.';
                                                                 if (sideOutputs.length > 0) {
-                                                                    stepDoneMsg += '\n\nINFO GATHERED (use this to decide next steps):\n';
+                                                                    stepDoneMsg += '\\n\\nINFO GATHERED (use this to decide next steps):\\n';
                                                                     sideOutputs.forEach(function(so) {
-                                                                        stepDoneMsg += '\n[' + so.action + ']\n' + so.output + '\n';
+                                                                        var safeOut = String(so.output).replace(/[\r\n]+/g, ' | ').replace(/'/g, "\\'").slice(0, 2000);
+                                                                        stepDoneMsg += '\\n[' + so.action + '] ' + safeOut;
                                                                     });
                                                                 }
-                                                                stepDoneMsg += '\n\nContinue with the next step.';
+                                                                stepDoneMsg += '\\n\\nContinue with the next step.';
 
                                                                 // Auto-continue countdown
                                                                 var cdSecs = 3;
