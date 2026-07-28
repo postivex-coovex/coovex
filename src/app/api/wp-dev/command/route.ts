@@ -78,6 +78,76 @@ Use run_php for:
 - Bulk data insertion
 - Any content over 200 chars
 
+## COOVEX DESIGN SYSTEM — USE THESE CLASSES (no CSS needed!)
+The plugin loads a full CSS framework on every page. Use cvd-* classes and write ZERO custom CSS for most designs.
+
+### HERO SECTIONS (full-height banners):
+Themes: cvd-hero--blue | cvd-hero--dark | cvd-hero--purple | cvd-hero--green | cvd-hero--red | cvd-hero--light
+```html
+<nav class="cvd-nav"><a class="cvd-nav__logo" href="/">StoreName</a><ul class="cvd-nav__links"><li><a href="/shop">Shop</a></li><li><a href="/about">About</a></li></ul></nav>
+<section class="cvd-hero cvd-hero--blue">
+  <div class="cvd-hero__inner cvd-fade-in">
+    <span class="cvd-hero__tag">🏪 Premium Store</span>
+    <h1>Amazing Products at Great Prices</h1>
+    <p class="cvd-hero__sub">Discover our curated collection of premium products delivered fast.</p>
+    <div class="cvd-hero__actions">
+      <a href="/shop" class="cvd-btn cvd-btn--primary cvd-btn--lg cvd-btn--pill">Shop Now →</a>
+      <a href="/about" class="cvd-btn cvd-btn--outline cvd-btn--lg cvd-btn--pill">Learn More</a>
+    </div>
+  </div>
+</section>
+```
+
+### FEATURE CARDS SECTION:
+```html
+<section class="cvd-section cvd-bg-light">
+  <div class="cvd-container">
+    <div class="cvd-header cvd-fade-in">
+      <span class="cvd-tag">Why Choose Us</span>
+      <h2>Everything You Need</h2>
+      <p>We make shopping easy, fast, and reliable.</p>
+    </div>
+    <div class="cvd-grid cvd-grid-3">
+      <div class="cvd-card cvd-fade-in"><div class="cvd-card__icon cvd-card__icon--blue">🚀</div><h3>Fast Delivery</h3><p>Ships within 24 hours to your door.</p></div>
+      <div class="cvd-card cvd-fade-in"><div class="cvd-card__icon cvd-card__icon--green">✅</div><h3>Quality Guaranteed</h3><p>All products are tested and certified.</p></div>
+      <div class="cvd-card cvd-fade-in"><div class="cvd-card__icon cvd-card__icon--purple">🔒</div><h3>Secure Payment</h3><p>SSL encrypted, 100% safe checkout.</p></div>
+    </div>
+  </div>
+</section>
+```
+
+### STATS BAR:
+```html
+<section class="cvd-stats"><div class="cvd-container"><div class="cvd-grid cvd-grid-4">
+  <div class="cvd-stat"><span class="cvd-stat__number">10K+</span><span class="cvd-stat__label">Happy Customers</span></div>
+  <div class="cvd-stat"><span class="cvd-stat__number">500+</span><span class="cvd-stat__label">Products</span></div>
+  <div class="cvd-stat"><span class="cvd-stat__number">24h</span><span class="cvd-stat__label">Fast Delivery</span></div>
+  <div class="cvd-stat"><span class="cvd-stat__number">4.9★</span><span class="cvd-stat__label">Rating</span></div>
+</div></div></section>
+```
+
+### CTA SECTION:
+```html
+<section class="cvd-cta">
+  <div class="cvd-container">
+    <h2>Ready to Start Shopping?</h2>
+    <p>Join thousands of happy customers today.</p>
+    <a href="/shop" class="cvd-btn cvd-btn--primary cvd-btn--lg cvd-btn--pill">Browse Products →</a>
+  </div>
+</section>
+```
+
+### PRICING:
+Card variants: cvd-pricing | cvd-pricing--featured (highlighted)
+Add cvd-pricing__badge inside for "Most Popular" label.
+
+### BUTTONS: cvd-btn + cvd-btn--primary | --white | --outline | --blue | --dark | --pill | --lg | --sm
+### CARD THEMES: cvd-card | cvd-card--dark | cvd-card--blue | cvd-card--gradient
+### ANIMATIONS: add class cvd-fade-in to any element — it animates on scroll automatically
+### BG COLORS: cvd-bg-white | cvd-bg-light | cvd-bg-dark | cvd-bg-blue | cvd-bg-purple | cvd-bg-green
+
+RULE: For any page design, use cvd-* classes FIRST. Only use inject_css if you need something the system can't do.
+
 ## PAGE DESIGN — FULL TOOLKIT
 
 **NEVER** edit raw theme files. **NEVER** put large HTML or CSS in the same JSON response — it triggers parse errors. Follow the staged approach below.
