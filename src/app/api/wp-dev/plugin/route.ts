@@ -528,7 +528,11 @@ function cvd_apply_change(array $change): array {
     $type = $change['type'] ?? 'file';
 
     if ($type === 'wp_action') {
-        return cvd_apply_wp_action($change);
+        $res = cvd_apply_wp_action($change);
+        $action = $change['action'] ?? 'wp_action';
+        $desc   = $change['data']['page_id'] ?? $change['data']['label'] ?? $change['data']['slug'] ?? '';
+        cvd_log_action($action, !empty($res['ok']), (string)$desc . (!empty($res['error']) ? ' ERR:'.$res['error'] : ''));
+        return $res;
     }
 
     if ($type === 'db') {
@@ -538,11 +542,16 @@ function cvd_apply_change(array $change): array {
         $upper   = strtoupper($sql);
         foreach ($blocked as $b) {
             if (strpos($upper, $b) !== false && strpos(strtolower($change['sql'] ?? ''), 'yes, delete') === false) {
+                cvd_log_action('db_sql', false, "Blocked: $b");
                 return ['ok' => false, 'error' => "Blocked: contains $b. Add 'yes, delete' to your command to confirm."];
             }
         }
         $result = $wpdb->query($sql);
-        if ($result === false) return ['ok' => false, 'error' => $wpdb->last_error];
+        if ($result === false) {
+            cvd_log_action('db_sql', false, $wpdb->last_error);
+            return ['ok' => false, 'error' => $wpdb->last_error];
+        }
+        cvd_log_action('db_sql', true, mb_substr($sql, 0, 80));
         return ['ok' => true, 'rows_affected' => $result];
     }
 
@@ -645,8 +654,11 @@ function cvd_apply_change(array $change): array {
 
     wp_mkdir_p(dirname($abs));
     $wrote = $wp_filesystem->put_contents($abs, $content, FS_CHMOD_FILE);
-    if (!$wrote) return ['ok' => false, 'file' => $file, 'error' => 'Could not write file (permissions?)'];
-
+    if (!$wrote) {
+        cvd_log_action('file_write', false, $file);
+        return ['ok' => false, 'file' => $file, 'error' => 'Could not write file (permissions?)'];
+    }
+    cvd_log_action('file_' . $action, true, $file);
     return ['ok' => true, 'file' => $file, 'action' => $action];
 }
 
@@ -1887,6 +1899,31 @@ function cvd_apply_wp_action(array $change): array {
     }
 }
 
+// -- Action log: persistent record of what Claude has done --------------------
+function cvd_log_dir(): string {
+    return WP_PLUGIN_DIR . '/coovex-dev/';
+}
+function cvd_log_file(): string {
+    return cvd_log_dir() . 'cvd-actions.log';
+}
+function cvd_log_action(string $action, bool $ok, string $desc): void {
+    $line = date('Y-m-d H:i:s') . ' [' . ($ok ? 'OK' : 'FAIL') . '] ' . $action . ': ' . mb_substr($desc, 0, 120) . "\\n";
+    @file_put_contents(cvd_log_file(), $line, FILE_APPEND | LOCK_EX);
+    // Keep log under 50KB by trimming old lines
+    $path = cvd_log_file();
+    if (file_exists($path) && filesize($path) > 51200) {
+        $lines = file($path);
+        $keep  = array_slice($lines, -150);
+        file_put_contents($path, implode('', $keep));
+    }
+}
+function cvd_get_recent_log(int $n = 20): array {
+    $path = cvd_log_file();
+    if (!file_exists($path)) return [];
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    return array_slice($lines, -$n);
+}
+
 // -- Collect site context ------------------------------------------------------
 function cvd_site_context(string $command = ''): array {
     global $wpdb;
@@ -1983,6 +2020,7 @@ function cvd_site_context(string $command = ''): array {
         'nav_menus'     => $menus,
         'widget_areas'  => $widget_areas,
         'stats'         => cvd_gather_stats($plugin_names),
+        'recent_actions'=> cvd_get_recent_log(20), // last 20 actions taken this session
     ];
 
     // -- Selective deep context (based on command keywords) --------------------
@@ -2221,7 +2259,7 @@ add_action('wp_ajax_cvd_command', function () {
     if (empty($command)) wp_send_json_error('Empty command', 400);
 
     $raw_history = json_decode(stripslashes($_POST['history'] ?? '[]'), true) ?? [];
-    $history     = array_slice($raw_history, -10);
+    $history     = array_slice($raw_history, -30);
 
     // Generate a one-time nonce for replay prevention
     $request_nonce = bin2hex(random_bytes(16));
@@ -2359,7 +2397,7 @@ add_action('wp_ajax_cvd_get_context', function () {
     }
 
     $raw_history = json_decode(stripslashes($_POST['history'] ?? '[]'), true) ?? [];
-    $history     = array_slice($raw_history, -10);
+    $history     = array_slice($raw_history, -30);
 
     wp_send_json_success([
         'api_key'       => $api_key,
@@ -4401,7 +4439,7 @@ What would you like to build or change?</div>
                                     addCreditsNote(d.credits_used);
 
                                     history.push({role: 'assistant', content: d.message});
-                                    if (history.length > 20) history = history.slice(-20);
+                                    if (history.length > 40) history = history.slice(-40);
 
                                     // Auto-retry if Claude's response was too large to parse as JSON
                                     if (d.parse_error) {
@@ -4412,8 +4450,20 @@ What would you like to build or change?</div>
                                         messages.appendChild(retryBanner);
                                         messages.scrollTop = messages.scrollHeight;
                                         cvdAutoFix = false;
+                                        // Find last assistant intent from history to remind Claude
+                                        var lastIntent = '';
+                                        for (var hi = history.length - 1; hi >= 0; hi--) {
+                                            var hm = history[hi];
+                                            if (hm.role === 'assistant' && hm.content && hm.content.indexOf('Response was too large') === -1) {
+                                                lastIntent = String(hm.content).slice(0, 300);
+                                                break;
+                                            }
+                                        }
                                         setTimeout(function() {
-                                            textarea.value = '[AUTO-RETRY] Your last response was too large to parse as JSON. Repeat the EXACT same step but: max 3 changes, post_content max 60 chars (placeholder text only), short descriptions. No large HTML blocks.';
+                                            var retryMsg = '[AUTO-RETRY] Your last JSON response was too large to parse. ';
+                                            if (lastIntent) retryMsg += 'Your previous plan was: "' + lastIntent + '". Continue that exact plan. ';
+                                            retryMsg += 'RULES: max 3 changes, NEVER put HTML in JSON (use run_php + wp_update_post for content), keep all string values under 80 chars, no post_content in JSON at all.';
+                                            textarea.value = retryMsg;
                                             sendCommand();
                                         }, 800);
                                         return;
