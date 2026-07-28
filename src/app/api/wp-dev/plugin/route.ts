@@ -25,7 +25,7 @@ define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
 define('CVD_DOWNLOAD_URL',    'https://app.coovex.com/api/wp-dev/download');
 define('CVD_MAX_SNAPSHOTS',   25);
-define('CVD_RATE_LIMIT',      12); // max commands per 5 minutes
+define('CVD_RATE_LIMIT',      40); // max commands per 5 minutes
 define('CVD_TELEGRAM_API',    'https://api.telegram.org/bot');
 
 // -----------------------------------------------------------------------------
