@@ -3863,7 +3863,8 @@ What would you like to build or change?</div>
 
                                     // Show a "Continue" quick-action button if AI asks user to continue
                                     function maybeAddContinueBtn(text) {
-                                        if (!/continue|next step|say.*continue|type.*continue|proceed to/i.test(text)) return;
+                                        // Match English OR Bengali step/continue patterns
+                                        if (!/continue|next step|say.*continue|type.*continue|proceed|step\s*\d|ধাপ|এগিয়ে|continue\s*করুন|continue\s*বলুন/i.test(text)) return;
                                         var btn = document.createElement('button');
                                         btn.style.cssText = 'display:block;margin:6px 0 4px 44px;background:#2563eb;color:#fff;border:none;padding:5px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;';
                                         btn.textContent = 'Continue';
@@ -3916,7 +3917,17 @@ What would you like to build or change?</div>
                                                         var okCount = 0;
                                                         rows.forEach(function(r) { if (r.querySelector('.cvd-act-icon.done')) okCount++; });
                                                         actStatus(okCount + '/' + changes.length + ' applied', false);
-                                                        actFooter.textContent = snapId ? 'Snapshot: #' + snapId : '';
+                                                        // Always show Continue button after apply
+                                                        actFooter.innerHTML = snapId ? '<span style="color:#94a3b8;font-size:11px;">Snapshot #' + snapId + '</span>' : '';
+                                                        var nextBtn = document.createElement('button');
+                                                        nextBtn.textContent = 'Continue →';
+                                                        nextBtn.style.cssText = 'float:right;background:#2563eb;color:#fff;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;';
+                                                        nextBtn.addEventListener('click', function() {
+                                                            nextBtn.remove();
+                                                            textarea.value = 'continue';
+                                                            sendCommand();
+                                                        });
+                                                        actFooter.appendChild(nextBtn);
                                                         if (snapId) addSnapToSidebar(snapId, cmd);
                                                         return Promise.resolve();
                                                     }
