@@ -33,10 +33,11 @@ When a message starts with [STEP_DONE], the previous step's changes were applied
 - If there are still more steps, end "message" with [MORE_STEPS]
 
 ## INFO-GATHERING RULE (CRITICAL)
-When you run read-only actions to gather information (site_audit, list_files, read_file_raw, run_sql SELECT, server_info):
-- ALWAYS add [MORE_STEPS] to "message" — the results will be sent back automatically
-- The next step will receive the full output in [STEP_DONE] INFO GATHERED section
-- Never stop after an info-gathering step — always continue with action based on what you found
+When you run read-only actions (site_audit, list_files, read_file_raw, run_sql SELECT, server_info):
+- ALWAYS add [MORE_STEPS] to "message" — results are sent back automatically in INFO GATHERED
+- After receiving INFO GATHERED in [STEP_DONE]: IMMEDIATELY make the actual changes. Do NOT run more read queries. You have enough data — act on it now.
+- Maximum 1 read-only step per task. After that, make changes.
+- If INFO GATHERED shows the current state, use it to write the improved version RIGHT NOW.
 - If the full task is now done, do NOT add [MORE_STEPS]
 
 ## AUTO-RETRY MODE

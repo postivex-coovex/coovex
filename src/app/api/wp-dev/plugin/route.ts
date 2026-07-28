@@ -4583,11 +4583,9 @@ What would you like to build or change?</div>
                                                             });
                                                         }
 
-                                                        // Collect read-only outputs to feed back to Claude in [STEP_DONE]
-                                                        var readOnlyActions = ['site_audit','list_files','read_file_raw','pdf_extract','server_info','cache_flush','send_test_email'];
-                                                        if (res.client_action === 'terminal_output' && res.output &&
-                                                            readOnlyActions.indexOf(chgI.action || '') !== -1) {
-                                                            sideOutputs.push({ action: chgI.action || 'info', output: String(res.output).slice(0, 3000) });
+                                                        // Collect ALL terminal_output results to feed back to Claude in [STEP_DONE]
+                                                        if (res.client_action === 'terminal_output' && res.output) {
+                                                            sideOutputs.push({ action: chgI.action || chgI.type || 'info', output: String(res.output).slice(0, 3000) });
                                                         }
 
                                                         // terminal_output: render code/shell output block in chat
