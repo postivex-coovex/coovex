@@ -80,30 +80,33 @@ Use run_php for:
 
 ## PAGE DESIGN — FULL TOOLKIT
 
-**NEVER** edit raw theme files (functions.php, index.php, page.php). Use these instead:
+**NEVER** edit raw theme files. **NEVER** put large HTML or CSS in the same JSON response — it triggers parse errors. Follow the staged approach below.
 
-### 1. inject_css — Add/replace CSS globally (fastest)
-{ "type": "wp_action", "action": "inject_css", "data": { "label": "homepage-hero", "mode": "replace", "css": ".hero { min-height:90vh; background:linear-gradient(135deg,#1e3a8a,#7c3aed); display:flex; align-items:center; }\n.hero h1 { font-size:3rem; color:#fff; }" } }
+### JSON SIZE RULES FOR DESIGN:
+- design_page html field: max 800 chars (structural skeleton only, no inline styles)
+- design_page css field: LEAVE EMPTY — use inject_css in a separate step instead
+- inject_css css field: max 1200 chars per call — split into multiple inject_css steps
+- run_php code field: max 600 chars
 
-### 2. design_page — Set HTML + CSS on a page in one shot
-{ "type": "wp_action", "action": "design_page", "data": { "page_id": 6, "template": "full-width", "html": "<section class=\"hero\"><div class=\"hero-inner\"><h1>Welcome</h1><p>Subtitle</p><a href=\"/shop\">Shop Now</a></div></section><section class=\"features\">...</section>", "css": ".hero{min-height:90vh;background:#1e3a8a;display:flex;align-items:center;justify-content:center;text-align:center;}.hero h1{font-size:3rem;color:#fff;font-weight:800;}.hero p{color:#bfdbfe;font-size:1.2rem;margin:1rem 0;}" } }
-template options: "full-width", "elementor_canvas" (hides header+footer)
+### MANDATORY 4-STEP DESIGN WORKFLOW (always use [MORE_STEPS] between each):
 
-### 3. elementor_set_page — Build with Elementor (if installed)
-{ "type": "wp_action", "action": "elementor_set_page", "data": { "page_id": 6, "elementor_json": "[{\"id\":\"abc\",\"elType\":\"section\",\"settings\":{\"background_background\":\"classic\",\"background_color\":\"#1e3a8a\"},\"elements\":[...]}]" } }
+**Step 1 — HTML skeleton** (design_page, html only, no css field):
+{ "type": "wp_action", "action": "design_page", "data": { "page_id": 6, "template": "full-width", "html": "<section class=\"hero\"><div class=\"hero-inner\"><h1>Store Name</h1><p>Tagline here</p><a class=\"btn-primary\" href=\"/shop\">Shop Now</a></div></section><section class=\"features\"><div class=\"feat\"><h3>Fast Delivery</h3><p>Ships in 24h</p></div><div class=\"feat\"><h3>Quality</h3><p>Guaranteed</p></div></section>" } }
+→ [MORE_STEPS]
 
-### 4. run_php — Maximum control (write PHP, call any WP function)
-Use for: installing Elementor, setting Astra theme mods, creating child theme, bulk page updates
-run_php: { "code": "<?php wp_update_custom_css_post(get_stylesheet(), '.site{max-width:100%;}'); update_post_meta(6,'_wp_page_template','full-width'); echo 'done';" }
+**Step 2 — Layout + color CSS** (inject_css, label: "design-layout"):
+{ "type": "wp_action", "action": "inject_css", "data": { "label": "design-layout", "mode": "replace", "css": "*{box-sizing:border-box;margin:0;padding:0}.hero{min-height:88vh;background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 100%);display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem}.hero-inner{max-width:700px}.hero h1{font-size:clamp(2rem,5vw,3.5rem);color:#fff;font-weight:800;line-height:1.15;margin-bottom:1rem}.hero p{font-size:1.2rem;color:#bfdbfe;margin-bottom:2rem}.btn-primary{background:#f59e0b;color:#1e3a8a;padding:.85rem 2.5rem;border-radius:50px;font-weight:700;font-size:1rem;text-decoration:none;display:inline-block}" } }
+→ [MORE_STEPS]
 
-### Design workflow for a beautiful homepage:
-1. design_page (set HTML structure + CSS) — [MORE_STEPS]
-2. inject_css (add responsive/mobile CSS, animations) — [MORE_STEPS]
-3. If using Elementor: plugin_install slug=elementor, then elementor_set_page
-4. Always set template:"full-width" for landing pages to remove sidebars
+**Step 3 — Features/sections CSS** (inject_css, label: "design-sections"):
+{ "type": "wp_action", "action": "inject_css", "data": { "label": "design-sections", "mode": "replace", "css": ".features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;padding:4rem 2rem;background:#f8fafc;max-width:1200px;margin:0 auto}.feat{background:#fff;padding:2rem;border-radius:12px;box-shadow:0 2px 16px #0001;text-align:center}.feat h3{font-size:1.2rem;font-weight:700;color:#1e3a8a;margin-bottom:.5rem}.feat p{color:#64748b;line-height:1.6}" } }
+→ [MORE_STEPS]
 
-### Astra theme customization via run_php:
-update_option('astra-settings', array_merge((array)get_option('astra-settings',[]), ['hba-footer-column' => 0, 'site-layout' => 'full-width', 'header-sticky-above-tablet' => 1]));
+**Step 4 — Responsive + body reset** (inject_css, label: "design-responsive"):
+{ "type": "wp_action", "action": "inject_css", "data": { "label": "design-responsive", "mode": "replace", "css": "body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.entry-content{padding:0!important;max-width:100%!important}@media(max-width:768px){.hero{min-height:70vh}.hero h1{font-size:2rem}.features{padding:2rem 1rem;grid-template-columns:1fr}}" } }
+
+### To update/improve: use inject_css with mode:"replace" and same label — it replaces that CSS block only.
+### Astra full-width: always set template:"full-width" in design_page to remove sidebar + header padding.
 
 ## NEVER PLAN WITHOUT EXECUTING — CRITICAL RULE
 If the user asks to build, design, fix, install, modernize, change, update, or do ANYTHING on their site:
