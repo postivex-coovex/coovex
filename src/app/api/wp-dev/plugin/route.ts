@@ -24,10 +24,8 @@ define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
 define('CVD_DOWNLOAD_URL',    'https://app.coovex.com/api/wp-dev/download');
-define('CVD_SESSION_TTL',     30 * MINUTE_IN_SECONDS);
 define('CVD_MAX_SNAPSHOTS',   25);
 define('CVD_RATE_LIMIT',      12); // max commands per 5 minutes
-define('CVD_COOKIE',          'cvd_session');
 define('CVD_TELEGRAM_API',    'https://api.telegram.org/bot');
 
 // -----------------------------------------------------------------------------
@@ -377,7 +375,6 @@ add_action('admin_menu', function () {
 add_action('admin_init', function () {
     register_setting('cvd_options', 'cvd_api_key',              ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_workspace_id',         ['sanitize_callback' => 'sanitize_text_field']);
-    register_setting('cvd_options', 'cvd_password_hash',        ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_telegram_bot_token',   ['sanitize_callback' => 'sanitize_text_field']);
     register_setting('cvd_options', 'cvd_telegram_chat_id',     ['sanitize_callback' => 'sanitize_text_field']);
     // Auto-validate when token is missing (runs on every admin page load until it succeeds)
@@ -396,51 +393,6 @@ add_action('update_option_cvd_api_key', function ($old, $new) {
         cvd_license_validate();
     }
 }, 10, 2);
-
-// -- Session helpers -----------------------------------------------------------
-function cvd_session_key(string $token): string {
-    return 'cvd_sess_' . substr(hash('sha256', $token), 0, 20);
-}
-
-function cvd_session_start(string $password): ?string {
-    $hash = get_option('cvd_password_hash', '');
-    if (empty($hash)) return null;
-    if (!wp_check_password($password, $hash)) return null;
-
-    $token = bin2hex(random_bytes(24));
-    set_transient(cvd_session_key($token), [
-        'uid'  => get_current_user_id(),
-        'ip'   => sanitize_text_field($_SERVER['REMOTE_ADDR'] ?? ''),
-        'born' => time(),
-    ], CVD_SESSION_TTL);
-
-    setcookie(CVD_COOKIE, $token, [
-        'expires'  => 0,
-        'path'     => '/wp-admin/',
-        'secure'   => is_ssl(),
-        'httponly' => true,
-        'samesite' => 'Strict',
-    ]);
-    return $token;
-}
-
-function cvd_session_valid(): bool {
-    $token = sanitize_text_field($_COOKIE[CVD_COOKIE] ?? '');
-    if (empty($token)) return false;
-    $key  = cvd_session_key($token);
-    $data = get_transient($key);
-    if (!$data) return false;
-    if ((int)($data['uid'] ?? 0) !== get_current_user_id()) return false;
-    // Refresh TTL (activity = reset clock)
-    set_transient($key, $data, CVD_SESSION_TTL);
-    return true;
-}
-
-function cvd_session_destroy(): void {
-    $token = sanitize_text_field($_COOKIE[CVD_COOKIE] ?? '');
-    if ($token) delete_transient(cvd_session_key($token));
-    setcookie(CVD_COOKIE, '', time() - 3600, '/wp-admin/');
-}
 
 // -- Rate limiting -------------------------------------------------------------
 function cvd_rate_check(): bool {
@@ -1867,28 +1819,6 @@ function cvd_gather_stats(array $plugin_names = []): array {
     return $stats;
 }
 
-// -- AJAX: authenticate --------------------------------------------------------
-add_action('wp_ajax_cvd_auth', function () {
-    check_ajax_referer('cvd_nonce', 'nonce');
-    if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
-
-    $password = sanitize_text_field($_POST['password'] ?? '');
-    $token    = cvd_session_start($password);
-
-    if ($token) {
-        wp_send_json_success(['authenticated' => true]);
-    } else {
-        wp_send_json_error('Incorrect password.');
-    }
-});
-
-// -- AJAX: logout --------------------------------------------------------------
-add_action('wp_ajax_cvd_logout', function () {
-    check_ajax_referer('cvd_nonce', 'nonce');
-    cvd_session_destroy();
-    wp_send_json_success();
-});
-
 // -- AJAX: send command --------------------------------------------------------
 add_action('wp_ajax_cvd_command', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
@@ -2126,11 +2056,6 @@ add_action('wp_ajax_cvd_rollback', function () {
     } else {
         wp_send_json_error($result['error']);
     }
-});
-
-// -- AJAX: session check (heartbeat) ------------------------------------------
-add_action('wp_ajax_cvd_ping', function () {
-    wp_send_json(['authenticated' => current_user_can('manage_options')]);
 });
 
 // -- Floating AI Widget --------------------------------------------------------
@@ -2940,21 +2865,6 @@ add_action('wp_ajax_cvd_telegram_unregister', function () {
 function cvd_page_settings() {
     if (!current_user_can('manage_options')) return;
 
-    // Handle password set
-    $pw_notice = '';
-    if (isset($_POST['cvd_set_password']) && check_admin_referer('cvd_set_pw')) {
-        $pw  = $_POST['cvd_new_password'] ?? '';
-        $pw2 = $_POST['cvd_confirm_password'] ?? '';
-        if (strlen($pw) < 8) {
-            $pw_notice = '<div class="notice notice-error"><p>Password must be at least 8 characters.</p></div>';
-        } elseif ($pw !== $pw2) {
-            $pw_notice = '<div class="notice notice-error"><p>Passwords do not match.</p></div>';
-        } else {
-            update_option('cvd_password_hash', wp_hash_password($pw));
-            $pw_notice = '<div class="notice notice-success"><p>Dev password updated.</p></div>';
-        }
-    }
-
     settings_errors('cvd_options');
     ?>
     <div class="wrap">
@@ -3000,30 +2910,6 @@ function cvd_page_settings() {
             Validating license with CooVex server...
         </div>
         <?php endif; ?>
-
-        <hr style="margin:32px 0;" />
-
-        <h2>Dev Password</h2>
-        <p style="color:#64748b;">
-            This password is separate from your WordPress login and your CooVex account.
-            It protects the CooVex Dev agent from unauthorized use.
-            Sessions expire after <strong>30 minutes of inactivity</strong>.
-        </p>
-
-        <form method="post" action="">
-            <?php wp_nonce_field('cvd_set_pw'); ?>
-            <table class="form-table">
-                <tr>
-                    <th><label for="cvd_new_password">New Dev Password</label></th>
-                    <td><input type="password" id="cvd_new_password" name="cvd_new_password" class="regular-text" autocomplete="new-password" /></td>
-                </tr>
-                <tr>
-                    <th><label for="cvd_confirm_password">Confirm Password</label></th>
-                    <td><input type="password" id="cvd_confirm_password" name="cvd_confirm_password" class="regular-text" /></td>
-                </tr>
-            </table>
-            <p><input type="submit" name="cvd_set_password" class="button button-primary" value="<?php echo empty(get_option('cvd_password_hash')) ? 'Set Dev Password' : 'Change Dev Password'; ?>" /></p>
-        </form>
 
         <?php
         $api_key = get_option('cvd_api_key', '');
@@ -3234,8 +3120,6 @@ function cvd_page_agent() {
     }
 
     $nonce          = wp_create_nonce('cvd_nonce');
-    $already_authed = 'true';
-    $session_ttl_min = CVD_SESSION_TTL / 60;
     ?>
     <style>
     #wpcontent { background: #f8fafc !important; }
@@ -3521,58 +3405,6 @@ function cvd_page_agent() {
     #cvd-send-btn:hover:not(:disabled) { background: #1d4ed8; }
     #cvd-send-btn:disabled { opacity: .4; cursor: not-allowed; }
     #cvd-input-hint { font-size: 11px; color: #cbd5e1; padding: 0 20px 8px; text-align: right; }
-    /* -- Auth overlay -- */
-    #cvd-auth-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0,0,0,.4);
-        backdrop-filter: blur(4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-    #cvd-auth-box {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 36px 40px;
-        width: 360px;
-        text-align: center;
-        box-shadow: 0 4px 24px rgba(0,0,0,.08);
-    }
-    #cvd-auth-box .icon { font-size: 40px; margin-bottom: 12px; }
-    #cvd-auth-box h2 { font-size: 20px; color: #0f172a; margin: 0 0 4px; }
-    #cvd-auth-box p { font-size: 13px; color: #64748b; margin: 0 0 24px; }
-    #cvd-auth-input {
-        width: 100%;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        color: #0f172a;
-        font-size: 15px;
-        padding: 12px 14px;
-        outline: none;
-        box-sizing: border-box;
-    }
-    #cvd-auth-input:focus { border-color: #2563eb; }
-    #cvd-auth-btn {
-        width: 100%;
-        background: #2563eb;
-        border: none;
-        border-radius: 10px;
-        color: white;
-        font-size: 14px;
-        font-weight: 600;
-        padding: 12px;
-        cursor: pointer;
-        margin-top: 12px;
-    }
-    #cvd-auth-btn:hover { background: #1d4ed8; }
-    #cvd-auth-error { color: #ef4444; font-size: 12px; margin-top: 8px; min-height: 18px; }
-    #cvd-auth-links { margin-top: 20px; }
-    #cvd-auth-links a { font-size: 12px; color: #94a3b8; text-decoration: none; }
-    #cvd-auth-links a:hover { color: #475569; }
     /* Scrollbar */
     #cvd-messages::-webkit-scrollbar, #cvd-snap-list::-webkit-scrollbar, #cvd-activity-list::-webkit-scrollbar { width: 4px; }
     #cvd-messages::-webkit-scrollbar-track, #cvd-snap-list::-webkit-scrollbar-track, #cvd-activity-list::-webkit-scrollbar-track { background: transparent; }
@@ -3725,19 +3557,6 @@ function cvd_page_agent() {
 
     <div id="cvd-app" style="position:relative;">
 
-        <!-- Auth overlay -->
-        <div id="cvd-auth-overlay" style="display: <?php echo $already_authed === 'true' ? 'none' : 'flex'; ?>;">
-            <div id="cvd-auth-box">
-                <h2>CooVex Dev</h2>
-                <p>Enter your dev password to start this session.<br>Sessions expire after <?php echo $session_ttl_min; ?> minutes of inactivity.</p>
-                <input type="password" id="cvd-auth-input" placeholder="Dev password" autocomplete="current-password" />
-                <button id="cvd-auth-btn">Unlock</button>
-                <div id="cvd-auth-error"></div>
-                <div id="cvd-auth-links">
-                    <a href="<?php echo admin_url('admin.php?page=coovex-dev-settings'); ?>">Forgot password? Reset in Settings →</a>
-                </div>
-            </div>
-        </div>
 
         <!-- Sidebar -->
         <div id="cvd-sidebar">
@@ -3762,7 +3581,6 @@ function cvd_page_agent() {
             <div id="cvd-sidebar-footer">
                 <button id="cvd-clear-btn">Clear chat</button>
                 <button id="cvd-history-btn" onclick="location.href='<?php echo admin_url('admin.php?page=coovex-dev-history'); ?>'">All commits</button>
-                <button id="cvd-logout-btn">Lock</button>
             </div>
         </div>
 
@@ -3771,7 +3589,6 @@ function cvd_page_agent() {
             <div id="cvd-topbar">
                 <span class="status-dot" id="cvd-status-dot"></span>
                 <span class="status-label" id="cvd-status-label">Connected</span>
-                <span class="session-timer" id="cvd-session-timer"></span>
             </div>
 
             <div id="cvd-messages">
@@ -3810,72 +3627,7 @@ What would you like to build or change?</div>
     (function() {
         var NONCE = <?php echo json_encode($nonce); ?>;
         var AJAXURL = <?php echo json_encode(admin_url('admin-ajax.php')); ?>;
-        var SESSION_TTL_MS = <?php echo CVD_SESSION_TTL * 1000; ?>;
-        var authenticated = <?php echo $already_authed; ?>;
         var history = [];
-        var lastActivity = Date.now();
-        var sessionStart = Date.now();
-
-        // -- Auth --------------------------------------------------------------
-        var authInput  = document.getElementById('cvd-auth-input');
-        var authBtn    = document.getElementById('cvd-auth-btn');
-        var authError  = document.getElementById('cvd-auth-error');
-        var authOverlay= document.getElementById('cvd-auth-overlay');
-
-        function doAuth() {
-            var pw = authInput.value;
-            if (!pw) return;
-            authBtn.disabled = true;
-            authBtn.textContent = 'Unlocking...';
-
-            ajax('cvd_auth', {password: pw})
-            .then(function(r) {
-                if (r.success) {
-                    authOverlay.style.display = 'none';
-                    authenticated = true;
-                    sessionStart = Date.now();
-                    lastActivity = Date.now();
-                    document.getElementById('cvd-textarea').focus();
-                } else {
-                    authError.textContent = r.data || 'Incorrect password.';
-                }
-            })
-            .finally(function() {
-                authBtn.disabled = false;
-                authBtn.textContent = 'Unlock';
-                authInput.value = '';
-            });
-        }
-
-        authBtn.addEventListener('click', doAuth);
-        authInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doAuth(); });
-
-        // -- Logout / lock -----------------------------------------------------
-        document.getElementById('cvd-logout-btn').addEventListener('click', function() {
-            ajax('cvd_logout', {}).then(function() {
-                authenticated = false;
-                authError.textContent = '';
-                authOverlay.style.display = 'flex';
-            });
-        });
-
-        // -- Session timer -----------------------------------------------------
-        var timerEl = document.getElementById('cvd-session-timer');
-        setInterval(function() {
-            if (!authenticated) return;
-            var remaining = SESSION_TTL_MS - (Date.now() - lastActivity);
-            if (remaining <= 0) {
-                authenticated = false;
-                authOverlay.style.display = 'flex';
-                timerEl.textContent = '';
-                return;
-            }
-            var mins = Math.floor(remaining / 60000);
-            var secs = Math.floor((remaining % 60000) / 1000);
-            timerEl.textContent = 'Session: ' + mins + ':' + (secs < 10 ? '0' : '') + secs;
-            if (remaining < 5 * 60 * 1000) timerEl.style.color = '#f59e0b';
-            else timerEl.style.color = '';
-        }, 1000);
 
         // -- Send command ------------------------------------------------------
         var textarea  = document.getElementById('cvd-textarea');
@@ -3989,11 +3741,9 @@ What would you like to build or change?</div>
         }
 
         function sendCommand() {
-            if (!authenticated) { authOverlay.style.display = 'flex'; return; }
             var cmd = textarea.value.trim();
             if (!cmd || sendBtn.disabled) return;
 
-            lastActivity = Date.now();
             addMessage('user', cmd);
             history.push({role: 'user', content: cmd});
             textarea.value = '';
@@ -4285,19 +4035,6 @@ What would you like to build or change?</div>
             history = [];
         });
 
-        // -- Ping heartbeat (every 2 minutes) ----------------------------------
-        setInterval(function() {
-            if (!authenticated) return;
-            fetch(AJAXURL + '?action=cvd_ping')
-            .then(function(r){ return r.json(); })
-            .then(function(d) {
-                if (!d.authenticated) {
-                    authenticated = false;
-                    authOverlay.style.display = 'flex';
-                }
-            });
-        }, 2 * 60 * 1000);
-
         // -- AJAX helper -------------------------------------------------------
         function ajax(action, data) {
             var params = new URLSearchParams();
@@ -4316,7 +4053,7 @@ What would you like to build or change?</div>
         }
 
         // Focus textarea after load
-        if (authenticated) setTimeout(function(){ textarea.focus(); }, 100);
+        setTimeout(function(){ textarea.focus(); }, 100);
     })();
     </script>
     <?php
@@ -4348,7 +4085,6 @@ register_deactivation_hook(__FILE__, function () {
 // to the DB; PHP cannot serialise anonymous functions (Closure).
 function cvd_uninstall_cleanup(): void {
     delete_option('cvd_api_key');
-    delete_option('cvd_password_hash');
     delete_option('cvd_snapshots');
     delete_option('cvd_audit_log');
     delete_option('cvd_license_token');
