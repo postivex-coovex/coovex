@@ -4227,6 +4227,22 @@ What would you like to build or change?</div>
                                     history.push({role: 'assistant', content: d.message});
                                     if (history.length > 20) history = history.slice(-20);
 
+                                    // Auto-retry if Claude's response was too large to parse as JSON
+                                    if (d.parse_error) {
+                                        actClose();
+                                        var retryBanner = document.createElement('div');
+                                        retryBanner.style.cssText = 'margin:4px 0 4px 44px;padding:5px 10px;background:#fef3c7;border-radius:6px;font-size:12px;color:#92400e;';
+                                        retryBanner.textContent = '⟳ Response too large — retrying with smaller batches...';
+                                        messages.appendChild(retryBanner);
+                                        messages.scrollTop = messages.scrollHeight;
+                                        cvdAutoFix = false;
+                                        setTimeout(function() {
+                                            textarea.value = '[AUTO-RETRY] Your last response was too large to parse as JSON. Repeat the EXACT same step but: max 3 changes, post_content max 60 chars (placeholder text only), short descriptions. No large HTML blocks.';
+                                            sendCommand();
+                                        }, 800);
+                                        return;
+                                    }
+
                                     // Strip [MORE_STEPS] marker and show Continue button if present
                                     var hasMoreSteps = d.message && d.message.indexOf('[MORE_STEPS]') !== -1;
                                     var displayMsg   = hasMoreSteps

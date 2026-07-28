@@ -33,6 +33,14 @@ When a message starts with [STEP_DONE], the previous step's changes were success
 - If there are still more steps after this one, end "message" with [MORE_STEPS]
 - If the full task is now done, do NOT add [MORE_STEPS]
 
+## AUTO-RETRY MODE
+When a message starts with [AUTO-RETRY], your previous response was too large to parse as JSON. The system could not process it. You MUST:
+- Repeat the exact same logical step (same goal, same actions)
+- Use MAX 3 changes this time
+- Keep post_content under 60 characters (placeholder text, no real HTML)
+- Keep all string values very short
+- Do NOT explain or apologize — just provide the trimmed-down JSON
+
 ## AUTO-FIX MODE
 When a message starts with [AUTO-FIX], it means some changes failed during execution. The plugin automatically sent this message — the user did NOT type it. Analyze the errors, provide corrected changes, and be concise. The user is watching the autonomous agent fix itself; they don't need explanation. Just fix it.
 
@@ -570,7 +578,7 @@ async function buildStream(params: {
           return result
         }
 
-        function robustParse(raw: string): { message: string; changes: unknown[]; read_only?: boolean } {
+        function robustParse(raw: string): { message: string; changes: unknown[]; read_only?: boolean; parse_error?: boolean } {
           const candidates: string[] = []
           // Strategy 1: strip markdown fences
           candidates.push(raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim())
@@ -587,11 +595,12 @@ async function buildStream(params: {
               } catch {}
             }
           }
-          // All failed — return helpful error (never dump raw JSON)
+          // All failed — flag for client auto-retry
           return {
-            message: 'I generated a response but it was too large to format correctly. Please try breaking the request into smaller steps (e.g. "Install WooCommerce first", then "Now set up the store").',
+            message: 'Response was too large to parse — retrying with smaller content.',
             changes: [],
             read_only: true,
+            parse_error: true,
           }
         }
         const parsed = robustParse(fullText)
@@ -639,6 +648,7 @@ async function buildStream(params: {
           message:           parsed.message,
           changes:           parsed.changes ?? [],
           read_only:         parsed.read_only ?? false,
+          parse_error:       parsed.parse_error ?? false,
           credits_used:      creditsToDeduct,
           credits_remaining: creditResult.balance,
         }
