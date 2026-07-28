@@ -1505,6 +1505,232 @@ function cvd_apply_wp_action(array $change): array {
             return ['ok' => true, 'action' => 'post_scheduled', 'post_id' => $pid, 'publish_at' => $date];
         }
 
+        // -- PHP REPL: execute arbitrary PHP in WP context ---------------------
+        case 'run_php': {
+            $code = $data['code'] ?? '';
+            if (!$code) return ['ok' => false, 'error' => 'run_php requires data.code'];
+            ob_start();
+            try {
+                eval('?>' . $code);
+            } catch (\Throwable $e) {
+                $out = ob_get_clean();
+                $msg = get_class($e) . ': ' . $e->getMessage() . ' on line ' . $e->getLine();
+                return ['ok' => false, 'action' => 'php_executed', 'error' => $msg,
+                        'client_action' => 'terminal_output', 'output' => ($out ? $out . "\n" : '') . $msg, 'lang' => 'php'];
+            }
+            $output = ob_get_clean();
+            return ['ok' => true, 'action' => 'php_executed',
+                    'client_action' => 'terminal_output', 'output' => $output !== '' ? $output : '(no output)', 'lang' => 'php'];
+        }
+
+        // -- Shell executor (WP-CLI, git, composer, bash) ----------------------
+        case 'run_shell': {
+            $cmd = $data['command'] ?? '';
+            if (!$cmd) return ['ok' => false, 'error' => 'run_shell requires data.command'];
+            $disabled = array_map('trim', explode(',', (string)ini_get('disable_functions')));
+            $has_exec = function_exists('exec') && !in_array('exec', $disabled);
+            if (!$has_exec) {
+                $has_shell = function_exists('shell_exec') && !in_array('shell_exec', $disabled);
+                if (!$has_shell) return ['ok' => false, 'error' => 'Shell execution is disabled on this server (exec + shell_exec both disabled)'];
+                $out = (string)shell_exec('cd ' . escapeshellarg(realpath($data['cwd'] ?? ABSPATH) ?: ABSPATH) . ' && (' . $cmd . ') 2>&1');
+                return ['ok' => true, 'action' => 'shell_executed', 'exit_code' => null,
+                        'client_action' => 'terminal_output', 'output' => $out !== '' ? $out : '(no output)', 'lang' => 'shell'];
+            }
+            $cwd = realpath($data['cwd'] ?? ABSPATH) ?: ABSPATH;
+            $lines = []; $retval = 0;
+            exec('cd ' . escapeshellarg($cwd) . ' && (' . $cmd . ') 2>&1', $lines, $retval);
+            $out = implode("\n", $lines);
+            return ['ok' => $retval === 0, 'action' => 'shell_executed', 'exit_code' => $retval,
+                    'client_action' => 'terminal_output', 'output' => $out !== '' ? $out : '(no output)', 'lang' => 'shell'];
+        }
+
+        // -- Raw SQL with results -----------------------------------------------
+        case 'run_sql': {
+            global $wpdb;
+            $sql = trim($data['sql'] ?? '');
+            if (!$sql) return ['ok' => false, 'error' => 'run_sql requires data.sql'];
+            $sql = str_replace('{prefix}', $wpdb->prefix, $sql);
+            if (empty($data['confirm'])) {
+                foreach (['DROP ', 'TRUNCATE '] as $kw) {
+                    if (stripos($sql, $kw) !== false)
+                        return ['ok' => false, 'error' => "Destructive SQL blocked (contains $kw). Pass confirm:true to allow."];
+                }
+            }
+            $upper = strtoupper(ltrim($sql));
+            $is_read = strpos($upper, 'SELECT') === 0 || strpos($upper, 'SHOW') === 0 || strpos($upper, 'DESCRIBE') === 0 || strpos($upper, 'EXPLAIN') === 0;
+            if ($is_read) {
+                $rows = $wpdb->get_results($sql, ARRAY_A);
+                if ($wpdb->last_error) return ['ok' => false, 'error' => $wpdb->last_error];
+                $out = json_encode($rows, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                return ['ok' => true, 'action' => 'sql_executed', 'rows' => count($rows),
+                        'client_action' => 'terminal_output', 'output' => $out, 'lang' => 'json'];
+            } else {
+                $affected = $wpdb->query($sql);
+                if ($wpdb->last_error) return ['ok' => false, 'error' => $wpdb->last_error];
+                return ['ok' => true, 'action' => 'sql_executed', 'affected' => $affected,
+                        'client_action' => 'terminal_output', 'output' => "Query OK, $affected row(s) affected.", 'lang' => 'shell'];
+            }
+        }
+
+        // -- File system browser -----------------------------------------------
+        case 'list_files': {
+            $dir   = $data['path'] ?? WP_CONTENT_DIR;
+            $depth = min((int)($data['depth'] ?? 1), 4);
+            $real  = realpath($dir);
+            if (!$real || !is_dir($real)) return ['ok' => false, 'error' => "Directory not found: $dir"];
+            $scan = function(string $path, int $max, int $cur = 0) use (&$scan): array {
+                $items = [];
+                foreach ((array)@scandir($path) as $e) {
+                    if ($e === '.' || $e === '..') continue;
+                    $full = $path . DIRECTORY_SEPARATOR . $e;
+                    $is_d = is_dir($full);
+                    $item = ['name' => $e, 'type' => $is_d ? 'dir' : 'file',
+                             'size' => $is_d ? null : @filesize($full),
+                             'modified' => date('Y-m-d H:i', (int)@filemtime($full))];
+                    if ($is_d && $cur < $max - 1) $item['children'] = $scan($full, $max, $cur + 1);
+                    $items[] = $item;
+                }
+                return $items;
+            };
+            return ['ok' => true, 'action' => 'files_listed', 'path' => $real,
+                    'items' => $scan($real, $depth), 'client_action' => 'file_tree'];
+        }
+
+        // -- Read any file (beyond wp-content write restriction) ---------------
+        case 'read_file_raw': {
+            $path   = $data['path'] ?? '';
+            $offset = max(0, (int)($data['offset'] ?? 0));
+            $limit  = min((int)($data['lines'] ?? 200), 2000);
+            if (!$path) return ['ok' => false, 'error' => 'read_file_raw requires data.path'];
+            $real = realpath($path);
+            if (!$real || !is_file($real)) return ['ok' => false, 'error' => "File not found: $path"];
+            if (!is_readable($real))       return ['ok' => false, 'error' => "File not readable: $path"];
+            $all   = file($real, FILE_IGNORE_NEW_LINES);
+            $total = count($all);
+            $slice = array_slice($all, $offset, $limit);
+            $ext   = strtolower(pathinfo($real, PATHINFO_EXTENSION));
+            return ['ok' => true, 'action' => 'file_read', 'path' => $real,
+                    'size_bytes' => filesize($real), 'total_lines' => $total,
+                    'offset' => $offset, 'lines_returned' => count($slice),
+                    'client_action' => 'terminal_output', 'output' => implode("\n", $slice), 'lang' => $ext ?: 'text'];
+        }
+
+        // -- Flush all caches (WP object, OPcache, plugin caches) --------------
+        case 'cache_flush': {
+            global $wpdb;
+            $flushed = [];
+            wp_cache_flush(); $flushed[] = 'wp_object_cache';
+            if (function_exists('opcache_reset'))         { opcache_reset();                              $flushed[] = 'opcache'; }
+            if (function_exists('w3tc_flush_all'))        { w3tc_flush_all();                            $flushed[] = 'w3_total_cache'; }
+            if (function_exists('wp_cache_clear_cache'))  { wp_cache_clear_cache();                      $flushed[] = 'wp_super_cache'; }
+            if (function_exists('rocket_clean_domain'))   { rocket_clean_domain();                       $flushed[] = 'wp_rocket'; }
+            if (function_exists('sg_cachepress_purge_cache')) { sg_cachepress_purge_cache();             $flushed[] = 'sg_optimizer'; }
+            if (class_exists('LiteSpeed\\Core'))          { do_action('litespeed_purge_all');            $flushed[] = 'litespeed'; }
+            if (class_exists('autoptimizeCache') && method_exists('autoptimizeCache', 'clearall')) {
+                \autoptimizeCache::clearall(); $flushed[] = 'autoptimize';
+            }
+            if (class_exists('Hummingbird\\WP_Hummingbird')) { do_action('wphb_clear_page_cache'); $flushed[] = 'hummingbird'; }
+            $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_%' OR option_name LIKE '\\_site\\_transient\\_%'");
+            $flushed[] = 'transients';
+            return ['ok' => true, 'action' => 'cache_flushed', 'flushed' => $flushed, 'count' => count($flushed)];
+        }
+
+        // -- Send test email ---------------------------------------------------
+        case 'send_test_email': {
+            $to      = sanitize_email($data['to'] ?? get_option('admin_email'));
+            $subject = sanitize_text_field($data['subject'] ?? '[CooVex Dev] Test Email');
+            $body    = wp_kses_post($data['body'] ?? '<p>Test email sent by <strong>CooVex Dev AI Agent</strong>.</p>');
+            $headers = !empty($data['html']) ? ['Content-Type: text/html; charset=UTF-8'] : [];
+            $ok      = wp_mail($to, $subject, $body, $headers);
+            $error   = '';
+            if (!$ok) {
+                global $phpmailer;
+                if (isset($phpmailer) && is_object($phpmailer) && property_exists($phpmailer, 'ErrorInfo'))
+                    $error = $phpmailer->ErrorInfo;
+            }
+            return ['ok' => $ok, 'action' => 'email_sent', 'to' => $to, 'error' => $error ?: ($ok ? '' : 'wp_mail() returned false')];
+        }
+
+        // -- PDF text extraction -----------------------------------------------
+        case 'pdf_extract': {
+            $att_id = (int)($data['attachment_id'] ?? 0);
+            $path   = $data['path'] ?? ($att_id ? get_attached_file($att_id) : '');
+            if (!$path || !file_exists($path)) return ['ok' => false, 'error' => 'PDF not found. Provide attachment_id or path.'];
+            $raw = @file_get_contents($path);
+            if (!$raw) return ['ok' => false, 'error' => 'Cannot read file'];
+            $text = '';
+            // Strategy 1: BT/ET text blocks
+            if (preg_match_all('/BT\s*(.*?)\s*ET/s', $raw, $m)) {
+                foreach ($m[1] as $block) {
+                    if (preg_match_all('/\((.*?)\)\s*T[jJ]/s', $block, $s)) $text .= implode(' ', $s[1]) . "\n";
+                }
+            }
+            // Strategy 2: decompress content streams
+            if (strlen(trim($text)) < 100 && preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s', $raw, $ms)) {
+                foreach ($ms[1] as $stream) {
+                    $dec = @gzuncompress($stream) ?: @gzinflate($stream) ?: '';
+                    if ($dec && preg_match_all('/\((.*?)\)\s*T[jJ]/s', $dec, $s2)) $text .= implode(' ', $s2[1]) . "\n";
+                }
+            }
+            $text = trim(preg_replace('/\s{2,}/', ' ', $text)) ?: '(Could not extract text — PDF may be image-based or encrypted)';
+            return ['ok' => true, 'action' => 'pdf_extracted', 'path' => $path,
+                    'client_action' => 'terminal_output', 'output' => substr($text, 0, 20000), 'lang' => 'text'];
+        }
+
+        // -- Server info snapshot (check capabilities before using shell) ------
+        case 'server_info': {
+            $disabled = ini_get('disable_functions');
+            $dis_arr  = array_map('trim', explode(',', (string)$disabled));
+            $has_exec = function_exists('exec') && !in_array('exec', $dis_arr);
+            $has_sh   = function_exists('shell_exec') && !in_array('shell_exec', $dis_arr);
+            $wp_cli   = $has_exec ? trim((string)@shell_exec('which wp 2>/dev/null')) : '';
+            $git      = $has_exec ? trim((string)@shell_exec('which git 2>/dev/null')) : '';
+            $composer = $has_exec ? trim((string)@shell_exec('which composer 2>/dev/null')) : '';
+            $info = [
+                'php_version'         => PHP_VERSION,
+                'php_sapi'            => PHP_SAPI,
+                'os'                  => PHP_OS . ' ' . php_uname('r'),
+                'server_software'     => $_SERVER['SERVER_SOFTWARE'] ?? 'unknown',
+                'memory_limit'        => ini_get('memory_limit'),
+                'max_execution_time'  => ini_get('max_execution_time'),
+                'upload_max_filesize' => ini_get('upload_max_filesize'),
+                'post_max_size'       => ini_get('post_max_size'),
+                'disable_functions'   => $disabled ?: 'none',
+                'exec_available'      => $has_exec,
+                'shell_exec_available'=> $has_sh,
+                'wpcli'               => $wp_cli ?: 'not found',
+                'git'                 => $git ?: 'not found',
+                'composer'            => $composer ?: 'not found',
+                'disk_free_gb'        => round((float)@disk_free_space(ABSPATH) / 1073741824, 2),
+                'disk_total_gb'       => round((float)@disk_total_space(ABSPATH) / 1073741824, 2),
+                'abspath'             => ABSPATH,
+                'wp_content_dir'      => WP_CONTENT_DIR,
+                'loaded_extensions'   => implode(', ', get_loaded_extensions()),
+            ];
+            return ['ok' => true, 'action' => 'server_info', 'info' => $info,
+                    'client_action' => 'terminal_output', 'output' => json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), 'lang' => 'json'];
+        }
+
+        // -- Embed page as iframe in chat (user-interaction required) --------
+        case 'embed_page': {
+            $url          = esc_url_raw($data['url'] ?? '');
+            $title        = sanitize_text_field($data['title'] ?? 'Setup Required');
+            $instructions = array_map('sanitize_text_field', (array)($data['instructions'] ?? []));
+            if (!$url) return ['ok' => false, 'error' => 'embed_page requires data.url'];
+            // Resolve admin-relative URLs
+            if (strpos($url, 'http') !== 0) {
+                $url = admin_url(ltrim($url, '/'));
+            }
+            return [
+                'ok'            => true,
+                'action'        => 'embed_page',
+                'client_action' => 'embed_page',
+                'url'           => $url,
+                'title'         => $title,
+                'instructions'  => $instructions,
+            ];
+        }
+
         default:
             return ['ok' => false, 'error' => "Unknown wp_action: '$action'"];
     }
@@ -3553,6 +3779,134 @@ function cvd_page_agent() {
         border-color: #ef4444;
         color: #b91c1c;
     }
+    .cvd-act-icon.waiting {
+        background: #fef9c3;
+        border-color: #eab308;
+        color: #854d0e;
+    }
+    .cvd-iframe-wrap {
+        width: 100%;
+        margin: 6px 0 4px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .cvd-iframe-wrap iframe {
+        display: block;
+        width: 100%;
+        height: 500px;
+        border: none;
+    }
+    .cvd-iframe-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 11px;
+        font-weight: 600;
+        color: #475569;
+    }
+    .cvd-iframe-bar button {
+        margin-left: auto;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        padding: 3px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 700;
+    }
+    /* -- Terminal output block -------------------------------------------- */
+    .cvd-terminal-block {
+        width: 100%;
+        margin: 6px 0 4px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #0f172a;
+        font-size: 11.5px;
+    }
+    .cvd-terminal-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        background: #1e293b;
+        border-bottom: 1px solid #334155;
+    }
+    .cvd-terminal-lang {
+        font-family: monospace;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: #94a3b8;
+        padding: 1px 6px;
+        background: #0f172a;
+        border-radius: 3px;
+    }
+    .cvd-terminal-exit {
+        font-size: 10px;
+        color: #ef4444;
+        margin-left: 2px;
+    }
+    .cvd-terminal-exit.ok { color: #22c55e; }
+    .cvd-terminal-copy {
+        margin-left: auto;
+        background: transparent;
+        color: #64748b;
+        border: 1px solid #334155;
+        padding: 2px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 10px;
+    }
+    .cvd-terminal-copy:hover { color: #94a3b8; border-color: #475569; }
+    .cvd-terminal-body {
+        margin: 0;
+        padding: 10px 12px;
+        color: #e2e8f0;
+        font-family: "Cascadia Code", "Fira Code", "Courier New", monospace;
+        font-size: 11.5px;
+        line-height: 1.55;
+        max-height: 320px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+    /* -- File tree --------------------------------------------------------- */
+    .cvd-file-tree {
+        width: 100%;
+        margin: 6px 0 4px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f8fafc;
+        font-size: 11.5px;
+        max-height: 320px;
+        overflow-y: auto;
+    }
+    .cvd-file-tree-path {
+        padding: 6px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        color: #475569;
+        background: #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+        font-family: monospace;
+    }
+    .cvd-file-node {
+        padding: 2px 10px;
+        font-family: monospace;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .cvd-file-node:hover { background: #e2e8f0; }
+    .cvd-file-node.is-dir { font-weight: 600; color: #1d4ed8; }
     .cvd-act-info { flex: 1; min-width: 0; }
     .cvd-act-badge {
         display: inline-block;
@@ -3664,6 +4018,8 @@ What would you like to build or change?</div>
         var STORE_KEY = 'cvd_chat_' + location.hostname;
         var history = [];
         var displayMsgs = [];
+        var cvdAutoFix = false;      // true while auto-escalation to Claude is active
+        var cvdAutoFixDepth = 0;     // max 2 auto-fix retries per task
 
         function saveChat() {
             try { localStorage.setItem(STORE_KEY, JSON.stringify({h: history, m: displayMsgs})); } catch(e) {}
@@ -3784,7 +4140,7 @@ What would you like to build or change?</div>
             var cmd = textarea.value.trim();
             if (!cmd || sendBtn.disabled) return;
 
-            addMessage('user', cmd);
+            if (!cvdAutoFix) addMessage('user', cmd);  // suppress bubble for auto-fix msgs
             history.push({role: 'user', content: cmd});
             textarea.value = '';
             textarea.style.height = '';
@@ -3883,36 +4239,60 @@ What would you like to build or change?</div>
                                     var changes = d.changes || [];
                                     if (changes.length === 0) {
                                         actClose();
-                                        addAgentMessage(displayMsg, [], null);
-                                        if (hasMoreSteps) showContinueBtn();
+                                        if (cvdAutoFix) {
+                                            // Auto-fix got a "no changes needed" reply — show subtle note
+                                            var noChgBanner = document.createElement('div');
+                                            noChgBanner.style.cssText = 'margin:4px 0 4px 44px;padding:5px 10px;background:#f0fdf4;border-radius:6px;font-size:12px;color:#166534;';
+                                            noChgBanner.textContent = '✓ Auto-fix: ' + displayMsg;
+                                            messages.appendChild(noChgBanner);
+                                            messages.scrollTop = messages.scrollHeight;
+                                            cvdAutoFix = false;
+                                        } else {
+                                            addAgentMessage(displayMsg, [], null);
+                                            if (hasMoreSteps) showContinueBtn();
+                                        }
                                     } else {
-                                        // Show the AI's message immediately
-                                        addAgentMessage(displayMsg, [], null);
-                                        if (hasMoreSteps) showContinueBtn();
+                                        // Show the AI's message (compact banner in auto-fix mode)
+                                        if (cvdAutoFix) {
+                                            var autoFixBanner = document.createElement('div');
+                                            autoFixBanner.style.cssText = 'margin:4px 0 4px 44px;padding:5px 10px;background:#dbeafe;border-radius:6px;font-size:12px;color:#1e40af;font-weight:600;';
+                                            autoFixBanner.textContent = '⟳ Auto-fixing... ' + displayMsg;
+                                            messages.appendChild(autoFixBanner);
+                                            messages.scrollTop = messages.scrollHeight;
+                                        } else {
+                                            addAgentMessage(displayMsg, [], null);
+                                            if (hasMoreSteps) showContinueBtn();
+                                        }
 
                                         // Show pending changes in activity panel
                                         actRenderChanges(changes);
                                         actStatus(changes.length + ' change' + (changes.length !== 1 ? 's' : '') + ' ready', false);
 
-                                        // Confirmation buttons
+                                        // Auto-start; per-change approval only for file/db/shell writes
                                         actFooter.innerHTML = '';
-                                        var applyBtn = document.createElement('button');
-                                        applyBtn.style.cssText = 'background:#2563eb;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;margin-right:6px;';
-                                        applyBtn.textContent = 'Apply ' + changes.length + (changes.length !== 1 ? ' changes' : ' change');
-                                        var discardBtn = document.createElement('button');
-                                        discardBtn.style.cssText = 'background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;';
-                                        discardBtn.textContent = 'Discard';
-                                        actFooter.appendChild(applyBtn);
-                                        actFooter.appendChild(discardBtn);
+
+                                        function needsApproval(chg) {
+                                            if (cvdAutoFix) return false;
+                                            if (chg.type === 'file') return true;
+                                            if (chg.type === 'db')   return true;
+                                            if (chg.type === 'wp_action') {
+                                                var a = chg.action || '';
+                                                if (a === 'run_php' || a === 'run_shell') return true;
+                                                if (a === 'run_sql') {
+                                                    var sq = ((chg.data && chg.data.sql) || '').trim().toUpperCase();
+                                                    return !/^(SELECT|SHOW|DESCRIBE|EXPLAIN)\\b/.test(sq);
+                                                }
+                                            }
+                                            return false;
+                                        }
 
                                         applyPromise = new Promise(function(resolve) {
-                                            applyBtn.addEventListener('click', function() {
-                                                applyBtn.disabled = true;
-                                                discardBtn.disabled = true;
+                                            (function() {
                                                 actFooter.innerHTML = '';
 
                                                 // Apply changes one-by-one for live progress
                                                 var snapId = null;
+                                                var failedItems = [];
                                                 var rows = actList.querySelectorAll('.cvd-act-item');
 
                                                 function applyOne(i) {
@@ -3932,18 +4312,32 @@ What would you like to build or change?</div>
                                                         });
                                                         actFooter.appendChild(nextBtn);
                                                         if (snapId) addSnapToSidebar(snapId, cmd);
+                                                        // Auto-escalate failures to Claude (max 2 attempts)
+                                                        if (failedItems.length > 0 && cvdAutoFixDepth < 2) {
+                                                            cvdAutoFixDepth++;
+                                                            var errLines = failedItems.map(function(f) { return '  * ' + f.desc + ': ' + f.error; });
+                                                            var autoFixMsg = '[AUTO-FIX] ' + failedItems.length + ' change(s) failed while executing: "' + cmd + '"\\n\\nErrors:\\n' + errLines.join('\\n') + '\\n\\nAnalyze each error, identify root cause, and provide corrected changes that will succeed.';
+                                                            actStatus('Consulting Claude AI for fixes...', true);
+                                                            cvdAutoFix = true;
+                                                            setTimeout(function() { textarea.value = autoFixMsg; sendCommand(); }, 900);
+                                                        } else {
+                                                            cvdAutoFix = false;
+                                                            cvdAutoFixDepth = 0;
+                                                        }
                                                         return Promise.resolve();
                                                     }
 
-                                                    // Animate current item
                                                     var row = rows[i];
-                                                    if (row) {
-                                                        var icon = row.querySelector('.cvd-act-icon');
-                                                        if (icon) { icon.className = 'cvd-act-icon applying'; icon.innerHTML = ''; }
-                                                    }
-                                                    actStatus('Applying ' + (i + 1) + ' / ' + changes.length + '...', true);
+                                                    var chgI = changes[i] || {};
 
-                                                    return ajax('cvd_apply_changes', {
+                                                    // Per-change approval gate for file/db/shell operations
+                                                    function doExec() {
+                                                        if (row) {
+                                                            var icon = row.querySelector('.cvd-act-icon');
+                                                            if (icon) { icon.className = 'cvd-act-icon applying'; icon.innerHTML = ''; }
+                                                        }
+                                                        actStatus('Applying ' + (i + 1) + ' / ' + changes.length + '...', true);
+                                                        return ajax('cvd_apply_changes', {
                                                         changes:      JSON.stringify(changes),
                                                         sig:          d.sig || '',
                                                         sig_nonce:    d.nonce || '',
@@ -3955,6 +4349,125 @@ What would you like to build or change?</div>
                                                         var res = r.success ? (r.data.result || {}) : { ok: false, error: 'Failed' };
                                                         if (r.success && r.data.snap_id) snapId = r.data.snap_id;
 
+                                                        // embed_page: show iframe in chat and pause until user clicks Done
+                                                        if (res.client_action === 'embed_page') {
+                                                            var ic2 = row && row.querySelector('.cvd-act-icon');
+                                                            if (ic2) { ic2.className = 'cvd-act-icon waiting'; ic2.innerHTML = '&#9998;'; }
+                                                            actStatus('Waiting for user...', true);
+
+                                                            // Build instructions in activity panel
+                                                            if (res.instructions && res.instructions.length) {
+                                                                res.instructions.forEach(function(ins) {
+                                                                    var li = document.createElement('div');
+                                                                    li.style.cssText = 'font-size:11px;padding:4px 0;color:#475569;';
+                                                                    li.textContent = ins;
+                                                                    actList.appendChild(li);
+                                                                });
+                                                            }
+
+                                                            // Build iframe block in chat messages area
+                                                            var wrap = document.createElement('div');
+                                                            wrap.className = 'cvd-iframe-wrap';
+                                                            var bar = document.createElement('div');
+                                                            bar.className = 'cvd-iframe-bar';
+                                                            bar.innerHTML = '<span>&#128279; ' + (res.title || 'Setup Page') + '</span>';
+                                                            var doneBtn = document.createElement('button');
+                                                            doneBtn.textContent = 'Done ✓';
+                                                            bar.appendChild(doneBtn);
+                                                            var fr = document.createElement('iframe');
+                                                            fr.src = res.url;
+                                                            fr.setAttribute('allowfullscreen', '1');
+                                                            wrap.appendChild(bar);
+                                                            wrap.appendChild(fr);
+                                                            messages.appendChild(wrap);
+                                                            messages.scrollTop = messages.scrollHeight;
+
+                                                            return new Promise(function(resolveDone) {
+                                                                doneBtn.addEventListener('click', function() {
+                                                                    if (ic2) { ic2.className = 'cvd-act-icon done'; ic2.innerHTML = '&#10003;'; }
+                                                                    actStatus('User confirmed setup', false);
+                                                                    resolveDone();
+                                                                });
+                                                            }).then(function() { return applyOne(i + 1); });
+                                                        }
+
+                                                        // terminal_output: render code/shell output block in chat
+                                                        if (res.client_action === 'terminal_output') {
+                                                            var termBlock = document.createElement('div');
+                                                            termBlock.className = 'cvd-terminal-block';
+                                                            var termHead = document.createElement('div');
+                                                            termHead.className = 'cvd-terminal-header';
+                                                            var langBadge = document.createElement('span');
+                                                            langBadge.className = 'cvd-terminal-lang';
+                                                            langBadge.textContent = res.lang || 'output';
+                                                            termHead.appendChild(langBadge);
+                                                            if (res.exit_code !== undefined && res.exit_code !== null) {
+                                                                var exitSpan = document.createElement('span');
+                                                                exitSpan.className = 'cvd-terminal-exit' + (res.exit_code === 0 ? ' ok' : '');
+                                                                exitSpan.textContent = 'exit ' + res.exit_code;
+                                                                termHead.appendChild(exitSpan);
+                                                            }
+                                                            var copyBtn2 = document.createElement('button');
+                                                            copyBtn2.className = 'cvd-terminal-copy';
+                                                            copyBtn2.textContent = 'Copy';
+                                                            var termOutput = res.output || '';
+                                                            copyBtn2.addEventListener('click', function() {
+                                                                if (navigator.clipboard) {
+                                                                    navigator.clipboard.writeText(termOutput).then(function() {
+                                                                        copyBtn2.textContent = 'Copied!';
+                                                                        setTimeout(function() { copyBtn2.textContent = 'Copy'; }, 1500);
+                                                                    });
+                                                                }
+                                                            });
+                                                            termHead.appendChild(copyBtn2);
+                                                            var termBody = document.createElement('pre');
+                                                            termBody.className = 'cvd-terminal-body';
+                                                            termBody.textContent = termOutput;
+                                                            termBlock.appendChild(termHead);
+                                                            termBlock.appendChild(termBody);
+                                                            messages.appendChild(termBlock);
+                                                            messages.scrollTop = messages.scrollHeight;
+                                                        }
+
+                                                        // file_tree: render collapsible file browser in chat
+                                                        if (res.client_action === 'file_tree') {
+                                                            var treeWrap = document.createElement('div');
+                                                            treeWrap.className = 'cvd-file-tree';
+                                                            var treePath2 = document.createElement('div');
+                                                            treePath2.className = 'cvd-file-tree-path';
+                                                            treePath2.textContent = '📂 ' + (res.path || '');
+                                                            treeWrap.appendChild(treePath2);
+                                                            function renderTree(items, container, depth) {
+                                                                (items || []).forEach(function(item) {
+                                                                    var node = document.createElement('div');
+                                                                    node.className = 'cvd-file-node' + (item.type === 'dir' ? ' is-dir' : '');
+                                                                    node.style.paddingLeft = (10 + depth * 14) + 'px';
+                                                                    var icon = item.type === 'dir' ? '📁' : '📄';
+                                                                    var sizeStr = '';
+                                                                    if (item.size != null) {
+                                                                        var sz = item.size;
+                                                                        sizeStr = sz > 1048576 ? ' — ' + (sz/1048576).toFixed(1) + 'MB'
+                                                                                : sz > 1024    ? ' — ' + Math.round(sz/1024) + 'KB'
+                                                                                               : ' — ' + sz + 'B';
+                                                                    }
+                                                                    node.textContent = icon + ' ' + item.name + sizeStr;
+                                                                    if (item.modified) {
+                                                                        var modSpan = document.createElement('span');
+                                                                        modSpan.style.cssText = 'float:right;color:#94a3b8;font-size:10px;padding-right:8px;';
+                                                                        modSpan.textContent = item.modified;
+                                                                        node.appendChild(modSpan);
+                                                                    }
+                                                                    container.appendChild(node);
+                                                                    if (item.children && item.children.length) {
+                                                                        renderTree(item.children, container, depth + 1);
+                                                                    }
+                                                                });
+                                                            }
+                                                            renderTree(res.items, treeWrap, 0);
+                                                            messages.appendChild(treeWrap);
+                                                            messages.scrollTop = messages.scrollHeight;
+                                                        }
+
                                                         if (row) {
                                                             var ic = row.querySelector('.cvd-act-icon');
                                                             var dc = row.querySelector('.cvd-act-desc');
@@ -3965,20 +4478,49 @@ What would you like to build or change?</div>
                                                                 } else {
                                                                     ic.className = 'cvd-act-icon fail'; ic.innerHTML = '&#10005;';
                                                                     if (dc) { dc.className = 'cvd-act-desc fail'; dc.title = res.error || ''; }
+                                                                    // Collect failure for auto-escalation
+                                                                    var failDesc = chgI.description || chgI.path || chgI.action || chgI.type || ('change ' + (i + 1));
+                                                                    failedItems.push({ desc: failDesc, error: res.error || 'unknown error' });
                                                                 }
                                                             }
                                                         }
                                                         return applyOne(i + 1);
-                                                    });
+                                                    }); // end doExec ajax
+                                                } // end doExec
+
+                                                // Run with or without approval gate
+                                                if (!needsApproval(chgI)) return doExec();
+
+                                                // Show inline Allow/Skip buttons for this change
+                                                var ic0 = row && row.querySelector('.cvd-act-icon');
+                                                var allowBtn3, skipBtn3;
+                                                if (ic0) { ic0.className = 'cvd-act-icon waiting'; ic0.innerHTML = '&#9888;'; }
+                                                if (row) {
+                                                    allowBtn3 = document.createElement('button');
+                                                    allowBtn3.style.cssText = 'font-size:10px;padding:2px 8px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-left:6px;flex-shrink:0;';
+                                                    allowBtn3.textContent = 'Allow';
+                                                    skipBtn3 = document.createElement('button');
+                                                    skipBtn3.style.cssText = 'font-size:10px;padding:2px 6px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;margin-left:4px;flex-shrink:0;';
+                                                    skipBtn3.textContent = 'Skip';
+                                                    var rowInfo = row.querySelector('.cvd-act-info');
+                                                    if (rowInfo) { rowInfo.appendChild(allowBtn3); rowInfo.appendChild(skipBtn3); }
+                                                }
+                                                actStatus('Waiting for approval (' + (i + 1) + '/' + changes.length + ')...', false);
+                                                return new Promise(function(resAp) {
+                                                    function cleanAp() { if (allowBtn3) { allowBtn3.remove(); } if (skipBtn3) { skipBtn3.remove(); } }
+                                                    if (allowBtn3) allowBtn3.addEventListener('click', function() { cleanAp(); resAp(true); });
+                                                    if (skipBtn3)  skipBtn3.addEventListener('click',  function() { cleanAp(); resAp(false); });
+                                                }).then(function(approved) {
+                                                    if (!approved) {
+                                                        if (ic0) { ic0.className = 'cvd-act-icon'; ic0.innerHTML = '&mdash;'; }
+                                                        return applyOne(i + 1);
+                                                    }
+                                                    return doExec();
+                                                });
                                                 }
 
-                                                applyOne(0).finally(resolve);
-                                            });
-
-                                            discardBtn.addEventListener('click', function() {
-                                                actClose();
-                                                resolve();
-                                            });
+                                                applyOne(0).finally(function() { resolve(); }); // cvdAutoFix managed by escalation path
+                                            })();
                                         });
                                     }
 
