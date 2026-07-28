@@ -8,7 +8,7 @@ export const COOVEX_DEV_PHP = `<?php
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
  * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language \u2014 CooVex Dev delivers working code.
- * Version:     1.5.0
+ * Version:     1.6.0
  * Author:      CooVex
  * Author URI:  https://coovex.com
  * License:     GPL2
@@ -19,7 +19,7 @@ export const COOVEX_DEV_PHP = `<?php
 if (!defined('ABSPATH')) exit;
 
 // -- Constants -----------------------------------------------------------------
-define('CVD_VERSION',         '1.5.0');
+define('CVD_VERSION',         '1.6.0');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');

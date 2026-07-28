@@ -2,12 +2,22 @@
 
 // â”€â”€ Bump this when releasing a new plugin version â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Also update CVD_VERSION constant in plugin/route.ts (must match).
-export const CVD_CURRENT_VERSION    = '1.5.0'
+export const CVD_CURRENT_VERSION    = '1.6.0'
 export const CVD_REQUIRES_WP        = '5.9'
 export const CVD_TESTED_WP          = '6.8'
 export const CVD_REQUIRES_PHP       = '7.4'
 
 const CHANGELOG = `\
+= 1.6.0 - 2026-07-29 =
+* Fix: agent no longer responds with empty text when it should be making changes
+* Fix: JavaScript SyntaxError in hasMoreSteps/else block — plugin was broken on load
+* Fix: conversation history increased from 10 to 30 turns — agent remembers longer sessions
+* New: persistent action log (cvd-actions.log) — agent always knows what it did previously
+* New: agent memory files (cvd-notes.md, cvd-plan.md) — agent saves site notes across sessions
+* Fix: AUTO-RETRY now carries previous plan context so agent doesn't forget its task
+* New: inject_css, design_page, elementor_set_page actions for full page design capability
+* New: floating ⚡ widget on frontend for quick access while browsing your site
+
 = 1.5.0 - 2026-07-28 =
 * New: VS Code-like Activity panel — shows every change the agent is making in real time
 * Fix: timeout eliminated — agent now streams directly from the AI (no more 90-second PHP proxy timeout)
