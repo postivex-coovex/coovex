@@ -4148,8 +4148,18 @@ What would you like to build or change?</div>
 
             // Show typing bubble + open activity panel
             var typingEl = addTyping();
-            actList.innerHTML = '';
-            actFooter.textContent = '';
+            var isAutoCmd = cvdAutoFix || cmd.indexOf('[STEP_DONE]') === 0;
+            if (!isAutoCmd) {
+                actList.innerHTML = '';
+                actFooter.textContent = '';
+            } else {
+                actFooter.textContent = '';
+                // Visual separator between steps
+                var stepSep = document.createElement('div');
+                stepSep.style.cssText = 'border-top:1px solid #334155;margin:6px 0 4px;padding:3px 0 0;color:#64748b;font-size:10px;letter-spacing:.03em;';
+                stepSep.textContent = cmd.indexOf('[STEP_DONE]') === 0 ? '▶ Next step' : '⟳ Auto-fix';
+                actList.appendChild(stepSep);
+            }
             actOpen();
             actStatus('Preparing...', true);
 
