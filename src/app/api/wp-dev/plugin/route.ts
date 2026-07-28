@@ -7,7 +7,7 @@ export const COOVEX_DEV_PHP = `<?php
 /**
  * Plugin Name: CooVex Dev
  * Plugin URI:  https://coovex.com/dev
- * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language â€” CooVex Dev delivers working code.
+ * Description: AI agent that writes, edits, and manages your WordPress site. Speak plain language \u2014 CooVex Dev delivers working code.
  * Version:     1.5.0
  * Author:      CooVex
  * Author URI:  https://coovex.com
@@ -31,7 +31,7 @@ define('CVD_COOKIE',          'cvd_session');
 define('CVD_TELEGRAM_API',    'https://api.telegram.org/bot');
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// AUTO-UPDATE â€” hooks into WordPress built-in plugin updater
+// AUTO-UPDATE \u2014 hooks into WordPress built-in plugin updater
 // When CooVex releases a new version, WP admin shows the standard update notice
 // and handles download + installation automatically.
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -107,7 +107,7 @@ add_action('upgrader_process_complete', function ($upgrader, $options) {
 }, 10, 2);
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// LICENSE VALIDATION â€” runs on activation, daily, and before every command
+// LICENSE VALIDATION \u2014 runs on activation, daily, and before every command
 // Security: license_token is derived server-side with a secret never sent here.
 //           Even reading this code reveals nothing useful for bypassing it.
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -170,7 +170,7 @@ function cvd_license_ok(): bool {
 
     if ($status === 'revoked' || $status === 'site_mismatch') return false;
     if ($expires > 0 && time() > $expires) {
-        // Token expired â€” try to refresh silently
+        // Token expired \u2014 try to refresh silently
         return cvd_license_validate();
     }
     return !empty(get_option('cvd_license_token', ''));
@@ -184,7 +184,7 @@ function cvd_license_ok(): bool {
  * server secret that never leaves the server.
  *
  * An attacker who modifies the response body (or forges one entirely) cannot
- * produce a valid signature without knowing today's license_token â€” which they
+ * produce a valid signature without knowing today's license_token \u2014 which they
  * cannot compute without the server's secret.
  */
 function cvd_verify_response(string $body, string $sig, string $nonce): bool {
@@ -317,7 +317,7 @@ add_action('init', function () {
 
 // â”€â”€ Admin Dashboard Widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 add_action('wp_dashboard_setup', function () {
-    wp_add_dashboard_widget('cvd_site_health', 'CooVex Dev â€” Site Health', function () {
+    wp_add_dashboard_widget('cvd_site_health', 'CooVex Dev \u2014 Site Health', function () {
         global $wpdb;
         $maintenance = get_option('cvd_maintenance_enabled') ? '<span style="color:#d63638">ON</span>' : '<span style="color:#00a32a">OFF</span>';
         $redirects   = count(get_option('cvd_redirects', []));
@@ -522,7 +522,7 @@ function cvd_resolve_path(string $rel_path): ?string {
             if ($realBase && $realDir && strpos($realDir, $realBase) === 0) {
                 return $target;
             }
-            // Directory doesn't exist yet â€” validate parent chain
+            // Directory doesn't exist yet \u2014 validate parent chain
             if (strpos(dirname($target), realpath($base) ?: $base) === 0) {
                 return $target;
             }
@@ -597,7 +597,7 @@ function cvd_apply_change(array $change): array {
             $download_url = $api->download_link;
         }
 
-        // Silent upgrader skin â€” suppresses all output
+        // Silent upgrader skin \u2014 suppresses all output
         if (!class_exists('CVD_Silent_Skin')) {
             class CVD_Silent_Skin extends WP_Upgrader_Skin {
                 public function feedback($string, ...$args) {}
@@ -664,7 +664,7 @@ function cvd_apply_change(array $change): array {
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // WP DIRECT ACTIONS
-// type: "wp_action" â€” create/update posts, upload images, SEO, menus, options
+// type: "wp_action" \u2014 create/update posts, upload images, SEO, menus, options
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function cvd_apply_wp_action(array $change): array {
@@ -755,7 +755,7 @@ function cvd_apply_wp_action(array $change): array {
                 if ($kw)    update_post_meta($post_id, '_aioseo_keywords', $kw);
                 $detected = 'aioseo';
             } else {
-                // No SEO plugin â€” write to native meta + generic keys
+                // No SEO plugin \u2014 write to native meta + generic keys
                 if ($title) update_post_meta($post_id, '_seo_title', $title);
                 if ($desc)  update_post_meta($post_id, '_seo_description', $desc);
                 if ($desc)  update_post_meta($post_id, '_meta_description', $desc);
@@ -1657,7 +1657,7 @@ function cvd_site_context(string $command = ''): array {
     ];
 
     // â”€â”€ Selective deep context (based on command keywords) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // Theme files â€” sent when working on theme/templates/design
+    // Theme files \u2014 sent when working on theme/templates/design
     $theme_keywords = ['theme', 'template', 'design', 'layout', 'header', 'footer', 'sidebar', 'style', 'css', 'page builder', 'elementor', 'divi'];
     foreach ($theme_keywords as $kw) {
         if (strpos($cmd, $kw) !== false) {
@@ -1666,7 +1666,7 @@ function cvd_site_context(string $command = ''): array {
         }
     }
 
-    // Recent content â€” sent when working on posts/pages/content
+    // Recent content \u2014 sent when working on posts/pages/content
     $content_keywords = ['post', 'page', 'content', 'article', 'blog', 'published', 'draft', 'category', 'tag'];
     foreach ($content_keywords as $kw) {
         if (strpos($cmd, $kw) !== false) {
@@ -1678,7 +1678,7 @@ function cvd_site_context(string $command = ''): array {
         }
     }
 
-    // DB schema â€” sent when working on database/tables
+    // DB schema \u2014 sent when working on database/tables
     $db_keywords = ['database', 'table', 'query', 'sql', 'column', 'schema', 'migration', 'row', 'data'];
     foreach ($db_keywords as $kw) {
         if (strpos($cmd, $kw) !== false) {
@@ -1687,7 +1687,7 @@ function cvd_site_context(string $command = ''): array {
         }
     }
 
-    // Menu items â€” sent when working on navigation
+    // Menu items \u2014 sent when working on navigation
     $menu_keywords = ['menu', 'navigation', 'nav', 'link'];
     foreach ($menu_keywords as $kw) {
         if (strpos($cmd, $kw) !== false) {
@@ -1851,7 +1851,7 @@ function cvd_gather_stats(array $plugin_names = []): array {
     if (in_array('Google Analytics by MonsterInsights', $plugin_names) ||
         in_array('Google Analytics Dashboard Plugin for WordPress by ExactMetrics', $plugin_names)) {
         $stats['monsterinsights'] = true;
-        // Data is in Google Analytics â€” not directly queryable from WP
+        // Data is in Google Analytics \u2014 not directly queryable from WP
     }
 
     // â”€â”€ Contact Form 7 submissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -1895,7 +1895,7 @@ add_action('wp_ajax_cvd_command', function () {
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
     if (!cvd_rate_check())                   wp_send_json_error('Rate limit reached. Wait a moment.', 429);
 
-    // â”€â”€ License check (client gate â€” real enforcement is server-side) â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // â”€â”€ License check (client gate \u2014 real enforcement is server-side) â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (!cvd_license_ok()) {
         $status = get_option('cvd_license_status', '');
         if ($status === 'revoked') {
@@ -1970,10 +1970,10 @@ add_action('wp_ajax_cvd_command', function () {
     // â”€â”€ Verify HMAC signature â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // The server signs the response with the daily license token.
     // If the nonce doesn't match what we sent, or the signature is wrong,
-    // the response was tampered with or forged â€” reject it entirely.
+    // the response was tampered with or forged \u2014 reject it entirely.
     if (!empty($sig)) {
         if ($returned_nonce !== $request_nonce) {
-            wp_send_json_error('Response nonce mismatch â€” possible replay attack detected.', 400);
+            wp_send_json_error('Response nonce mismatch \u2014 possible replay attack detected.', 400);
         }
         if (!cvd_verify_response($raw_body, $sig, $request_nonce)) {
             // Signature failed: try refreshing license token (in case it just rotated at midnight)
@@ -2204,7 +2204,7 @@ function cvd_render_floating_widget(): void {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div id="cvd-wctx">Loadingâ€¦</div>
+    <div id="cvd-wctx">Loading...</div>
     <div id="cvd-wm">
       <div class="cvd-msg cvd-a">Hi! I can see your WordPress site. Type a command or paste a screenshot (Ctrl+V).</div>
     </div>
@@ -2217,7 +2217,7 @@ function cvd_render_floating_widget(): void {
       </button>
     </div>
     <div id="cvd-wi">
-      <textarea id="cvd-wtx" rows="1" placeholder="Ask anythingâ€¦ paste screenshot (Ctrl+V) or attach file"></textarea>
+      <textarea id="cvd-wtx" rows="1" placeholder="Ask anything... paste screenshot (Ctrl+V) or attach file"></textarea>
       <label id="cvd-wil" title="Attach file or screenshot">
         <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
         <input type="file" id="cvd-wf" accept="image/*,.csv,.txt,.json,.pdf,.doc,.docx,.xls,.xlsx,.md,.log,.tsv" style="display:none">
@@ -2253,7 +2253,7 @@ function cvd_render_floating_widget(): void {
   var fc=$('cvd-wfc'), fi=$('cvd-wfi'), fn=$('cvd-wfn'), fs=$('cvd-wfs'), fp=$('cvd-wpl');
   var file=$('cvd-wf'), ctx=$('cvd-wctx');
 
-  var screenCtx=(isAdmin?'WP Admin â€” ':'')+document.title.replace(' â€¹ '+document.title.split(' â€¹ ').pop(),'');
+  var screenCtx=(isAdmin?'WP Admin \u2014 ':'')+document.title.replace(' \u2039 '+document.title.split(' \u2039 ').pop(),'');
   ctx.textContent=screenCtx; ctx.title=screenCtx;
 
   function hasAttachment(){ return !!(screenshot||fileData); }
@@ -2396,7 +2396,7 @@ function cvd_render_floating_widget(): void {
   function addMsg(html,cls,thumb){
     var d=document.createElement('div');d.className='cvd-msg '+cls;
     if(thumb){var im=document.createElement('img');im.className='cvd-thumb';im.src=thumb;d.appendChild(im);}
-    if(cls==='cvd-a'&&html==='â€¦'){
+    if(cls==='cvd-a'&&html==='\u2026'){
       var t=document.createElement('div');t.className='cvd-typing';
       t.innerHTML='<span></span><span></span><span></span>';d.appendChild(t);
     }else{d.appendChild(document.createTextNode(html));}
@@ -2413,7 +2413,7 @@ function cvd_render_floating_widget(): void {
     var shot=screenshot,fd=fileData;
     clearAttachment();
     snd.disabled=true;
-    var typing=addMsg('â€¦','cvd-a');
+    var typing=addMsg('\u2026','cvd-a');
 
     var defaultCmd=shot
       ?'Analyze this screenshot and tell me what you see. Suggest what I can do or ask me for a specific task.'
@@ -2436,13 +2436,13 @@ function cvd_render_floating_widget(): void {
         if(res.success){
           addMsg((res.data&&res.data.message)||'Done.','cvd-a');
           var app=res.data&&res.data.applied?res.data.applied.filter(function(c){return c.ok;}).length:0;
-          if(app)addMsg('âœ“ '+app+' change'+(app>1?'s':'')+' applied.','cvd-a');
+          if(app)addMsg('\u2714 '+app+' change'+(app>1?'s':'')+' applied.','cvd-a');
         }else{addMsg(res.data||'Something went wrong.','cvd-a cvd-err');}
         snd.disabled=!txt.value.trim();
       })
       .catch(function(){
         msgs.removeChild(typing);
-        addMsg('Network error â€” please try again.','cvd-a cvd-err');
+        addMsg('Network error \u2014 please try again.','cvd-a cvd-err');
         snd.disabled=!txt.value.trim();
       });
   }
@@ -2467,7 +2467,7 @@ add_action('wp_footer', function () {
     cvd_render_floating_widget();
 });
 
-// â”€â”€ AJAX: floating widget command (no CVD session required â€” WP admin cap is enough) â”€â”€
+// â”€â”€ AJAX: floating widget command (no CVD session required \u2014 WP admin cap is enough) â”€â”€
 add_action('wp_ajax_cvd_float_command', function () {
     check_ajax_referer('cvd_nonce', 'nonce');
     if (!current_user_can('manage_options')) wp_send_json_error('Forbidden', 403);
@@ -2835,13 +2835,13 @@ function cvd_telegram_run_command(string $command, $chat_id, int $reply_to = 0):
     if (!empty($applied)) {
         $msg .= "\n\nâœ… {$ok} change(s) applied.";
         if ($fail) $msg .= " âš ï¸ {$fail} failed.";
-        if ($snap_id) $msg .= "\n_Commit \`{$snap_id}\` â€” rollback in WP admin._";
+        if ($snap_id) $msg .= "\n_Commit \`{$snap_id}\` \u2014 rollback in WP admin._";
     }
     if ($payload['credits_used'] ?? null) $msg .= "\n_Credits used: " . $payload['credits_used'] . "_";
 
     cvd_audit_log(['command' => $command, 'source' => 'telegram', 'chat_id' => $chat_id, 'time' => time()]);
 
-    if (mb_strlen($msg) > 4000) $msg = mb_substr($msg, 0, 4000) . 'â€¦';
+    if (mb_strlen($msg) > 4000) $msg = mb_substr($msg, 0, 4000) . '\u2026';
     cvd_telegram_send($token, $chat_id, $msg, $reply_to ?: null);
 }
 
@@ -2885,7 +2885,7 @@ function cvd_telegram_webhook_handler(WP_REST_Request $request): WP_REST_Respons
     }
 
     // Acknowledge immediately, process in background
-    cvd_telegram_send($token, $chat_id, 'âš¡ *Working on it...*', $msg_id);
+    cvd_telegram_send($token, $chat_id, '\u26A1 *Working on it...*', $msg_id);
     cvd_telegram_run_command($text, $chat_id, $msg_id);
 
     return new WP_REST_Response(['ok' => true]);
@@ -2960,7 +2960,7 @@ function cvd_page_settings() {
     <div class="wrap">
         <h1 style="display:flex;align-items:center;gap:8px;">
             <span class="dashicons dashicons-editor-code" style="font-size:24px;color:#2563eb;"></span>
-            CooVex Dev â€” Settings
+            CooVex Dev \u2014 Settings
         </h1>
 
         <?php echo $pw_notice; ?>
@@ -3081,7 +3081,7 @@ function cvd_page_settings() {
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <?php if ($tg_token): ?>
             <button id="cvd-tg-register" class="button button-primary">
-                <?php echo $tg_registered ? 'â†» Re-register Webhook' : 'âš¡ Register Telegram Webhook'; ?>
+                <?php echo $tg_registered ? 'â†» Re-register Webhook' : '\u26A1 Register Telegram Webhook'; ?>
             </button>
             <?php if ($tg_registered): ?>
             <button id="cvd-tg-unregister" class="button button-secondary">Remove Webhook</button>
@@ -3096,7 +3096,7 @@ function cvd_page_settings() {
 
         <?php if ($tg_registered): ?>
         <div style="margin-top:16px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;color:#166534;">
-            âœ“ Telegram webhook active.
+            \u2714 Telegram webhook active.
             Webhook URL: <code><?php echo esc_html(rest_url('coovex-dev/v1/telegram')); ?></code>
         </div>
         <?php endif; ?>
@@ -3113,11 +3113,11 @@ function cvd_page_settings() {
                     body:'action=cvd_telegram_register&nonce=' + encodeURIComponent(nonce)})
                 .then(r => r.json()).then(function(d) {
                     if (d.success) {
-                        status.textContent = 'âœ“ Webhook registered! Send /start to your bot.';
+                        status.textContent = '\u2714 Webhook registered! Send /start to your bot.';
                         status.style.color = 'green';
                         location.reload();
                     } else {
-                        status.textContent = 'âœ— ' + (d.data || 'Error');
+                        status.textContent = '\u2717 ' + (d.data || 'Error');
                         status.style.color = 'red';
                         regBtn.disabled = false;
                     }
@@ -3146,7 +3146,7 @@ function cvd_page_history() {
     <div class="wrap">
         <h1 style="display:flex;align-items:center;gap:8px;">
             <span class="dashicons dashicons-backup" style="font-size:24px;color:#2563eb;"></span>
-            CooVex Dev â€” Commit History
+            CooVex Dev \u2014 Commit History
         </h1>
         <p style="color:#64748b;">Every change made by CooVex Dev is snapshotted before applying. Roll back any commit instantly.</p>
         <?php if (empty($snaps)): ?>
@@ -3167,13 +3167,13 @@ function cvd_page_history() {
                 <tr>
                     <td><code><?php echo esc_html($s['id']); ?></code></td>
                     <td><?php echo esc_html(wp_date('Y-m-d H:i:s', $s['time'])); ?></td>
-                    <td><?php echo esc_html(wp_trim_words($s['label'], 12, 'â€¦')); ?></td>
+                    <td><?php echo esc_html(wp_trim_words($s['label'], 12, '\u2026')); ?></td>
                     <td><?php echo count($s['files']); ?> file(s)</td>
                     <td>
                         <button class="button button-secondary cvd-rollback-btn"
                             data-snap="<?php echo esc_attr($s['id']); ?>"
                             data-label="<?php echo esc_attr($s['label']); ?>">
-                            â†© Roll back
+                            \u21A9 Roll back
                         </button>
                     </td>
                 </tr>
@@ -3193,7 +3193,7 @@ function cvd_page_history() {
                 if (!confirm('Roll back to commit ' + snap + '?\n\nThis will restore all files from before:\n"' + label + '"')) return;
 
                 btn.disabled = true;
-                btn.textContent = 'Rolling backâ€¦';
+                btn.textContent = 'Rolling back...';
 
                 fetch(ajaxurl, {
                     method: 'POST',
@@ -3203,11 +3203,11 @@ function cvd_page_history() {
                 .then(r => r.json())
                 .then(function(d) {
                     if (d.success) {
-                        btn.textContent = 'âœ“ Rolled back';
+                        btn.textContent = '\u2714 Rolled back';
                         btn.style.color = 'green';
                         alert('Restored ' + (d.data.restored || []).length + ' file(s) from commit ' + snap);
                     } else {
-                        btn.textContent = 'â†© Roll back';
+                        btn.textContent = '\u21A9 Roll back';
                         btn.disabled = false;
                         alert('Rollback failed: ' + (d.data || 'Unknown error'));
                     }
@@ -3737,7 +3737,7 @@ function cvd_page_agent() {
                 <span class="cvd-logo">CooVex Dev</span>
                 <span class="cvd-version">v<?php echo CVD_VERSION; ?></span>
             </div>
-            <div id="cvd-credits-bar">Credits remaining: <span id="cvd-credits-val">â€”</span></div>
+            <div id="cvd-credits-bar">Credits remaining: <span id="cvd-credits-val">&mdash;</span></div>
             <div id="cvd-snap-list">
                 <?php
                 $snaps = get_option('cvd_snapshots', []);
@@ -3745,7 +3745,7 @@ function cvd_page_agent() {
                 ?>
                 <div class="snap-item" data-snap="<?php echo esc_attr($s['id']); ?>">
                     <div class="snap-id"># <?php echo esc_html($s['id']); ?></div>
-                    <div class="snap-label"><?php echo esc_html(wp_trim_words($s['label'], 8, 'â€¦')); ?></div>
+                    <div class="snap-label"><?php echo esc_html(wp_trim_words($s['label'], 8, '\u2026')); ?></div>
                     <div class="snap-time"><?php echo esc_html(human_time_diff($s['time'])); ?> ago</div>
                 </div>
                 <?php endforeach; ?>
@@ -3767,7 +3767,7 @@ function cvd_page_agent() {
 
             <div id="cvd-messages">
                 <div class="cvd-msg agent">
-                    <div class="avatar">âš¡</div>
+                    <div class="avatar">\u26A1</div>
                     <div class="bubble">Welcome to CooVex Dev. I can write code, install plugins, edit themes, and modify your database.
 
 What would you like to build or change?</div>
@@ -3775,7 +3775,7 @@ What would you like to build or change?</div>
             </div>
 
             <div id="cvd-input-area">
-                <textarea id="cvd-textarea" rows="1" placeholder="Tell me what to build or changeâ€¦ (Ctrl+Enter to send)"></textarea>
+                <textarea id="cvd-textarea" rows="1" placeholder="Tell me what to build or change... (Ctrl+Enter to send)"></textarea>
                 <button id="cvd-send-btn">Send</button>
             </div>
             <div id="cvd-input-hint">Ctrl+Enter to send &middot; credits deducted per use</div>
@@ -3817,7 +3817,7 @@ What would you like to build or change?</div>
             var pw = authInput.value;
             if (!pw) return;
             authBtn.disabled = true;
-            authBtn.textContent = 'Unlockingâ€¦';
+            authBtn.textContent = 'Unlocking...';
 
             ajax('cvd_auth', {password: pw})
             .then(function(r) {
@@ -4127,7 +4127,7 @@ What would you like to build or change?</div>
 
             var avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.textContent = isUser ? wp_username_initial : 'âš¡';
+            avatar.textContent = isUser ? wp_username_initial : '\u26A1';
 
             var bubble = document.createElement('div');
             bubble.className = 'bubble';
@@ -4167,11 +4167,11 @@ What would you like to build or change?</div>
 
                     var filepath = document.createElement('span');
                     filepath.className = 'filepath';
-                    filepath.textContent = ok ? label : ('âœ— ' + label + ' â€” ' + (ch.error || 'failed'));
+                    filepath.textContent = ok ? label : ('\u2717 ' + label + ' \u2014 ' + (ch.error || 'failed'));
 
                     var toggleIcon = document.createElement('span');
                     toggleIcon.className = 'toggle-icon';
-                    toggleIcon.textContent = 'â–¼';
+                    toggleIcon.textContent = '\u25BC';
 
                     header.appendChild(badge);
                     header.appendChild(filepath);
@@ -4187,13 +4187,13 @@ What would you like to build or change?</div>
                     } else if (type === 'db' && ch.rows_affected != null) {
                         var p = document.createElement('p');
                         p.style.cssText = 'margin:0;font-size:12px;color:#86efac;';
-                        p.textContent = 'Query OK â€” ' + ch.rows_affected + ' row(s) affected.';
+                        p.textContent = 'Query OK \u2014 ' + ch.rows_affected + ' row(s) affected.';
                         body.appendChild(p);
                     }
 
                     header.addEventListener('click', function() {
                         item.classList.toggle('open');
-                        toggleIcon.textContent = item.classList.contains('open') ? 'â–²' : 'â–¼';
+                        toggleIcon.textContent = item.classList.contains('open') ? '\u25B2' : '\u25BC';
                     });
 
                     item.appendChild(header);
@@ -4204,13 +4204,13 @@ What would you like to build or change?</div>
                 if (snap_id) {
                     var rbBtn = document.createElement('button');
                     rbBtn.className = 'cvd-rollback-inline';
-                    rbBtn.innerHTML = 'â†© Roll back this change';
+                    rbBtn.innerHTML = '\u21A9 Roll back this change';
                     rbBtn.addEventListener('click', function() {
                         if (!confirm('Roll back to before this change?')) return;
                         rbBtn.disabled = true;
                         ajax('cvd_rollback', {snap_id: snap_id}).then(function(r) {
                             if (r.success) {
-                                rbBtn.textContent = 'âœ“ Rolled back';
+                                rbBtn.textContent = '\u2714 Rolled back';
                                 rbBtn.style.color = '#86efac';
                             } else {
                                 alert('Rollback failed: ' + r.data);
@@ -4233,7 +4233,7 @@ What would you like to build or change?</div>
             wrap.className = 'cvd-msg agent';
             var avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.textContent = 'âš¡';
+            avatar.textContent = '\u26A1';
             var bubble = document.createElement('div');
             bubble.className = 'bubble';
             bubble.innerHTML = '<div class="cvd-typing"><span></span><span></span><span></span></div>';
@@ -4263,7 +4263,7 @@ What would you like to build or change?</div>
             if (!confirm('Roll back to commit ' + item.dataset.snap + '?')) return;
             ajax('cvd_rollback', {snap_id: item.dataset.snap}).then(function(r) {
                 if (r.success) {
-                    addMessage('agent', 'âœ“ Rolled back ' + (r.data.restored || []).length + ' file(s) from commit ' + item.dataset.snap + '.');
+                    addMessage('agent', '\u2714 Rolled back ' + (r.data.restored || []).length + ' file(s) from commit ' + item.dataset.snap + '.');
                 } else {
                     alert('Rollback failed: ' + r.data);
                 }
@@ -4335,7 +4335,7 @@ register_deactivation_hook(__FILE__, function () {
 });
 
 // â”€â”€ Uninstall cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Must be a named function â€” register_uninstall_hook() serialises the callback
+// Must be a named function \u2014 register_uninstall_hook() serialises the callback
 // to the DB; PHP cannot serialise anonymous functions (Closure).
 function cvd_uninstall_cleanup(): void {
     delete_option('cvd_api_key');
@@ -4360,7 +4360,7 @@ register_uninstall_hook(__FILE__, 'cvd_uninstall_cleanup');
 `
 
 export async function GET(_req: Request) {
-  // Require authentication â€” the plugin is only available to CooVex users
+  // Require authentication \u2014 the plugin is only available to CooVex users
   const { createClient } = await import('@/lib/supabase/server')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
