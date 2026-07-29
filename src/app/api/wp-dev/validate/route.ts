@@ -57,6 +57,13 @@ function getTomorrowUTC(): Date {
 
 export async function POST(req: NextRequest) {
   try {
+    // If request comes from our VPS agent, verify internal secret
+    const internalSecret = process.env.COOVEX_INTERNAL_SECRET
+    const sentSecret     = req.headers.get('x-internal-secret')
+    if (sentSecret && internalSecret && sentSecret !== internalSecret) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await req.json()
     const { api_key, site_url, plugin_version } = body as {
       api_key?: string
