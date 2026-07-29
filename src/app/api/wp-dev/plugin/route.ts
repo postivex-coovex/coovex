@@ -21,6 +21,7 @@ if (!defined('ABSPATH')) exit;
 // -- Constants -----------------------------------------------------------------
 define('CVD_VERSION',         '1.7.0');
 define('CVD_API_URL',         'https://app.coovex.com/api/wp-dev/command');
+define('CVD_VPS_URL',         get_option('cvd_vps_url', 'https://app.coovex.com/api/wp-dev/command')); // set to VPS after deploy
 define('CVD_VALIDATE_URL',    'https://app.coovex.com/api/wp-dev/validate');
 define('CVD_UPDATE_URL',      'https://app.coovex.com/api/wp-dev/update');
 define('CVD_DOWNLOAD_URL',    'https://app.coovex.com/api/wp-dev/download');
@@ -3069,6 +3070,73 @@ add_action('wp_footer', function () {
     if (!cvd_license_ok()) return;
     cvd_render_floating_widget();
 });
+
+// -- AJAX: VPS executor \u2014 called by CooVex VPS agent to run actions on this site --
+// Auth: HMAC-SHA256(api_key + timestamp, api_key) \u2014 no WP session needed (server-to-server)
+add_action('wp_ajax_nopriv_cvd_vps_execute', 'cvd_handle_vps_execute');
+add_action('wp_ajax_cvd_vps_execute',        'cvd_handle_vps_execute');
+
+function cvd_handle_vps_execute(): void {
+    $raw  = file_get_contents('php://input');
+    $body = json_decode($raw, true);
+    if (!is_array($body)) { wp_send_json_error('Invalid JSON', 400); return; }
+
+    $api_key   = sanitize_text_field($body['api_key']   ?? '');
+    $timestamp = (int)($body['timestamp'] ?? 0);
+    $sig       = sanitize_text_field($body['sig']       ?? '');
+    $action    = sanitize_text_field($body['wp_action'] ?? '');
+    $data      = (array)($body['data'] ?? []);
+
+    $stored_key = get_option('cvd_api_key', '');
+    if (empty($stored_key) || $api_key !== $stored_key) {
+        wp_send_json_error('Invalid API key', 403); return;
+    }
+
+    // Replay prevention: reject requests older than 5 minutes
+    if (abs(time() - $timestamp) > 300) {
+        wp_send_json_error('Request expired', 401); return;
+    }
+
+    // HMAC verification: VPS signs with api_key as secret
+    $expected = hash_hmac('sha256', $api_key . ':' . $timestamp . ':' . $action, $stored_key);
+    if (!hash_equals($expected, $sig)) {
+        wp_send_json_error('Invalid signature', 403); return;
+    }
+
+    // Execute the requested action using existing cvd_apply_change infrastructure
+    if ($action === 'get_site_context') {
+        wp_send_json_success(cvd_site_context(''));
+        return;
+    }
+
+    if ($action === 'upload_image_base64') {
+        $b64      = $data['base64']   ?? '';
+        $filename = sanitize_file_name($data['filename'] ?? 'ai-image.png');
+        $mime     = $data['mime']     ?? 'image/png';
+        $bits     = base64_decode($b64);
+        if (!$bits) { wp_send_json_error('Invalid base64', 400); return; }
+        $upload = wp_upload_bits($filename, null, $bits);
+        if ($upload['error']) { wp_send_json_error($upload['error'], 500); return; }
+        $att_id = wp_insert_attachment([
+            'post_mime_type' => $mime,
+            'post_title'     => sanitize_file_name($filename),
+            'post_status'    => 'inherit',
+        ], $upload['file']);
+        require_once ABSPATH . 'wp-admin/includes/image.php';
+        wp_update_attachment_metadata($att_id, wp_generate_attachment_metadata($att_id, $upload['file']));
+        wp_send_json_success(['attachment_id' => $att_id, 'url' => $upload['url']]);
+        return;
+    }
+
+    // Route to cvd_apply_change for all standard actions
+    $change = ['type' => 'wp_action', 'action' => $action, 'data' => $data, 'description' => "VPS: $action"];
+    $result = cvd_apply_change($change);
+    if ($result['success']) {
+        wp_send_json_success($result['output'] ?? true);
+    } else {
+        wp_send_json_error($result['error'] ?? 'Action failed', 500);
+    }
+}
 
 // -- AJAX: floating widget command (no CVD session required \u2014 WP admin cap is enough) --
 add_action('wp_ajax_cvd_float_command', function () {
