@@ -22,7 +22,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 
   const { data, error } = await supabase
     .from('website_checks')
-    .select('id,checked_at,is_up,http_status,load_time_ms,ssl_days_left,domain_days_left,security_score,seo_score,error_message')
+    .select('id,checked_at,is_up,http_status,load_time_ms,ssl_valid,ssl_expiry_date,ssl_days_left,domain_expiry_date,domain_days_left,has_https,has_robots_txt,has_sitemap,security_score,security_headers,seo_score,seo_data,error_message')
     .eq('website_id', id)
     .order('checked_at', { ascending: false })
     .limit(limit)
