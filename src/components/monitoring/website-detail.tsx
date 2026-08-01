@@ -24,7 +24,7 @@ function DaysLeftBadge({ days, label }: { days: number | null; label: string }) 
       <span className="text-[10px] text-slate-300 dark:text-slate-600">Run a check to fetch</span>
     </div>
   )
-  const color = days <= 7 ? 'text-red-600 dark:text-red-400' : days <= 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
+  const color = days <= 10 ? 'text-red-600 dark:text-red-400' : days <= 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
   return (
     <div className="flex flex-col gap-0.5">
       <span className="text-xs text-slate-400">{label}</span>
@@ -359,7 +359,7 @@ export function WebsiteDetail({ site: initialSite, initialChecks, initialNotific
               </div>
               <div>
                 <span className="text-xs text-slate-400">Days Left</span>
-                <div className={`font-bold mt-0.5 ${(latestCheck.ssl_days_left ?? 999) <= 7 ? 'text-red-500' : (latestCheck.ssl_days_left ?? 999) <= 30 ? 'text-yellow-500' : 'text-green-500'}`}>
+                <div className={`font-bold mt-0.5 ${(latestCheck.ssl_days_left ?? 999) <= 10 ? 'text-red-500' : (latestCheck.ssl_days_left ?? 999) <= 30 ? 'text-yellow-500' : 'text-green-500'}`}>
                   {latestCheck.ssl_days_left ?? '—'}
                 </div>
               </div>

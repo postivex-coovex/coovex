@@ -17,25 +17,33 @@ function fmtUptime(u: number | null) {
   return `${u.toFixed(1)}%`
 }
 
-// Priority: 0 = critical (down or expiry ≤30d), 1 = warning (expiry ≤60d), 2 = ok
-function sitePriority(site: MonitoredWebsite): number {
-  if (site.status === 'down') return 0
-  const minDays = Math.min(site.ssl_days_left ?? 999, site.domain_days_left ?? 999)
-  if (minDays <= 30) return 0
-  if (minDays <= 60) return 1
-  return 2
+// SSL: red ≤10d, yellow ≤30d  |  Domain: red ≤30d, yellow ≤60d
+function sslColor(days: number | null): string {
+  if (days === null) return 'text-slate-400 dark:text-slate-500'
+  if (days <= 10) return 'text-red-600 dark:text-red-400 font-semibold'
+  if (days <= 30) return 'text-yellow-600 dark:text-yellow-400 font-medium'
+  return 'text-slate-500 dark:text-slate-400'
 }
 
-function daysColor(days: number | null): string {
+function domainColor(days: number | null): string {
   if (days === null) return 'text-slate-400 dark:text-slate-500'
   if (days <= 30) return 'text-red-600 dark:text-red-400 font-semibold'
   if (days <= 60) return 'text-yellow-600 dark:text-yellow-400 font-medium'
   return 'text-slate-500 dark:text-slate-400'
 }
 
-function DaysChip({ days, label }: { days: number | null; label: string }) {
+// Priority: 0 = critical, 1 = warning, 2 = ok
+function sitePriority(site: MonitoredWebsite): number {
+  if (site.status === 'down') return 0
+  if ((site.ssl_days_left ?? 999) <= 10 || (site.domain_days_left ?? 999) <= 30) return 0
+  if ((site.ssl_days_left ?? 999) <= 30 || (site.domain_days_left ?? 999) <= 60) return 1
+  return 2
+}
+
+function DaysChip({ days, label, type }: { days: number | null; label: string; type: 'ssl' | 'domain' }) {
   if (days === null) return <span className="text-slate-300 dark:text-slate-600 text-xs">{label}: N/A</span>
-  return <span className={`text-xs ${daysColor(days)}`}>{label}: {days}d</span>
+  const color = type === 'ssl' ? sslColor(days) : domainColor(days)
+  return <span className={`text-xs ${color}`}>{label}: {days}d</span>
 }
 
 function rowAccent(site: MonitoredWebsite): string {
@@ -81,8 +89,8 @@ function WebsiteRow({ site }: { site: MonitoredWebsite }) {
 
       {/* SSL */}
       <div className="hidden xl:flex flex-col items-end w-20">
-        <DaysChip days={site.ssl_days_left} label="SSL" />
-        <DaysChip days={site.domain_days_left} label="Domain" />
+        <DaysChip days={site.ssl_days_left} label="SSL" type="ssl" />
+        <DaysChip days={site.domain_days_left} label="Domain" type="domain" />
       </div>
 
       {/* Last check */}
