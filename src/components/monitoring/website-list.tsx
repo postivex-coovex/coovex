@@ -17,17 +17,37 @@ function fmtUptime(u: number | null) {
   return `${u.toFixed(1)}%`
 }
 
+// Priority: 0 = critical (down or expiry ≤30d), 1 = warning (expiry ≤60d), 2 = ok
+function sitePriority(site: MonitoredWebsite): number {
+  if (site.status === 'down') return 0
+  const minDays = Math.min(site.ssl_days_left ?? 999, site.domain_days_left ?? 999)
+  if (minDays <= 30) return 0
+  if (minDays <= 60) return 1
+  return 2
+}
+
+function daysColor(days: number | null): string {
+  if (days === null) return 'text-slate-400 dark:text-slate-500'
+  if (days <= 30) return 'text-red-600 dark:text-red-400 font-semibold'
+  if (days <= 60) return 'text-yellow-600 dark:text-yellow-400 font-medium'
+  return 'text-slate-500 dark:text-slate-400'
+}
+
 function DaysChip({ days, label }: { days: number | null; label: string }) {
   if (days === null) return <span className="text-slate-300 dark:text-slate-600 text-xs">{label}: N/A</span>
-  const color = days <= 7 ? 'text-red-600 dark:text-red-400' : days <= 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-slate-500 dark:text-slate-400'
-  return <span className={`text-xs ${color}`}>{label}: {days}d</span>
+  return <span className={`text-xs ${daysColor(days)}`}>{label}: {days}d</span>
+}
+
+function rowAccent(site: MonitoredWebsite): string {
+  const p = sitePriority(site)
+  if (p === 0) return 'border-l-2 border-l-red-400 bg-red-50/30 dark:bg-red-950/10'
+  if (p === 1) return 'border-l-2 border-l-yellow-400 bg-yellow-50/20 dark:bg-yellow-950/10'
+  return 'border-l-2 border-l-transparent'
 }
 
 function WebsiteRow({ site }: { site: MonitoredWebsite }) {
-  const unreadCount = 0 // will be fetched separately if needed
-
   return (
-    <Link href={`/monitoring/${site.id}`} className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 group">
+    <Link href={`/monitoring/${site.id}`} className={`flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 group ${rowAccent(site)}`}>
       {/* Status dot */}
       <StatusDot status={site.status} />
 
@@ -78,8 +98,12 @@ function WebsiteRow({ site }: { site: MonitoredWebsite }) {
   )
 }
 
+function sortSites(list: MonitoredWebsite[]): MonitoredWebsite[] {
+  return [...list].sort((a, b) => sitePriority(a) - sitePriority(b))
+}
+
 export function WebsiteList({ initial }: { initial: MonitoredWebsite[] }) {
-  const [sites, setSites] = useState(initial)
+  const [sites, setSites] = useState(() => sortSites(initial))
   const [refreshing, setRefreshing] = useState(false)
   const [lastRefresh, setLastRefresh] = useState(new Date())
 
@@ -88,7 +112,7 @@ export function WebsiteList({ initial }: { initial: MonitoredWebsite[] }) {
     try {
       const res = await fetch('/api/monitoring/websites')
       if (res.ok) {
-        setSites(await res.json())
+        setSites(sortSites(await res.json()))
         setLastRefresh(new Date())
       }
     } finally {
@@ -102,8 +126,8 @@ export function WebsiteList({ initial }: { initial: MonitoredWebsite[] }) {
     return () => clearInterval(id)
   }, [refresh])
 
-  const upCount   = sites.filter(s => s.status === 'up').length
-  const downCount = sites.filter(s => s.status === 'down').length
+  const upCount    = sites.filter(s => s.status === 'up').length
+  const downCount  = sites.filter(s => s.status === 'down').length
   const checkCount = sites.filter(s => s.status === 'checking').length
 
   return (
@@ -139,7 +163,7 @@ export function WebsiteList({ initial }: { initial: MonitoredWebsite[] }) {
             { icon: Globe,         label: 'Total Sites',    value: sites.length,                                       color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-blue-50 dark:bg-blue-950/40' },
             { icon: TrendingUp,    label: 'Avg Uptime 7d',  value: `${(sites.reduce((a, s) => a + (s.uptime_7d ?? 0), 0) / Math.max(sites.length, 1)).toFixed(1)}%`, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-950/40' },
             { icon: Clock,         label: 'Avg Response',   value: fmtMs(Math.round(sites.reduce((a, s) => a + (s.avg_load_time_ms ?? 0), 0) / Math.max(sites.filter(s => s.avg_load_time_ms).length, 1))), color: 'text-slate-600 dark:text-slate-300', bg: 'bg-slate-100 dark:bg-slate-800' },
-            { icon: AlertTriangle, label: 'Issues',         value: downCount + sites.filter(s => (s.ssl_days_left ?? 999) <= 30 || (s.domain_days_left ?? 999) <= 30).length, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/40' },
+            { icon: AlertTriangle, label: 'Issues',         value: sites.filter(s => sitePriority(s) < 2).length, color: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-50 dark:bg-yellow-950/40' },
           ].map(({ icon: Icon, label, value, color, bg }) => (
             <div key={label} className={`rounded-xl p-4 ${bg}`}>
               <Icon className={`w-4 h-4 ${color} mb-2`} />
