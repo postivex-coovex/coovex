@@ -1,4 +1,4 @@
-import https from 'https'
+import tls from 'tls'
 import type { CheckResult } from './types'
 
 function normalizeUrl(url: string): string {
@@ -29,33 +29,36 @@ async function checkSSL(urlStr: string): Promise<CheckResult['ssl']> {
       return { valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'Not HTTPS' }
     }
     return new Promise((resolve) => {
-      const req = https.request(
-        { host: url.hostname, port: 443, method: 'HEAD', rejectUnauthorized: false, timeout: 10000, servername: url.hostname },
-        (res) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const sock = res.socket as any
-          const cert = sock.getPeerCertificate?.()
-          res.destroy()
+      // Use tls.connect directly so getPeerCertificate() is called after the
+      // TLS handshake fully completes — https.request's response callback can
+      // fire before the cert is readable via res.socket
+      const sock = tls.connect(
+        { host: url.hostname, port: 443, servername: url.hostname, rejectUnauthorized: false },
+        () => {
+          const cert = sock.getPeerCertificate()
+          sock.destroy()
           if (!cert?.valid_to) {
             return resolve({ valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'No cert' })
           }
           const expiryDate = new Date(cert.valid_to)
           const daysLeft = Math.floor((expiryDate.getTime() - Date.now()) / 86400000)
           resolve({
-            valid: sock.authorized === true && daysLeft > 0,
+            valid: daysLeft > 0,
             expiryDate,
             daysLeft,
-            issuer: cert.issuer?.CN || cert.issuer?.O || null,
-            error: sock.authorized ? null : (sock.authorizationError ?? 'Invalid cert'),
+            issuer: (Array.isArray(cert.issuer?.CN) ? cert.issuer.CN[0] : cert.issuer?.CN) || (Array.isArray(cert.issuer?.O) ? cert.issuer.O[0] : cert.issuer?.O) || null,
+            error: null,
           })
         }
       )
-      req.on('error', (e) => resolve({ valid: false, expiryDate: null, daysLeft: null, issuer: null, error: e.message }))
-      req.on('timeout', () => {
-        req.destroy()
+      sock.setTimeout(10000, () => {
+        sock.destroy()
         resolve({ valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'Timeout' })
       })
-      req.end()
+      sock.on('error', (e) => {
+        sock.destroy()
+        resolve({ valid: false, expiryDate: null, daysLeft: null, issuer: null, error: e.message })
+      })
     })
   } catch (e: unknown) {
     return { valid: false, expiryDate: null, daysLeft: null, issuer: null, error: (e as Error).message }
