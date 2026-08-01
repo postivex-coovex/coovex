@@ -16,6 +16,14 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = createServiceClient()
+
+  // Verify service client is working
+  const { error: pingError } = await supabase.from('monitored_websites').select('id').limit(1)
+  if (pingError) {
+    console.error('[monitoring-cron] Supabase service client error:', pingError.message)
+    return NextResponse.json({ error: 'DB error: ' + pingError.message }, { status: 500 })
+  }
+
   const now = new Date().toISOString()
 
   const { data: sites } = await supabase
@@ -23,7 +31,8 @@ export async function GET(req: NextRequest) {
     .select('*')
     .eq('is_active', true)
     .eq('retry_count', 0)
-    .lte('next_check_at', now)
+    // Include sites never checked (next_check_at IS NULL) AND sites due for check
+    .or(`next_check_at.is.null,next_check_at.lte.${now}`)
     .limit(100)
 
   if (!sites?.length) return NextResponse.json({ ok: true, processed: 0 })
