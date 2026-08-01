@@ -104,6 +104,7 @@ const RDAP_SERVERS: Record<string, string> = {
 async function tryRdap(url: string, domain: string): Promise<CheckResult['domain']> {
   const res = await fetch(`${url}domain/${domain}`, {
     signal: AbortSignal.timeout(7000),
+    cache: 'no-store',
     headers: { Accept: 'application/rdap+json, application/json' },
   })
   if (!res.ok) return null as unknown as CheckResult['domain']
@@ -184,6 +185,7 @@ async function httpGet(url: string, timeoutMs = 20000) {
     const res = await fetch(url, {
       signal: AbortSignal.timeout(timeoutMs),
       redirect: 'follow',
+      cache: 'no-store',   // prevent Next.js App Router from caching monitoring checks
       headers: { 'User-Agent': 'CooVex-Monitor/1.0 (+https://coovex.com)' },
     })
     const body = await res.text()
