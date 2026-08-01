@@ -35,6 +35,14 @@
     {
       "path": "/api/cron/social-posts",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/monitoring",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/monitoring-retry",
+      "schedule": "* * * * *"
     }
   ]
 }
