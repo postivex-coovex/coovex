@@ -39,7 +39,7 @@ export function ResponseTimeChart({ checks, threshold }: Props) {
         />
         <Tooltip
           contentStyle={{ background: 'var(--background)', border: '1px solid rgba(148,163,184,0.3)', borderRadius: 8, fontSize: 12 }}
-          formatter={(v: number) => [`${v}ms`, 'Response time']}
+          formatter={(v) => [v != null ? `${v}ms` : '—', 'Response time']}
         />
         {threshold && (
           <ReferenceLine y={threshold} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: 'threshold', fontSize: 10, fill: '#f59e0b' }} />
