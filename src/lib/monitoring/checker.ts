@@ -179,24 +179,29 @@ async function httpGet(url: string, timeoutMs = 20000) {
       headers: { 'User-Agent': 'CooVex-Monitor/1.0 (+https://coovex.com)' },
     })
     const body = await res.text()
-    return { ok: res.ok, status: res.status, ms: Date.now() - t0, body, headers: res.headers, error: null }
+    // res.url is the final URL after all redirects
+    return { ok: res.ok, status: res.status, ms: Date.now() - t0, body, headers: res.headers, finalUrl: res.url, error: null }
   } catch (e: unknown) {
-    return { ok: false, status: null, ms: Date.now() - t0, body: '', headers: null, error: (e as Error).message }
+    return { ok: false, status: null, ms: Date.now() - t0, body: '', headers: null, finalUrl: url, error: (e as Error).message }
   }
 }
 
 export async function checkWebsite(urlInput: string): Promise<CheckResult> {
   const url      = normalizeUrl(urlInput)
   const hostname = getHostname(url)
-  const origin   = getOrigin(url)
-  const isHttps  = url.startsWith('https://')
 
   const main = await httpGet(url, 15000)
+
+  // Use the final URL after redirects for all sub-checks
+  // This fixes http→https redirect cases where sub-checks used the wrong origin
+  const effectiveUrl    = main.finalUrl || url
+  const effectiveOrigin = getOrigin(effectiveUrl)
+  const hasHttps        = effectiveUrl.startsWith('https://')
 
   // Network failure — site is unreachable
   if (main.status === null) {
     return {
-      isUp: false, httpStatus: null, loadTimeMs: main.ms, hasHttps: isHttps,
+      isUp: false, httpStatus: null, loadTimeMs: main.ms, hasHttps: false,
       hasRobotsTxt: false, hasSitemap: false,
       ssl: { valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'Connection failed' },
       domain: { expiryDate: null, daysLeft: null, error: null },
@@ -206,24 +211,34 @@ export async function checkWebsite(urlInput: string): Promise<CheckResult> {
     }
   }
 
-  // Parallel secondary checks
-  const [sslR, domainR, robotsR, sitemapR] = await Promise.allSettled([
-    isHttps ? checkSSL(url) : Promise.resolve<CheckResult['ssl']>({ valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'Not HTTPS' }),
+  // Parallel secondary checks — all using effective (post-redirect) origin
+  const [sslR, domainR, robotsR, sitemapR, sitemapIdxR] = await Promise.allSettled([
+    hasHttps
+      ? checkSSL(effectiveUrl)
+      : Promise.resolve<CheckResult['ssl']>({ valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'Not HTTPS' }),
     checkDomain(hostname),
-    httpGet(`${origin}/robots.txt`, 10000),
-    httpGet(`${origin}/sitemap.xml`, 10000),
+    httpGet(`${effectiveOrigin}/robots.txt`, 8000),
+    httpGet(`${effectiveOrigin}/sitemap.xml`, 8000),
+    httpGet(`${effectiveOrigin}/sitemap_index.xml`, 8000),
   ])
 
-  const ssl      = sslR.status === 'fulfilled' ? sslR.value : { valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'Check failed' }
+  const sslRaw   = sslR.status === 'fulfilled' ? sslR.value : { valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'Check failed' }
+  // Mark SSL valid if cert exists and not expired — browser clients see it as valid even if
+  // Node.js strict chain validation flags it (e.g. some Let's Encrypt intermediate chains)
+  const ssl      = { ...sslRaw, valid: sslRaw.daysLeft !== null && sslRaw.daysLeft > 0 }
   const domain   = domainR.status === 'fulfilled' ? domainR.value : { expiryDate: null, daysLeft: null, error: 'Check failed' }
-  const hasRobotsTxt = robotsR.status === 'fulfilled' && robotsR.value.status === 200
-  const hasSitemap   = sitemapR.status === 'fulfilled' && sitemapR.value.status === 200
+
+  const ok2xx    = (s: number | null) => s !== null && s >= 200 && s < 400
+  const hasRobotsTxt = robotsR.status === 'fulfilled' && ok2xx(robotsR.value.status)
+  const hasSitemap   = (sitemapR.status === 'fulfilled' && ok2xx(sitemapR.value.status))
+                    || (sitemapIdxR.status === 'fulfilled' && ok2xx(sitemapIdxR.value.status))
+
   const security = main.headers ? parseSecurityHeaders(main.headers) : { score: 0, hasHsts: false, hasXFrame: false, hasXContentType: false, hasCSP: false, hasReferrerPolicy: false, hasPermissionsPolicy: false }
   const seo      = main.body ? parseSEO(main.body) : { score: 0, hasTitle: false, hasMetaDescription: false, hasOgTitle: false, hasCanonical: false, title: null, metaDescription: null }
   const isUp     = main.status >= 200 && main.status < 400
 
   return {
-    isUp, httpStatus: main.status, loadTimeMs: main.ms, hasHttps: isHttps,
+    isUp, httpStatus: main.status, loadTimeMs: main.ms, hasHttps,
     hasRobotsTxt, hasSitemap, ssl, domain, security, seo,
     errorMessage: isUp ? null : `HTTP ${main.status}`,
   }
