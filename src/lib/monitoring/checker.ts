@@ -65,40 +65,42 @@ async function checkSSL(urlStr: string): Promise<CheckResult['ssl']> {
   }
 }
 
-// TLD-specific RDAP servers (faster + more reliable than rdap.org proxy)
-const RDAP_SERVERS: Record<string, string> = {
-  com: 'https://rdap.verisign.com/com/v1/',
-  net: 'https://rdap.verisign.com/net/v1/',
-  org: 'https://rdap.publicinterestregistry.org/rdap/',
-  info: 'https://rdap.afilias.info/rdap/info/',
-  io:  'https://rdap.identitydigital.services/rdap/',
-  co:  'https://rdap.nic.co/',
-  app: 'https://rdap.nic.google/',
-  dev: 'https://rdap.nic.google/',
-  page:'https://rdap.nic.google/',
-  xyz: 'https://rdap.nic.xyz/',
-  ai:  'https://rdap.nic.ai/',
-  me:  'https://rdap.nic.me/',
-  online: 'https://rdap.centralnic.com/online/',
-  store:  'https://rdap.centralnic.com/store/',
-  site:   'https://rdap.centralnic.com/site/',
-  tech:   'https://rdap.centralnic.com/tech/',
+// TLD-specific RDAP servers — array allows per-TLD fallback chain
+// before the universal rdap.org fallback
+const RDAP_SERVERS: Record<string, string[]> = {
+  com:  ['https://rdap.verisign.com/com/v1/'],
+  net:  ['https://rdap.verisign.com/net/v1/'],
+  org:  ['https://rdap.publicinterestregistry.org/rdap/'],
+  info: ['https://rdap.afilias.info/rdap/info/'],
+  io:   ['https://rdap.identitydigital.services/rdap/', 'https://rdap.nic.io/'],
+  // .co — GoDaddy Registry (formerly Neustar), try multiple known endpoints
+  co:   ['https://rdap.nic.co/', 'https://rdap.neustar.biz/', 'https://rdap.registry.godaddy/co/'],
+  app:  ['https://rdap.nic.google/'],
+  dev:  ['https://rdap.nic.google/'],
+  page: ['https://rdap.nic.google/'],
+  xyz:  ['https://rdap.nic.xyz/'],
+  ai:   ['https://rdap.nic.ai/'],
+  me:   ['https://rdap.nic.me/'],
+  online: ['https://rdap.centralnic.com/online/'],
+  store:  ['https://rdap.centralnic.com/store/'],
+  site:   ['https://rdap.centralnic.com/site/'],
+  tech:   ['https://rdap.centralnic.com/tech/'],
   // European TLDs
-  de:  'https://rdap.denic.de/',
-  eu:  'https://rdap.eurid.eu/',
-  uk:  'https://rdap.nominet.uk/',
-  fr:  'https://rdap.nic.fr/',
-  nl:  'https://rdap.sidn.nl/',
-  it:  'https://rdap.nic.it/',
-  ch:  'https://rdap.nic.ch/',
-  at:  'https://rdap.nic.at/',
-  be:  'https://rdap.dnsbelgium.be/',
-  se:  'https://rdap.iis.se/',
-  dk:  'https://rdap.dk-hostmaster.dk/',
-  no:  'https://rdap.norid.no/',
-  pl:  'https://rdap.dns.pl/',
+  de:  ['https://rdap.denic.de/'],
+  eu:  ['https://rdap.eurid.eu/'],
+  uk:  ['https://rdap.nominet.uk/'],
+  fr:  ['https://rdap.nic.fr/'],
+  nl:  ['https://rdap.sidn.nl/'],
+  it:  ['https://rdap.nic.it/'],
+  ch:  ['https://rdap.nic.ch/'],
+  at:  ['https://rdap.nic.at/'],
+  be:  ['https://rdap.dnsbelgium.be/'],
+  se:  ['https://rdap.iis.se/'],
+  dk:  ['https://rdap.dk-hostmaster.dk/'],
+  no:  ['https://rdap.norid.no/'],
+  pl:  ['https://rdap.dns.pl/'],
   // North America
-  ca:  'https://rdap.cira.ca/',
+  ca:  ['https://rdap.cira.ca/'],
 }
 
 async function tryRdap(url: string, domain: string): Promise<CheckResult['domain']> {
@@ -128,10 +130,8 @@ async function checkDomain(hostname: string): Promise<CheckResult['domain']> {
     const apex = getApexDomain(hostname)
     const tld  = apex.split('.').pop()?.toLowerCase() ?? ''
 
-    // Try TLD-specific server first (faster), then rdap.org as universal fallback
-    const servers: string[] = []
-    if (RDAP_SERVERS[tld]) servers.push(RDAP_SERVERS[tld])
-    servers.push('https://rdap.org/')
+    // Build server list: TLD-specific chain first, then universal rdap.org fallback
+    const servers: string[] = [...(RDAP_SERVERS[tld] ?? []), 'https://rdap.org/']
 
     for (const server of servers) {
       try {
