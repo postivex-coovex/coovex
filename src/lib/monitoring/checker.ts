@@ -68,7 +68,7 @@ const RDAP_SERVERS: Record<string, string> = {
   net: 'https://rdap.verisign.com/net/v1/',
   org: 'https://rdap.publicinterestregistry.org/rdap/',
   info: 'https://rdap.afilias.info/rdap/info/',
-  io:  'https://rdap.nic.io/',
+  io:  'https://rdap.identitydigital.services/rdap/',
   co:  'https://rdap.nic.co/',
   app: 'https://rdap.nic.google/',
   dev: 'https://rdap.nic.google/',
@@ -104,14 +104,19 @@ async function tryRdap(url: string, domain: string): Promise<CheckResult['domain
     headers: { Accept: 'application/rdap+json, application/json' },
   })
   if (!res.ok) return null as unknown as CheckResult['domain']
-  const data = await res.json() as { events?: { eventAction: string; eventDate: string }[] }
-  const exp = data.events?.find(e =>
-    e.eventAction === 'expiration' || e.eventAction === 'expiry'
-  )
-  if (!exp?.eventDate) return null as unknown as CheckResult['domain']
-  const expiryDate = new Date(exp.eventDate)
-  const daysLeft = Math.floor((expiryDate.getTime() - Date.now()) / 86400000)
-  return { expiryDate, daysLeft, error: null }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await res.json() as { events?: { eventAction: string; eventDate: string }[]; [k: string]: any }
+  // Match any event containing "expir" to handle non-standard action names across registries
+  // e.g. "expiration", "expiry", "registration expiry date", "registrar registration expiration date"
+  const exp = data.events?.find(e => e.eventAction?.toLowerCase().includes('expir'))
+  if (exp?.eventDate) {
+    const expiryDate = new Date(exp.eventDate)
+    const daysLeft = Math.floor((expiryDate.getTime() - Date.now()) / 86400000)
+    return { expiryDate, daysLeft, error: null }
+  }
+  // Some registries (e.g. .io via nic.io) embed expiry inside entities or remarks —
+  // fall through to let the next server in the list try
+  return null as unknown as CheckResult['domain']
 }
 
 async function checkDomain(hostname: string): Promise<CheckResult['domain']> {
