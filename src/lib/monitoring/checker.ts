@@ -187,16 +187,18 @@ async function httpGet(url: string, timeoutMs = 20000) {
 }
 
 export async function checkWebsite(urlInput: string): Promise<CheckResult> {
-  const url      = normalizeUrl(urlInput)
-  const hostname = getHostname(url)
+  const url       = normalizeUrl(urlInput)
+  const hostname  = getHostname(url)
+  const isHttpsUrl = url.startsWith('https://')
 
   const main = await httpGet(url, 15000)
 
-  // Use the final URL after redirects for all sub-checks
-  // This fixes http→https redirect cases where sub-checks used the wrong origin
+  // Use the final URL after redirects for sub-check origins.
+  // hasHttps is derived from the normalized input URL + a successful response —
+  // res.url can behave inconsistently in server-side Node.js environments.
   const effectiveUrl    = main.finalUrl || url
   const effectiveOrigin = getOrigin(effectiveUrl)
-  const hasHttps        = effectiveUrl.startsWith('https://')
+  const hasHttps        = isHttpsUrl && main.status !== null
 
   // Network failure — site is unreachable
   if (main.status === null) {
@@ -211,9 +213,10 @@ export async function checkWebsite(urlInput: string): Promise<CheckResult> {
     }
   }
 
-  // Parallel secondary checks — all using effective (post-redirect) origin
+  // Parallel secondary checks — all using effective (post-redirect) origin.
+  // Run SSL check based on original URL scheme, not redirect-detected hasHttps.
   const [sslR, domainR, robotsR, sitemapR, sitemapIdxR] = await Promise.allSettled([
-    hasHttps
+    isHttpsUrl
       ? checkSSL(effectiveUrl)
       : Promise.resolve<CheckResult['ssl']>({ valid: false, expiryDate: null, daysLeft: null, issuer: null, error: 'Not HTTPS' }),
     checkDomain(hostname),
