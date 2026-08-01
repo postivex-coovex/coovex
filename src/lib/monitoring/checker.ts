@@ -80,6 +80,20 @@ const RDAP_SERVERS: Record<string, string> = {
   store:  'https://rdap.centralnic.com/store/',
   site:   'https://rdap.centralnic.com/site/',
   tech:   'https://rdap.centralnic.com/tech/',
+  // European TLDs
+  de:  'https://rdap.denic.de/',
+  eu:  'https://rdap.eurid.eu/',
+  uk:  'https://rdap.nominet.uk/',
+  fr:  'https://rdap.nic.fr/',
+  nl:  'https://rdap.sidn.nl/',
+  it:  'https://rdap.nic.it/',
+  ch:  'https://rdap.nic.ch/',
+  at:  'https://rdap.nic.at/',
+  be:  'https://rdap.dnsbelgium.be/',
+  se:  'https://rdap.iis.se/',
+  dk:  'https://rdap.dk-hostmaster.dk/',
+  no:  'https://rdap.norid.no/',
+  pl:  'https://rdap.dns.pl/',
 }
 
 async function tryRdap(url: string, domain: string): Promise<CheckResult['domain']> {
