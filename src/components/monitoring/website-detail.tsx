@@ -20,7 +20,8 @@ function DaysLeftBadge({ days, label }: { days: number | null; label: string }) 
   if (days === null) return (
     <div className="flex flex-col gap-0.5">
       <span className="text-xs text-slate-400">{label}</span>
-      <span className="font-semibold text-slate-400">Unknown</span>
+      <span className="text-sm text-slate-400 italic">Not available</span>
+      <span className="text-[10px] text-slate-300 dark:text-slate-600">Run a check to fetch</span>
     </div>
   )
   const color = days <= 7 ? 'text-red-600 dark:text-red-400' : days <= 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'

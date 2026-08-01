@@ -62,20 +62,60 @@ async function checkSSL(urlStr: string): Promise<CheckResult['ssl']> {
   }
 }
 
+// TLD-specific RDAP servers (faster + more reliable than rdap.org proxy)
+const RDAP_SERVERS: Record<string, string> = {
+  com: 'https://rdap.verisign.com/com/v1/',
+  net: 'https://rdap.verisign.com/net/v1/',
+  org: 'https://rdap.publicinterestregistry.org/rdap/',
+  info: 'https://rdap.afilias.info/rdap/info/',
+  io:  'https://rdap.nic.io/',
+  co:  'https://rdap.nic.co/',
+  app: 'https://rdap.nic.google/',
+  dev: 'https://rdap.nic.google/',
+  page:'https://rdap.nic.google/',
+  xyz: 'https://rdap.nic.xyz/',
+  ai:  'https://rdap.nic.ai/',
+  me:  'https://rdap.nic.me/',
+  online: 'https://rdap.centralnic.com/online/',
+  store:  'https://rdap.centralnic.com/store/',
+  site:   'https://rdap.centralnic.com/site/',
+  tech:   'https://rdap.centralnic.com/tech/',
+}
+
+async function tryRdap(url: string, domain: string): Promise<CheckResult['domain']> {
+  const res = await fetch(`${url}domain/${domain}`, {
+    signal: AbortSignal.timeout(7000),
+    headers: { Accept: 'application/rdap+json, application/json' },
+  })
+  if (!res.ok) return null as unknown as CheckResult['domain']
+  const data = await res.json() as { events?: { eventAction: string; eventDate: string }[] }
+  const exp = data.events?.find(e =>
+    e.eventAction === 'expiration' || e.eventAction === 'expiry'
+  )
+  if (!exp?.eventDate) return null as unknown as CheckResult['domain']
+  const expiryDate = new Date(exp.eventDate)
+  const daysLeft = Math.floor((expiryDate.getTime() - Date.now()) / 86400000)
+  return { expiryDate, daysLeft, error: null }
+}
+
 async function checkDomain(hostname: string): Promise<CheckResult['domain']> {
   try {
     const apex = getApexDomain(hostname)
-    const res = await fetch(`https://rdap.org/domain/${apex}`, {
-      signal: AbortSignal.timeout(12000),
-      headers: { Accept: 'application/json' },
-    })
-    if (!res.ok) return { expiryDate: null, daysLeft: null, error: `RDAP ${res.status}` }
-    const data = await res.json() as { events?: { eventAction: string; eventDate: string }[] }
-    const exp = data.events?.find(e => e.eventAction === 'expiration')
-    if (!exp?.eventDate) return { expiryDate: null, daysLeft: null, error: 'No expiry in RDAP' }
-    const expiryDate = new Date(exp.eventDate)
-    const daysLeft = Math.floor((expiryDate.getTime() - Date.now()) / 86400000)
-    return { expiryDate, daysLeft, error: null }
+    const tld  = apex.split('.').pop()?.toLowerCase() ?? ''
+
+    // Try TLD-specific server first (faster), then rdap.org as universal fallback
+    const servers: string[] = []
+    if (RDAP_SERVERS[tld]) servers.push(RDAP_SERVERS[tld])
+    servers.push('https://rdap.org/')
+
+    for (const server of servers) {
+      try {
+        const result = await tryRdap(server, apex)
+        if (result?.expiryDate) return result
+      } catch { /* try next */ }
+    }
+
+    return { expiryDate: null, daysLeft: null, error: 'RDAP not available for this TLD' }
   } catch (e: unknown) {
     return { expiryDate: null, daysLeft: null, error: (e as Error).message }
   }
@@ -135,7 +175,7 @@ export async function checkWebsite(urlInput: string): Promise<CheckResult> {
   const origin   = getOrigin(url)
   const isHttps  = url.startsWith('https://')
 
-  const main = await httpGet(url, 25000)
+  const main = await httpGet(url, 15000)
 
   // Network failure — site is unreachable
   if (main.status === null) {

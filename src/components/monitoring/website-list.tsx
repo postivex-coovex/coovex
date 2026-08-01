@@ -18,7 +18,7 @@ function fmtUptime(u: number | null) {
 }
 
 function DaysChip({ days, label }: { days: number | null; label: string }) {
-  if (days === null) return <span className="text-slate-400 text-xs">—</span>
+  if (days === null) return <span className="text-slate-300 dark:text-slate-600 text-xs">{label}: N/A</span>
   const color = days <= 7 ? 'text-red-600 dark:text-red-400' : days <= 30 ? 'text-yellow-600 dark:text-yellow-400' : 'text-slate-500 dark:text-slate-400'
   return <span className={`text-xs ${color}`}>{label}: {days}d</span>
 }
