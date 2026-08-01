@@ -94,6 +94,8 @@ const RDAP_SERVERS: Record<string, string> = {
   dk:  'https://rdap.dk-hostmaster.dk/',
   no:  'https://rdap.norid.no/',
   pl:  'https://rdap.dns.pl/',
+  // North America
+  ca:  'https://rdap.cira.ca/',
 }
 
 async function tryRdap(url: string, domain: string): Promise<CheckResult['domain']> {
