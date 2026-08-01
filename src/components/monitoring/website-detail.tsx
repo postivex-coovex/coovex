@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft, RefreshCw, Trash2, Shield, Lock, Globe, Clock, FileText, Search, Bell, Eye, EyeOff, Save, Users, CheckCircle2, XCircle, Minus } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Trash2, Shield, Lock, Globe, Clock, FileText, Search, Bell, Eye, EyeOff, Save, Users, CheckCircle2, XCircle, Minus, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { StatusBadge } from './status-badge'
 import { ResponseTimeChart } from './response-time-chart'
@@ -81,12 +81,51 @@ export function WebsiteDetail({ site: initialSite, initialChecks, initialNotific
   const [checks, setChecks] = useState(initialChecks)
   const [notifications, setNotifications] = useState(initialNotifications)
   const [checking, setChecking] = useState(false)
-  const [activeTab, setActiveTab] = useState<'overview' | 'security' | 'seo' | 'notifications' | 'credentials'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'security' | 'seo' | 'notifications' | 'credentials' | 'settings'>('overview')
   const [notes, setNotes]   = useState(site.credential_notes ?? '')
   const [notesVisibility, setNotesVisibility] = useState(site.notes_visibility)
   const [savingNotes, setSavingNotes] = useState(false)
   const [showNotes, setShowNotes]   = useState(false)
   const [deleting, setDeleting]     = useState(false)
+
+  // Settings edit state
+  const [editName, setEditName]           = useState(site.name)
+  const [editUrl, setEditUrl]             = useState(site.url)
+  const [editEmails, setEditEmails]       = useState((site.alert_emails ?? []).join(', '))
+  const [editThreshold, setEditThreshold] = useState(site.slow_load_threshold_ms ?? 3000)
+  const [editAlertDown, setEditAlertDown]           = useState(site.alert_on_down ?? true)
+  const [editAlertSsl, setEditAlertSsl]             = useState(site.alert_on_ssl_expiry ?? true)
+  const [editAlertDomain, setEditAlertDomain]       = useState(site.alert_on_domain_expiry ?? true)
+  const [editAlertSlow, setEditAlertSlow]           = useState(site.alert_on_slow_load ?? false)
+  const [savingSettings, setSavingSettings]         = useState(false)
+
+  async function saveSettings() {
+    setSavingSettings(true)
+    try {
+      const res = await fetch(`/api/monitoring/websites/${site.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName.trim(),
+          url: editUrl.trim(),
+          alert_emails: editEmails,
+          slow_load_threshold_ms: editThreshold,
+          alert_on_down: editAlertDown,
+          alert_on_ssl_expiry: editAlertSsl,
+          alert_on_domain_expiry: editAlertDomain,
+          alert_on_slow_load: editAlertSlow,
+        }),
+      })
+      if (!res.ok) throw new Error('Save failed')
+      const updated = await res.json()
+      setSite(updated)
+      toast.success('Settings saved')
+    } catch (e: unknown) {
+      toast.error((e as Error).message)
+    } finally {
+      setSavingSettings(false)
+    }
+  }
 
   const latestCheck = checks[0]
 
@@ -156,6 +195,7 @@ export function WebsiteDetail({ site: initialSite, initialChecks, initialNotific
     { id: 'seo',          label: 'SEO' },
     { id: 'notifications',label: `Notifications${unreadCount > 0 ? ` (${unreadCount})` : ''}` },
     ...(isOwner ? [{ id: 'credentials', label: 'Credentials' }] : []),
+    ...(isOwner ? [{ id: 'settings', label: 'Settings' }] : []),
   ] as const
 
   return (
@@ -432,6 +472,107 @@ export function WebsiteDetail({ site: initialSite, initialChecks, initialNotific
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Settings ─────────────────────────────────────────────────────────── */}
+      {activeTab === 'settings' && isOwner && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
+          <div className="flex items-center gap-2">
+            <Settings className="w-5 h-5 text-blue-500" />
+            <h3 className="font-semibold text-slate-800 dark:text-slate-200">Website Settings</h3>
+          </div>
+
+          {/* Name */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Name</label>
+            <input
+              type="text"
+              value={editName}
+              onChange={e => setEditName(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* URL */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">URL</label>
+            <input
+              type="url"
+              value={editUrl}
+              onChange={e => setEditUrl(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+            />
+          </div>
+
+          {/* Alert emails */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+              Alert Emails <span className="font-normal text-slate-400">(comma-separated)</span>
+            </label>
+            <input
+              type="text"
+              value={editEmails}
+              onChange={e => setEditEmails(e.target.value)}
+              placeholder="you@example.com, team@example.com"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Slow load threshold */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+              Slow Load Threshold: <span className="text-blue-600 dark:text-blue-400">{editThreshold}ms</span>
+            </label>
+            <input
+              type="range" min={500} max={10000} step={500}
+              value={editThreshold}
+              onChange={e => setEditThreshold(Number(e.target.value))}
+              className="w-full accent-blue-600"
+            />
+            <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>500ms</span><span>10s</span>
+            </div>
+          </div>
+
+          {/* Alert toggles */}
+          <div>
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">Alert Triggers</p>
+            <div className="space-y-3">
+              {([
+                { label: 'Site Down',     desc: 'Alert when site is unreachable',       val: editAlertDown,   set: setEditAlertDown },
+                { label: 'SSL Expiry',    desc: 'Alert 30 days & 7 days before expiry', val: editAlertSsl,    set: setEditAlertSsl },
+                { label: 'Domain Expiry', desc: 'Alert 30 days & 7 days before expiry', val: editAlertDomain, set: setEditAlertDomain },
+                { label: 'Slow Load',     desc: 'Alert when response exceeds threshold', val: editAlertSlow,   set: setEditAlertSlow },
+              ] as const).map(({ label, desc, val, set }) => (
+                <div key={label} className="flex items-center justify-between py-2 border-t border-slate-100 dark:border-slate-800 first:border-0">
+                  <div>
+                    <div className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</div>
+                    <div className="text-xs text-slate-400">{desc}</div>
+                  </div>
+                  <button
+                    onClick={() => set((v: boolean) => !v)}
+                    className={`relative rounded-full transition-colors flex-shrink-0 ${val ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                    style={{ width: 40, height: 22 }}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 bg-white rounded-full shadow transition-transform ${val ? 'translate-x-[18px]' : ''}`}
+                      style={{ width: 18, height: 18 }}
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={saveSettings}
+            disabled={savingSettings}
+            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium rounded-xl transition-colors"
+          >
+            <Save className="w-4 h-4" />
+            {savingSettings ? 'Saving...' : 'Save Settings'}
+          </button>
         </div>
       )}
 
