@@ -99,6 +99,16 @@ export async function GET(req: NextRequest) {
         return
       }
 
+      // Site is still down but was never alerted (e.g. manual Check Now set status='down' before cron ran)
+      if (!result.isUp && site.status === 'down' && !site.down_notified_at && site.alert_on_down) {
+        await saveNotification(supabase, {
+          websiteId: site.id, userId: site.user_id, type: 'down',
+          severity: 'critical', title: `${site.name} is DOWN`,
+          message: `Website is unreachable. ${result.errorMessage ?? ''}`,
+        })
+        await sendDownAlert(site)
+      }
+
       // Site recovered
       if (result.isUp && site.status === 'down') {
         const downSince = site.down_notified_at ? new Date(site.down_notified_at) : null
@@ -168,6 +178,7 @@ export async function GET(req: NextRequest) {
 
       // Normal update
       const nextCheck = new Date(Date.now() + 30 * 60000).toISOString()
+      const needsDownNotifiedAt = !result.isUp && site.status === 'down' && !site.down_notified_at
       const update: Record<string, unknown> = {
         status: result.isUp ? 'up' : 'down',
         last_check_at: checkTime,
@@ -183,6 +194,7 @@ export async function GET(req: NextRequest) {
         consecutive_failures: result.isUp ? 0 : site.consecutive_failures + 1,
         next_check_at: nextCheck,
         updated_at: checkTime,
+        ...(needsDownNotifiedAt ? { down_notified_at: checkTime } : {}),
       }
       if (result.isUp && result.loadTimeMs !== null) {
         update.avg_load_time_ms = site.avg_load_time_ms
