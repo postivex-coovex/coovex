@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Globe, AlertTriangle, Shield, Clock, TrendingUp, RefreshCw } from 'lucide-react'
 import { StatusDot, StatusBadge } from './status-badge'
 import { AddWebsiteDialog } from './add-website-dialog'
+import { CsvImportDialog } from './csv-import-dialog'
 import type { MonitoredWebsite } from '@/lib/monitoring/types'
 
 function fmtMs(ms: number | null) {
@@ -160,6 +161,7 @@ export function WebsiteList({ initial }: { initial: MonitoredWebsite[] }) {
             <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
+          <CsvImportDialog />
           <AddWebsiteDialog />
         </div>
       </div>
