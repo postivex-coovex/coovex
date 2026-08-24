@@ -43,6 +43,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/api/wp-dev/') ||
     request.nextUrl.pathname.startsWith('/api/demo') ||
     request.nextUrl.pathname.startsWith('/api/embed') ||
+    request.nextUrl.pathname.startsWith('/api/support/ingest') ||
+    request.nextUrl.pathname.startsWith('/api/support/email-webhook') ||
     request.nextUrl.pathname.startsWith('/onboarding') ||
     isAuthPage
 
