@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Trash2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { PropertyForm } from '@/components/support/property-form'
 import { ResourceVault } from '@/components/support/resource-vault'
+import { DeletePropertyButton } from '@/components/support/delete-property-button'
 
 export default async function PropertyDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -20,7 +21,6 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/support/properties"
@@ -35,18 +35,14 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             {property.domain && <p className="text-xs text-slate-400 pl-5">{property.domain}</p>}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href={`/support?property=${id}`}
-            className="px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-950/30 rounded-lg transition-colors">
-            View Inbox
-          </Link>
-        </div>
+        <Link href={`/support?property=${id}`}
+          className="px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-950/30 rounded-lg transition-colors">
+          View Inbox
+        </Link>
       </div>
 
-      {/* Settings form */}
       <PropertyForm mode="edit" initial={property as unknown as Record<string, unknown>} />
 
-      {/* Resource Vault */}
       <div>
         <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 mb-3">Resource Vault</h2>
         <p className="text-sm text-slate-500 mb-4">
@@ -55,26 +51,12 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
         <ResourceVault propertyId={id} initial={(resources ?? []) as any} />
       </div>
 
-      {/* Danger zone */}
       <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-red-700 dark:text-red-400 mb-1">Danger Zone</h3>
         <p className="text-xs text-red-600 dark:text-red-500 mb-3">
           Deleting this property will permanently remove all conversations, messages, and resources.
         </p>
-        <form action={`/api/support/properties/${id}`} method="post">
-          <button
-            type="button"
-            onClick={async () => {
-              if (!confirm('Are you sure? This will delete all conversations and data for this property.')) return
-              const res = await fetch(`/api/support/properties/${id}`, { method: 'DELETE' })
-              if (res.ok) window.location.href = '/support/properties'
-            }}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-300 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            Delete Property
-          </button>
-        </form>
+        <DeletePropertyButton id={id} />
       </div>
     </div>
   )
