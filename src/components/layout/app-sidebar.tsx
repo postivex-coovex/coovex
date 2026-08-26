@@ -45,7 +45,7 @@ const FLAT_ITEMS: FlatItem[] = [
   { label: 'Products & Service', href: '/products',        icon: Package },
   { label: 'Agent Tasks',        href: '/agent/inbox',     icon: Inbox },
   { label: 'Website Monitoring', href: '/monitoring',      icon: Activity },
-  { label: 'Support',            href: '/support',          icon: LifeBuoy },
+  { label: 'Support Manager',     href: '/support',          icon: LifeBuoy },
 ]
 
 const NAV_GROUPS: NavGroup[] = [
