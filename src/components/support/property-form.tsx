@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Globe, Mail, Palette, Zap, Eye, EyeOff, TestTube, Copy, Check, Users, Trash2, Loader2, Shield, Bot, ChevronDown, ChevronUp, Plus, X, Database, GitBranch, Server, Link, LayoutGrid } from 'lucide-react'
+import { Globe, Mail, Palette, Zap, Eye, EyeOff, TestTube, Copy, Check, Users, Trash2, Loader2, Shield, Bot, ChevronDown, ChevronUp, Plus, X, Database, GitBranch, Server, Link, LayoutGrid, Terminal } from 'lucide-react'
 import type { AgentIntegration } from '@/lib/support/agent'
 
 interface Member {
@@ -134,6 +134,8 @@ const INTEGRATION_ICONS: Record<string, React.ReactNode> = {
   wordpress:   <LayoutGrid className="w-4 h-4 text-blue-500" />,
   mysql_bridge:<Server className="w-4 h-4 text-orange-500" />,
   custom_api:  <Link className="w-4 h-4 text-violet-500" />,
+  ssh_vps:     <Terminal className="w-4 h-4 text-green-500" />,
+  postgres:    <Database className="w-4 h-4 text-blue-600" />,
 }
 
 const SETUP_GUIDES: Record<string, { title: string; steps: string[]; placeholder_url: string; placeholder_key: string }> = {
@@ -170,6 +172,29 @@ const SETUP_GUIDES: Record<string, { title: string; steps: string[]; placeholder
     ],
     placeholder_url: 'https://yoursite.com',
     placeholder_key: 'xxxx xxxx xxxx xxxx',
+  },
+  ssh_vps: {
+    title: 'SSH / VPS Setup Guide',
+    steps: [
+      'তোমার VPS-এর IP address বা hostname দাও',
+      'SSH username দাও (সাধারণত root বা ubuntu)',
+      'Private Key (recommended): ~/.ssh/id_rsa ফাইলের সম্পূর্ণ content দাও',
+      'অথবা SSH Password দিতে পারো (কম secure)',
+      'VPS-এ AI agent কমান্ড চালাতে পারবে: nginx restart, log check, disk usage ইত্যাদি',
+    ],
+    placeholder_url: '192.168.1.10',
+    placeholder_key: '-----BEGIN RSA PRIVATE KEY-----\n...',
+  },
+  postgres: {
+    title: 'PostgreSQL Setup Guide',
+    steps: [
+      'PostgreSQL host, port, database name দাও',
+      'Read-only user create করা recommended: CREATE USER coovex_ro WITH PASSWORD \'pass\'; GRANT SELECT ON ALL TABLES IN SCHEMA public TO coovex_ro;',
+      'Remote access allow করো: pg_hba.conf-এ Vercel IP যোগ করো অথবা 0.0.0.0/0 দাও (SSL সহ)',
+      'Agent শুধু SELECT query করবে — write/delete করবে না',
+    ],
+    placeholder_url: 'db.example.com',
+    placeholder_key: 'your-password',
   },
   mysql_bridge: {
     title: 'MySQL Bridge Setup Guide',
@@ -259,42 +284,119 @@ function IntegrationCard({
               className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
-          <div>
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">
-              {integration.type === 'mysql_bridge' ? 'Bridge URL' : integration.type === 'github' ? 'Default Repo (org/repo)' : 'Base URL'}
-            </label>
-            <input value={integration.base_url} onChange={e => set('base_url', e.target.value)}
-              placeholder={guide.placeholder_url}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-
-          {integration.type === 'github' && (
-            <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Default Repo (org/repo)</label>
-              <input value={integration.github_repo || ''} onChange={e => set('github_repo', e.target.value)}
-                placeholder="myorg/myrepo"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
+          {/* SSH VPS fields */}
+          {integration.type === 'ssh_vps' ? (
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2">
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Host / IP</label>
+                  <input value={integration.ssh_host || ''} onChange={e => set('ssh_host', e.target.value)}
+                    placeholder="192.168.1.10"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Port</label>
+                  <input value={integration.ssh_port || 22} onChange={e => set('ssh_port', parseInt(e.target.value))}
+                    type="number" placeholder="22"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Username</label>
+                <input value={integration.ssh_username || ''} onChange={e => set('ssh_username', e.target.value)}
+                  placeholder="root"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Private Key <span className="text-slate-400 font-normal">(recommended)</span></label>
+                <textarea value={integration.ssh_private_key || ''} onChange={e => set('ssh_private_key', e.target.value)}
+                  rows={4} placeholder="-----BEGIN RSA PRIVATE KEY-----&#10;...&#10;-----END RSA PRIVATE KEY-----"
+                  className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Password <span className="text-slate-400 font-normal">(if no private key)</span></label>
+                <input value={integration.ssh_password || ''} onChange={e => set('ssh_password', e.target.value)}
+                  type="password" placeholder="SSH password"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </>
+          ) : integration.type === 'postgres' ? (
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2">
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Host</label>
+                  <input value={integration.pg_host || ''} onChange={e => set('pg_host', e.target.value)}
+                    placeholder="db.example.com"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Port</label>
+                  <input value={integration.pg_port || 5432} onChange={e => set('pg_port', parseInt(e.target.value))}
+                    type="number" placeholder="5432"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Database</label>
+                  <input value={integration.pg_database || ''} onChange={e => set('pg_database', e.target.value)}
+                    placeholder="mydb"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Username</label>
+                  <input value={integration.pg_user || ''} onChange={e => set('pg_user', e.target.value)}
+                    placeholder="postgres"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Password</label>
+                <input value={integration.pg_password || ''} onChange={e => set('pg_password', e.target.value)}
+                  type="password" placeholder="database password"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={!!integration.pg_ssl} onChange={e => set('pg_ssl', String(e.target.checked))} className="rounded accent-blue-600" />
+                <span className="text-xs text-slate-600 dark:text-slate-300">Use SSL</span>
+              </label>
+            </>
+          ) : (
+            <>
+              <div>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">
+                  {integration.type === 'mysql_bridge' ? 'Bridge URL' : integration.type === 'github' ? 'Base URL' : 'Base URL'}
+                </label>
+                <input value={integration.base_url} onChange={e => set('base_url', e.target.value)}
+                  placeholder={guide.placeholder_url}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              {integration.type === 'github' && (
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Default Repo (org/repo)</label>
+                  <input value={integration.github_repo || ''} onChange={e => set('github_repo', e.target.value)}
+                    placeholder="myorg/myrepo"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+              {integration.type === 'wordpress' && (
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">WordPress Username</label>
+                  <input value={integration.wp_username || ''} onChange={e => set('wp_username', e.target.value)}
+                    placeholder="admin"
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+              <div>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">
+                  {integration.type === 'wordpress' ? 'App Password' : integration.type === 'mysql_bridge' ? 'Bridge Secret Key' : 'API Key / Token'}
+                </label>
+                <input value={integration.api_key || ''} onChange={e => set('api_key', e.target.value)}
+                  type="password" placeholder={guide.placeholder_key}
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </>
           )}
-
-          {integration.type === 'wordpress' && (
-            <div>
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">WordPress Username</label>
-              <input value={integration.wp_username || ''} onChange={e => set('wp_username', e.target.value)}
-                placeholder="admin"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-          )}
-
-          <div>
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">
-              {integration.type === 'wordpress' ? 'App Password' : integration.type === 'mysql_bridge' ? 'Bridge Secret Key' : 'API Key / Token'}
-            </label>
-            <input value={integration.api_key || ''} onChange={e => set('api_key', e.target.value)}
-              type="password"
-              placeholder={guide.placeholder_key}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
 
           {/* Setup Guide */}
           <div className="mt-2 border border-blue-100 dark:border-blue-900/40 rounded-lg overflow-hidden">
@@ -347,6 +449,7 @@ export function PropertyForm({ initial = {}, mode }: Props) {
     const labels: Record<string, string> = {
       supabase: 'Supabase DB', github: 'GitHub', wordpress: 'WordPress',
       mysql_bridge: 'MySQL Bridge', custom_api: 'Custom API',
+      ssh_vps: 'SSH / VPS', postgres: 'PostgreSQL',
     }
     setAiIntegrations(prev => [...prev, {
       id: Math.random().toString(36).slice(2, 8),
@@ -696,6 +799,8 @@ export function PropertyForm({ initial = {}, mode }: Props) {
                     { type: 'github' as const,        label: '+ GitHub',         icon: <GitBranch className="w-3 h-3" /> },
                     { type: 'wordpress' as const,     label: '+ WordPress',      icon: <LayoutGrid className="w-3 h-3" /> },
                     { type: 'mysql_bridge' as const,  label: '+ MySQL Bridge',   icon: <Server className="w-3 h-3" /> },
+                    { type: 'ssh_vps' as const,       label: '+ SSH / VPS',      icon: <Terminal className="w-3 h-3" /> },
+                    { type: 'postgres' as const,      label: '+ PostgreSQL',     icon: <Database className="w-3 h-3" /> },
                     { type: 'custom_api' as const,    label: '+ Custom API',     icon: <Link className="w-3 h-3" /> },
                   ].map(({ type, label, icon }) => (
                     <button key={type} type="button" onClick={() => addIntegration(type)}

@@ -1,14 +1,28 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { Client as SshClient } from 'ssh2'
 
 export interface AgentIntegration {
   id: string
-  type: 'supabase' | 'github' | 'wordpress' | 'mysql_bridge' | 'custom_api'
+  type: 'supabase' | 'github' | 'wordpress' | 'mysql_bridge' | 'custom_api' | 'ssh_vps' | 'postgres'
   label: string
   base_url: string
   api_key?: string
   github_repo?: string
   wp_username?: string
   wp_app_password?: string
+  // SSH fields
+  ssh_host?: string
+  ssh_port?: number
+  ssh_username?: string
+  ssh_private_key?: string
+  ssh_password?: string
+  // Postgres fields
+  pg_host?: string
+  pg_port?: number
+  pg_database?: string
+  pg_user?: string
+  pg_password?: string
+  pg_ssl?: boolean
 }
 
 interface ConvMessage {
@@ -77,6 +91,25 @@ Example — check subscription:
 Base URL: ${int.base_url}
 Auth: Authorization: Bearer ${int.api_key}
 Use http_get or http_post to call any endpoint.`
+    } else if (int.type === 'postgres') {
+      integrationsDoc += `
+Host: ${int.pg_host}:${int.pg_port || 5432}  Database: ${int.pg_database}
+Use query_postgres(sql) to run SELECT queries.
+Example:
+  query_postgres("SELECT plan, status, expires_at FROM subscriptions WHERE email = 'customer@email.com'")`
+    } else if (int.type === 'ssh_vps') {
+      integrationsDoc += `
+Host: ${int.ssh_host}:${int.ssh_port || 22}
+User: ${int.ssh_username}
+Use ssh_exec(command) to run commands on this server.
+Examples:
+  ssh_exec("systemctl status nginx")
+  ssh_exec("systemctl restart php8.1-fpm")
+  ssh_exec("tail -50 /var/log/nginx/error.log")
+  ssh_exec("df -h")
+  ssh_exec("pm2 status")
+  ssh_exec("mysql -u root -pPASS -e 'SHOW DATABASES;'")
+IMPORTANT: Only run safe diagnostic/fix commands. Never delete files or data.`
     }
   }
 
@@ -96,6 +129,42 @@ Rules:
 - If you can't solve it, explain what you found and what next steps are
 - Do NOT reveal API keys or internal system details to the customer
 ${integrationsDoc ? `\nAvailable integrations:${integrationsDoc}` : '\nNo integrations configured — reply based on conversation context only.'}`
+}
+
+const BLOCKED_COMMANDS = /\b(rm\s+-[rRf]{1,3}f?|mkfs|dd\s+if=\/dev|wget[^|]*\|[^|]*bash|curl[^|]*\|[^|]*bash|chmod\s+000|DROP\s+TABLE|TRUNCATE\s+TABLE|> \/dev\/sd)\b/i
+
+async function execSsh(integration: AgentIntegration, command: string): Promise<string> {
+  if (BLOCKED_COMMANDS.test(command)) {
+    return JSON.stringify({ error: 'Command blocked for safety. Use safe diagnostic commands only.' })
+  }
+
+  return new Promise((resolve) => {
+    const conn = new SshClient()
+    let output = ''
+    const done = (result: string) => { try { conn.end() } catch {} resolve(result) }
+    const timer = setTimeout(() => done(JSON.stringify({ error: 'SSH timeout after 15s' })), 15000)
+
+    conn.on('ready', () => {
+      conn.exec(command, (err, stream) => {
+        if (err) { clearTimeout(timer); done(JSON.stringify({ error: err.message })); return }
+        stream.on('data', (d: Buffer) => { output += d.toString() })
+        stream.stderr.on('data', (d: Buffer) => { output += '[stderr] ' + d.toString() })
+        stream.on('close', () => { clearTimeout(timer); done(output.trim().slice(0, 3000)) })
+      })
+    })
+
+    conn.on('error', (err) => { clearTimeout(timer); done(JSON.stringify({ error: err.message })) })
+
+    conn.connect({
+      host:       integration.ssh_host || '',
+      port:       integration.ssh_port || 22,
+      username:   integration.ssh_username || 'root',
+      ...(integration.ssh_private_key
+        ? { privateKey: integration.ssh_private_key }
+        : { password: integration.ssh_password || '' }),
+      readyTimeout: 10000,
+    })
+  })
 }
 
 const TOOLS: Anthropic.Tool[] = [
@@ -135,9 +204,31 @@ const TOOLS: Anthropic.Tool[] = [
       required: ['url', 'body'],
     },
   },
+  {
+    name: 'ssh_exec',
+    description: 'Run a shell command on the configured VPS via SSH. Use for checking service status, restarting services, reading logs, disk usage, etc.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        command: { type: 'string', description: 'Shell command to execute on the remote server' },
+      },
+      required: ['command'],
+    },
+  },
+  {
+    name: 'query_postgres',
+    description: 'Run a SELECT query on a configured PostgreSQL database.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        sql: { type: 'string', description: 'SQL SELECT query to run' },
+      },
+      required: ['sql'],
+    },
+  },
 ]
 
-async function execTool(name: string, input: Record<string, unknown>): Promise<string> {
+async function execTool(name: string, input: Record<string, unknown>, integrations: AgentIntegration[]): Promise<string> {
   if (name === 'http_get') {
     try {
       const res = await fetch(input.url as string, {
@@ -162,6 +253,37 @@ async function execTool(name: string, input: Record<string, unknown>): Promise<s
       })
       const text = await res.text()
       return text.slice(0, 4000)
+    } catch (e) {
+      return JSON.stringify({ error: String(e) })
+    }
+  }
+
+  if (name === 'ssh_exec') {
+    const sshInt = integrations.find(i => i.type === 'ssh_vps')
+    if (!sshInt) return JSON.stringify({ error: 'No SSH/VPS integration configured' })
+    return await execSsh(sshInt, input.command as string)
+  }
+
+  if (name === 'query_postgres') {
+    const pgInt = integrations.find(i => i.type === 'postgres')
+    if (!pgInt) return JSON.stringify({ error: 'No PostgreSQL integration configured' })
+    const sql = (input.sql as string).trim()
+    if (!/^\s*SELECT/i.test(sql)) return JSON.stringify({ error: 'Only SELECT queries allowed' })
+    try {
+      const { Client } = await import('pg')
+      const client = new Client({
+        host:     pgInt.pg_host || 'localhost',
+        port:     pgInt.pg_port || 5432,
+        database: pgInt.pg_database,
+        user:     pgInt.pg_user,
+        password: pgInt.pg_password,
+        ssl:      pgInt.pg_ssl ? { rejectUnauthorized: false } : false,
+        connectionTimeoutMillis: 8000,
+      })
+      await client.connect()
+      const res = await client.query(sql)
+      await client.end()
+      return JSON.stringify({ rows: res.rows.slice(0, 50) })
     } catch (e) {
       return JSON.stringify({ error: String(e) })
     }
@@ -221,7 +343,7 @@ Investigate and reply to the customer's latest message.`
     msgs.push({ role: 'assistant', content: response.content })
     const toolResults: Anthropic.ToolResultBlockParam[] = []
     for (const tool of toolUseBlocks) {
-      const result = await execTool(tool.name, tool.input as Record<string, unknown>)
+      const result = await execTool(tool.name, tool.input as Record<string, unknown>, opts.integrations)
       toolResults.push({ type: 'tool_result', tool_use_id: tool.id, content: result })
     }
     msgs.push({ role: 'user', content: toolResults })
