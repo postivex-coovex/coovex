@@ -1,5 +1,7 @@
--- ── Tasks ──────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS tasks (
+-- Drop and recreate tasks (previous partial run left a bad schema)
+DROP TABLE IF EXISTS tasks CASCADE;
+
+CREATE TABLE tasks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -19,47 +21,30 @@ CREATE TABLE IF NOT EXISTS tasks (
 
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='tasks' AND policyname='Users see own or assigned tasks') THEN
-    CREATE POLICY "Users see own or assigned tasks"
-      ON tasks FOR SELECT
-      USING (user_id = auth.uid() OR assigned_to_user_id = auth.uid());
-  END IF;
-END $$;
+CREATE POLICY "Users see own or assigned tasks"
+  ON tasks FOR SELECT
+  USING (user_id = auth.uid() OR assigned_to_user_id = auth.uid());
 
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='tasks' AND policyname='Users create tasks') THEN
-    CREATE POLICY "Users create tasks"
-      ON tasks FOR INSERT
-      WITH CHECK (user_id = auth.uid());
-  END IF;
-END $$;
+CREATE POLICY "Users create tasks"
+  ON tasks FOR INSERT
+  WITH CHECK (user_id = auth.uid());
 
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='tasks' AND policyname='Owners and assignees update tasks') THEN
-    CREATE POLICY "Owners and assignees update tasks"
-      ON tasks FOR UPDATE
-      USING (user_id = auth.uid() OR assigned_to_user_id = auth.uid());
-  END IF;
-END $$;
+CREATE POLICY "Owners and assignees update tasks"
+  ON tasks FOR UPDATE
+  USING (user_id = auth.uid() OR assigned_to_user_id = auth.uid());
 
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='tasks' AND policyname='Owners delete tasks') THEN
-    CREATE POLICY "Owners delete tasks"
-      ON tasks FOR DELETE
-      USING (user_id = auth.uid());
-  END IF;
-END $$;
+CREATE POLICY "Owners delete tasks"
+  ON tasks FOR DELETE
+  USING (user_id = auth.uid());
 
-CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON tasks(user_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-CREATE INDEX IF NOT EXISTS idx_tasks_assigned ON tasks(assigned_to_user_id);
+CREATE INDEX idx_tasks_user_id ON tasks(user_id);
+CREATE INDEX idx_tasks_status ON tasks(status);
+CREATE INDEX idx_tasks_assigned ON tasks(assigned_to_user_id);
 
 CREATE OR REPLACE FUNCTION update_tasks_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$;
 
-DROP TRIGGER IF EXISTS trg_tasks_updated ON tasks;
 CREATE TRIGGER trg_tasks_updated
   BEFORE UPDATE ON tasks
   FOR EACH ROW EXECUTE FUNCTION update_tasks_updated_at();
