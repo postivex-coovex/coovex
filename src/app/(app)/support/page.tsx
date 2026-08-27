@@ -16,7 +16,7 @@ export default async function SupportPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="h-full flex flex-col overflow-hidden">
       <SupportInbox properties={properties ?? []} />
     </div>
   )

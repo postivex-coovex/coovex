@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Lightbulb, Package, Inbox,
   ClipboardCheck, Zap, Globe2, Users,
   Target, TrendingUp, Calendar, Share2,
-  Settings, ChevronDown, Search, LogOut, Plug, Activity, LifeBuoy,
+  Settings, ChevronDown, Search, LogOut, Plug, Activity, LifeBuoy, ListTodo,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BrandLogo } from './brand-logo'
@@ -46,6 +46,7 @@ const FLAT_ITEMS: FlatItem[] = [
   { label: 'Agent Tasks',        href: '/agent/inbox',     icon: Inbox },
   { label: 'Website Monitoring', href: '/monitoring',      icon: Activity },
   { label: 'Support Manager',     href: '/support',          icon: LifeBuoy },
+  { label: 'Tasks Manager',       href: '/tasks',            icon: ListTodo },
 ]
 
 const NAV_GROUPS: NavGroup[] = [

@@ -1,9 +1,131 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Globe, Mail, Palette, Zap, Eye, EyeOff, TestTube, Copy, Check } from 'lucide-react'
+import { Globe, Mail, Palette, Zap, Eye, EyeOff, TestTube, Copy, Check, Users, Trash2, Loader2, Shield } from 'lucide-react'
+
+interface Member {
+  id: string
+  member_email: string
+  member_user_id: string | null
+  role: string
+  can_see_credentials: boolean
+  invited_at: string
+}
+
+function TeamMembersSection({ propertyId }: { propertyId: string }) {
+  const [members, setMembers]     = useState<Member[]>([])
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [canSeeCreds, setCanSeeCreds] = useState(false)
+  const [loading, setLoading]     = useState(true)
+  const [saving, setSaving]       = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/support/properties/${propertyId}/members`)
+      .then(r => r.json())
+      .then(d => setMembers(d.members || []))
+      .finally(() => setLoading(false))
+  }, [propertyId])
+
+  async function invite(e: React.FormEvent) {
+    e.preventDefault()
+    if (!inviteEmail.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/support/properties/${propertyId}/members`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ member_email: inviteEmail, can_see_credentials: canSeeCreds }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setMembers(m => {
+        const without = m.filter(x => x.member_email !== data.member.member_email)
+        return [data.member, ...without]
+      })
+      setInviteEmail('')
+      setCanSeeCreds(false)
+      toast.success('Member invited')
+    } catch (err: unknown) {
+      toast.error((err as Error).message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function toggleCreds(member: Member) {
+    const next = !member.can_see_credentials
+    await fetch(`/api/support/properties/${propertyId}/members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ member_email: member.member_email, can_see_credentials: next, role: member.role }),
+    })
+    setMembers(m => m.map(x => x.id === member.id ? { ...x, can_see_credentials: next } : x))
+  }
+
+  async function removeMember(memberId: string) {
+    if (!confirm('Remove this team member?')) return
+    await fetch(`/api/support/properties/${propertyId}/members`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ member_id: memberId }),
+    })
+    setMembers(m => m.filter(x => x.id !== memberId))
+    toast.success('Member removed')
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Invite form */}
+      <form onSubmit={invite} className="flex gap-2 flex-wrap">
+        <input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
+          placeholder="teammate@email.com" required
+          className="flex-1 min-w-40 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <label className="flex items-center gap-1.5 text-xs text-slate-500 cursor-pointer whitespace-nowrap">
+          <input type="checkbox" checked={canSeeCreds} onChange={e => setCanSeeCreds(e.target.checked)} className="rounded accent-blue-600" />
+          <Shield className="w-3.5 h-3.5 text-slate-400" />
+          Can see credentials
+        </label>
+        <button type="submit" disabled={saving}
+          className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-medium rounded-lg transition-colors">
+          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+          Invite
+        </button>
+      </form>
+
+      {/* Member list */}
+      {loading ? (
+        <p className="text-xs text-slate-400">Loading members…</p>
+      ) : members.length === 0 ? (
+        <p className="text-xs text-slate-400">No team members yet. Invite by email above.</p>
+      ) : (
+        <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+          {members.map(m => (
+            <div key={m.id} className="flex items-center gap-3 px-4 py-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-slate-800 dark:text-slate-100 truncate">{m.member_email}</p>
+                <p className="text-xs text-slate-400">
+                  {m.member_user_id ? 'Active user' : 'Pending sign-up'} · {m.role}
+                </p>
+              </div>
+              <button type="button" onClick={() => toggleCreds(m)}
+                title="Toggle credential access"
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors ${m.can_see_credentials ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
+                <Shield className="w-3 h-3" />
+                {m.can_see_credentials ? 'Credentials ✓' : 'No Credentials'}
+              </button>
+              <button type="button" onClick={() => removeMember(m.id)}
+                className="text-slate-300 hover:text-red-500 transition-colors">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'
 
@@ -288,6 +410,20 @@ export function PropertyForm({ initial = {}, mode }: Props) {
             </div>
             <code className="text-xs bg-slate-950 text-green-300 px-3 py-2 rounded-lg block font-mono break-all">{String(initial.api_key)}</code>
           </div>
+        </section>
+      )}
+
+      {/* Team Members — edit mode only */}
+      {mode === 'edit' && (
+        <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+          <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-5">
+            <Users className="w-4 h-4 text-blue-600" />
+            Team Members
+          </h2>
+          <p className="text-xs text-slate-500 mb-4">
+            Invited members can access this property&apos;s conversations in their own Support Manager after signing up with the same email.
+          </p>
+          <TeamMembersSection propertyId={String(initial.id)} />
         </section>
       )}
 
