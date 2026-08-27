@@ -77,7 +77,7 @@ export function SupportInbox({ properties }: { properties: Property[] }) {
   const [filterSource, setFilterSource] = useState(searchParams.get('source') ?? '')
   const [propCounts, setPropCounts] = useState<Record<string, number>>({})
 
-  const loadRef = useRef<(silent?: boolean) => Promise<void>>()
+  const loadRef = useRef<(silent?: boolean) => Promise<void>>(undefined!)
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
