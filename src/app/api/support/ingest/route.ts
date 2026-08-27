@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
   // Verify property key
   const { data: property, error: propErr } = await supabase
     .from('support_properties')
-    .select('id, user_id, name, auto_reply_enabled, auto_reply_message, from_email, from_name, domain')
+    .select('id, user_id, name, auto_reply_enabled, auto_reply_message, from_email, from_name, domain, ai_enabled, ai_auto_reply')
     .eq('api_key', key)
     .single()
 
@@ -185,6 +185,15 @@ export async function POST(req: NextRequest) {
       subject: subject || null,
       preview: message || `[${attachments.length} attachment(s)]`,
       source: 'widget',
+    }).catch(() => {})
+  }
+
+  // Trigger AI agent async (fire-and-forget)
+  if ((property as Record<string, unknown>).ai_enabled && (property as Record<string, unknown>).ai_auto_reply) {
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversation_id: conversationId }),
     }).catch(() => {})
   }
 

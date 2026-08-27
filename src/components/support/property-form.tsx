@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Globe, Mail, Palette, Zap, Eye, EyeOff, TestTube, Copy, Check, Users, Trash2, Loader2, Shield } from 'lucide-react'
+import { Globe, Mail, Palette, Zap, Eye, EyeOff, TestTube, Copy, Check, Users, Trash2, Loader2, Shield, Bot, ChevronDown, ChevronUp, Plus, X, Database, Github, Wordpress, Server, Link } from 'lucide-react'
+import type { AgentIntegration } from '@/lib/support/agent'
 
 interface Member {
   id: string
@@ -127,6 +128,204 @@ function TeamMembersSection({ propertyId }: { propertyId: string }) {
   )
 }
 
+const INTEGRATION_ICONS: Record<string, React.ReactNode> = {
+  supabase:    <Database className="w-4 h-4 text-emerald-500" />,
+  github:      <Github className="w-4 h-4 text-slate-700 dark:text-slate-300" />,
+  wordpress:   <Wordpress className="w-4 h-4 text-blue-500" />,
+  mysql_bridge:<Server className="w-4 h-4 text-orange-500" />,
+  custom_api:  <Link className="w-4 h-4 text-violet-500" />,
+}
+
+const SETUP_GUIDES: Record<string, { title: string; steps: string[]; placeholder_url: string; placeholder_key: string }> = {
+  supabase: {
+    title: 'Supabase Setup Guide',
+    steps: [
+      'Supabase Dashboard → Settings → API খোলো',
+      '"Project URL" কপি করো → Base URL-এ দাও',
+      '"service_role" key কপি করো → API Key-এ দাও',
+      'Agent এখন তোমার যেকোনো table query করতে পারবে',
+    ],
+    placeholder_url: 'https://xxxx.supabase.co',
+    placeholder_key: 'eyJ...',
+  },
+  github: {
+    title: 'GitHub Setup Guide',
+    steps: [
+      'GitHub.com → Settings → Developer settings → Personal access tokens → Tokens (classic)',
+      '"Generate new token" → scopes: repo, issues',
+      'Token কপি করো → API Key-এ দাও',
+      'Default Repo: org/repo-name format-এ দাও',
+    ],
+    placeholder_url: 'https://github.com',
+    placeholder_key: 'ghp_xxxxxxxxxxxx',
+  },
+  wordpress: {
+    title: 'WordPress Setup Guide',
+    steps: [
+      'WordPress Admin → Users → তোমার profile',
+      'নিচে "Application Passwords" section খোঁজো',
+      'Name দাও (যেমন: CooVex) → "Add New Application Password" ক্লিক করো',
+      'Password কপি করো → WP App Password-এ দাও',
+      'WooCommerce ব্যবহার করলে REST API enable করো: WooCommerce → Settings → Advanced → REST API',
+    ],
+    placeholder_url: 'https://yoursite.com',
+    placeholder_key: 'xxxx xxxx xxxx xxxx',
+  },
+  mysql_bridge: {
+    title: 'MySQL Bridge Setup Guide',
+    steps: [
+      'নিচের PHP script তোমার server-এ upload করো (যেকোনো folder-এ, যেমন: /bridge.php)',
+      'Script-এর ভেতরে DB credentials ও SECRET_KEY সেট করো',
+      'Bridge URL-এ সেই file-এর public URL দাও',
+      'API Key-এ তোমার SECRET_KEY দাও',
+      'Agent এখন SELECT query করতে পারবে — DELETE/DROP safe নয়',
+    ],
+    placeholder_url: 'https://yoursite.com/bridge.php',
+    placeholder_key: 'your-secret-key',
+  },
+  custom_api: {
+    title: 'Custom API Setup Guide',
+    steps: [
+      'তোমার API এর base URL দাও',
+      'Bearer token বা API key দাও',
+      'System Prompt-এ agent-কে বলো কোন endpoint কীভাবে কাজ করে',
+      'Agent http_get / http_post দিয়ে যেকোনো endpoint call করতে পারবে',
+    ],
+    placeholder_url: 'https://api.yourapp.com',
+    placeholder_key: 'Bearer your-api-token',
+  },
+}
+
+const MYSQL_BRIDGE_SCRIPT = `<?php
+// CooVex MySQL Bridge — upload to your server, set credentials below
+$SECRET_KEY = 'your-secret-key-here'; // change this!
+$DB_HOST    = 'localhost';
+$DB_NAME    = 'your_database';
+$DB_USER    = 'your_username';
+$DB_PASS    = 'your_password';
+
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+
+$key = $_SERVER['HTTP_X_BRIDGE_KEY'] ?? '';
+if ($key !== $SECRET_KEY) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+
+$input = json_decode(file_get_contents('php://input'), true);
+$sql   = trim($input['sql'] ?? '');
+
+// Only allow SELECT for safety
+if (!preg_match('/^\\s*SELECT/i', $sql)) {
+  echo json_encode(['error' => 'Only SELECT queries allowed']); exit;
+}
+
+try {
+  $pdo = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME;charset=utf8", $DB_USER, $DB_PASS);
+  $stmt = $pdo->query($sql);
+  echo json_encode(['rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+} catch (Exception $e) {
+  echo json_encode(['error' => $e->getMessage()]);
+}`
+
+function IntegrationCard({
+  int: integration,
+  onUpdate,
+  onRemove,
+}: {
+  int: AgentIntegration
+  onUpdate: (updated: AgentIntegration) => void
+  onRemove: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
+  const guide = SETUP_GUIDES[integration.type]
+  const set = (k: string, v: string) => onUpdate({ ...integration, [k]: v })
+
+  return (
+    <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800/50 cursor-pointer" onClick={() => setOpen(v => !v)}>
+        {INTEGRATION_ICONS[integration.type]}
+        <span className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-100">{integration.label || guide.title.replace(' Setup Guide', '')}</span>
+        <button type="button" onClick={e => { e.stopPropagation(); onRemove() }} className="text-slate-300 hover:text-red-500 transition-colors mr-1">
+          <X className="w-4 h-4" />
+        </button>
+        {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      </div>
+
+      {open && (
+        <div className="p-4 space-y-3">
+          <div>
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Label (display name)</label>
+            <input value={integration.label} onChange={e => set('label', e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">
+              {integration.type === 'mysql_bridge' ? 'Bridge URL' : integration.type === 'github' ? 'Default Repo (org/repo)' : 'Base URL'}
+            </label>
+            <input value={integration.base_url} onChange={e => set('base_url', e.target.value)}
+              placeholder={guide.placeholder_url}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          {integration.type === 'github' && (
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Default Repo (org/repo)</label>
+              <input value={integration.github_repo || ''} onChange={e => set('github_repo', e.target.value)}
+                placeholder="myorg/myrepo"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          )}
+
+          {integration.type === 'wordpress' && (
+            <div>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">WordPress Username</label>
+              <input value={integration.wp_username || ''} onChange={e => set('wp_username', e.target.value)}
+                placeholder="admin"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          )}
+
+          <div>
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">
+              {integration.type === 'wordpress' ? 'App Password' : integration.type === 'mysql_bridge' ? 'Bridge Secret Key' : 'API Key / Token'}
+            </label>
+            <input value={integration.api_key || ''} onChange={e => set('api_key', e.target.value)}
+              type="password"
+              placeholder={guide.placeholder_key}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+
+          {/* Setup Guide */}
+          <div className="mt-2 border border-blue-100 dark:border-blue-900/40 rounded-lg overflow-hidden">
+            <button type="button" onClick={() => setGuideOpen(v => !v)}
+              className="w-full flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-950/30 text-xs font-medium text-blue-700 dark:text-blue-300">
+              {guideOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {guide.title}
+            </button>
+            {guideOpen && (
+              <div className="px-4 py-3 space-y-1.5 bg-blue-50/50 dark:bg-blue-950/10">
+                {guide.steps.map((step, i) => (
+                  <p key={i} className="text-xs text-slate-600 dark:text-slate-400 flex gap-2">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400 flex-shrink-0">{i + 1}.</span>
+                    {step}
+                  </p>
+                ))}
+                {integration.type === 'mysql_bridge' && (
+                  <div className="mt-3">
+                    <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">bridge.php script:</p>
+                    <pre className="text-[10px] bg-slate-900 text-green-300 p-2 rounded-lg overflow-x-auto whitespace-pre-wrap">{MYSQL_BRIDGE_SCRIPT}</pre>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'
 
 interface Props {
@@ -140,6 +339,20 @@ export function PropertyForm({ initial = {}, mode }: Props) {
   const [testing, setTesting] = useState(false)
   const [showPass, setShowPass] = useState(false)
   const [copied, setCopied] = useState<string | null>(null)
+  const [aiIntegrations, setAiIntegrations] = useState<AgentIntegration[]>(
+    Array.isArray(initial.ai_integrations) ? (initial.ai_integrations as AgentIntegration[]) : []
+  )
+
+  function addIntegration(type: AgentIntegration['type']) {
+    const labels: Record<string, string> = {
+      supabase: 'Supabase DB', github: 'GitHub', wordpress: 'WordPress',
+      mysql_bridge: 'MySQL Bridge', custom_api: 'Custom API',
+    }
+    setAiIntegrations(prev => [...prev, {
+      id: Math.random().toString(36).slice(2, 8),
+      type, label: labels[type], base_url: '', api_key: '',
+    }])
+  }
 
   const [form, setForm] = useState({
     name:               (initial.name as string)               || '',
@@ -159,6 +372,9 @@ export function PropertyForm({ initial = {}, mode }: Props) {
     inbound_email:      (initial.inbound_email as string)      || '',
     auto_reply_enabled: (initial.auto_reply_enabled as boolean) ?? false,
     auto_reply_message: (initial.auto_reply_message as string) || '',
+    ai_enabled:         (initial.ai_enabled as boolean)         ?? false,
+    ai_auto_reply:      (initial.ai_auto_reply as boolean)      ?? false,
+    ai_system_prompt:   (initial.ai_system_prompt as string)    || '',
   })
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
@@ -172,7 +388,7 @@ export function PropertyForm({ initial = {}, mode }: Props) {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, ai_integrations: aiIntegrations }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
@@ -426,6 +642,83 @@ export function PropertyForm({ initial = {}, mode }: Props) {
           <TeamMembersSection propertyId={String(initial.id)} />
         </section>
       )}
+
+      {/* AI Agent */}
+      <section className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-1">
+          <Bot className="w-4 h-4 text-blue-600" />
+          AI Agent
+        </h2>
+        <p className="text-xs text-slate-400 mb-5">AI automatically investigates and replies to customer messages using your connected systems.</p>
+
+        <div className="space-y-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={form.ai_enabled} onChange={e => set('ai_enabled', e.target.checked)} className="rounded accent-blue-600" />
+            <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">Enable AI Agent for this property</span>
+          </label>
+
+          {form.ai_enabled && (
+            <>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.ai_auto_reply} onChange={e => set('ai_auto_reply', e.target.checked)} className="rounded accent-blue-600" />
+                <span className="text-sm text-slate-600 dark:text-slate-300">Auto-reply on every new customer message</span>
+              </label>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  System Prompt <span className="text-xs font-normal text-slate-400">(Optional custom instructions)</span>
+                </label>
+                <textarea value={form.ai_system_prompt} onChange={e => set('ai_system_prompt', e.target.value)} rows={4}
+                  placeholder={`Example:\nYou are the support agent for RedactAI. Our product is a PDF redaction SaaS.\nSubscriptions are stored in the Supabase 'subscriptions' table with columns: email, plan, status, expires_at.\nIf a customer's subscription has expired, offer them a renewal link: https://redactai.com/pricing`}
+                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none font-mono text-xs" />
+              </div>
+
+              {/* Integrations */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Connected Systems</label>
+                </div>
+
+                <div className="space-y-2 mb-3">
+                  {aiIntegrations.map((int, i) => (
+                    <IntegrationCard
+                      key={int.id}
+                      int={int}
+                      onUpdate={updated => setAiIntegrations(prev => prev.map((x, j) => j === i ? updated : x))}
+                      onRemove={() => setAiIntegrations(prev => prev.filter((_, j) => j !== i))}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { type: 'supabase' as const,     label: '+ Supabase',       icon: <Database className="w-3 h-3" /> },
+                    { type: 'github' as const,        label: '+ GitHub',         icon: <Github className="w-3 h-3" /> },
+                    { type: 'wordpress' as const,     label: '+ WordPress',      icon: <Wordpress className="w-3 h-3" /> },
+                    { type: 'mysql_bridge' as const,  label: '+ MySQL Bridge',   icon: <Server className="w-3 h-3" /> },
+                    { type: 'custom_api' as const,    label: '+ Custom API',     icon: <Link className="w-3 h-3" /> },
+                  ].map(({ type, label, icon }) => (
+                    <button key={type} type="button" onClick={() => addIntegration(type)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-500 dark:text-slate-400 hover:border-blue-400 hover:text-blue-600 transition-colors">
+                      {icon}{label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Manual trigger */}
+              {mode === 'edit' && (
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <p className="text-xs text-slate-400 mb-2">Manually trigger AI agent on a specific conversation:</p>
+                  <code className="text-xs bg-slate-950 text-green-300 px-3 py-2 rounded-lg block font-mono break-all">
+                    POST /api/support/agent/run{'\n'}{'{ "conversation_id": "uuid" }'}
+                  </code>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
 
       <div className="flex gap-3">
         <button type="button" onClick={() => router.back()}

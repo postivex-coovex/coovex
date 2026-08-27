@@ -85,6 +85,20 @@ export async function POST(req: NextRequest) {
         .update({ last_message_at: new Date().toISOString(), is_read: false, status: 'open' })
         .eq('id', conv.id)
 
+      // Trigger AI agent if enabled
+      const { data: prop } = await supabase
+        .from('support_properties')
+        .select('ai_enabled, ai_auto_reply')
+        .eq('id', conv.property_id)
+        .single()
+      if (prop?.ai_enabled && prop?.ai_auto_reply) {
+        fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversation_id: conv.id }),
+        }).catch(() => {})
+      }
+
       return NextResponse.json({ ok: true, conversation_id: conv.id }, { headers: CORS })
     }
   }

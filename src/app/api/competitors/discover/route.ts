@@ -142,7 +142,7 @@ Respond ONLY with a valid JSON array (${6} items total):
 
   try {
     const response = await claude.messages.create({
-      model: 'claude-opus-4-8',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 4000,
       messages: [{ role: 'user', content: prompt }],
     })
