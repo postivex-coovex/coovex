@@ -423,16 +423,16 @@ function IntegrationCard({
 
           {/* Test Connection */}
           {propertyId && (
-            <div className="flex items-center gap-3">
+            <div className="space-y-2">
               <button type="button" onClick={testConnection} disabled={testLoading}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium transition-colors disabled:opacity-50">
                 <TestTube className="w-3.5 h-3.5" />
                 {testLoading ? 'Testing…' : 'Test Connection'}
               </button>
               {testResult && (
-                <span className={`text-xs font-medium ${testResult.ok ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                <div className={`text-xs px-3 py-2 rounded-lg break-all ${testResult.ok ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300'}`}>
                   {testResult.ok ? '✓ ' : '✗ '}{testResult.message}
-                </span>
+                </div>
               )}
             </div>
           )}
