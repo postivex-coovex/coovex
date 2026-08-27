@@ -39,14 +39,26 @@ export async function sendReplyEmail(opts: SendReplyOptions): Promise<{ messageI
     ? (conversation.subject.startsWith('Re:') ? conversation.subject : `Re: ${conversation.subject}`)
     : `Re: Support conversation`
 
-  const inboundDomain = process.env.INBOUND_EMAIL_DOMAIN || 'inbound.coovex.com'
-  const replyTo = `reply+${conversation.id}@${inboundDomain}`
+  // Reply-To: either subaddress on custom domain, or Postmark's fixed inbound address
+  const inboundAddress = process.env.POSTMARK_INBOUND_ADDRESS || ''
+  const inboundDomain  = process.env.INBOUND_EMAIL_DOMAIN || ''
+  let replyTo: string | undefined
+  if (inboundDomain) {
+    // Custom domain supports subaddressing: reply+{id}@inbound.coovex.com
+    replyTo = `reply+${conversation.id}@${inboundDomain}`
+  } else if (inboundAddress) {
+    // Postmark fixed address — embed conv_id in subject instead
+    replyTo = inboundAddress
+  }
+
+  // Embed conv_id in subject so webhook can match without subaddressing
+  const subjectWithId = `${subject} [ref:${conversation.id}]`
 
   const mailOptions: nodemailer.SendMailOptions = {
     from,
     to: to!,
-    replyTo,
-    subject,
+    ...(replyTo ? { replyTo } : {}),
+    subject: subjectWithId,
     text: replyContent,
     html: replyHtml || `<div style="font-family:sans-serif;font-size:15px;line-height:1.6;color:#1e293b">${replyContent.replace(/\n/g, '<br>')}</div>`,
   }

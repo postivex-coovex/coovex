@@ -11,10 +11,15 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS })
 }
 
-// Extract reply+{UUID}@... from a To/Delivered-To field
-function extractConvId(toField: string): string | null {
-  const m = toField.match(/reply\+([0-9a-f-]{36})/i)
-  return m ? m[1] : null
+// Extract conv_id from To address (reply+UUID@...) OR subject ([ref:UUID])
+function extractConvId(toField: string, subject?: string): string | null {
+  const toMatch = toField.match(/reply\+([0-9a-f-]{36})/i)
+  if (toMatch) return toMatch[1]
+  if (subject) {
+    const subMatch = subject.match(/\[ref:([0-9a-f-]{36})\]/i)
+    if (subMatch) return subMatch[1]
+  }
+  return null
 }
 
 // Extract plain email address from "Name <email>" or bare email
@@ -58,8 +63,8 @@ export async function POST(req: NextRequest) {
 
   const senderEmail = extractEmail(fromField)
 
-  // ── Strategy 1: conv ID embedded in Reply-To / To address ──────────
-  const convId = extractConvId(toField)
+  // ── Strategy 1: conv ID in To address OR subject [ref:UUID] ────────
+  const convId = extractConvId(toField, subject)
   if (convId) {
     const { data: conv } = await supabase
       .from('support_conversations')
