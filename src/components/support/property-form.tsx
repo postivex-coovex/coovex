@@ -263,7 +263,7 @@ function IntegrationCard({
   const [open, setOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
   const guide = SETUP_GUIDES[integration.type]
-  const set = (k: string, v: string) => onUpdate({ ...integration, [k]: v })
+  const set = (k: string, v: string | number | boolean) => onUpdate({ ...integration, [k]: v })
 
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
