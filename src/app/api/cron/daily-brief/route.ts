@@ -172,8 +172,11 @@ export async function GET(req: NextRequest) {
         dismissed: false,
       }).then(() => null)
 
-      // Send email brief to workspace owner if email configured
-      if (process.env.RESEND_API_KEY) {
+      // Send email only if there is something meaningful to report
+      const hasAnything = stats.signals > 0 || stats.leads > 0 || stats.reviews > 0
+        || pendingTasks.length > 0 || pendingBlogTasks.length > 0
+
+      if (hasAnything && process.env.RESEND_API_KEY) {
         const { data: members } = await supabase
           .from('workspace_members')
           .select('user_id, role')
