@@ -58,7 +58,28 @@ function MessageBubble({ msg }: { msg: SupportMessage }) {
             ? 'bg-blue-600 text-white rounded-tr-sm'
             : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-sm'
         }`}>
-          {msg.content}
+          {msg.content && <p>{msg.content}</p>}
+          {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
+            <div className={`flex flex-wrap gap-2 ${msg.content ? 'mt-2' : ''}`}>
+              {(msg.attachments as Array<{ url: string; name: string; type: string; size: number }>).map((a, i) => (
+                a.type?.startsWith('image/') ? (
+                  <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={a.url} alt={a.name}
+                      className="w-24 h-20 object-cover rounded-lg border border-black/10 hover:opacity-90 transition-opacity cursor-pointer"
+                    />
+                  </a>
+                ) : (
+                  <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" download
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium max-w-[200px] truncate transition-opacity hover:opacity-80 ${
+                      isAgent ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
+                    }`}>
+                    📎 <span className="truncate">{a.name}</span>
+                  </a>
+                )
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
