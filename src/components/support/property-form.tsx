@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Globe, Mail, Palette, Zap, Eye, EyeOff, TestTube, Copy, Check, Users, Trash2, Loader2, Shield, Bot, ChevronDown, ChevronUp, Plus, X, Database, Github, Wordpress, Server, Link } from 'lucide-react'
+import { Globe, Mail, Palette, Zap, Eye, EyeOff, TestTube, Copy, Check, Users, Trash2, Loader2, Shield, Bot, ChevronDown, ChevronUp, Plus, X, Database, Github, Server, Link, LayoutGrid } from 'lucide-react'
 import type { AgentIntegration } from '@/lib/support/agent'
 
 interface Member {
@@ -131,7 +131,7 @@ function TeamMembersSection({ propertyId }: { propertyId: string }) {
 const INTEGRATION_ICONS: Record<string, React.ReactNode> = {
   supabase:    <Database className="w-4 h-4 text-emerald-500" />,
   github:      <Github className="w-4 h-4 text-slate-700 dark:text-slate-300" />,
-  wordpress:   <Wordpress className="w-4 h-4 text-blue-500" />,
+  wordpress:   <LayoutGrid className="w-4 h-4 text-blue-500" />,
   mysql_bridge:<Server className="w-4 h-4 text-orange-500" />,
   custom_api:  <Link className="w-4 h-4 text-violet-500" />,
 }
@@ -694,7 +694,7 @@ export function PropertyForm({ initial = {}, mode }: Props) {
                   {[
                     { type: 'supabase' as const,     label: '+ Supabase',       icon: <Database className="w-3 h-3" /> },
                     { type: 'github' as const,        label: '+ GitHub',         icon: <Github className="w-3 h-3" /> },
-                    { type: 'wordpress' as const,     label: '+ WordPress',      icon: <Wordpress className="w-3 h-3" /> },
+                    { type: 'wordpress' as const,     label: '+ WordPress',      icon: <LayoutGrid className="w-3 h-3" /> },
                     { type: 'mysql_bridge' as const,  label: '+ MySQL Bridge',   icon: <Server className="w-3 h-3" /> },
                     { type: 'custom_api' as const,    label: '+ Custom API',     icon: <Link className="w-3 h-3" /> },
                   ].map(({ type, label, icon }) => (
