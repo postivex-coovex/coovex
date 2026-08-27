@@ -279,8 +279,8 @@ function IntegrationCard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(integration),
       })
-      const data = await res.json() as { ok: boolean; message: string }
-      setTestResult(data)
+      const data = await res.json() as { ok?: boolean; message?: string; error?: string }
+      setTestResult({ ok: data.ok ?? false, message: data.message || data.error || 'Unknown error' })
     } catch {
       setTestResult({ ok: false, message: 'Network error' })
     } finally {
