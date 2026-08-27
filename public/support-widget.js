@@ -4,7 +4,9 @@
   var cfg = window.CooVexSupport || {};
   if (!cfg.key) return;
 
-  var API      = (cfg.apiUrl  || 'https://app.coovex.com') + '/api/support/ingest';
+  var BASE     = cfg.apiUrl  || 'https://app.coovex.com';
+  var API      = BASE + '/api/support/ingest';
+  var MSGS_API = BASE + '/api/support/widget/messages';
   var color    = cfg.color    || '#2563eb';
   var position = cfg.position || 'bottom-right';
   var title    = cfg.title    || 'Support';
@@ -18,6 +20,10 @@
   var selectedFiles = [];
   var MAX_FILES = 5;
   var MAX_SIZE  = 10 * 1024 * 1024; // 10 MB
+
+  var pollTimer    = null;
+  var lastMsgTime  = null;
+  var seenMsgIds   = {};
 
   // ── Styles ──────────────────────────────────────────────────────
   var css = `
@@ -271,11 +277,49 @@
     });
   }
 
+  // ── Polling for agent replies ─────────────────────────────────────
+  function pollMessages() {
+    var convId = session.conversation_id;
+    if (!convId) return;
+    var url = MSGS_API + '?conversation_id=' + encodeURIComponent(convId);
+    if (lastMsgTime) url += '&since=' + encodeURIComponent(lastMsgTime);
+    fetch(url)
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data || !data.messages) return;
+        data.messages.forEach(function(m) {
+          if (seenMsgIds[m.id]) return;
+          seenMsgIds[m.id] = true;
+          lastMsgTime = m.created_at;
+          // Show badge if panel is hidden
+          if (panel.classList.contains('cvx-hidden')) {
+            badge.style.display = 'flex';
+          }
+          addMsg(m.content, false, 'now', m.attachments || []);
+        });
+      })
+      .catch(function() {});
+  }
+
+  function startPolling() {
+    if (pollTimer) return;
+    lastMsgTime = new Date().toISOString();
+    pollTimer = setInterval(pollMessages, 4000);
+  }
+
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  // If session already has a conversation, start polling immediately
+  if (session.conversation_id) startPolling();
+
   // ── Events ───────────────────────────────────────────────────────
   btn.addEventListener('click', function() {
     var isHidden = panel.classList.contains('cvx-hidden');
     if (isHidden) {
       panel.classList.remove('cvx-hidden');
+      badge.style.display = 'none';
       showWelcome();
       replyInput.focus();
     } else {
@@ -339,6 +383,7 @@
       if (data.conversation_id) {
         saveSession({ conversation_id: data.conversation_id });
         infoForm.style.display = 'none';
+        startPolling();
       }
       if (data.auto_reply) {
         setTimeout(function() { addMsg(data.auto_reply, false); }, 600);
