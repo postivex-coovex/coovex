@@ -25,14 +25,18 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
     .order('created_at', { ascending: true })
     .limit(20)
 
-  const reply = await generateAiReply({
-    propertyName: conv.support_properties?.name ?? 'Support',
-    propertyDomain: conv.support_properties?.domain ?? null,
-    customerName: conv.customer_name,
-    customerEmail: conv.customer_email,
-    subject: conv.subject,
-    messages: messages ?? [],
-  })
-
-  return NextResponse.json({ reply })
+  try {
+    const reply = await generateAiReply({
+      propertyName: conv.support_properties?.name ?? 'Support',
+      propertyDomain: conv.support_properties?.domain ?? null,
+      customerName: conv.customer_name,
+      customerEmail: conv.customer_email,
+      subject: conv.subject,
+      messages: messages ?? [],
+    })
+    return NextResponse.json({ reply })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'AI generation failed'
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
 }
