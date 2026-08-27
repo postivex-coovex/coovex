@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MessageSquare, Mail, Globe, Search, RefreshCw, Plus, Circle, CheckCircle, Clock, AlertOctagon, ChevronRight, Building2, ExternalLink } from 'lucide-react'
 import type { SupportConversation } from '@/lib/support/types'
@@ -19,6 +19,24 @@ const SOURCE_CONFIG = {
   widget: { label: 'Widget', icon: MessageSquare, color: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' },
   email:  { label: 'Email',  icon: Mail,           color: 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300' },
   api:    { label: 'API',    icon: Globe,          color: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300' },
+}
+
+function playNotification() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const gain = ctx.createGain()
+    gain.connect(ctx.destination)
+    gain.gain.setValueAtTime(0, ctx.currentTime)
+    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6)
+    const osc = ctx.createOscillator()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(880, ctx.currentTime)
+    osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.15)
+    osc.connect(gain)
+    osc.start(ctx.currentTime)
+    osc.stop(ctx.currentTime + 0.6)
+  } catch {}
 }
 
 function timeAgo(date: string) {
@@ -59,6 +77,8 @@ export function SupportInbox({ properties }: { properties: Property[] }) {
   const [filterSource, setFilterSource] = useState(searchParams.get('source') ?? '')
   const [propCounts, setPropCounts] = useState<Record<string, number>>({})
 
+  const loadRef = useRef<(silent?: boolean) => Promise<void>>()
+
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
     else setRefreshing(true)
@@ -87,18 +107,25 @@ export function SupportInbox({ properties }: { properties: Property[] }) {
     }
   }, [filterProperty, filterStatus, filterSource, search])
 
+  // Keep ref in sync so realtime handler always calls latest version
+  useEffect(() => { loadRef.current = load }, [load])
   useEffect(() => { load() }, [load])
 
-  // Realtime — refresh on any conversation/message change
+  // Realtime — stable subscription (never recreated), calls latest load via ref
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
       .channel('inbox-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_conversations' }, () => load(true))
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, () => load(true))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_conversations' }, () => {
+        loadRef.current?.(true)
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, () => {
+        playNotification()
+        loadRef.current?.(true)
+      })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [load])
+  }, []) // empty deps — subscribe once, never recreate
 
   const sorted = sortConversations(conversations)
   const unreadCount = conversations.filter(c => !c.is_read).length
