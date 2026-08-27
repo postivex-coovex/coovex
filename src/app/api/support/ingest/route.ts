@@ -4,6 +4,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyOwnerNewMessage } from '@/lib/support/notify'
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS })
+}
+
 interface AttachmentMeta { url: string; name: string; type: string; size: number }
 
 async function uploadFiles(
@@ -46,7 +56,7 @@ export async function POST(req: NextRequest) {
     ;({ key, name, email, phone, message, subject, url, session_id } = json)
   } else {
     const fd = await req.formData().catch(() => null)
-    if (!fd) return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
+    if (!fd) return NextResponse.json({ error: 'Invalid body' }, { status: 400, headers: CORS })
     key        = fd.get('key')        as string | undefined
     name       = fd.get('name')       as string | undefined
     email      = fd.get('email')      as string | undefined
@@ -58,8 +68,8 @@ export async function POST(req: NextRequest) {
     files = fd.getAll('files').filter((v): v is File => v instanceof File)
   }
 
-  if (!key) return NextResponse.json({ error: 'Property key required' }, { status: 400 })
-  if (!message && files.length === 0) return NextResponse.json({ error: 'Message or file required' }, { status: 400 })
+  if (!key) return NextResponse.json({ error: 'Property key required' }, { status: 400, headers: CORS })
+  if (!message && files.length === 0) return NextResponse.json({ error: 'Message or file required' }, { status: 400, headers: CORS })
 
   // Verify property key
   const { data: property, error: propErr } = await supabase
@@ -69,7 +79,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (propErr || !property) {
-    return NextResponse.json({ error: 'Invalid property key' }, { status: 403 })
+    return NextResponse.json({ error: 'Invalid property key' }, { status: 403, headers: CORS })
   }
 
   // Find existing conversation
@@ -119,7 +129,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (convErr || !conv) {
-      return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500, headers: CORS })
     }
     conversationId = conv.id
 
@@ -151,7 +161,7 @@ export async function POST(req: NextRequest) {
       attachments,
     })
 
-  if (msgErr) return NextResponse.json({ error: msgErr.message }, { status: 500 })
+  if (msgErr) return NextResponse.json({ error: msgErr.message }, { status: 500, headers: CORS })
 
   await supabase
     .from('support_conversations')
@@ -181,5 +191,5 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     conversation_id: conversationId,
     auto_reply: property.auto_reply_enabled ? property.auto_reply_message : null,
-  })
+  }, { headers: CORS })
 }
