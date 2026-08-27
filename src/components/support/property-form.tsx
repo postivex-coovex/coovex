@@ -255,15 +255,38 @@ function IntegrationCard({
   int: integration,
   onUpdate,
   onRemove,
+  propertyId,
 }: {
   int: AgentIntegration
   onUpdate: (updated: AgentIntegration) => void
   onRemove: () => void
+  propertyId: string
 }) {
   const [open, setOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null)
+  const [testLoading, setTestLoading] = useState(false)
   const guide = SETUP_GUIDES[integration.type]
   const set = (k: string, v: string | number | boolean) => onUpdate({ ...integration, [k]: v })
+
+  async function testConnection() {
+    if (!propertyId) return
+    setTestLoading(true)
+    setTestResult(null)
+    try {
+      const res = await fetch(`/api/support/properties/${propertyId}/test-integration`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(integration),
+      })
+      const data = await res.json() as { ok: boolean; message: string }
+      setTestResult(data)
+    } catch {
+      setTestResult({ ok: false, message: 'Network error' })
+    } finally {
+      setTestLoading(false)
+    }
+  }
 
   return (
     <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
@@ -396,6 +419,22 @@ function IntegrationCard({
                   className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             </>
+          )}
+
+          {/* Test Connection */}
+          {propertyId && (
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={testConnection} disabled={testLoading}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium transition-colors disabled:opacity-50">
+                <TestTube className="w-3.5 h-3.5" />
+                {testLoading ? 'Testing…' : 'Test Connection'}
+              </button>
+              {testResult && (
+                <span className={`text-xs font-medium ${testResult.ok ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                  {testResult.ok ? '✓ ' : '✗ '}{testResult.message}
+                </span>
+              )}
+            </div>
           )}
 
           {/* Setup Guide */}
@@ -789,6 +828,7 @@ export function PropertyForm({ initial = {}, mode }: Props) {
                       int={int}
                       onUpdate={updated => setAiIntegrations(prev => prev.map((x, j) => j === i ? updated : x))}
                       onRemove={() => setAiIntegrations(prev => prev.filter((_, j) => j !== i))}
+                      propertyId={String(initial.id || '')}
                     />
                   ))}
                 </div>

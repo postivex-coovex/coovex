@@ -1,6 +1,6 @@
 // Public endpoint — receives messages from embedded widgets
 // Auth: property api_key (no user session required)
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyOwnerNewMessage } from '@/lib/support/notify'
 
@@ -188,13 +188,16 @@ export async function POST(req: NextRequest) {
     }).catch(() => {})
   }
 
-  // Trigger AI agent async (fire-and-forget)
+  // Trigger AI agent after response is sent
   if ((property as Record<string, unknown>).ai_enabled && (property as Record<string, unknown>).ai_auto_reply) {
-    fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conversation_id: conversationId }),
-    }).catch(() => {})
+    const convId = conversationId
+    after(async () => {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversation_id: convId }),
+      }).catch(() => {})
+    })
   }
 
   return NextResponse.json({

@@ -21,9 +21,10 @@
   var MAX_FILES = 5;
   var MAX_SIZE  = 10 * 1024 * 1024; // 10 MB
 
-  var pollTimer    = null;
-  var lastMsgTime  = null;
-  var seenMsgIds   = {};
+  var pollTimer      = null;
+  var lastMsgTime    = null;
+  var seenMsgIds     = {};
+  var historyLoaded  = false;
 
   // ── Styles ──────────────────────────────────────────────────────
   var css = `
@@ -311,6 +312,25 @@
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   }
 
+  function loadHistory() {
+    if (historyLoaded || !session.conversation_id) return;
+    historyLoaded = true;
+    fetch(MSGS_API + '?conversation_id=' + encodeURIComponent(session.conversation_id))
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data || !data.messages || !data.messages.length) return;
+        data.messages.forEach(function(m) {
+          if (seenMsgIds[m.id]) return;
+          seenMsgIds[m.id] = true;
+          var isOut = m.sender_type === 'customer';
+          var t = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          addMsg(m.content, isOut, t, m.attachments || []);
+          lastMsgTime = m.created_at;
+        });
+      })
+      .catch(function() {});
+  }
+
   // If session already has a conversation, start polling immediately
   if (session.conversation_id) startPolling();
 
@@ -320,7 +340,11 @@
     if (isHidden) {
       panel.classList.remove('cvx-hidden');
       badge.style.display = 'none';
-      showWelcome();
+      if (session.conversation_id) {
+        loadHistory();
+      } else {
+        showWelcome();
+      }
       replyInput.focus();
     } else {
       panel.classList.add('cvx-hidden');

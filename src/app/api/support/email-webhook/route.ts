@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const CORS = {
@@ -92,11 +92,14 @@ export async function POST(req: NextRequest) {
         .eq('id', conv.property_id)
         .single()
       if (prop?.ai_enabled && prop?.ai_auto_reply) {
-        fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conversation_id: conv.id }),
-        }).catch(() => {})
+        const runConvId = conv.id
+        after(async () => {
+          await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ conversation_id: runConvId }),
+          }).catch(() => {})
+        })
       }
 
       return NextResponse.json({ ok: true, conversation_id: conv.id }, { headers: CORS })
