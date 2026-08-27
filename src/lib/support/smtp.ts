@@ -39,9 +39,13 @@ export async function sendReplyEmail(opts: SendReplyOptions): Promise<{ messageI
     ? (conversation.subject.startsWith('Re:') ? conversation.subject : `Re: ${conversation.subject}`)
     : `Re: Support conversation`
 
+  const inboundDomain = process.env.INBOUND_EMAIL_DOMAIN || 'inbound.coovex.com'
+  const replyTo = `reply+${conversation.id}@${inboundDomain}`
+
   const mailOptions: nodemailer.SendMailOptions = {
     from,
     to: to!,
+    replyTo,
     subject,
     text: replyContent,
     html: replyHtml || `<div style="font-family:sans-serif;font-size:15px;line-height:1.6;color:#1e293b">${replyContent.replace(/\n/g, '<br>')}</div>`,
