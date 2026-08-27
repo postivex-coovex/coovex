@@ -62,7 +62,7 @@ export function CreateTaskForm({ onCreated, onClose, conversationId, conversatio
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       toast.success('Task created')
-      onCreated(data.task)
+      onCreated?.(data.task)
       onClose()
     } catch (err: unknown) {
       toast.error((err as Error).message)
