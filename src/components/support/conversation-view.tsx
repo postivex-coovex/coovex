@@ -8,6 +8,7 @@ import {
   ChevronDown, Loader2, X, ExternalLink, Copy, Tag,
 } from 'lucide-react'
 import type { SupportConversation, SupportMessage, SupportProperty } from '@/lib/support/types'
+import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   conversation: SupportConversation & { support_properties: SupportProperty }
@@ -102,6 +103,27 @@ export function ConversationView({ conversation: initial, messages: initialMessa
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Realtime — subscribe to new messages on this conversation
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`conv-messages-${conv.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `conversation_id=eq.${conv.id}` },
+        (payload) => {
+          const newMsg = payload.new as SupportMessage
+          // Ignore messages we just sent ourselves (agent type)
+          setMessages(prev => {
+            if (prev.some(m => m.id === newMsg.id)) return prev
+            return [...prev, newMsg]
+          })
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [conv.id])
 
   async function sendReply() {
     if (!replyText.trim()) return

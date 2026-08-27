@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MessageSquare, Mail, Globe, Search, Filter, RefreshCw, Plus, Circle, CheckCircle, Clock, AlertOctagon, ChevronRight } from 'lucide-react'
 import type { SupportConversation } from '@/lib/support/types'
+import { createClient } from '@/lib/supabase/client'
 
 interface Property { id: string; name: string; domain: string | null; widget_color: string }
 
@@ -61,6 +62,21 @@ export function SupportInbox({ properties }: { properties: Property[] }) {
   }, [filterProperty, filterStatus, filterSource, search])
 
   useEffect(() => { load() }, [load])
+
+  // Realtime — refresh inbox when any conversation is updated or new message arrives
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('inbox-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_conversations' }, () => {
+        load(true)
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, () => {
+        load(true)
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [load])
 
   const unreadCount = conversations.filter(c => !c.is_read).length
 
