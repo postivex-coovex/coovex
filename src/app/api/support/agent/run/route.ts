@@ -70,9 +70,10 @@ export async function POST(req: NextRequest) {
   if (conv.customer_email && property.smtp_host) {
     try {
       const { sendReplyEmail } = await import('@/lib/support/smtp')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await sendReplyEmail({
-        property: property as Parameters<typeof sendReplyEmail>[0]['property'],
-        conversation: { ...conv, email_thread_id: null } as Parameters<typeof sendReplyEmail>[0]['conversation'],
+        property: property as any,
+        conversation: { ...conv, email_thread_id: null } as any,
         replyContent: reply,
       })
     } catch { /* SMTP optional */ }
