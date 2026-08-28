@@ -134,6 +134,12 @@
     #cvx-send-btn svg{width:16px;height:16px;fill:white;}
     #cvx-powered{text-align:center;font-size:10px;color:#94a3b8;padding:6px;flex-shrink:0;}
     #cvx-powered a{color:${color};text-decoration:none;}
+    #cvx-typing{display:none;align-self:flex-start;}
+    #cvx-typing .cvx-dots{display:flex;gap:5px;padding:12px 14px;background:white;border:1px solid #e2e8f0;border-radius:14px 14px 14px 4px;}
+    #cvx-typing .cvx-dots span{width:7px;height:7px;background:#94a3b8;border-radius:50%;animation:cvxBounce 1.2s infinite ease-in-out;}
+    #cvx-typing .cvx-dots span:nth-child(2){animation-delay:.2s;}
+    #cvx-typing .cvx-dots span:nth-child(3){animation-delay:.4s;}
+    @keyframes cvxBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
     @media(max-width:420px){
       #cvx-panel{width:calc(100vw - 24px);max-height:calc(100vh - 90px);border-radius:12px;}
     }
@@ -168,7 +174,9 @@
       </div>
       <button id="cvx-close-btn">&#x2715;</button>
     </div>
-    <div id="cvx-messages"></div>
+    <div id="cvx-messages">
+      <div id="cvx-typing"><div class="cvx-dots"><span></span><span></span><span></span></div></div>
+    </div>
     <div id="cvx-info-form">
       <input id="cvx-name-input"  type="text"  placeholder="Your name (optional)" />
       <input id="cvx-email-input" type="email" placeholder="Your email (for reply, optional)" />
@@ -192,6 +200,8 @@
   document.body.appendChild(panel);
 
   var msgContainer  = panel.querySelector('#cvx-messages');
+  var typingEl      = panel.querySelector('#cvx-typing');
+  var typingTimer   = null;
   var nameInput     = panel.querySelector('#cvx-name-input');
   var emailInput    = panel.querySelector('#cvx-email-input');
   var phoneInput    = panel.querySelector('#cvx-phone-input');
@@ -221,6 +231,19 @@
     if (bytes < 1024) return bytes + 'B';
     if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + 'KB';
     return (bytes/(1024*1024)).toFixed(1) + 'MB';
+  }
+
+  function showTyping(timeoutMs) {
+    if (typingTimer) clearTimeout(typingTimer);
+    typingEl.style.display = 'flex';
+    msgContainer.appendChild(typingEl); // keep at bottom
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+    typingTimer = setTimeout(hideTyping, timeoutMs || 60000);
+  }
+
+  function hideTyping() {
+    if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+    typingEl.style.display = 'none';
   }
 
   function addMsg(content, isOut, time, attachments) {
@@ -292,6 +315,7 @@
           if (seenMsgIds[m.id]) return;
           seenMsgIds[m.id] = true;
           lastMsgTime = m.created_at;
+          if (m.sender_type !== 'customer') hideTyping();
           // Show badge if panel is hidden
           if (panel.classList.contains('cvx-hidden')) {
             badge.style.display = 'flex';
@@ -411,6 +435,9 @@
       }
       if (data.auto_reply) {
         setTimeout(function() { addMsg(data.auto_reply, false); }, 600);
+      }
+      if (data.ai_reply_pending) {
+        showTyping(90000); // hide after 90s max
       }
     };
     var onError = function() {

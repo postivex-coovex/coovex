@@ -191,7 +191,11 @@ export async function POST(req: NextRequest) {
   }
 
   // Trigger AI agent after response is sent
-  if ((property as Record<string, unknown>).ai_enabled && (property as Record<string, unknown>).ai_auto_reply) {
+  const aiPending = !!(
+    (property as Record<string, unknown>).ai_enabled &&
+    (property as Record<string, unknown>).ai_auto_reply
+  )
+  if (aiPending) {
     const convId = conversationId
     after(async () => {
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
@@ -205,5 +209,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     conversation_id: conversationId,
     auto_reply: property.auto_reply_enabled ? property.auto_reply_message : null,
+    ai_reply_pending: aiPending,
   }, { headers: CORS })
 }
