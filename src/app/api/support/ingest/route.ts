@@ -1,6 +1,8 @@
 // Public endpoint — receives messages from embedded widgets
 // Auth: property api_key (no user session required)
 import { NextRequest, NextResponse, after } from 'next/server'
+
+export const maxDuration = 60
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyOwnerNewMessage } from '@/lib/support/notify'
 
