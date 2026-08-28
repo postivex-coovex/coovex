@@ -226,6 +226,18 @@ const TOOLS: Anthropic.Tool[] = [
       required: ['sql'],
     },
   },
+  {
+    name: 'escalate_ticket',
+    description: 'Escalate the conversation as a support ticket requiring human review. Use when the issue is beyond your capability (payment disputes, account bans, refunds, legal matters, complex bugs). Also call send_reply to inform the customer.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        reason:   { type: 'string', description: 'Why this needs human attention (e.g. "Payment dispute", "Refund request", "Account compromised")' },
+        priority: { type: 'string', enum: ['low', 'normal', 'high', 'urgent'], description: 'Ticket priority' },
+      },
+      required: ['reason', 'priority'],
+    },
+  },
 ]
 
 async function execTool(name: string, input: Record<string, unknown>, integrations: AgentIntegration[]): Promise<string> {
@@ -289,10 +301,19 @@ async function execTool(name: string, input: Record<string, unknown>, integratio
     }
   }
 
+  if (name === 'escalate_ticket') {
+    return JSON.stringify({ escalated: true, reason: input.reason, priority: input.priority })
+  }
+
   return JSON.stringify({ error: 'Unknown tool' })
 }
 
-export async function runSupportAgent(opts: AgentOptions): Promise<string> {
+export interface AgentResult {
+  reply: string
+  escalated?: { reason: string; priority: string }
+}
+
+export async function runSupportAgent(opts: AgentOptions): Promise<AgentResult> {
   const systemMsg = buildSystemPrompt(opts)
 
   const history = opts.messages
@@ -312,6 +333,7 @@ Investigate and reply to the customer's latest message.`
   const msgs: Anthropic.MessageParam[] = [{ role: 'user', content: userContent }]
 
   let finalReply = ''
+  let escalated: { reason: string; priority: string } | undefined
   const MAX_ITER = 8
 
   for (let i = 0; i < MAX_ITER; i++) {
@@ -336,7 +358,7 @@ Investigate and reply to the customer's latest message.`
     const replyTool = toolUseBlocks.find(b => b.name === 'send_reply')
     if (replyTool) {
       finalReply = (replyTool.input as { message: string }).message
-      break
+      // don't break yet — escalate_ticket might also be in this batch
     }
 
     // Execute other tools
@@ -344,10 +366,19 @@ Investigate and reply to the customer's latest message.`
     const toolResults: Anthropic.ToolResultBlockParam[] = []
     for (const tool of toolUseBlocks) {
       const result = await execTool(tool.name, tool.input as Record<string, unknown>, opts.integrations)
+      if (tool.name === 'escalate_ticket') {
+        const parsed = JSON.parse(result) as { escalated: boolean; reason: string; priority: string }
+        if (parsed.escalated) escalated = { reason: parsed.reason, priority: parsed.priority }
+      }
       toolResults.push({ type: 'tool_result', tool_use_id: tool.id, content: result })
     }
+
+    if (replyTool) break
     msgs.push({ role: 'user', content: toolResults })
   }
 
-  return finalReply || 'I have reviewed your message and our team will follow up shortly.'
+  return {
+    reply: finalReply || 'I have reviewed your message and our team will follow up shortly.',
+    escalated,
+  }
 }

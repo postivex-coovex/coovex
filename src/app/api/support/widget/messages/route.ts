@@ -26,10 +26,13 @@ export async function GET(req: NextRequest) {
     .from('support_messages')
     .select('id, content, sender_type, created_at, attachments')
     .eq('conversation_id', conversationId)
-    .in('sender_type', ['agent', 'ai'])
     .order('created_at', { ascending: true })
 
-  if (since) q = q.gt('created_at', since)
+  // When polling for new replies, only fetch non-customer (agent/ai) messages
+  // When loading history (no since param), fetch all
+  if (since) {
+    q = q.gt('created_at', since).in('sender_type', ['agent', 'ai'])
+  }
 
   const { data, error } = await q
   if (error) return NextResponse.json({ error: error.message }, { status: 500, headers: CORS })

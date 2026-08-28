@@ -45,6 +45,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/api/embed') ||
     request.nextUrl.pathname.startsWith('/api/support/ingest') ||
     request.nextUrl.pathname.startsWith('/api/support/email-webhook') ||
+    request.nextUrl.pathname.startsWith('/api/support/widget/') ||
+    request.nextUrl.pathname.startsWith('/api/support/agent/run') ||
     request.nextUrl.pathname.startsWith('/onboarding') ||
     isAuthPage
 

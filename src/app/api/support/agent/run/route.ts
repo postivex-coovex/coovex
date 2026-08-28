@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { runSupportAgent } from '@/lib/support/agent'
-import type { AgentIntegration } from '@/lib/support/agent'
+import type { AgentIntegration, AgentResult } from '@/lib/support/agent'
 
 export const maxDuration = 60
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     ? (property.ai_integrations as AgentIntegration[])
     : []
 
-  const reply = await runSupportAgent({
+  const result: AgentResult = await runSupportAgent({
     conversationId: conversation_id,
     propertyName:   property.name,
     propertyDomain: property.domain,
@@ -58,13 +58,24 @@ export async function POST(req: NextRequest) {
     property_id:  conv.property_id,
     sender_type:  'ai',
     sender_name:  'AI Agent',
-    content:      reply,
+    content:      result.reply,
     source:       'ai',
   })
 
-  await supabase.from('support_conversations')
-    .update({ last_message_at: new Date().toISOString() })
-    .eq('id', conversation_id)
+  // Mark as escalated ticket if agent requested it
+  if (result.escalated) {
+    await supabase.from('support_conversations').update({
+      last_message_at: new Date().toISOString(),
+      status: 'open',
+      is_read: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      metadata: { ticket: true, ticket_reason: result.escalated.reason, ticket_priority: result.escalated.priority } as any,
+    }).eq('id', conversation_id)
+  } else {
+    await supabase.from('support_conversations')
+      .update({ last_message_at: new Date().toISOString() })
+      .eq('id', conversation_id)
+  }
 
   // Send email reply if customer has email + SMTP configured
   if (conv.customer_email && property.smtp_host) {
@@ -74,10 +85,10 @@ export async function POST(req: NextRequest) {
       await sendReplyEmail({
         property: property as any,
         conversation: { ...conv, email_thread_id: null } as any,
-        replyContent: reply,
+        replyContent: result.reply,
       })
     } catch { /* SMTP optional */ }
   }
 
-  return NextResponse.json({ ok: true, reply })
+  return NextResponse.json({ ok: true, reply: result.reply, escalated: result.escalated ?? null })
 }
