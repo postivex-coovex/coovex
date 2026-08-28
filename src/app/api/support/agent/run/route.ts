@@ -41,16 +41,34 @@ export async function POST(req: NextRequest) {
     ? (property.ai_integrations as AgentIntegration[])
     : []
 
-  const result: AgentResult = await runSupportAgent({
-    conversationId: conversation_id,
-    propertyName:   property.name,
-    propertyDomain: property.domain,
-    systemPrompt:   property.ai_system_prompt,
-    integrations,
-    messages:       messages || [],
-    customerName:   conv.customer_name,
-    customerEmail:  conv.customer_email,
-  })
+  let result: AgentResult
+  try {
+    result = await runSupportAgent({
+      conversationId: conversation_id,
+      propertyName:   property.name,
+      propertyDomain: property.domain,
+      systemPrompt:   property.ai_system_prompt,
+      integrations,
+      messages:       messages || [],
+      customerName:   conv.customer_name,
+      customerEmail:  conv.customer_email,
+    })
+  } catch (err) {
+    console.error('[agent/run] runSupportAgent failed:', err)
+    // Insert fallback so widget typing indicator stops
+    await supabase.from('support_messages').insert({
+      conversation_id,
+      property_id: conv.property_id,
+      sender_type: 'ai',
+      sender_name: 'AI Agent',
+      content: 'Sorry, I ran into an issue processing your request. A team member will follow up shortly.',
+      source: 'ai',
+    })
+    await supabase.from('support_conversations')
+      .update({ last_message_at: new Date().toISOString(), is_read: false })
+      .eq('id', conversation_id)
+    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+  }
 
   // Insert AI reply
   await supabase.from('support_messages').insert({

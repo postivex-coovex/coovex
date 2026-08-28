@@ -437,7 +437,7 @@
         setTimeout(function() { addMsg(data.auto_reply, false); }, 600);
       }
       if (data.ai_reply_pending) {
-        showTyping(90000); // hide after 90s max
+        showTyping(45000); // hide after 45s max
       }
     };
     var onError = function() {
