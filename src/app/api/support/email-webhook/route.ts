@@ -1,7 +1,5 @@
-import { NextRequest, NextResponse, after } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-
-export const maxDuration = 60
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -94,14 +92,12 @@ export async function POST(req: NextRequest) {
         .eq('id', conv.property_id)
         .single()
       if (prop?.ai_enabled && prop?.ai_auto_reply) {
-        const runConvId = conv.id
-        after(async () => {
-          await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ conversation_id: runConvId }),
-          }).catch(() => {})
-        })
+        // Fire-and-forget — email replies get agent triggered server-side
+        fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://app.coovex.com'}/api/support/agent/run`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversation_id: conv.id }),
+        }).catch(() => {})
       }
 
       return NextResponse.json({ ok: true, conversation_id: conv.id }, { headers: CORS })

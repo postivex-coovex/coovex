@@ -4,9 +4,10 @@
   var cfg = window.CooVexSupport || {};
   if (!cfg.key) return;
 
-  var BASE     = cfg.apiUrl  || 'https://app.coovex.com';
-  var API      = BASE + '/api/support/ingest';
-  var MSGS_API = BASE + '/api/support/widget/messages';
+  var BASE      = cfg.apiUrl  || 'https://app.coovex.com';
+  var API       = BASE + '/api/support/ingest';
+  var MSGS_API  = BASE + '/api/support/widget/messages';
+  var AGENT_API = BASE + '/api/support/agent/run';
   var color    = cfg.color    || '#2563eb';
   var position = cfg.position || 'bottom-right';
   var title    = cfg.title    || 'Support';
@@ -436,8 +437,14 @@
       if (data.auto_reply) {
         setTimeout(function() { addMsg(data.auto_reply, false); }, 600);
       }
-      if (data.ai_reply_pending) {
-        showTyping(45000); // hide after 45s max
+      if (data.ai_reply_pending && data.conversation_id) {
+        showTyping(45000);
+        // Trigger AI agent directly from browser (reliable vs server-side after())
+        fetch(AGENT_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversation_id: data.conversation_id }),
+        }).catch(function() {});
       }
     };
     var onError = function() {
