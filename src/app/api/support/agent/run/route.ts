@@ -5,9 +5,19 @@ import type { AgentIntegration, AgentResult } from '@/lib/support/agent'
 
 export const maxDuration = 60
 
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS })
+}
+
 export async function POST(req: NextRequest) {
   const { conversation_id } = await req.json()
-  if (!conversation_id) return NextResponse.json({ error: 'conversation_id required' }, { status: 400 })
+  if (!conversation_id) return NextResponse.json({ error: 'conversation_id required' }, { status: 400, headers: CORS })
 
   const supabase = await createServiceClient()
 
@@ -18,7 +28,7 @@ export async function POST(req: NextRequest) {
     .eq('id', conversation_id)
     .single()
 
-  if (!conv) return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+  if (!conv) return NextResponse.json({ error: 'Conversation not found' }, { status: 404, headers: CORS })
 
   const { data: property } = await supabase
     .from('support_properties')
@@ -27,7 +37,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (!property || !property.ai_enabled) {
-    return NextResponse.json({ ok: false, reason: 'AI not enabled for this property' })
+    return NextResponse.json({ ok: false, reason: 'AI not enabled for this property' }, { headers: CORS })
   }
 
   const { data: messages } = await supabase
@@ -67,7 +77,7 @@ export async function POST(req: NextRequest) {
     await supabase.from('support_conversations')
       .update({ last_message_at: new Date().toISOString(), is_read: false })
       .eq('id', conversation_id)
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+    return NextResponse.json({ ok: false, error: String(err) }, { status: 500, headers: CORS })
   }
 
   // Insert AI reply
@@ -108,5 +118,5 @@ export async function POST(req: NextRequest) {
     } catch { /* SMTP optional */ }
   }
 
-  return NextResponse.json({ ok: true, reply: result.reply, escalated: result.escalated ?? null })
+  return NextResponse.json({ ok: true, reply: result.reply, escalated: result.escalated ?? null }, { headers: CORS })
 }
