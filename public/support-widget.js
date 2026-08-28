@@ -444,7 +444,14 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ conversation_id: data.conversation_id }),
-        }).catch(function() {});
+        })
+          .then(function(r) {
+            return r.json().then(function(d) {
+              if (!d.ok) console.error('[CooVex] agent/run error:', d);
+              else console.log('[CooVex] agent/run ok, reply:', d.reply && d.reply.slice(0, 60));
+            });
+          })
+          .catch(function(e) { console.error('[CooVex] agent/run fetch failed (CORS?):', e); });
       }
     };
     var onError = function() {
