@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import {
-  Globe, RefreshCw, Copy, Check, Eye, Archive,
-  ChevronRight, ExternalLink, Key, BookOpen, X,
-  CheckCircle, Clock, Inbox, RotateCcw,
+  Globe, RefreshCw, Copy, Check, Archive,
+  ExternalLink, Key, BookOpen, X,
+  CheckCircle, Inbox, MoreVertical,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -217,9 +217,13 @@ export function InquiryManagerClient() {
   const [apiKey, setApiKey]             = useState('')
   const [loading, setLoading]           = useState(true)
   const [loadingSubs, setLoadingSubs]   = useState(false)
-  const [showDocs, setShowDocs]         = useState(false)
-  const [statusFilter, setStatusFilter] = useState('')
-  const [selectedSub, setSelectedSub]  = useState<Submission | null>(null)
+  const [showDocs, setShowDocs]             = useState(false)
+  const [statusFilter, setStatusFilter]     = useState('')
+  const [selectedSub, setSelectedSub]      = useState<Submission | null>(null)
+  const [showKeyMenu, setShowKeyMenu]       = useState(false)
+  const [showRegenModal, setShowRegenModal] = useState(false)
+  const [regenInput, setRegenInput]         = useState('')
+  const [regenLoading, setRegenLoading]     = useState(false)
 
   // Fetch API key + properties on mount
   useEffect(() => {
@@ -262,9 +266,13 @@ export function InquiryManagerClient() {
   }
 
   async function regenerateKey() {
-    if (!confirm('Regenerate API key? All integrations will need updating.')) return
+    if (regenInput !== 'REGENERATE') return
+    setRegenLoading(true)
     const res = await fetch('/api/inquiry/api-key', { method: 'POST' }).then(r => r.json())
     setApiKey(res.api_key || '')
+    setRegenLoading(false)
+    setShowRegenModal(false)
+    setRegenInput('')
   }
 
   if (loading) {
@@ -279,6 +287,50 @@ export function InquiryManagerClient() {
     <>
       {showDocs && <DocsPanel apiKey={apiKey} onClose={() => setShowDocs(false)} />}
 
+      {/* Regenerate confirmation modal */}
+      {showRegenModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => { setShowRegenModal(false); setRegenInput('') }}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center flex-shrink-0">
+                <Key className="w-5 h-5 text-red-500" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Regenerate API Key?</h3>
+                <p className="text-xs text-slate-500 mt-0.5">All existing integrations will stop working immediately.</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
+              Type <span className="font-mono font-bold text-red-500">REGENERATE</span> to confirm:
+            </p>
+            <input
+              autoFocus
+              type="text"
+              value={regenInput}
+              onChange={e => setRegenInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && regenInput === 'REGENERATE' && regenerateKey()}
+              placeholder="REGENERATE"
+              className="w-full border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-mono bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-red-400 mb-4"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setShowRegenModal(false); setRegenInput('') }}
+                className="flex-1 px-3 py-2 text-sm rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={regenerateKey}
+                disabled={regenInput !== 'REGENERATE' || regenLoading}
+                className="flex-1 px-3 py-2 text-sm rounded-lg bg-red-500 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium transition-colors"
+              >
+                {regenLoading ? 'Regenerating...' : 'Regenerate'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="h-full flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex-shrink-0">
@@ -292,13 +344,28 @@ export function InquiryManagerClient() {
               <span className="truncate">{apiKey || 'Loading...'}</span>
               {apiKey && <CopyButton value={apiKey} />}
             </div>
-            <button
-              onClick={regenerateKey}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Regenerate API key"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
+            {/* ··· key settings menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowKeyMenu(v => !v)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+              {showKeyMenu && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowKeyMenu(false)} />
+                  <div className="absolute right-0 top-8 z-20 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-lg py-1 w-48">
+                    <button
+                      onClick={() => { setShowKeyMenu(false); setShowRegenModal(true) }}
+                      className="w-full text-left px-4 py-2.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors flex items-center gap-2"
+                    >
+                      <Key className="w-3.5 h-3.5" /> Regenerate API Key
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
             <button
               onClick={() => setShowDocs(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium rounded-lg transition-colors"
