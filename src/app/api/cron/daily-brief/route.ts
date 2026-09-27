@@ -187,11 +187,16 @@ export async function GET(req: NextRequest) {
         if (members?.[0]) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('email, name')
+            .select('email, name, preferences_json')
             .eq('id', members[0].user_id)
             .single()
 
-          if (profile?.email) {
+          // Respect user's daily brief email preference (default: on)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const prefs = (profile as any)?.preferences_json as Record<string, boolean> | null
+          const briefEnabled = prefs?.agent_daily_brief !== false
+
+          if (profile?.email && briefEnabled) {
             await sendDailyBriefEmail(profile.email, profile.name ?? 'there', {
               summary,
               signals: stats.signals,

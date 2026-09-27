@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface NotifGroup {
   label: string
@@ -78,6 +78,20 @@ export default function NotificationsClient({ userId, initialPrefs }: Notificati
     }))
     return p
   })
+
+  // Hydrate from server on mount (overrides localStorage with DB value)
+  useEffect(() => {
+    fetch('/api/settings/notifications').then(r => r.json()).then(data => {
+      const serverPrefs = data.preferences_json as Record<string, boolean> | null
+      if (serverPrefs && Object.keys(serverPrefs).length > 0) {
+        setPrefs(prev => {
+          const merged = { ...prev, ...serverPrefs }
+          try { localStorage.setItem('notif_prefs', JSON.stringify(merged)) } catch {}
+          return merged
+        })
+      }
+    }).catch(() => {})
+  }, [])
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
