@@ -185,19 +185,37 @@ export function ConversationView({ conversation: initial, messages: initialMessa
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Realtime
+  // Realtime — no server-side filter (requires REPLICA IDENTITY FULL), filter client-side instead
   useEffect(() => {
     const supabase = createClient()
     const channel = supabase
-      .channel(`conv-messages-${conv.id}`)
+      .channel('conv-messages-realtime')
       .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `conversation_id=eq.${conv.id}` },
+        { event: 'INSERT', schema: 'public', table: 'support_messages' },
         (payload) => {
           const newMsg = payload.new as SupportMessage
+          if (newMsg.conversation_id !== conv.id) return
           setMessages(prev => prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg])
         }
       ).subscribe()
-    return () => { supabase.removeChannel(channel) }
+
+    // Polling fallback every 5s in case realtime misses events
+    const poll = setInterval(async () => {
+      const res = await fetch(`/api/support/conversations/${conv.id}/messages`)
+      if (!res.ok) return
+      const data: SupportMessage[] = await res.json()
+      setMessages(prev => {
+        if (data.length <= prev.length) return prev
+        const ids = new Set(prev.map(m => m.id))
+        const added = data.filter(m => !ids.has(m.id))
+        return added.length ? [...prev, ...added] : prev
+      })
+    }, 5000)
+
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(poll)
+    }
   }, [conv.id])
 
   async function sendReply() {

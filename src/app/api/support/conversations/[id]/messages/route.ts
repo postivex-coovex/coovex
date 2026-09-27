@@ -3,6 +3,31 @@ import { createClient } from '@/lib/supabase/server'
 import { sendReplyEmail } from '@/lib/support/smtp'
 import type { SupportProperty, SupportConversation } from '@/lib/support/types'
 
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { id } = await params
+
+  // Verify ownership
+  const { data: conv } = await supabase
+    .from('support_conversations')
+    .select('id')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .single()
+  if (!conv) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  const { data: messages } = await supabase
+    .from('support_messages')
+    .select('*')
+    .eq('conversation_id', id)
+    .order('created_at', { ascending: true })
+
+  return NextResponse.json(messages ?? [])
+}
+
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
