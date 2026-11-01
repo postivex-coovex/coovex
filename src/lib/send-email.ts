@@ -88,7 +88,7 @@ async function viaSMTP(
   secure: boolean,
 ): Promise<SendResult> {
   if (!s.smtp_user || !s.smtp_pass) return { ok: false, error: 'Email and password required' }
-  const transporter = nodemailer.createTransport({ host, port, secure, auth: { user: s.smtp_user, pass: s.smtp_pass } })
+  const transporter = nodemailer.createTransport({ host, port, secure: port === 465 || secure, auth: { user: s.smtp_user, pass: s.smtp_pass } })
   await transporter.sendMail({
     from:    `${s.from_name || s.smtp_user} <${s.from_email || s.smtp_user}>`,
     to:      env.to,

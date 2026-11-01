@@ -66,14 +66,15 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[agent/run] runSupportAgent failed:', err)
     // Insert fallback so widget typing indicator stops
-    await supabase.from('support_messages').insert({
+    const { error: fbErr } = await supabase.from('support_messages').insert({
       conversation_id,
       property_id: conv.property_id,
       sender_type: 'ai',
       sender_name: 'AI Agent',
       content: 'Sorry, I ran into an issue processing your request. A team member will follow up shortly.',
-      source: 'ai',
+      source: 'system',
     })
+    if (fbErr) console.error('[agent/run] fallback insert failed:', fbErr.message)
     await supabase.from('support_conversations')
       .update({ last_message_at: new Date().toISOString(), is_read: false })
       .eq('id', conversation_id)
@@ -81,14 +82,19 @@ export async function POST(req: NextRequest) {
   }
 
   // Insert AI reply
-  await supabase.from('support_messages').insert({
+  // source must satisfy support_messages CHECK (widget/email/api/system)
+  const { error: insErr } = await supabase.from('support_messages').insert({
     conversation_id,
     property_id:  conv.property_id,
     sender_type:  'ai',
     sender_name:  'AI Agent',
     content:      result.reply,
-    source:       'ai',
+    source:       'system',
   })
+  if (insErr) {
+    console.error('[agent/run] reply insert failed:', insErr.message)
+    return NextResponse.json({ ok: false, error: insErr.message }, { status: 500, headers: CORS })
+  }
 
   // Mark as escalated ticket if agent requested it
   if (result.escalated) {

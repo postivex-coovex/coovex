@@ -12,10 +12,12 @@ function buildTransport(property: SupportProperty) {
   if (!property.smtp_host || !property.smtp_user || !property.smtp_password) {
     throw new Error('SMTP not configured for this property')
   }
+  const port = Number(property.smtp_port) || 587
   return nodemailer.createTransport({
     host: property.smtp_host,
-    port: property.smtp_port || 587,
-    secure: property.smtp_secure,
+    port,
+    // Port 465 is implicit TLS; plain connect would hang with "Greeting never received"
+    secure: port === 465 || property.smtp_secure,
     auth: {
       user: property.smtp_user,
       pass: property.smtp_password,
