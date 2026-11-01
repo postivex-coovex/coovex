@@ -308,6 +308,8 @@
     if (!convId) return;
     var url = MSGS_API + '?conversation_id=' + encodeURIComponent(convId);
     if (lastMsgTime) url += '&since=' + encodeURIComponent(lastMsgTime);
+    // Presence: tell the server the visitor is actively looking at the chat
+    if (!panel.classList.contains('cvx-hidden') && !document.hidden) url += '&active=1';
     fetch(url)
       .then(function(r) { return r.ok ? r.json() : null; })
       .then(function(data) {

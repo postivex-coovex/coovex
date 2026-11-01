@@ -22,6 +22,15 @@ export async function GET(req: NextRequest) {
 
   const supabase = await createServiceClient()
 
+  // Presence heartbeat: widget sends active=1 while the chat is open and visible.
+  // agent/run uses this to decide whether the AI reply also needs an email.
+  if (searchParams.get('active') === '1') {
+    await supabase
+      .from('support_conversations')
+      .update({ widget_last_seen_at: new Date().toISOString() })
+      .eq('id', conversationId)
+  }
+
   let q = supabase
     .from('support_messages')
     .select('id, content, sender_type, created_at, attachments')

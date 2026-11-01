@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   // Load conversation + messages + property
   const { data: conv } = await supabase
     .from('support_conversations')
-    .select('id, property_id, customer_name, customer_email, subject')
+    .select('id, property_id, customer_name, customer_email, subject, source, metadata, widget_last_seen_at')
     .eq('id', conversation_id)
     .single()
 
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       status: 'open',
       is_read: false,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      metadata: { ticket: true, ticket_reason: result.escalated.reason, ticket_priority: result.escalated.priority } as any,
+      metadata: { ...(conv.metadata as Record<string, unknown> ?? {}), ticket: true, ticket_reason: result.escalated.reason, ticket_priority: result.escalated.priority } as any,
     }).eq('id', conversation_id)
   } else {
     await supabase.from('support_conversations')
@@ -111,8 +111,13 @@ export async function POST(req: NextRequest) {
       .eq('id', conversation_id)
   }
 
-  // Send email reply if customer has email + SMTP configured
-  if (conv.customer_email && property.smtp_host) {
+  // Email the reply only when the customer can't see it live: email-originated
+  // conversations, or widget visitors who left the chat (no presence heartbeat
+  // in the last 20s). Mailing every live-chat reply would spam them.
+  const lastSeen = conv.widget_last_seen_at as string | null
+  const customerPresent = !!lastSeen && Date.now() - new Date(lastSeen).getTime() < 20_000
+  const needsEmail = conv.source === 'email' || !customerPresent
+  if (needsEmail && conv.customer_email && property.smtp_host) {
     try {
       const { sendReplyEmail } = await import('@/lib/support/smtp')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
