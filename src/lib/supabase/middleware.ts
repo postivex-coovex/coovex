@@ -47,6 +47,9 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/api/support/email-webhook') ||
     request.nextUrl.pathname.startsWith('/api/support/widget/') ||
     request.nextUrl.pathname.startsWith('/api/support/agent/run') ||
+    request.nextUrl.pathname.startsWith('/book/') ||
+    request.nextUrl.pathname.startsWith('/booking/') ||
+    request.nextUrl.pathname.startsWith('/api/meetings/public/') ||
     request.nextUrl.pathname.startsWith('/api/inquiry/submit') ||
     request.nextUrl.pathname.startsWith('/onboarding') ||
     isAuthPage

@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Lightbulb, Package, Inbox,
   ClipboardCheck, Zap, Globe2, Users,
   Target, TrendingUp, Calendar, Share2,
-  Settings, ChevronDown, Search, LogOut, Plug, Activity, LifeBuoy, ListTodo, ClipboardList,
+  Settings, ChevronDown, Search, LogOut, Plug, Activity, LifeBuoy, ListTodo, ClipboardList, CalendarClock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BrandLogo } from './brand-logo'
@@ -48,6 +48,7 @@ const FLAT_ITEMS: FlatItem[] = [
   { label: 'Support Manager',     href: '/support',           icon: LifeBuoy },
   { label: 'Inquiry Manager',     href: '/inquiry-manager',  icon: ClipboardList },
   { label: 'Tasks Manager',       href: '/tasks',            icon: ListTodo },
+  { label: 'Meeting Calendar',    href: '/meetings',         icon: CalendarClock },
 ]
 
 const NAV_GROUPS: NavGroup[] = [

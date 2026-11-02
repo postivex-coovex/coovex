@@ -43,6 +43,10 @@
     {
       "path": "/api/cron/monitoring-retry",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/meeting-reminders",
+      "schedule": "*/10 * * * *"
     }
   ]
 }
