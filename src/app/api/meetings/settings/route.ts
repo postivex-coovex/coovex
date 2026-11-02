@@ -61,15 +61,15 @@ export async function GET() {
 }
 
 const schema = z.object({
-  slug: z.string().regex(/^[a-z0-9-]{3,40}$/, 'Link name must be 3–40 characters: lowercase letters, numbers, dashes').optional(),
-  display_name: z.string().trim().max(80).optional(),
-  bio: z.string().trim().max(500).optional(),
-  timezone: z.string().optional(),
-  host_email: z.union([z.literal(''), z.string().email('Enter a valid notification email')]).optional(),
-  brand_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Color must be a hex value like #2563eb').optional(),
-  zoom_account_id: z.string().trim().max(120).optional(),
-  zoom_client_id: z.string().trim().max(120).optional(),
-  zoom_client_secret: z.string().trim().max(200).optional(),
+  slug: z.string().regex(/^[a-z0-9-]{3,40}$/, 'Link name must be 3–40 characters: lowercase letters, numbers, dashes').nullish(),
+  display_name: z.string().trim().max(80).nullish(),
+  bio: z.string().trim().max(500).nullish(),
+  timezone: z.string().nullish(),
+  host_email: z.union([z.literal(''), z.string().email('Enter a valid notification email')]).nullish(),
+  brand_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Color must be a hex value like #2563eb').nullish(),
+  zoom_account_id: z.string().trim().max(120).nullish(),
+  zoom_client_id: z.string().trim().max(120).nullish(),
+  zoom_client_secret: z.string().trim().max(200).nullish(),
 })
 
 export async function PUT(req: NextRequest) {
@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
   const b = parsed.data
 
-  if (b.timezone !== undefined && !isValidTimeZone(b.timezone)) {
+  if (b.timezone && !isValidTimeZone(b.timezone)) {
     return NextResponse.json({ error: 'Unknown timezone' }, { status: 400 })
   }
   if (b.slug) {
@@ -92,10 +92,13 @@ export async function PUT(req: NextRequest) {
 
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
   for (const k of ['slug', 'display_name', 'bio', 'timezone', 'host_email', 'brand_color', 'zoom_account_id', 'zoom_client_id'] as const) {
-    if (b[k] !== undefined) update[k] = b[k] === '' ? null : b[k]
+    if (b[k] === undefined) continue
+    // slug, timezone and brand color are NOT NULL columns: ignore empty values
+    if ((k === 'slug' || k === 'timezone' || k === 'brand_color') && !b[k]) continue
+    update[k] = b[k] === '' ? null : b[k]
   }
   // Never overwrite the stored secret with the display mask
-  if (b.zoom_client_secret !== undefined && b.zoom_client_secret !== MASK) {
+  if (b.zoom_client_secret != null && b.zoom_client_secret !== MASK) {
     update.zoom_client_secret = b.zoom_client_secret === '' ? null : b.zoom_client_secret
   }
 
